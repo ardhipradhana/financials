@@ -354,6 +354,53 @@
                 flex-direction: column;
                 gap: 10px;
             }
+
+            /* Error Messages */
+            .error-message {
+                color: #dc2626;
+                font-size: 0.875rem;
+                margin-top: 5px;
+                display: none;
+            }
+            
+            .error-message.show {
+                display: block;
+            }
+            
+            .form-input.error,
+            .form-select.error {
+                border-color: #dc2626;
+                box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+            }
+            
+            .btn:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+                transform: none !important;
+                box-shadow: none !important;
+            }
+            
+            .upload-primary.error {
+                border-color: #dc2626;
+                background: #fef2f2;
+            }
+            
+            /* File Info Display */
+            .file-info {
+                background: #f0f9ff;
+                border: 1px solid #e0f2fe;
+                border-radius: 6px;
+                padding: 10px;
+                margin-top: 10px;
+                font-size: 0.9rem;
+                color: #0369a1;
+            }
+            
+            .file-info.error {
+                background: #fef2f2;
+                border-color: #fecaca;
+                color: #dc2626;
+            }
         }
     </style>
 </head>
@@ -441,6 +488,8 @@
                         <div class="upload-hint">or click to browse files</div>
                         <input type="file" id="bankStatements" style="display: none;" multiple accept=".pdf">
                     </div>
+
+                    <div class="error-message" id="bankStatementsError"></div>
                     
                     <div class="upload-secondary">
                         <div class="secondary-title">📊 Additional Context (Optional)</div>
@@ -449,10 +498,17 @@
                         <div class="form-group">
                             <input type="file" id="contextFiles" class="form-input" multiple accept=".csv,.xlsx,.xls">
                         </div>
+
+                        <div class="error-message" id="contextFilesError"></div>
                         
                         <div class="form-group">
                             <label class="form-label" for="gsheetLink">Google Sheets Link</label>
                             <input type="url" id="gsheetLink" class="form-input" placeholder="https://docs.google.com/spreadsheets/d/...">
+                        </div>
+
+                        <div class="error-message" id="gsheetError"></div>
+                        <div style="font-size: 0.85rem; color: #6b7280; margin-top: 5px;">
+                            💡 <strong>Tip:</strong> Make your Google Sheet public (Anyone with link can view) for us to access it
                         </div>
                         
                         <div class="csv-guide">
@@ -514,8 +570,141 @@
 
     <script>
         let currentStep = 1;
-
+        let uploadedFiles = {
+            bankStatements: [],
+            contextFiles: []
+        };
+    
+        function validateStep(step) {
+            if (step === 2) {
+                return validateFileUploads();
+            }
+            return true; // Step 1 and 3 don't need validation (company info is optional)
+        }
+    
+        function validateFileUploads() {
+            let isValid = true;
+            
+            // Reset previous errors
+            clearErrors();
+            
+            // Check bank statements (required)
+            if (uploadedFiles.bankStatements.length === 0) {
+                showError('bankStatementsError', 'At least one bank statement PDF is required');
+                document.querySelector('.upload-primary').classList.add('error');
+                isValid = false;
+            } else {
+                document.querySelector('.upload-primary').classList.remove('error');
+            }
+            
+            // Validate file types and sizes
+            const { valid, errors, totalSize } = validateFiles();
+            if (!valid) {
+                errors.forEach(error => showError(error.field, error.message));
+                isValid = false;
+            }
+            
+            // Check total file size (25MB limit)
+            if (totalSize > 25 * 1024 * 1024) {
+                showError('bankStatementsError', `Total file size (${(totalSize / 1024 / 1024).toFixed(1)}MB) exceeds 25MB limit`);
+                isValid = false;
+            }
+            
+            // Validate Google Sheets URL if provided
+            const gsheetUrl = document.getElementById('gsheetLink').value.trim();
+            if (gsheetUrl && !isValidGoogleSheetsUrl(gsheetUrl)) {
+                showError('gsheetError', 'Please enter a valid Google Sheets URL');
+                document.getElementById('gsheetLink').classList.add('error');
+                isValid = false;
+            } else {
+                document.getElementById('gsheetLink').classList.remove('error');
+            }
+            
+            return isValid;
+        }
+    
+        function validateFiles() {
+            const errors = [];
+            let totalSize = 0;
+            
+            // Validate bank statements
+            for (let file of uploadedFiles.bankStatements) {
+                totalSize += file.size;
+                if (file.type !== 'application/pdf') {
+                    errors.push({
+                        field: 'bankStatementsError',
+                        message: `${file.name} is not a PDF file`
+                    });
+                }
+            }
+            
+            // Validate context files
+            const allowedTypes = [
+                'application/pdf',
+                'text/csv',
+                'application/vnd.ms-excel',
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'image/jpeg',
+                'image/jpg'
+            ];
+            
+            for (let file of uploadedFiles.contextFiles) {
+                totalSize += file.size;
+                if (!allowedTypes.includes(file.type)) {
+                    errors.push({
+                        field: 'contextFilesError',
+                        message: `${file.name} is not a supported file type (PDF, CSV, Excel, JPG only)`
+                    });
+                }
+            }
+            
+            return {
+                valid: errors.length === 0,
+                errors: errors,
+                totalSize: totalSize
+            };
+        }
+    
+        function isValidGoogleSheetsUrl(url) {
+            const googleSheetsPattern = /^https:\/\/docs\.google\.com\/spreadsheets\/d\/[a-zA-Z0-9-_]+/;
+            return googleSheetsPattern.test(url);
+        }
+    
+        function showError(fieldId, message) {
+            const errorElement = document.getElementById(fieldId);
+            errorElement.textContent = message;
+            errorElement.classList.add('show');
+        }
+    
+        function clearErrors() {
+            document.querySelectorAll('.error-message').forEach(el => {
+                el.classList.remove('show');
+            });
+            document.querySelectorAll('.error').forEach(el => {
+                el.classList.remove('error');
+            });
+        }
+    
+        function updateFileDisplay(inputId, files) {
+            const totalSize = [...uploadedFiles.bankStatements, ...uploadedFiles.contextFiles]
+                .reduce((sum, file) => sum + file.size, 0);
+            
+            if (inputId === 'bankStatements') {
+                const uploadArea = document.querySelector('.upload-primary');
+                if (files.length > 0) {
+                    uploadArea.style.background = '#f0f9ff';
+                    uploadArea.style.borderColor = '#0369a1';
+                    uploadArea.querySelector('.upload-text').textContent = `${files.length} PDF file(s) selected`;
+                    uploadArea.querySelector('.upload-hint').textContent = `Total size: ${(totalSize / 1024 / 1024).toFixed(1)}MB / 25MB`;
+                }
+            }
+        }
+    
         function nextStep() {
+            if (!validateStep(currentStep)) {
+                return; // Don't proceed if validation fails
+            }
+            
             if (currentStep < 3) {
                 // Hide current step
                 document.getElementById(`step${currentStep}`).classList.remove('active');
@@ -536,9 +725,12 @@
                 updateStepLabels();
             }
         }
-
+    
         function prevStep() {
             if (currentStep > 1) {
+                // Clear any errors when going back
+                clearErrors();
+                
                 // Hide current step
                 document.getElementById(`step${currentStep}`).classList.remove('active');
                 document.getElementById(`step${currentStep}-circle`).classList.remove('active');
@@ -556,7 +748,7 @@
                 updateStepLabels();
             }
         }
-
+    
         function updateStepLabels() {
             // Reset all labels
             document.querySelectorAll('.step-label').forEach(label => {
@@ -566,7 +758,7 @@
             // Activate current step label
             document.querySelector(`#step${currentStep}-circle`).parentElement.querySelector('.step-label').classList.add('active');
         }
-
+    
         function startOver() {
             // Reset to step 1
             document.querySelectorAll('.step-section').forEach(section => {
@@ -584,22 +776,25 @@
             document.getElementById('step1-circle').classList.add('active');
             updateStepLabels();
             
-            // Clear form data
+            // Clear form data and errors
             document.getElementById('companyName').value = '';
             document.getElementById('industry').value = '';
             document.getElementById('businessSize').value = '';
+            document.getElementById('gsheetLink').value = '';
+            uploadedFiles = { bankStatements: [], contextFiles: [] };
+            clearErrors();
         }
-
+    
         // File upload handling
         document.getElementById('bankStatements').addEventListener('change', function(e) {
-            const files = e.target.files;
-            if (files.length > 0) {
-                const uploadArea = e.target.parentElement;
-                uploadArea.style.background = '#f0f9ff';
-                uploadArea.style.borderColor = '#0369a1';
-                uploadArea.querySelector('.upload-text').textContent = `${files.length} file(s) selected`;
-                uploadArea.querySelector('.upload-hint').textContent = 'Click to change files';
-            }
+            uploadedFiles.bankStatements = Array.from(e.target.files);
+            updateFileDisplay('bankStatements', uploadedFiles.bankStatements);
+            clearErrors(); // Clear errors when files are selected
+        });
+    
+        document.getElementById('contextFiles').addEventListener('change', function(e) {
+            uploadedFiles.contextFiles = Array.from(e.target.files);
+            clearErrors(); // Clear errors when files are selected
         });
     </script>
 </body>
