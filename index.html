@@ -401,6 +401,149 @@
                 border-color: #fecaca;
                 color: #dc2626;
             }
+
+            /* File Preview List */
+            .file-preview {
+                background: #f8fafc;
+                border: 1px solid #e2e8f0;
+                border-radius: 8px;
+                padding: 15px;
+                margin-top: 15px;
+                display: none;
+            }
+            
+            .file-preview.show {
+                display: block;
+            }
+            
+            .file-preview h4 {
+                font-size: 0.9rem;
+                font-weight: 600;
+                color: #374151;
+                margin-bottom: 10px;
+            }
+            
+            .file-list {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .file-item {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                background: white;
+                padding: 8px 12px;
+                border-radius: 6px;
+                border: 1px solid #e2e8f0;
+            }
+            
+            .file-details {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                flex: 1;
+            }
+            
+            .file-icon {
+                font-size: 1.2rem;
+            }
+            
+            .file-name {
+                font-size: 0.85rem;
+                color: #374151;
+                font-weight: 500;
+            }
+            
+            .file-size {
+                font-size: 0.75rem;
+                color: #6b7280;
+            }
+
+            .file-remove {
+                background: #fee2e2;
+                color: #dc2626;
+                border: none;
+                border-radius: 4px;
+                padding: 4px 8px;
+                font-size: 0.75rem;
+                cursor: pointer;
+                transition: all 0.2s ease;
+            }
+            
+            .file-remove:hover {
+                background: #fecaca;
+                transform: scale(1.05);
+            }
+
+            /* File Summary */
+            .file-summary {
+                background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+                border: 1px solid #bfdbfe;
+                border-radius: 8px;
+                padding: 12px 16px;
+                margin-top: 15px;
+                display: none;
+            }
+            
+            .file-summary.show {
+                display: block;
+            }
+            
+            .summary-row {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                font-size: 0.85rem;
+                margin-bottom: 4px;
+            }
+            
+            .summary-row:last-child {
+                margin-bottom: 0;
+            }
+            
+            .summary-label {
+                color: #374151;
+                font-weight: 500;
+            }
+            
+            .summary-value {
+                color: #1e40af;
+                font-weight: 600;
+            }
+            
+            .summary-value.warning {
+                color: #d97706;
+            }
+            
+            .summary-value.error {
+                color: #dc2626;
+            }
+
+            /* Drag and Drop States */
+            .upload-primary.drag-over {
+                background: #dbeafe !important;
+                border-color: #3b82f6 !important;
+                transform: scale(1.02);
+                box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15);
+            }
+            
+            .upload-primary.drag-over .upload-icon {
+                color: #3b82f6;
+                transform: scale(1.1);
+            }
+            
+            .upload-primary.drag-over .upload-text {
+                color: #1e40af;
+                font-weight: 600;
+            }
+            
+            .upload-secondary.drag-over {
+                background: #f0f9ff !important;
+                border-color: #60a5fa !important;
+                transform: translateY(-2px);
+            }
         }
     </style>
 </head>
@@ -409,7 +552,7 @@
         <!-- Header -->
         <div class="header">
             <div class="logo">MontPro Financial Wizard</div>
-            <div class="tagline">Transform your bank statements into professional financial reports and lending readiness scores</div>
+            <div class="tagline">Get bank-ready financial reports and loan eligibility in minutes</div>
         </div>
 
         <!-- Progress Bar -->
@@ -437,7 +580,7 @@
             <!-- Step 1: Company Info -->
             <div class="step-section active" id="step1">
                 <h2 class="step-title">Tell us about your company</h2>
-                <p class="step-description">We'll use this information to customize your financial analysis and recommendations.</p>
+                <p class="step-description">We'll customize your analysis to match your industry and business needs.</p>
                 
                 <div class="form-group">
                     <label class="form-label" for="companyName">Company Name</label>
@@ -479,17 +622,22 @@
             <!-- Step 2: Upload Statements -->
             <div class="step-section" id="step2">
                 <h2 class="step-title">Upload your bank statements</h2>
-                <p class="step-description">Upload your recent bank statements (last 3-12 months) to generate professional financial statements.</p>
+                <p class="step-description">Our AI will analyze your cash flow and create professional financial statements.</p>
                 
                 <div class="upload-section">
                     <div class="upload-primary" onclick="document.getElementById('bankStatements').click()">
                         <div class="upload-icon">📄</div>
-                        <div class="upload-text">Drop your bank statement PDFs here</div>
-                        <div class="upload-hint">or click to browse files</div>
+                        <div class="upload-text">Drag & drop PDFs here or click to browse</div>
+                        <div class="upload-hint">We accept statements from any bank - usually 3-6 months is perfect</div>
                         <input type="file" id="bankStatements" style="display: none;" multiple accept=".pdf">
                     </div>
 
                     <div class="error-message" id="bankStatementsError"></div>
+
+                    <div class="file-preview" id="bankStatementsPreview">
+                        <h4>📁 Selected Bank Statements</h4>
+                        <div class="file-list" id="bankStatementsList"></div>
+                    </div>
                     
                     <div class="upload-secondary">
                         <div class="secondary-title">📊 Additional Context (Optional)</div>
@@ -500,6 +648,26 @@
                         </div>
 
                         <div class="error-message" id="contextFilesError"></div>
+
+                        <div class="file-preview" id="contextFilesPreview">
+                            <h4>📊 Additional Files</h4>
+                            <div class="file-list" id="contextFilesList"></div>
+                        </div>
+
+                        <div class="file-summary" id="fileSummary">
+                            <div class="summary-row">
+                                <span class="summary-label">📄 Bank Statements:</span>
+                                <span class="summary-value" id="bankStatementsCount">0 files</span>
+                            </div>
+                            <div class="summary-row">
+                                <span class="summary-label">📊 Additional Files:</span>
+                                <span class="summary-value" id="contextFilesCount">0 files</span>
+                            </div>
+                            <div class="summary-row">
+                                <span class="summary-label">💾 Total Size:</span>
+                                <span class="summary-value" id="totalFileSize">0 MB / 25 MB</span>
+                            </div>
+                        </div>
                         
                         <div class="form-group">
                             <label class="form-label" for="gsheetLink">Google Sheets Link</label>
@@ -528,20 +696,23 @@
             <!-- Step 3: Results -->
             <div class="step-section" id="step3">
                 <h2 class="step-title">Your Financial Analysis</h2>
-                <p class="step-description">Here's your professional financial statements and lending readiness assessment.</p>
+                <p class="step-description">See exactly what lenders see - plus actionable steps to improve your loan chances.</p>
                 
                 <div class="results-grid">
                     <div class="result-card">
                         <div class="result-value">B+</div>
                         <div class="result-label">Credit Readiness</div>
+                        <div style="font-size: 0.8rem; color: #64748b; margin-top: 8px;">Based on cash flow stability and financial ratios</div>
                     </div>
                     <div class="result-card green">
                         <div class="result-value">78%</div>
                         <div class="result-label">Lending Score</div>
+                        <div style="font-size: 0.8rem; color: #64748b; margin-top: 8px;">Probability of loan approval from partner lenders</div>
                     </div>
                     <div class="result-card">
                         <div class="result-value">$125K</div>
                         <div class="result-label">Est. Loan Capacity</div>
+                        <div style="font-size: 0.8rem; color: #64748b; margin-top: 8px;">Maximum loan amount based on your financials</div>
                     </div>
                 </div>
                 
@@ -691,13 +862,76 @@
             
             if (inputId === 'bankStatements') {
                 const uploadArea = document.querySelector('.upload-primary');
+                const previewSection = document.getElementById('bankStatementsPreview');
+                const fileList = document.getElementById('bankStatementsList');
+                
                 if (files.length > 0) {
                     uploadArea.style.background = '#f0f9ff';
                     uploadArea.style.borderColor = '#0369a1';
                     uploadArea.querySelector('.upload-text').textContent = `${files.length} PDF file(s) selected`;
                     uploadArea.querySelector('.upload-hint').textContent = `Total size: ${(totalSize / 1024 / 1024).toFixed(1)}MB / 25MB`;
+                    
+                    // Show file preview
+                    fileList.innerHTML = '';
+                    files.forEach((file, index) => {
+                        const fileItem = createFileItem(file, 'pdf', index, 'bankStatements');
+                        fileList.appendChild(fileItem);
+                    });
+                    previewSection.classList.add('show');
+                } else {
+                    previewSection.classList.remove('show');
+                    // Reset upload area appearance
+                    uploadArea.style.background = '#f8fafc';
+                    uploadArea.style.borderColor = '#667eea';
+                    uploadArea.querySelector('.upload-text').textContent = 'Drop your bank statement PDFs here';
+                    uploadArea.querySelector('.upload-hint').textContent = 'We accept statements from any bank - usually 3-6 months is perfect';
+                }
+            } else if (inputId === 'contextFiles') {
+                const previewSection = document.getElementById('contextFilesPreview');
+                const fileList = document.getElementById('contextFilesList');
+                
+                if (files.length > 0) {
+                    fileList.innerHTML = '';
+                    files.forEach((file, index) => {
+                        const fileIcon = getFileIcon(file.type);
+                        const fileItem = createFileItem(file, fileIcon, index, 'contextFiles');
+                        fileList.appendChild(fileItem);
+                    });
+                    previewSection.classList.add('show');
+                } else {
+                    previewSection.classList.remove('show');
                 }
             }
+            updateFileSummary();
+        }
+        
+        function createFileItem(file, iconType, fileIndex, arrayType) {
+            const div = document.createElement('div');
+            div.className = 'file-item';
+            
+            const icon = iconType === 'pdf' ? '📄' : iconType;
+            const sizeText = (file.size / 1024 / 1024).toFixed(1);
+            
+            div.innerHTML = `
+                <div class="file-details">
+                    <span class="file-icon">${icon}</span>
+                    <div>
+                        <div class="file-name">${file.name}</div>
+                        <div class="file-size">${sizeText} MB</div>
+                    </div>
+                </div>
+                <button class="file-remove" onclick="removeFile(${fileIndex}, '${arrayType}')">Remove</button>
+            `;
+            
+            return div;
+        }
+        
+        function getFileIcon(fileType) {
+            if (fileType.includes('pdf')) return '📄';
+            if (fileType.includes('csv')) return '📊';
+            if (fileType.includes('excel') || fileType.includes('spreadsheet')) return '📈';
+            if (fileType.includes('image')) return '📷';
+            return '📎';
         }
     
         function nextStep() {
@@ -784,6 +1018,53 @@
             uploadedFiles = { bankStatements: [], contextFiles: [] };
             clearErrors();
         }
+
+        function removeFile(fileIndex, arrayType) {
+            if (arrayType === 'bankStatements') {
+                uploadedFiles.bankStatements.splice(fileIndex, 1);
+                updateFileDisplay('bankStatements', uploadedFiles.bankStatements);
+            } else if (arrayType === 'contextFiles') {
+                uploadedFiles.contextFiles.splice(fileIndex, 1);
+                updateFileDisplay('contextFiles', uploadedFiles.contextFiles);
+            }
+            
+            // Clear any errors since file list changed
+            clearErrors();
+            updateFileSummary();
+        }
+
+        function updateFileSummary() {
+            const bankCount = uploadedFiles.bankStatements.length;
+            const contextCount = uploadedFiles.contextFiles.length;
+            const totalSize = [...uploadedFiles.bankStatements, ...uploadedFiles.contextFiles]
+                .reduce((sum, file) => sum + file.size, 0);
+            
+            const totalSizeMB = (totalSize / 1024 / 1024).toFixed(1);
+            const summarySection = document.getElementById('fileSummary');
+            
+            // Update counts
+            document.getElementById('bankStatementsCount').textContent = `${bankCount} file${bankCount !== 1 ? 's' : ''}`;
+            document.getElementById('contextFilesCount').textContent = `${contextCount} file${contextCount !== 1 ? 's' : ''}`;
+            
+            // Update size with color coding
+            const sizeElement = document.getElementById('totalFileSize');
+            sizeElement.textContent = `${totalSizeMB} MB / 25 MB`;
+            
+            // Color code based on size
+            sizeElement.className = 'summary-value';
+            if (totalSize > 25 * 1024 * 1024) {
+                sizeElement.classList.add('error');
+            } else if (totalSize > 20 * 1024 * 1024) {
+                sizeElement.classList.add('warning');
+            }
+            
+            // Show/hide summary
+            if (bankCount > 0 || contextCount > 0) {
+                summarySection.classList.add('show');
+            } else {
+                summarySection.classList.remove('show');
+            }
+        }
     
         // File upload handling
         document.getElementById('bankStatements').addEventListener('change', function(e) {
@@ -795,6 +1076,82 @@
         document.getElementById('contextFiles').addEventListener('change', function(e) {
             uploadedFiles.contextFiles = Array.from(e.target.files);
             clearErrors(); // Clear errors when files are selected
+        });
+
+        // Drag and Drop functionality
+        function setupDragAndDrop() {
+            const bankUploadArea = document.querySelector('.upload-primary');
+            const contextUploadArea = document.querySelector('.upload-secondary');
+            
+            // Bank statements drag and drop
+            bankUploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.classList.add('drag-over');
+            });
+            
+            bankUploadArea.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.classList.remove('drag-over');
+            });
+            
+            bankUploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.classList.remove('drag-over');
+                
+                const files = Array.from(e.dataTransfer.files);
+                const pdfFiles = files.filter(file => file.type === 'application/pdf');
+                
+                if (pdfFiles.length > 0) {
+                    uploadedFiles.bankStatements = [...uploadedFiles.bankStatements, ...pdfFiles];
+                    updateFileDisplay('bankStatements', uploadedFiles.bankStatements);
+                    clearErrors();
+                }
+            });
+            
+            // Context files drag and drop
+            contextUploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.classList.add('drag-over');
+            });
+            
+            contextUploadArea.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.classList.remove('drag-over');
+            });
+            
+            contextUploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.classList.remove('drag-over');
+                
+                const files = Array.from(e.dataTransfer.files);
+                const allowedTypes = [
+                    'application/pdf',
+                    'text/csv',
+                    'application/vnd.ms-excel',
+                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    'image/jpeg',
+                    'image/jpg'
+                ];
+                
+                const validFiles = files.filter(file => allowedTypes.includes(file.type));
+                
+                if (validFiles.length > 0) {
+                    uploadedFiles.contextFiles = [...uploadedFiles.contextFiles, ...validFiles];
+                    updateFileDisplay('contextFiles', uploadedFiles.contextFiles);
+                    clearErrors();
+                }
+            });
+        }
+        
+        // Initialize drag and drop when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            setupDragAndDrop();
         });
     </script>
 </body>
