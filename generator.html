@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financial Statement Generator - MontPro</title>
+    <style>
+        /* Using the same styles from your original file for consistency */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); background-attachment: fixed; min-height: 100vh; color: #333; position: relative; }
+        body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.05) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.05) 0%, transparent 50%), radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.05) 0%, transparent 50%); pointer-events: none; z-index: -1; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 30px 20px; min-height: 100vh; display: flex; flex-direction: column; }
+        
+        /* Header & Back Link */
+        .header { text-align: center; margin-bottom: 50px; position: relative; }
+        .back-link { position: absolute; top: 10px; left: 10px; color: #4b5563; text-decoration: none; font-weight: 500; }
+        .back-link:hover { text-decoration: underline; }
+        .logo { font-size: 2.5rem; font-weight: bold; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 10px; }
+        .tagline { font-size: 1.1rem; color: #666; margin-bottom: 30px; }
+
+        /* Progress Bar */
+        .progress-container { background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); border-radius: 16px; padding: 30px; margin-bottom: 30px; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08); border: 1px solid #e2e8f0; }
+        .progress-bar { display: flex; justify-content: space-between; align-items: center; }
+        .progress-step { display: flex; align-items: center; flex: 1; }
+        .step-circle { width: 50px; height: 50px; border-radius: 50%; background: #f1f5f9; color: #94a3b8; display: flex; align-items: center; justify-content: center; font-weight: 700; transition: all 0.4s ease; border: 3px solid #e2e8f0; }
+        .step-circle.active { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-color: #667eea; transform: scale(1.1); }
+        .step-circle.completed { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border-color: #10b981; }
+        .step-circle.completed::after { content: '✓'; font-size: 1.2rem; }
+        .step-label { margin-left: 15px; font-weight: 600; color: #64748b; }
+        .progress-line { height: 4px; background: #e2e8f0; flex: 1; margin: 0 20px; border-radius: 2px; position: relative; overflow: hidden; }
+        .progress-line::before { content: ''; position: absolute; top: 0; left: 0; height: 100%; width: 0%; background: linear-gradient(90deg, #10b981 0%, #059669 100%); transition: width 0.6s ease; }
+        .progress-line.completed::before { width: 100%; }
+
+        /* Wizard Content */
+        .wizard-content { background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%); border-radius: 20px; padding: 50px 60px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08); min-height: 600px; border: 1px solid #e2e8f0; flex: 1; }
+        .step-section { display: none; animation: fadeInUp 0.5s ease-out; }
+        .step-section.active { display: block; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .step-title { font-size: 2.2rem; font-weight: 800; margin-bottom: 15px; color: #1f2937; }
+        .step-description { color: #4b5563; margin-bottom: 40px; font-size: 1.15rem; line-height: 1.6; }
+        
+        /* Form & Button Styles (copied from original) */
+        .form-group { margin-bottom: 25px; }
+        .form-label { display: block; margin-bottom: 8px; font-weight: 600; color: #1f2937; }
+        .form-input, .form-select { width: 100%; padding: 16px 20px; border: 2px solid #e5e7eb; border-radius: 12px; font-size: 1rem; transition: all 0.3s ease; background: #fafbfc; }
+        .form-input:focus, .form-select:focus { outline: none; border-color: #667eea; background: white; box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1); }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .upload-primary { border: 3px dashed #667eea; border-radius: 12px; padding: 40px; text-align: center; background: #f8fafc; cursor: pointer; margin-bottom: 20px; }
+        .upload-icon { font-size: 3rem; color: #667eea; margin-bottom: 15px; }
+        .upload-text { font-size: 1.1rem; color: #4b5563; }
+        .upload-hint { font-size: 0.9rem; color: #9ca3af; }
+        .file-preview { margin-top: 15px; }
+        .file-list { display: flex; flex-direction: column; gap: 8px; }
+        .file-item { display: flex; align-items: center; justify-content: space-between; background: white; padding: 8px 12px; border-radius: 6px; border: 1px solid #e2e8f0; }
+        .file-remove { background: #fee2e2; color: #dc2626; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer; }
+        .btn { padding: 16px 32px; border: none; border-radius: 12px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; text-decoration: none; display: inline-block; }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-secondary { background: #f8fafc; color: #374151; border: 2px solid #e5e7eb; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-container { display: flex; justify-content: space-between; align-items: center; margin-top: 50px; padding-top: 30px; border-top: 1px solid #f1f5f9; }
+        .error-message { color: #dc2626; font-size: 0.875rem; margin-top: 5px; display: none; }
+        .error-message.show { display: block; }
+        .form-input.error, .upload-primary.error { border-color: #dc2626; }
+
+        /* Loading Overlay (copied from original) */
+        .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: none; align-items: center; justify-content: center; z-index: 1000; }
+        .loading-overlay.show { display: flex; }
+        .loading-content { background: white; border-radius: 12px; padding: 40px; text-align: center; }
+        .loading-spinner { width: 60px; height: 60px; border: 4px solid #f3f4f6; border-top: 4px solid #667eea; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Final Success Step Styles */
+        .success-icon { font-size: 5rem; color: #10b981; margin-bottom: 20px; }
+        .download-section { margin-top: 30px; display: flex; gap: 15px; justify-content: center; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to Home</a>
+        <div class="header">
+            <div class="logo">Financial Statement Generator</div>
+            <div class="tagline">Turn your bank statements into professional financial reports.</div>
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-step">
+                    <div class="step-circle active" id="step1-circle">1</div>
+                    <div class="step-label">Company Info</div>
+                </div>
+                <div class="progress-line" id="line1"></div>
+                <div class="progress-step">
+                    <div class="step-circle" id="step2-circle">2</div>
+                    <div class="step-label">Upload Statements</div>
+                </div>
+                <div class="progress-line" id="line2"></div>
+                <div class="progress-step">
+                    <div class="step-circle" id="step3-circle">✓</div>
+                    <div class="step-label">Generate</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="wizard-content">
+            <div class="step-section active" id="step1">
+                <h2 class="step-title">Tell us about your company</h2>
+                <p class="step-description">We'll customize your analysis to match your industry and business needs.</p>
+                <div class="form-group"><label class="form-label" for="companyName">Company Name</label><input type="text" id="companyName" class="form-input" placeholder="Enter your company name"></div>
+                <div class="form-row">
+                    <div class="form-group"><label class="form-label" for="industry">Industry</label><select id="industry" class="form-select"><option value="">Select your industry</option><option value="manufacturing">Manufacturing</option><option value="retail">Retail & Trade</option><option value="services">Professional Services</option><option value="other">Other</option></select></div>
+                    <div class="form-group"><label class="form-label" for="businessSize">Business Size</label><select id="businessSize" class="form-select"><option value="">Select business size</option><option value="micro">Micro (1-9 employees)</option><option value="small">Small (10-49 employees)</option><option value="medium">Medium (50-249 employees)</option></select></div>
+                </div>
+                <div class="btn-container"><div/>
+                    <button class="btn btn-primary" onclick="nextStep()">Continue to Upload →</button>
+                </div>
+            </div>
+
+            <div class="step-section" id="step2">
+                <h2 class="step-title">Upload your bank statements</h2>
+                <p class="step-description">Our AI will analyze your cash flow and create professional financial statements. We recommend uploading 3-6 months of statements for the best results.</p>
+                <div class="upload-primary" onclick="document.getElementById('bankStatements').click()">
+                    <div class="upload-icon">📄</div>
+                    <div class="upload-text">Drag & drop PDFs here or click to browse</div>
+                    <div class="upload-hint">We accept statements from any bank in PDF format.</div>
+                    <input type="file" id="bankStatements" style="display: none;" multiple accept=".pdf">
+                </div>
+                <div class="error-message" id="bankStatementsError"></div>
+                <div class="file-preview" id="bankStatementsPreview"><h4>Selected Files:</h4><div class="file-list" id="bankStatementsList"></div></div>
+                <div class="btn-container">
+                    <button class="btn btn-secondary" onclick="prevStep()">← Back</button>
+                    <button class="btn btn-primary" id="processBtn" onclick="processFiles()">Generate Report 🚀</button>
+                </div>
+            </div>
+
+            <div class="step-section" id="step3">
+                <div style="text-align: center;">
+                    <div class="success-icon">🎉</div>
+                    <h2 class="step-title">Statements Generated!</h2>
+                    <p class="step-description">Your financial statements have been successfully generated based on the documents you provided.</p>
+                    <div class="download-section">
+                        <button class="btn btn-primary" onclick="alert('Download functionality coming soon!')">📥 Download Report (PDF)</button>
+                        <a href="analysis.html" class="btn btn-secondary">Analyze These Statements →</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <h3 style="color: #1f2937;">Processing Your Statements...</h3>
+            <p style="color: #6b7280;">Our AI is working its magic.</p>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        let bankStatementFiles = [];
+
+        function nextStep() {
+            // Simple validation for step 1
+            if (currentStep === 1 && document.getElementById('companyName').value.trim() === '') {
+                alert('Please enter a company name.');
+                return;
+            }
+            if (currentStep < 3) {
+                document.getElementById(`step${currentStep}`).classList.remove('active');
+                document.getElementById(`step${currentStep}-circle`).classList.remove('active');
+                document.getElementById(`step${currentStep}-circle`).classList.add('completed');
+                document.getElementById(`line${currentStep}`).classList.add('completed');
+                currentStep++;
+                document.getElementById(`step${currentStep}`).classList.add('active');
+                document.getElementById(`step${currentStep}-circle`).classList.add('active');
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                document.getElementById(`step${currentStep}`).classList.remove('active');
+                document.getElementById(`step${currentStep}-circle`).classList.remove('active');
+                document.getElementById(`line${currentStep-1}`).classList.remove('completed');
+                currentStep--;
+                document.getElementById(`step${currentStep}`).classList.add('active');
+                document.getElementById(`step${currentStep}-circle`).classList.remove('completed');
+                document.getElementById(`step${currentStep}-circle`).classList.add('active');
+            }
+        }
+
+        function processFiles() {
+            const errorEl = document.getElementById('bankStatementsError');
+            const uploadEl = document.querySelector('.upload-primary');
+            errorEl.classList.remove('show');
+            uploadEl.classList.remove('error');
+
+            if (bankStatementFiles.length === 0) {
+                errorEl.textContent = 'Please select at least one bank statement PDF to continue.';
+                errorEl.classList.add('show');
+                uploadEl.classList.add('error');
+                return;
+            }
+
+            // Show loading animation
+            document.getElementById('loadingOverlay').classList.add('show');
+
+            // Simulate backend processing
+            setTimeout(() => {
+                document.getElementById('loadingOverlay').classList.remove('show');
+                nextStep(); // Move to the success step
+            }, 2500); // 2.5 second delay
+        }
+
+        // --- File Upload Handling ---
+        const fileInput = document.getElementById('bankStatements');
+        const uploadArea = document.querySelector('.upload-primary');
+
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+        });
+
+        // Add drag and drop listeners
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.background = '#f1f5f9';
+            uploadArea.style.borderColor = '#4f46e5';
+        });
+        uploadArea.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            uploadArea.style.background = '#f8fafc';
+            uploadArea.style.borderColor = '#667eea';
+        });
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.background = '#f8fafc';
+            uploadArea.style.borderColor = '#667eea';
+            handleFiles(e.dataTransfer.files);
+        });
+
+        function handleFiles(files) {
+            const pdfFiles = Array.from(files).filter(file => file.type === 'application/pdf');
+            if (pdfFiles.length > 0) {
+                bankStatementFiles = [...bankStatementFiles, ...pdfFiles];
+                updateFileDisplay();
+            } else {
+                alert('Only PDF files are accepted for bank statements.');
+            }
+        }
+
+        function updateFileDisplay() {
+            const fileListEl = document.getElementById('bankStatementsList');
+            fileListEl.innerHTML = '';
+            bankStatementFiles.forEach((file, index) => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.innerHTML = `
+                    <span>📄 ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)</span>
+                    <button class="file-remove" onclick="removeFile(event, ${index})">×</button>
+                `;
+                fileListEl.appendChild(fileItem);
+            });
+            document.getElementById('bankStatementsPreview').style.display = bankStatementFiles.length > 0 ? 'block' : 'none';
+        }
+
+        function removeFile(event, index) {
+            event.stopPropagation(); // Prevent the click from triggering the file input
+            bankStatementFiles.splice(index, 1);
+            updateFileDisplay();
+        }
+    </script>
+</body>
+</html>
