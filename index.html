@@ -19,13 +19,26 @@
         }
         
         body {
-            font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
             background-attachment: fixed;
             min-height: 100vh;
             color: #E2E8F0;
             position: relative;
             overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4, h5, h6,
+        .hero-title,
+        .section-title,
+        .card-title,
+        .trust-title {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .brand-text,
+        .footer-logo {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         }
         
         body::before {
@@ -88,7 +101,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 6px;
+            padding: 3px;
         }
 
         .brand-icon img {
