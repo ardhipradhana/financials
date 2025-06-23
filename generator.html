@@ -3864,6 +3864,13 @@
                 behavior: 'smooth', 
                 block: 'center' 
             });
+            // Add extra scroll down after the initial scroll
+            setTimeout(() => {
+                window.scrollBy({
+                    top: 150, // Adjust this value as needed
+                    behavior: 'smooth'
+                });
+            }, 500);
         }
 
         // Initialize
