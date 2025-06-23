@@ -1699,6 +1699,39 @@
                 margin-bottom: 16px;
             }
         }
+
+        .hero-cta {
+            margin-bottom: 32px;
+        }
+        
+        .btn-hero-start {
+            background: linear-gradient(135deg, #1E40AF, #60A5FA);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 16px 32px;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+        }
+        
+        .btn-hero-start:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(59, 130, 246, 0.4);
+        }
+        
+        .btn-hero-start svg {
+            transition: transform 0.3s ease;
+        }
+        
+        .btn-hero-start:hover svg {
+            transform: translateX(4px);
+        }
         
     </style>
 </head>
@@ -1742,24 +1775,15 @@
                 <strong>secure, isolated environment</strong> with zero permanent storage.
             </p>
         
-            <!-- Key Benefits -->
-            <div class="hero-benefits">
-                <div class="benefit-item">
-                    <div class="benefit-icon">⚡</div>
-                    <span>Minutes, not hours</span>
-                </div>
-                <div class="benefit-item">
-                    <div class="benefit-icon">🛡️</div>
-                    <span>Enterprise security</span>
-                </div>
-                <div class="benefit-item">
-                    <div class="benefit-icon">📊</div>
-                    <span>Investor-ready output</span>
-                </div>
-                <div class="benefit-item">
-                    <div class="benefit-icon">🏦</div>
-                    <span>Lender-approved format</span>
-                </div>
+            <!-- CTA Button -->
+            <div class="hero-cta">
+                <button class="btn-hero-start" onclick="scrollToForms()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14"/>
+                        <path d="m12 5 7 7-7 7"/>
+                    </svg>
+                    <span>Start Your Analysis</span>
+                </button>
             </div>
         </div>
 
@@ -3849,6 +3873,13 @@
             processingCard.classList.remove('active');
             resultsCard.classList.add('hidden');
             resultsCard.classList.remove('active');
+        }
+
+        function scrollToForms() {
+            document.getElementById('companyCard').scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'center' 
+            });
         }
 
         // Initialize
