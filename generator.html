@@ -1086,6 +1086,156 @@
             font-size: 0.75rem;
             font-weight: 500;
         }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #1E40AF, #60A5FA);
+            border-radius: 3px;
+            width: 0%;
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        
+        .progress-text {
+            font-size: 0.95rem;
+            color: #94A3B8;
+            text-align: center;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .security-notice {
+            background: linear-gradient(145deg, rgba(16, 185, 129, 0.05), rgba(5, 150, 105, 0.05));
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 40px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .security-content {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .security-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #10B981, #059669);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            flex-shrink: 0;
+        }
+        
+        .security-text {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .security-main {
+            color: #10B981;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        
+        .security-detail {
+            color: #6B7280;
+            font-size: 0.85rem;
+        }
+        
+        @media (max-width: 768px) {
+            .security-notice {
+                margin: 0 20px 40px 20px;
+            }
+        }
+
+        .file-validation-success,
+        .file-validation-error {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(15, 23, 42, 0.6);
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            border-left: 3px solid #10B981;
+            animation: slideInValidation 0.3s ease;
+        }
+        
+        .file-validation-error {
+            border-left-color: #EF4444;
+        }
+        
+        @keyframes slideInValidation {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .validation-icon {
+            width: 24px;
+            height: 24px;
+            background: #10B981;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            flex-shrink: 0;
+        }
+        
+        .validation-icon.error {
+            background: #EF4444;
+        }
+        
+        .validation-text {
+            flex: 1;
+        }
+        
+        .validation-main {
+            color: #10B981;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 2px;
+        }
+        
+        .file-validation-error .validation-main {
+            color: #EF4444;
+        }
+        
+        .validation-details {
+            color: #94A3B8;
+            font-size: 0.8rem;
+        }
         
     </style>
 </head>
@@ -1099,6 +1249,22 @@
         <div class="workspace-hero" data-aos="fade-up">
             <h1>Financial Intelligence Workspace</h1>
             <p>Transform banking data into investor-grade financial statements with institutional-level precision</p>
+        </div>
+
+        <!-- Security Notice Bar -->
+        <div class="security-notice" data-aos="fade-up" data-aos-delay="200">
+            <div class="security-content">
+                <div class="security-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        <path d="M9 12l2 2 4-4"/>
+                    </svg>
+                </div>
+                <div class="security-text">
+                    <span class="security-main">🔒 Your data stays on your device</span>
+                    <span class="security-detail">We process everything locally. No data is stored on our servers.</span>
+                </div>
+            </div>
         </div>
 
         <!-- Add this right after the workspace-hero section -->
@@ -1594,6 +1760,104 @@
             progressText.textContent = progressTexts[step - 1];
         }
 
+        // Enhanced Progress System
+        let progressInterval;
+        let currentProgress = 0;
+        let progressSpeed = 1;
+        
+        function startSatisfyingProgress() {
+            currentProgress = 0;
+            progressSpeed = 1;
+            
+            // Calculate total estimated time based on uploaded files
+            const totalSize = uploadedFiles.reduce((sum, file) => sum + file.size, 0);
+            const totalSizeMB = totalSize / 1024 / 1024;
+            
+            let estimatedSeconds;
+            if (totalSizeMB < 5) {
+                estimatedSeconds = 30;
+            } else if (totalSizeMB < 10) {
+                estimatedSeconds = 60;
+            } else {
+                estimatedSeconds = 90;
+            }
+            
+            const progressFill = document.getElementById('progressFill');
+            const progressText = document.getElementById('progressText');
+            
+            // Add smooth CSS transition
+            progressFill.style.transition = 'width 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+            
+            let timeRemaining = estimatedSeconds;
+            
+            progressInterval = setInterval(() => {
+                if (currentProgress < 95) {
+                    // Variable speed logic (same as before)
+                    if (currentProgress < 20) {
+                        progressSpeed = 0.5 + Math.random() * 1;
+                    } else if (currentProgress < 70) {
+                        progressSpeed = 1.5 + Math.random() * 2;
+                    } else {
+                        progressSpeed = 0.3 + Math.random() * 0.5;
+                    }
+                    
+                    currentProgress += progressSpeed;
+                    currentProgress = Math.min(currentProgress, 95);
+                    
+                    // Update time remaining
+                    timeRemaining = Math.max(0, Math.round(estimatedSeconds * (1 - currentProgress / 100)));
+                    
+                    progressFill.style.width = currentProgress + '%';
+                    
+                    // Dynamic text with time estimates
+                    const roundedProgress = Math.round(currentProgress);
+                    let statusText = '';
+                    
+                    if (currentProgress < 25) {
+                        statusText = 'Reading your bank statements...';
+                    } else if (currentProgress < 50) {
+                        statusText = 'Analyzing transaction patterns...';
+                    } else if (currentProgress < 75) {
+                        statusText = 'Building financial statements...';
+                    } else {
+                        statusText = 'Applying finishing touches...';
+                    }
+                    
+                    progressText.textContent = `${roundedProgress}% Complete - ${statusText} (${timeRemaining}s remaining)`;
+                    
+                    // Milestone effects (same as before)
+                    if (roundedProgress === 25 || roundedProgress === 50 || roundedProgress === 75) {
+                        progressFill.style.boxShadow = '0 0 20px rgba(59, 130, 246, 0.6)';
+                        setTimeout(() => {
+                            progressFill.style.boxShadow = 'none';
+                        }, 500);
+                    }
+                }
+            }, 400);
+        }
+        
+        function completeProgressSatisfying() {
+            clearInterval(progressInterval);
+            
+            const progressFill = document.getElementById('progressFill');
+            const progressText = document.getElementById('progressText');
+            
+            // Dramatic completion
+            progressFill.style.transition = 'width 1.2s cubic-bezier(0.2, 0, 0, 1)';
+            progressFill.style.width = '100%';
+            progressText.textContent = '100% Complete - Your financial statements are ready! ✨';
+            
+            // Success glow effect
+            progressFill.style.background = 'linear-gradient(135deg, #10B981, #059669)';
+            progressFill.style.boxShadow = '0 0 30px rgba(16, 185, 129, 0.5)';
+            
+            // Reset after a moment
+            setTimeout(() => {
+                progressFill.style.background = 'linear-gradient(135deg, #1E40AF, #60A5FA)';
+                progressFill.style.boxShadow = 'none';
+            }, 2000);
+        }
+
         function showCard(card) {
             card.classList.remove('hidden');
             card.classList.add('active');
@@ -1654,16 +1918,109 @@
         function handleFiles(files) {
             const pdfFiles = Array.from(files).filter(file => file.type === 'application/pdf');
             
-            if (pdfFiles.length > 0) {
-                uploadedFiles = [...uploadedFiles, ...pdfFiles];
-                updateFileList();
-                
-                // Show the generate button when files are uploaded
-                document.getElementById('uploadActions').style.display = 'block';
-                
-            } else {
-                alert('Only PDF files are accepted for bank statements.');
+            if (pdfFiles.length === 0) {
+                showFileError('Only PDF files are accepted for bank statements.');
+                return;
             }
+            
+            // Process each file with validation
+            pdfFiles.forEach(file => {
+                validateAndAddFile(file);
+            });
+            
+            // Show generate button if we have valid files
+            if (uploadedFiles.length > 0) {
+                document.getElementById('uploadActions').style.display = 'block';
+            }
+        }
+        
+        function validateAndAddFile(file) {
+            const fileSize = file.size;
+            const fileSizeMB = (fileSize / 1024 / 1024).toFixed(1);
+            
+            // Basic PDF validation (you can enhance this)
+            const isValidSize = fileSize > 1000 && fileSize < 50 * 1024 * 1024; // 1KB to 50MB
+            
+            if (!isValidSize) {
+                showFileError(`File "${file.name}" is too large or too small. Please upload files between 1KB and 50MB.`);
+                return;
+            }
+            
+            // Add to uploaded files
+            uploadedFiles.push(file);
+            
+            // Show immediate validation feedback
+            showFileValidation(file, fileSizeMB);
+            
+            // Update file list
+            updateFileList();
+        }
+        
+        function showFileValidation(file, fileSizeMB) {
+            const fileName = file.name;
+            const fileSize = file.size;
+            
+            // Estimate processing time
+            let estimatedTime;
+            if (fileSize < 5 * 1024 * 1024) { // < 5MB
+                estimatedTime = '~30 seconds';
+            } else if (fileSize < 10 * 1024 * 1024) { // 5-10MB
+                estimatedTime = '~60 seconds';
+            } else {
+                estimatedTime = '~90 seconds';
+            }
+            
+            // Create validation notification
+            const notification = document.createElement('div');
+            notification.className = 'file-validation-success';
+            notification.innerHTML = `
+                <div class="validation-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20,6 9,17 4,12"/>
+                    </svg>
+                </div>
+                <div class="validation-text">
+                    <div class="validation-main">✓ Valid bank statement detected</div>
+                    <div class="validation-details">PDF, ${fileSizeMB}MB • Est. processing: ${estimatedTime}</div>
+                </div>
+            `;
+            
+            // Add to file list (it will be replaced by updateFileList, but shows immediate feedback)
+            document.getElementById('fileList').appendChild(notification);
+            
+            // Remove after file list updates
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 3000);
+        }
+        
+        function showFileError(message) {
+            const notification = document.createElement('div');
+            notification.className = 'file-validation-error';
+            notification.innerHTML = `
+                <div class="validation-icon error">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="15" y1="9" x2="9" y2="15"/>
+                        <line x1="9" y1="9" x2="15" y2="15"/>
+                    </svg>
+                </div>
+                <div class="validation-text">
+                    <div class="validation-main">⚠ Upload Error</div>
+                    <div class="validation-details">${message}</div>
+                </div>
+            `;
+            
+            document.getElementById('fileList').appendChild(notification);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 5000);
         }
 
         function startAnalysis() {
@@ -1694,6 +2051,8 @@
             currentStep = 3;
             updateProgress(3);
             showCard(processingCard);
+
+            startSatisfyingProgress();
             
             // Send to backend
             sendToBackend(formData);
@@ -1723,6 +2082,7 @@
         }
         
         function handleBackendResponse(data) {
+            completeProgressSatisfying();
             // Stop the processing animation immediately
             if (window.processingInterval) {
                 clearInterval(window.processingInterval);
@@ -2052,11 +2412,14 @@
         }
 
         function startProcessing() {
+            // Start the satisfying progress animation
+            startSatisfyingProgress();
+            
+            // Keep the existing step animation
             const steps = document.querySelectorAll('.processing-step');
             let currentProcessingStep = 0;
             
-            // Store interval ID so we can clear it
-            const processingInterval = setInterval(() => {
+            const interval = setInterval(() => {
                 if (currentProcessingStep > 0) {
                     steps[currentProcessingStep - 1].classList.remove('active');
                     steps[currentProcessingStep - 1].classList.add('completed');
@@ -2067,13 +2430,11 @@
                     steps[currentProcessingStep].classList.add('active');
                     currentProcessingStep++;
                 } else {
-                    // Clear the interval when all steps are done
-                    clearInterval(processingInterval);
+                    clearInterval(interval);
                 }
             }, 1500);
             
-            // Store interval ID globally so we can clear it from handleBackendResponse
-            window.processingInterval = processingInterval;
+            window.processingInterval = interval;
         }
 
         function showReport(reportType) {
