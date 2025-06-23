@@ -1244,11 +1244,23 @@
             font-size: 0.85rem;
         }
 
-        .generate-action { margin-top: 32px; text-align: center; }
-        .generate-container { max-width: 500px; margin: 0 auto; }
+        .generate-action { 
+            margin-top: 32px; 
+            text-align: center; 
+            display: flex;
+            justify-content: center;
+        }
+        .generate-container { 
+            max-width: 500px; 
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
         
         .btn-generate-premium {
-            width: 100%;
+            width: auto;
+            min-width: 300px;
             max-width: 350px;
             background: linear-gradient(135deg, #1E40AF 0%, #3B82F6 50%, #60A5FA 100%);
             border: none;
@@ -1256,12 +1268,14 @@
             padding: 16px 20px;
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 12px;
             cursor: pointer;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: hidden;
             box-shadow: 0 8px 32px rgba(59, 130, 246, 0.3);
+            white-space: nowrap;
         }
         
         .btn-generate-premium::before {
@@ -1291,12 +1305,16 @@
             color: white;
         }
         
-        .btn-generate-content { flex: 1; text-align: left; }
+        .btn-generate-content { 
+            flex: 0 0 auto;
+            text-align: center; 
+        }
         
         .btn-generate-title {
             color: white;
             font-weight: 700;
             font-size: 1.1rem;
+            white-space: nowrap;
         }
         
         .btn-generate-arrow {
@@ -1311,6 +1329,7 @@
             gap: 12px;
             margin-top: 16px;
             flex-wrap: wrap;
+            width: 100%;
         }
         
         .feature-badge {
@@ -1661,8 +1680,8 @@
                             <div class="feature-badge">✓ Income Statement</div>
                             <div class="feature-badge">✓ Balance Sheet</div>
                             <div class="feature-badge">✓ Cash Flow</div>
-                            <div class="feature-badge coming-soon">Working Capital</div>
-                            <div class="feature-badge coming-soon">Ratios</div>
+                            <div class="feature-badge coming-soon">Working Capital (Coming Soon)</div>
+                            <div class="feature-badge coming-soon">Financial Ratios (Coming Soon)</div>
                         </div>
                     </div>
                 </div>
