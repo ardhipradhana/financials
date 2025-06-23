@@ -1236,6 +1236,50 @@
             color: #94A3B8;
             font-size: 0.8rem;
         }
+
+        .actions-grid {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+        
+        .security-quick-notice {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(16, 185, 129, 0.05);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 20px;
+            padding: 8px 16px;
+            color: #10B981;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .security-quick-notice .security-icon {
+            width: 16px;
+            height: 16px;
+            color: #10B981;
+        }
+        
+        .quick-action-item {
+            flex: 1;
+            max-width: 350px;
+        }
+        
+        @media (max-width: 768px) {
+            .actions-grid {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .security-quick-notice {
+                justify-content: center;
+                margin-bottom: 16px;
+            }
+        }
         
     </style>
 </head>
@@ -1267,21 +1311,35 @@
             </div>
         </div>
 
-        <!-- Add this right after the workspace-hero section -->
+        <!-- Replace the standalone security notice with this integrated version -->
         <div class="quick-actions-bar" data-aos="fade-up" data-aos-delay="150">
-            <div class="quick-action-item">
-                <button class="btn-quick-action" onclick="showHistoryModal()">
-                    <div class="quick-action-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                            <polyline points="9,22 9,12 15,12 15,22"/>
+            <div class="actions-grid">
+                <!-- Security Notice -->
+                <div class="security-quick-notice">
+                    <div class="security-icon">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                            <path d="M9 12l2 2 4-4"/>
                         </svg>
                     </div>
-                    <div class="quick-action-text">
-                        <div class="quick-action-title">Load Previous Analysis</div>
-                        <div class="quick-action-subtitle">Continue from saved reports</div>
-                    </div>
-                </button>
+                    <span>🔒 Your data stays on your device</span>
+                </div>
+                
+                <!-- Load Previous Analysis -->
+                <div class="quick-action-item">
+                    <button class="btn-quick-action" onclick="showHistoryModal()">
+                        <div class="quick-action-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                                <polyline points="9,22 9,12 15,12 15,22"/>
+                            </svg>
+                        </div>
+                        <div class="quick-action-text">
+                            <div class="quick-action-title">Load Previous Analysis</div>
+                            <div class="quick-action-subtitle">Continue from saved reports</div>
+                        </div>
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -1401,7 +1459,10 @@
                 <h3>
                     <span class="card-icon">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                            <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-5 0V4.5A2.5 2.5 0 0 1 9.5 2z"/>
+                            <path d="M14.5 4A2.5 2.5 0 0 1 17 6.5v11a2.5 2.5 0 0 1-5 0V6.5A2.5 2.5 0 0 1 14.5 4z"/>
+                            <path d="M6 6a2 2 0 0 1 2 2v8a2 2 0 1 1-4 0V8a2 2 0 0 1 2-2z"/>
+                            <path d="M18 10a2 2 0 0 1 2 2v4a2 2 0 1 1-4 0v-4a2 2 0 0 1 2-2z"/>
                         </svg>
                     </span>
                     Intelligence Processing
@@ -2412,14 +2473,15 @@
         }
 
         function startProcessing() {
-            // Start the satisfying progress animation
+            // Start the satisfying progress animation FIRST
             startSatisfyingProgress();
             
-            // Keep the existing step animation
+            // Keep the existing step animation but don't interfere with progress
             const steps = document.querySelectorAll('.processing-step');
             let currentProcessingStep = 0;
             
-            const interval = setInterval(() => {
+            // Don't store this interval globally to avoid conflicts
+            const stepInterval = setInterval(() => {
                 if (currentProcessingStep > 0) {
                     steps[currentProcessingStep - 1].classList.remove('active');
                     steps[currentProcessingStep - 1].classList.add('completed');
@@ -2430,11 +2492,9 @@
                     steps[currentProcessingStep].classList.add('active');
                     currentProcessingStep++;
                 } else {
-                    clearInterval(interval);
+                    clearInterval(stepInterval);
                 }
             }, 1500);
-            
-            window.processingInterval = interval;
         }
 
         function showReport(reportType) {
