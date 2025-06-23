@@ -635,6 +635,19 @@
             animation: spin 1s linear infinite;
             margin-left: 8px;
         }
+
+        .export-options {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        @media (max-width: 768px) {
+            .export-options {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+        }
         
         @media (max-width: 768px) {
             .export-toolbar {
@@ -1051,6 +1064,12 @@
                     </button>
                 </div>
                 <div class="export-options">
+                    <select class="export-select" id="currencySelect" onchange="changeCurrency()">
+                        <option value="IDR">Indonesian Rupiah (Rp)</option>
+                        <option value="USD">US Dollar ($)</option>
+                        <option value="EUR">Euro (€)</option>
+                        <option value="SGD">Singapore Dollar (S$)</option>
+                    </select>
                     <select class="export-select" id="exportScope">
                         <option value="current">Current Report Only</option>
                         <option value="all">All Financial Statements</option>
@@ -1240,6 +1259,19 @@
         }
         
         function handleBackendResponse(data) {
+            // Stop the processing animation immediately
+            if (window.processingInterval) {
+                clearInterval(window.processingInterval);
+            }
+            
+            // Complete all processing steps instantly
+            const steps = document.querySelectorAll('.processing-step');
+            steps.forEach(step => {
+                step.classList.remove('active');
+                step.classList.add('completed');
+                step.querySelector('.step-indicator').textContent = '✓';
+            });
+            
             // Handle array response format from your backend
             const result = Array.isArray(data) ? data[0] : data;
             
@@ -1251,11 +1283,12 @@
                 populateResults(result.financialStatements);
                 currentStep = 4;
                 updateProgress(4);
-                showCard(resultsCard);
+                setTimeout(() => showCard(resultsCard), 500);
             }
         }
 
         function populateResults(financialStatements) {
+            window.currentFinancialData = financialStatements;
             // Update company info in report headers
             const reportingPeriod = document.getElementById('reportingPeriod').value;
             const periodText = formatReportingPeriod(reportingPeriod);
@@ -1283,12 +1316,34 @@
         }
         
         function formatCurrency(amount) {
-            return new Intl.NumberFormat('en-US', {
+            const currency = document.getElementById('currencySelect').value;
+            
+            const formatOptions = {
+                'IDR': { locale: 'id-ID', currency: 'IDR' },
+                'USD': { locale: 'en-US', currency: 'USD' },
+                'EUR': { locale: 'de-DE', currency: 'EUR' },
+                'SGD': { locale: 'en-SG', currency: 'SGD' }
+            };
+            
+            const config = formatOptions[currency] || formatOptions['IDR'];
+            
+            return new Intl.NumberFormat(config.locale, {
                 style: 'currency',
-                currency: 'USD',
+                currency: config.currency,
                 minimumFractionDigits: 0,
                 maximumFractionDigits: 0
             }).format(amount);
+        }
+
+        function changeCurrency() {
+            // Re-populate all visible reports with new currency
+            const activeReport = document.querySelector('.report-container.active');
+            if (!activeReport) return;
+            
+            // Get the stored financial data (we need to store this globally)
+            if (window.currentFinancialData) {
+                populateResults(window.currentFinancialData);
+            }
         }
         
         function populateIncomeStatement(incomeData) {
@@ -1512,7 +1567,8 @@
             const steps = document.querySelectorAll('.processing-step');
             let currentProcessingStep = 0;
             
-            const interval = setInterval(() => {
+            // Store interval ID so we can clear it
+            const processingInterval = setInterval(() => {
                 if (currentProcessingStep > 0) {
                     steps[currentProcessingStep - 1].classList.remove('active');
                     steps[currentProcessingStep - 1].classList.add('completed');
@@ -1523,14 +1579,13 @@
                     steps[currentProcessingStep].classList.add('active');
                     currentProcessingStep++;
                 } else {
-                    clearInterval(interval);
-                    setTimeout(() => {
-                        currentStep = 4;
-                        updateProgress(4);
-                        showCard(resultsCard);
-                    }, 1000);
+                    // Clear the interval when all steps are done
+                    clearInterval(processingInterval);
                 }
             }, 1500);
+            
+            // Store interval ID globally so we can clear it from handleBackendResponse
+            window.processingInterval = processingInterval;
         }
 
         function showReport(reportType) {
