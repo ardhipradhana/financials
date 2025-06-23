@@ -1247,25 +1247,23 @@
         .generate-action { 
             margin-top: 32px; 
             text-align: center; 
+            width: 100%;
             display: flex;
             justify-content: center;
         }
+        
         .generate-container { 
-            max-width: 500px; 
-            width: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
+            gap: 16px;
         }
         
         .btn-generate-premium {
-            width: auto;
-            min-width: 300px;
-            max-width: 350px;
             background: linear-gradient(135deg, #1E40AF 0%, #3B82F6 50%, #60A5FA 100%);
             border: none;
             border-radius: 12px;
-            padding: 16px 20px;
+            padding: 16px 24px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1276,6 +1274,7 @@
             overflow: hidden;
             box-shadow: 0 8px 32px rgba(59, 130, 246, 0.3);
             white-space: nowrap;
+            color: white;
         }
         
         .btn-generate-premium::before {
@@ -1311,14 +1310,13 @@
         }
         
         .btn-generate-title {
-            color: white;
             font-weight: 700;
             font-size: 1.1rem;
-            white-space: nowrap;
         }
         
         .btn-generate-arrow {
-            color: white; font-size: 1.2rem; font-weight: bold;
+            font-size: 1.2rem; 
+            font-weight: bold;
             transition: transform 0.3s ease;
         }
         .btn-generate-premium:hover .btn-generate-arrow { transform: translateX(4px); }
@@ -1327,9 +1325,7 @@
             display: flex;
             justify-content: center;
             gap: 12px;
-            margin-top: 16px;
             flex-wrap: wrap;
-            width: 100%;
         }
         
         .feature-badge {
@@ -1657,24 +1653,20 @@
                 <div class="generate-action" id="uploadActions" style="display: none;">
                     <div class="generate-container">
                         <button class="btn-generate-premium" id="generateBtn" onclick="startAnalysis()">
-                            <div class="btn-generate-icon">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <rect x="4" y="4" width="16" height="16" rx="2"/>
-                                    <rect x="9" y="9" width="6" height="6"/>
-                                    <line x1="9" y1="1" x2="9" y2="4"/>
-                                    <line x1="15" y1="1" x2="15" y2="4"/>
-                                    <line x1="9" y1="20" x2="9" y2="23"/>
-                                    <line x1="15" y1="20" x2="15" y2="23"/>
-                                    <line x1="20" y1="9" x2="23" y2="9"/>
-                                    <line x1="20" y1="14" x2="23" y2="14"/>
-                                    <line x1="1" y1="9" x2="4" y2="9"/>
-                                    <line x1="1" y1="14" x2="4" y2="14"/>
-                                </svg>
-                            </div>
-                            <div class="btn-generate-content">
-                                <div class="btn-generate-title">Generate Financial Statements</div>
-                            </div>
-                            <div class="btn-generate-arrow">→</div>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="4" y="4" width="16" height="16" rx="2"/>
+                                <rect x="9" y="9" width="6" height="6"/>
+                                <line x1="9" y1="1" x2="9" y2="4"/>
+                                <line x1="15" y1="1" x2="15" y2="4"/>
+                                <line x1="9" y1="20" x2="9" y2="23"/>
+                                <line x1="15" y1="20" x2="15" y2="23"/>
+                                <line x1="20" y1="9" x2="23" y2="9"/>
+                                <line x1="20" y1="14" x2="23" y2="14"/>
+                                <line x1="1" y1="9" x2="4" y2="9"/>
+                                <line x1="1" y1="14" x2="4" y2="14"/>
+                            </svg>
+                            <span class="btn-generate-title">Generate Financial Statements</span>
+                            <span class="btn-generate-arrow">→</span>
                         </button>
                         <div class="generate-features">
                             <div class="feature-badge">✓ Income Statement</div>
