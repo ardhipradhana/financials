@@ -1130,13 +1130,29 @@
             }
         });
 
-        // File upload handling
+        // File upload handling - CORRECTED VERSION
         const uploadZone = document.getElementById('uploadZone');
         const fileInput = document.getElementById('fileInput');
         const fileList = document.getElementById('fileList');
-
-        uploadZone.addEventListener('click', () => fileInput.click());
         
+        // Only trigger file input on click, not the zone
+        uploadZone.addEventListener('click', (e) => {
+            // Prevent triggering if clicking on the input itself
+            if (e.target !== fileInput) {
+                fileInput.click();
+            }
+        });
+        
+        // Remove the existing change listener and replace with this
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFiles(e.target.files);
+                // Clear the input to allow same file to be selected again
+                e.target.value = '';
+            }
+        });
+        
+        // Drag and drop (keep as is)
         uploadZone.addEventListener('dragover', (e) => {
             e.preventDefault();
             uploadZone.classList.add('drag-over');
@@ -1150,10 +1166,6 @@
             e.preventDefault();
             uploadZone.classList.remove('drag-over');
             handleFiles(e.dataTransfer.files);
-        });
-
-        fileInput.addEventListener('change', (e) => {
-            handleFiles(e.target.files);
         });
 
         function handleFiles(files) {
@@ -1177,10 +1189,68 @@
                 return;
             }
             
+            // Prepare form data
+            const formData = new FormData();
+            
+            // Add company information
+            formData.append('companyName', document.getElementById('companyName').value);
+            formData.append('industry', document.getElementById('industry').value);
+            formData.append('businessSize', document.getElementById('businessSize').value);
+            formData.append('reportingPeriod', document.getElementById('reportingPeriod').value);
+            
+            // Add files
+            uploadedFiles.forEach((file, index) => {
+                formData.append(`bankStatement_${index}`, file);
+            });
+            
+            // Add metadata
+            formData.append('timestamp', new Date().toISOString());
+            formData.append('totalFiles', uploadedFiles.length);
+            
+            // Start UI processing
             currentStep = 3;
             updateProgress(3);
             showCard(processingCard);
-            startProcessing();
+            
+            // Send to backend
+            sendToBackend(formData);
+        }
+        
+        async function sendToBackend(formData) {
+            try {
+                const response = await fetch('https://montpro.app.n8n.cloud/webhook-test/financier-generator', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                handleBackendResponse(result);
+                
+            } catch (error) {
+                console.error('Backend error:', error);
+                alert('Error processing your files. Please try again.');
+                // Reset to upload step
+                currentStep = 2;
+                updateProgress(2);
+            }
+        }
+        
+        function handleBackendResponse(data) {
+            // Update the processing steps based on backend response
+            if (data.status === 'processing') {
+                // Backend is still processing, poll for updates
+                pollForResults(data.jobId);
+            } else if (data.status === 'complete') {
+                // Processing complete, show results
+                populateResults(data.financialStatements);
+                currentStep = 4;
+                updateProgress(4);
+                showCard(resultsCard);
+            }
         }
 
         function updateFileList() {
