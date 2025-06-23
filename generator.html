@@ -3860,17 +3860,14 @@
         }
 
         function scrollToForms() {
-            document.querySelector('.progress-indicator').scrollIntoView({ 
-                behavior: 'smooth', 
-                block: 'center' 
+            const element = document.querySelector('.progress-indicator');
+            const elementTop = element.offsetTop;
+            const offset = 150; // Extra scroll amount
+            
+            window.scrollTo({
+                top: elementTop + offset,
+                behavior: 'smooth'
             });
-            // Add extra scroll down after the initial scroll
-            setTimeout(() => {
-                window.scrollBy({
-                    top: 110, // Adjust this value as needed
-                    behavior: 'smooth'
-                });
-            }, 500);
         }
 
         // Initialize
