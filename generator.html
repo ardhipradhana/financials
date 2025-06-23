@@ -1542,7 +1542,11 @@
                 
                 currentStep = 4;
                 updateProgress(4);
-                setTimeout(() => showCard(resultsCard), 500);
+                setTimeout(() => {
+                    showCard(resultsCard);
+                    // Hide completed steps after results are shown
+                    hideCompletedSteps();
+                }, 500);
             }
         }
 
@@ -2060,6 +2064,8 @@
             // Scroll to results
             setTimeout(() => {
                 document.getElementById('resultsCard').scrollIntoView({ behavior: 'smooth' });
+                // Hide completed steps when loading previous analysis
+                hideCompletedSteps();
             }, 500);
         }
         
@@ -2643,14 +2649,38 @@
             currentStep = 1;
             updateProgress(1);
             
-            // Hide all cards except company card
-            uploadCard.classList.add('hidden');
-            processingCard.classList.add('hidden');
-            resultsCard.classList.add('hidden');
-            companyCard.classList.add('active');
+            // Show all steps again and hide results
+            showAllSteps();
             
             // Scroll back to top
             document.querySelector('.workspace-hero').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Step visibility management
+        function hideCompletedSteps() {
+            // Hide company card and upload card
+            companyCard.classList.add('hidden');
+            companyCard.classList.remove('active');
+            uploadCard.classList.add('hidden');
+            uploadCard.classList.remove('active');
+            
+            // Also hide processing card since it's complete
+            processingCard.classList.add('hidden');
+            processingCard.classList.remove('active');
+        }
+        
+        function showAllSteps() {
+            // Show company card and upload card again
+            companyCard.classList.remove('hidden');
+            companyCard.classList.add('active');
+            uploadCard.classList.remove('hidden');
+            uploadCard.classList.add('active');
+            
+            // Hide processing and results cards
+            processingCard.classList.add('hidden');
+            processingCard.classList.remove('active');
+            resultsCard.classList.add('hidden');
+            resultsCard.classList.remove('active');
         }
 
         // Initialize
