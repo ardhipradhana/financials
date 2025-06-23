@@ -40,289 +40,666 @@
         .container {
             max-width: 1400px;
             margin: 0 auto;
-            padding: 60px 20px;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            padding: 0 20px;
             position: relative;
             z-index: 1;
         }
         
-        /* Executive Header */
-        .header {
-            text-align: center;
-            margin-bottom: 80px;
-            position: relative;
-        }
-        
-        .header::before {
-            content: '';
-            position: absolute;
-            top: -30px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 80px;
-            height: 3px;
-            background: linear-gradient(90deg, #3B82F6, #8B5CF6);
-            border-radius: 2px;
-            opacity: 0.8;
-        }
-        
-        .logo {
-            font-size: 3.5rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, #60A5FA 0%, #A78BFA 50%, #F472B6 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 20px;
-            letter-spacing: -2px;
-            position: relative;
-            animation: subtle-glow 4s ease-in-out infinite alternate;
-        }
-        
-        @keyframes subtle-glow {
-            0% { filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.3)); }
-            100% { filter: drop-shadow(0 0 30px rgba(139, 92, 246, 0.4)); }
-        }
-        
-        .tagline {
-            font-size: 1.4rem;
-            color: #94A3B8;
-            margin-bottom: 25px;
-            font-weight: 400;
-            max-width: 800px;
-            margin-left: auto;
-            margin-right: auto;
-            line-height: 1.6;
-            opacity: 0.9;
-        }
-        
-        /* Strategic Navigation */
-        .main-title {
-            text-align: center;
-            font-size: 2.8rem;
-            font-weight: 700;
-            margin-bottom: 20px;
-            color: #F8FAFC;
-            letter-spacing: -0.5px;
-        }
-
-        .main-subtitle {
-            text-align: center;
-            color: #94A3B8;
-            margin-bottom: 60px;
-            font-size: 1.2rem;
-            max-width: 700px;
-            line-height: 1.7;
-            opacity: 0.9;
-        }
-        
-        .feature-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
-            gap: 40px;
-            width: 100%;
-            max-width: 1200px;
-        }
-        
-        .feature-card {
-            background: linear-gradient(145deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.9) 100%);
-            backdrop-filter: blur(20px);
-            border-radius: 24px;
-            padding: 45px 35px;
-            border: 1px solid rgba(59, 130, 246, 0.2);
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .feature-card::before {
-            content: '';
-            position: absolute;
+        /* Navigation */
+        .top-nav {
+            position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #3B82F6, transparent);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .feature-card:hover {
-            transform: translateY(-12px);
-            border-color: rgba(59, 130, 246, 0.4);
-            box-shadow: 0 25px 80px rgba(59, 130, 246, 0.15);
-        }
-
-        .feature-card:hover::before {
-            opacity: 1;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(59, 130, 246, 0.1);
+            z-index: 1000;
+            padding: 0;
         }
         
-        .feature-icon {
-            font-size: 4rem;
-            margin-bottom: 25px;
-            line-height: 1;
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 70px;
+        }
+        
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .brand-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            color: white;
+            font-size: 0.9rem;
+        }
+        
+        .brand-text {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #F8FAFC;
+        }
+        
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+        }
+        
+        .nav-link {
+            color: #94A3B8;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        
+        .nav-link:hover {
+            color: #F8FAFC;
+        }
+        
+        .btn-nav-cta {
+            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-nav-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+        }
+        
+        /* Hero Section */
+        .hero-section {
+            padding: 140px 0 100px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 60px;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .hero-content {
+            position: relative;
+        }
+        
+        .hero-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            padding: 8px 16px;
+            border-radius: 20px;
+            margin-bottom: 24px;
+        }
+        
+        .badge-text {
             background: linear-gradient(135deg, #3B82F6, #8B5CF6);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            transition: transform 0.3s ease;
-        }
-
-        .feature-card:hover .feature-icon {
-            transform: scale(1.1);
-        }
-        
-        .feature-title {
-            font-size: 1.6rem;
-            font-weight: 700;
-            color: #F8FAFC;
-            margin-bottom: 18px;
-            letter-spacing: -0.3px;
-        }
-        
-        .feature-description {
-            color: #94A3B8;
-            font-size: 1.05rem;
-            line-height: 1.7;
-            margin-bottom: 35px;
-            flex-grow: 1;
-            opacity: 0.9;
-        }
-
-        /* Executive Action Buttons */
-        .btn {
-            padding: 18px 36px;
-            border: none;
-            border-radius: 16px;
-            font-size: 1.05rem;
             font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-            letter-spacing: 0.3px;
-            text-decoration: none;
-            display: inline-block;
-            text-transform: uppercase;
             font-size: 0.9rem;
         }
         
-        .btn-primary {
-            background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%);
-            color: #FFFFFF;
-            box-shadow: 0 8px 32px rgba(59, 130, 246, 0.3);
+        .hero-title {
+            font-size: 4rem;
+            font-weight: 800;
+            color: #F8FAFC;
+            line-height: 1.1;
+            margin-bottom: 24px;
+            letter-spacing: -2px;
         }
         
-        .btn-primary:hover {
+        .gradient-text {
+            background: linear-gradient(135deg, #60A5FA, #A78BFA);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: #94A3B8;
+            line-height: 1.7;
+            margin-bottom: 40px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .hero-cta {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn-hero-primary {
+            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-hero-primary:hover {
             transform: translateY(-3px);
             box-shadow: 0 15px 40px rgba(59, 130, 246, 0.4);
-            background: linear-gradient(135deg, #2563EB 0%, #7C3AED 100%);
         }
-
-        .btn-coming-soon {
-            background: linear-gradient(135deg, rgba(75, 85, 99, 0.6) 0%, rgba(55, 65, 81, 0.8) 100%);
-            color: #9CA3AF;
-            border: 1px solid rgba(75, 85, 99, 0.5);
-            cursor: not-allowed;
+        
+        .btn-hero-secondary {
+            background: transparent;
+            color: #94A3B8;
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            padding: 16px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
         }
-
-        .coming-soon-badge {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: linear-gradient(135deg, #F59E0B, #EF4444);
-            color: white;
-            padding: 6px 12px;
+        
+        .btn-hero-secondary:hover {
+            border-color: rgba(59, 130, 246, 0.5);
+            color: #F8FAFC;
+        }
+        
+        .play-icon {
+            color: #3B82F6;
+        }
+        
+        /* Platform Section */
+        .platform-section {
+            padding: 100px 0;
+            background: linear-gradient(180deg, transparent 0%, rgba(15, 23, 42, 0.5) 100%);
+        }
+        
+        .section-header {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+        
+        .section-title {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #F8FAFC;
+            margin-bottom: 20px;
+            letter-spacing: -1px;
+        }
+        
+        .section-subtitle {
+            font-size: 1.2rem;
+            color: #94A3B8;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        .platform-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 40px;
+        }
+        
+        .platform-card {
+            background: linear-gradient(145deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9));
+            backdrop-filter: blur(20px);
             border-radius: 20px;
+            padding: 40px;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .platform-card.active {
+            border-color: rgba(59, 130, 246, 0.4);
+            background: linear-gradient(145deg, rgba(59, 130, 246, 0.05), rgba(30, 41, 59, 0.9));
+        }
+        
+        .platform-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(59, 130, 246, 0.4);
+            box-shadow: 0 25px 80px rgba(59, 130, 246, 0.15);
+        }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+        
+        .card-icon {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .card-badge {
+            background: linear-gradient(135deg, #10B981, #059669);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
             font-size: 0.75rem;
             font-weight: 600;
             text-transform: uppercase;
+        }
+        
+        .card-badge.coming-soon {
+            background: linear-gradient(135deg, #F59E0B, #D97706);
+        }
+        
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #F8FAFC;
+            margin-bottom: 16px;
+        }
+        
+        .card-description {
+            color: #94A3B8;
+            line-height: 1.6;
+            margin-bottom: 24px;
+            font-size: 1rem;
+        }
+        
+        .card-features {
+            margin-bottom: 32px;
+        }
+        
+        .feature-item {
+            color: #CBD5E1;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-card-primary {
+            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 10px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            font-size: 0.9rem;
             letter-spacing: 0.5px;
         }
-
+        
+        .btn-card-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(59, 130, 246, 0.4);
+        }
+        
+        .btn-card-disabled {
+            background: linear-gradient(135deg, rgba(75, 85, 99, 0.6), rgba(55, 65, 81, 0.8));
+            color: #9CA3AF;
+            border: 1px solid rgba(75, 85, 99, 0.5);
+            padding: 14px 28px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: not-allowed;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Trust Section */
+        .trust-section {
+            padding: 80px 0;
+            background: rgba(15, 23, 42, 0.3);
+            border-top: 1px solid rgba(59, 130, 246, 0.1);
+            border-bottom: 1px solid rgba(59, 130, 246, 0.1);
+        }
+        
+        .trust-content {
+            text-align: center;
+        }
+        
+        .trust-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #F8FAFC;
+            margin-bottom: 50px;
+        }
+        
+        .trust-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+        
+        .stat-label {
+            color: #94A3B8;
+            font-weight: 500;
+        }
+        
         /* Footer */
-        .footer {
-            margin-top: 80px;
+        .main-footer {
+            background: #0F172A;
+            border-top: 1px solid rgba(59, 130, 246, 0.1);
+            padding: 60px 0 30px;
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            margin-bottom: 40px;
+        }
+        
+        .footer-brand {
+            max-width: 400px;
+        }
+        
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #F8FAFC;
+        }
+        
+        .footer-tagline {
+            color: #94A3B8;
+            line-height: 1.6;
+        }
+        
+        .footer-links {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+        }
+        
+        .link-group h4 {
+            color: #F8FAFC;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+        
+        .link-group a {
+            color: #94A3B8;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 8px;
+            transition: color 0.3s ease;
+        }
+        
+        .link-group a:hover {
+            color: #F8FAFC;
+        }
+        
+        .footer-bottom {
+            border-top: 1px solid rgba(59, 130, 246, 0.1);
+            padding-top: 30px;
             text-align: center;
             color: #64748B;
-            font-size: 0.95rem;
-            opacity: 0.8;
         }
-
+        
         /* Responsive Design */
-        @media (max-width: 768px) {
-            .container {
-                padding: 40px 15px;
+        @media (max-width: 1024px) {
+            .hero-title {
+                font-size: 3rem;
             }
             
-            .logo {
+            .platform-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .hero-section {
+                padding: 120px 0 80px;
+            }
+            
+            .hero-title {
                 font-size: 2.5rem;
             }
             
-            .main-title {
-                font-size: 2.2rem;
+            .hero-cta {
+                flex-direction: column;
+                align-items: stretch;
             }
             
-            .feature-grid {
+            .trust-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .footer-content {
                 grid-template-columns: 1fr;
-                gap: 30px;
-            }
-            
-            .feature-card {
-                padding: 35px 25px;
+                gap: 40px;
             }
         }
-
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <div class="logo">MontPro Financier</div>
-            <div class="tagline">Your all-in-one toolkit for financial clarity and funding success.</div>
-        </div>
-
-        <h2 class="main-title">What would you like to do today?</h2>
-        <p class="main-subtitle">Choose a tool to get started. Each is designed to help you understand and improve your company's financial health.</p>
-
-        <div class="feature-grid">
-            <div class="feature-card">
-                <div class="feature-icon">📄➡️📊</div>
-                <h3 class="feature-title">Financial Statements Generator</h3>
-                <p class="feature-description">
-                    No accountant? No problem. Turn your raw bank statements into professional, bank-ready financial reports (Income Statement, Balance Sheet, etc.).
-                </p>
-                <a href="generator.html" class="btn btn-primary">Start Generating →</a>
+    <!-- Navigation Header -->
+    <nav class="top-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <div class="brand-icon">MP</div>
+                <span class="brand-text">MontPro</span>
             </div>
-
-            <div class="feature-card">
-                <div class="feature-icon">🔍💯</div>
-                <h3 class="feature-title">Creditworthiness Analysis</h3>
-                <p class="feature-description">
-                    Already have financial statements? Upload them to see what lenders see. Get your credit readiness score and benchmark against your industry.
-                </p>
-                <a href="analysis.html" class="btn btn-primary">Analyze Now →</a>
-            </div>
-
-            <div class="feature-card">
-                <div class="feature-icon">🌱💡</div>
-                <h3 class="feature-title">Green Financing Opportunities</h3>
-                <p class="feature-description">
-                    Discover how investing in sustainable practices can benefit your business. We'll help you identify opportunities and find the right "green" funding.
-                </p>
-                <a href="green-financing.html" class="btn btn-primary">Explore Green Finance →</a>
+            <div class="nav-links">
+                <a href="#platform" class="nav-link">Platform</a>
+                <a href="#solutions" class="nav-link">Solutions</a>
+                <a href="#about" class="nav-link">About</a>
+                <button class="btn-nav-cta">Request Demo</button>
             </div>
         </div>
+    </nav>
 
-        <div class="footer">
-            <p>&copy; 2025 MontPro. All rights reserved.</p>
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-container">
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <span class="badge-text">Next-Generation Financial Intelligence</span>
+                </div>
+                <h1 class="hero-title">
+                    Replace Your CFO.<br>
+                    <span class="gradient-text">Automate Your Analytics.</span>
+                </h1>
+                <p class="hero-subtitle">
+                    Institutional-grade financial analysis powered by AI. Generate McKinsey-level insights from raw data in minutes, not months.
+                </p>
+                <div class="hero-cta">
+                    <button class="btn-hero-primary">Start Free Analysis</button>
+                    <button class="btn-hero-secondary">
+                        <span class="play-icon">▶</span>
+                        Watch Demo
+                    </button>
+                </div>
+            </div>
         </div>
-    </div>
+    </section>
+
+    <!-- Platform Section -->
+    <section class="platform-section" id="platform">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Financial Intelligence Platform</h2>
+                <p class="section-subtitle">
+                    Three powerful modules designed to eliminate the need for expensive consultants and manual financial analysis.
+                </p>
+            </div>
+
+            <div class="platform-grid">
+                <div class="platform-card active">
+                    <div class="card-header">
+                        <div class="card-icon">⚡</div>
+                        <div class="card-badge">Available Now</div>
+                    </div>
+                    <h3 class="card-title">Statement Generator</h3>
+                    <p class="card-description">
+                        Transform raw banking data into CFO-grade financial statements. Generate professional Income Statements, Balance Sheets, and Cash Flow reports.
+                    </p>
+                    <div class="card-features">
+                        <div class="feature-item">✓ Bank statement parsing</div>
+                        <div class="feature-item">✓ Three-statement model</div>
+                        <div class="feature-item">✓ Regulatory compliance</div>
+                        <div class="feature-item">✓ PDF/Excel export</div>
+                    </div>
+                    <a href="generator.html" class="btn-card-primary">Launch Generator →</a>
+                </div>
+
+                <div class="platform-card">
+                    <div class="card-header">
+                        <div class="card-icon">📊</div>
+                        <div class="card-badge coming-soon">Q2 2025</div>
+                    </div>
+                    <h3 class="card-title">Credit Intelligence</h3>
+                    <p class="card-description">
+                        Advanced creditworthiness analysis with industry benchmarking. Our proprietary scoring engine evaluates financial health using institutional-grade risk models.
+                    </p>
+                    <div class="card-features">
+                        <div class="feature-item">✓ Credit scoring algorithm</div>
+                        <div class="feature-item">✓ Industry benchmarking</div>
+                        <div class="feature-item">✓ Risk assessment</div>
+                        <div class="feature-item">✓ Lender matching</div>
+                    </div>
+                    <button class="btn-card-disabled">Coming Soon</button>
+                </div>
+
+                <div class="platform-card">
+                    <div class="card-header">
+                        <div class="card-icon">🌱</div>
+                        <div class="card-badge coming-soon">Q3 2025</div>
+                    </div>
+                    <h3 class="card-title">Green Capital Navigator</h3>
+                    <p class="card-description">
+                        Unlock sustainable financing opportunities with ESG scoring and green taxonomy compliance. Connect with specialized lenders offering preferential rates.
+                    </p>
+                    <div class="card-features">
+                        <div class="feature-item">✓ ESG assessment</div>
+                        <div class="feature-item">✓ Green taxonomy mapping</div>
+                        <div class="feature-item">✓ Carbon footprint analysis</div>
+                        <div class="feature-item">✓ Sustainable lender network</div>
+                    </div>
+                    <button class="btn-card-disabled">Coming Soon</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Trust Indicators -->
+    <section class="trust-section">
+        <div class="container">
+            <div class="trust-content">
+                <h3 class="trust-title">Trusted by Financial Professionals</h3>
+                <div class="trust-stats">
+                    <div class="stat-item">
+                        <div class="stat-number">$2.4B+</div>
+                        <div class="stat-label">Analyzed Capital</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">500+</div>
+                        <div class="stat-label">SMEs Analyzed</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">98%</div>
+                        <div class="stat-label">Accuracy Rate</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">24hrs</div>
+                        <div class="stat-label">Avg. Turnaround</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="footer-logo">
+                        <span class="brand-icon">MP</span>
+                        <span>MontPro Financier</span>
+                    </div>
+                    <p class="footer-tagline">Executive-grade financial intelligence for strategic decision making.</p>
+                </div>
+                <div class="footer-links">
+                    <div class="link-group">
+                        <h4>Platform</h4>
+                        <a href="#platform">Statement Generator</a>
+                        <a href="#platform">Credit Intelligence</a>
+                        <a href="#platform">Green Capital</a>
+                    </div>
+                    <div class="link-group">
+                        <h4>Company</h4>
+                        <a href="#about">About</a>
+                        <a href="#contact">Contact</a>
+                        <a href="#privacy">Privacy</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 MontPro Financier. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
 </body>
 </html>
