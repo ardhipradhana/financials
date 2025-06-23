@@ -68,6 +68,45 @@
             padding-bottom: 20px;
             border-bottom: 1px solid rgba(59, 130, 246, 0.1);
         }
+
+        .btn-back-home,
+        .btn-load-analysis {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+
+        .btn-back-home {
+            background: rgba(15, 23, 42, 0.6);
+            color: #94A3B8;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+        
+        .btn-back-home:hover {
+            color: #F8FAFC;
+            border-color: rgba(59, 130, 246, 0.3);
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        .btn-load-analysis {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(30, 41, 59, 0.8));
+            color: #60A5FA;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-load-analysis:hover {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(30, 41, 59, 0.9));
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15);
+        }
         
         .back-link {
             margin-bottom: 0; /* Remove margin from original style */
@@ -1283,6 +1322,12 @@
             font-size: 0.75rem;
             font-weight: 500;
         }
+        
+        .feature-badge.coming-soon {
+            background: rgba(75, 85, 99, 0.1);
+            border-color: rgba(75, 85, 99, 0.2);
+            color: #9CA3AF;
+        }
 
         .progress-fill {
             height: 100%;
@@ -1478,22 +1523,21 @@
 </head>
 <body>
     <div class="container">
-        <a href="https://financier.montpro.xyz" class="back-link">
-            ← Back to Home
-        </a>
-        
-        <div class="quick-action-item" data-aos="fade-up">
-            <button class="btn-quick-action" onclick="showHistoryModal()">
-                <div class="quick-action-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                        <polyline points="9,22 9,12 15,12 15,22"/>
-                    </svg>
-                </div>
-                <div class="quick-action-text">
-                    <div class="quick-action-title">Load Previous Analysis</div>
-                    <div class="quick-action-subtitle">Continue from saved reports</div>
-                </div>
+        <!-- Top Action Bar -->
+        <div class="top-action-bar" data-aos="fade-down">
+            <a href="https://financier.montpro.xyz" class="btn-back-home">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="m15 18-6-6 6-6"/>
+                </svg>
+                <span>Back to Home</span>
+            </a>
+            
+            <button class="btn-load-analysis" onclick="showHistoryModal()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    <polyline points="9,22 9,12 15,12 15,22"/>
+                </svg>
+                <span>Load Previous Analysis</span>
             </button>
         </div>
         
@@ -1595,7 +1639,18 @@
                     <div class="generate-container">
                         <button class="btn-generate-premium" id="generateBtn" onclick="startAnalysis()">
                             <div class="btn-generate-icon">
-                                <svg width="20" height="20" ...> </svg>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="4" y="4" width="16" height="16" rx="2"/>
+                                    <rect x="9" y="9" width="6" height="6"/>
+                                    <line x1="9" y1="1" x2="9" y2="4"/>
+                                    <line x1="15" y1="1" x2="15" y2="4"/>
+                                    <line x1="9" y1="20" x2="9" y2="23"/>
+                                    <line x1="15" y1="20" x2="15" y2="23"/>
+                                    <line x1="20" y1="9" x2="23" y2="9"/>
+                                    <line x1="20" y1="14" x2="23" y2="14"/>
+                                    <line x1="1" y1="9" x2="4" y2="9"/>
+                                    <line x1="1" y1="14" x2="4" y2="14"/>
+                                </svg>
                             </div>
                             <div class="btn-generate-content">
                                 <div class="btn-generate-title">Generate Financial Statements</div>
@@ -1606,8 +1661,8 @@
                             <div class="feature-badge">✓ Income Statement</div>
                             <div class="feature-badge">✓ Balance Sheet</div>
                             <div class="feature-badge">✓ Cash Flow</div>
-                            <div class="feature-badge">Working Capital (soon)</div>
-                            <div class="feature-badge">Ratios (soon)</div>
+                            <div class="feature-badge coming-soon">Working Capital</div>
+                            <div class="feature-badge coming-soon">Ratios</div>
                         </div>
                     </div>
                 </div>
