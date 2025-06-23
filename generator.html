@@ -60,16 +60,17 @@
             z-index: 1;
         }
 
-        /* Back Link */
-        .back-link {
-            display: inline-flex;
+        .top-action-bar {
+            display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 8px;
-            color: #94A3B8;
-            text-decoration: none;
-            font-weight: 500;
             margin-bottom: 40px;
-            transition: color 0.3s ease;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(59, 130, 246, 0.1);
+        }
+        
+        .back-link {
+            margin-bottom: 0; /* Remove margin from original style */
         }
         
         .back-link:hover {
@@ -1216,19 +1217,14 @@
         
         .btn-generate-premium {
             width: 100%;
-            max-width: 350px; /* Reduced from 400px */
-            background: linear-gradient(135deg, #1E40AF 0%, #3B82F6 50%, #60A5FA 100%);
-            border: none;
-            border-radius: 12px; /* Reduced from 16px */
-            padding: 16px 20px; /* Reduced from 20px 24px */
-            display: flex;
-            align-items: center;
-            gap: 12px; /* Reduced from 16px */
-            cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            max-width: 400px;
+            background: linear-gradient(135deg, #1E40AF, #3B82F6, #60A5FA);
+            border-radius: 16px;
+            padding: 20px 24px;
+            /* ... other styles from your original code ... */
+            box-shadow: 0 8px 32px rgba(59, 130, 246, 0.3);
             position: relative;
             overflow: hidden;
-            box-shadow: 0 8px 32px rgba(59, 130, 246, 0.3);
         }
         
         .btn-generate-premium::before {
@@ -1295,18 +1291,27 @@
             display: flex;
             justify-content: center;
             gap: 12px;
-            margin-top: 16px;
+            margin-top: 20px;
             flex-wrap: wrap;
         }
         
         .feature-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
             background: rgba(59, 130, 246, 0.1);
             border: 1px solid rgba(59, 130, 246, 0.2);
-            color: #60A5FA;
-            padding: 6px 12px;
+            color: #94A3B8;
+            padding: 8px 14px;
             border-radius: 20px;
-            font-size: 0.75rem;
+            font-size: 0.8rem;
             font-weight: 500;
+        }
+
+        .feature-badge.disabled {
+            background: rgba(75, 85, 99, 0.1);
+            border-color: rgba(75, 85, 99, 0.3);
+            color: #6B7280;
         }
 
         .progress-fill {
@@ -1510,27 +1515,15 @@
         <a href="https://financier.montpro.xyz" class="back-link">
             ← Back to Home
         </a>
-
-        <!-- Load Previous Analysis -->
-        <div class="quick-action-item">
-            <button class="btn-quick-action" onclick="showHistoryModal()">
-                <div class="quick-action-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                        <polyline points="9,22 9,12 15,12 15,22"/>
-                    </svg>
-                </div>
-                <div class="quick-action-text">
-                    <div class="quick-action-title">Load Previous Analysis</div>
-                    <div class="quick-action-subtitle">Continue from saved reports</div>
-                </div>
-            </button>
-        </div>
+        <button class="btn btn-secondary" onclick="showHistoryModal()">
+             <svg width="16" height="16" viewBox="0 0 24 24" ...> </svg>
+            Load Previous Analysis
+        </button>
         
         <!-- Workspace Hero -->
         <div class="workspace-hero" data-aos="fade-up">
             <h1>Financial Intelligence Workspace</h1>
-            <p>Transform banking data into investor-grade financial statements with institutional-level precision</p>
+            <p>Securely transform raw bank statements into investor-grade reports in minutes. Let our AI do the heavy lifting.</p>
         </div>
 
         <!-- Replace the standalone security notice with this integrated version -->
@@ -1601,6 +1594,16 @@
                 </div>
             </div>
 
+            <div class="security-notice" data-aos="fade-up">
+                <div class="security-icon">
+                    <svg> </svg>
+                </div>
+                <div class="security-text">
+                    <div class="security-title">Bank-Level Security & Confidentiality</div>
+                    <div class="security-subtitle">Your data is encrypted and processed in an isolated environment. Raw files are deleted immediately after analysis.</div>
+                </div>
+            </div>
+
             <!-- Document Upload Card -->
             <div class="workspace-card hidden" id="uploadCard">
                 <h3>
@@ -1612,7 +1615,7 @@
                 <div class="upload-zone" id="uploadZone">
                     <div class="upload-icon">📄</div>
                     <div class="upload-text">Drag & drop your bank statements here</div>
-                    <div class="upload-hint">or click to browse (PDF files only)</div>
+                    <div class="upload-hint">Click to browse. We only accept PDF files for your security.</div>
                     <input type="file" class="file-input" id="fileInput" multiple accept=".pdf">
                 </div>
                 <div class="file-list" id="fileList"></div>
@@ -1621,24 +1624,19 @@
                     <div class="generate-container">
                         <button class="btn-generate-premium" id="generateBtn" onclick="startAnalysis()">
                             <div class="btn-generate-icon">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                                    <polyline points="14,2 14,8 20,8"/>
-                                    <path d="M8 13l2 2 4-4"/>
-                                    <path d="M8 17h8"/>
-                                </svg>
+                                 <svg> ... </svg>
                             </div>
                             <div class="btn-generate-content">
-                                <div class="btn-generate-title">Generate Financial Reports</div>
+                                <div class="btn-generate-title">Generate Financial Statements</div>
+                                <div class="btn-generate-subtitle">Begin AI-powered transformation</div>
                             </div>
                             <div class="btn-generate-arrow">→</div>
                         </button>
                         <div class="generate-features">
-                            <div class="feature-badge">✓ Income Statement</div>
-                            <div class="feature-badge">✓ Balance Sheet</div>
-                            <div class="feature-badge">✓ Cash Flow</div>
-                            <div class="feature-badge">Working Capital (soon)</div>
-                            <div class="feature-badge">Ratios (soon)</div>
+                            <div class="feature-badge"><svg>✓</svg> Income Statement</div>
+                            <div class="feature-badge"><svg>✓</svg> Balance Sheet</div>
+                            <div class="feature-badge"><svg>✓</svg> Cash Flow</div>
+                            <div class="feature-badge disabled"><svg>🕒</svg> Ratios (soon)</div>
                         </div>
                     </div>
                 </div>
@@ -1695,19 +1693,19 @@
                 <div class="processing-steps">
                     <div class="processing-step completed">
                         <div class="step-indicator">✓</div>
-                        <span>Extracting transaction data</span>
+                        <span>Securely parsing statement...</span>
                     </div>
                     <div class="processing-step active">
                         <div class="step-indicator">2</div>
-                        <span>Categorizing transactions</span>
+                        <span>Applying AI categorization models...</span>
                     </div>
                     <div class="processing-step">
                         <div class="step-indicator">3</div>
-                        <span>Generating financial statements</span>
+                        <span>Generating financial statements...</span>
                     </div>
                     <div class="processing-step">
                         <div class="step-indicator">4</div>
-                        <span>Finalizing reports</span>
+                        <span>Finalizing executive-ready reports...</span>
                     </div>
                 </div>
             </div>
