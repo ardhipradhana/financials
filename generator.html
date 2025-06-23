@@ -841,7 +841,7 @@
                             <thead>
                                 <tr>
                                     <th style="text-align: left;">Item</th>
-                                    <th style="text-align: right;">Amount (USD)</th>
+                                    <th style="text-align: right;">Amount</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -901,7 +901,7 @@
                             <thead>
                                 <tr>
                                     <th style="text-align: left;">Item</th>
-                                    <th style="text-align: right;">Amount (USD)</th>
+                                    <th style="text-align: right;">Amount</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -985,7 +985,7 @@
                             <thead>
                                 <tr>
                                     <th style="text-align: left;">Item</th>
-                                    <th style="text-align: right;">Amount (USD)</th>
+                                    <th style="text-align: right;">Amount</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -1262,6 +1262,18 @@
             // Stop the processing animation immediately
             if (window.processingInterval) {
                 clearInterval(window.processingInterval);
+            }
+            
+            // Replace spinner with success checkmark
+            const processingAnimation = document.querySelector('.processing-animation');
+            if (processingAnimation) {
+                processingAnimation.innerHTML = `
+                    <div style="width: 60px; height: 60px; background: #10B981; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; color: white; font-size: 1.5rem;">
+                        ✓
+                    </div>
+                    <h4 style="color: #10B981; margin-bottom: 16px;">Processing Complete!</h4>
+                    <p style="color: #94A3B8;">Your financial statements are ready</p>
+                `;
             }
             
             // Complete all processing steps instantly
