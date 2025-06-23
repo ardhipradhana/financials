@@ -1240,19 +1240,245 @@
         }
         
         function handleBackendResponse(data) {
-            // Update the processing steps based on backend response
-            if (data.status === 'processing') {
+            // Handle array response format from your backend
+            const result = Array.isArray(data) ? data[0] : data;
+            
+            if (result.status === 'processing') {
                 // Backend is still processing, poll for updates
-                pollForResults(data.jobId);
-            } else if (data.status === 'complete') {
+                pollForResults(result.jobId);
+            } else if (result.status === 'complete') {
                 // Processing complete, show results
-                populateResults(data.financialStatements);
+                populateResults(result.financialStatements);
                 currentStep = 4;
                 updateProgress(4);
                 showCard(resultsCard);
             }
         }
 
+        function populateResults(financialStatements) {
+            // Update company info in report headers
+            const reportingPeriod = document.getElementById('reportingPeriod').value;
+            const periodText = formatReportingPeriod(reportingPeriod);
+            
+            document.getElementById('reportPeriod1').textContent = periodText;
+            document.getElementById('reportPeriod2').textContent = periodText;
+            document.getElementById('reportPeriod3').textContent = periodText;
+            
+            // Populate each statement
+            populateIncomeStatement(financialStatements.incomeStatement);
+            populateBalanceSheet(financialStatements.balanceSheet);
+            populateCashFlowStatement(financialStatements.cashFlow);
+        }
+        
+        function formatReportingPeriod(period) {
+            const periodMap = {
+                'jan-2025': 'January 2025',
+                'dec-2024': 'December 2024',
+                'nov-2024': 'November 2024',
+                'oct-2024': 'October 2024',
+                'sep-2024': 'September 2024',
+                'aug-2024': 'August 2024'
+            };
+            return periodMap[period] || period;
+        }
+        
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(amount);
+        }
+        
+        function populateIncomeStatement(incomeData) {
+            const incomeTable = document.querySelector('#incomeReport tbody');
+            
+            // Calculate totals
+            const totalRevenue = incomeData.revenue.reduce((sum, item) => sum + item.amount, 0);
+            const totalExpenses = incomeData.expenses.reduce((sum, item) => sum + item.amount, 0);
+            const netIncome = incomeData.netIncome || (totalRevenue - totalExpenses);
+            
+            incomeTable.innerHTML = `
+                <tr class="section-header">
+                    <td><strong>Revenue</strong></td>
+                    <td></td>
+                </tr>
+                ${incomeData.revenue
+                    .filter(item => item.amount > 0)
+                    .map(item => `
+                        <tr>
+                            <td>&nbsp;&nbsp;${item.item}</td>
+                            <td style="text-align: right;">${formatCurrency(item.amount)}</td>
+                        </tr>
+                    `).join('')}
+                <tr class="subtotal">
+                    <td><strong>Total Revenue</strong></td>
+                    <td style="text-align: right;"><strong>${formatCurrency(totalRevenue)}</strong></td>
+                </tr>
+                <tr class="section-header">
+                    <td><strong>Expenses</strong></td>
+                    <td></td>
+                </tr>
+                ${incomeData.expenses
+                    .filter(item => item.amount > 0)
+                    .map(item => `
+                        <tr>
+                            <td>&nbsp;&nbsp;${item.item}</td>
+                            <td style="text-align: right;">${formatCurrency(item.amount)}</td>
+                        </tr>
+                    `).join('')}
+                <tr class="subtotal">
+                    <td><strong>Total Expenses</strong></td>
+                    <td style="text-align: right;"><strong>${formatCurrency(totalExpenses)}</strong></td>
+                </tr>
+                <tr class="total-line">
+                    <td><strong>Net Income</strong></td>
+                    <td style="text-align: right;"><strong>${formatCurrency(netIncome)}</strong></td>
+                </tr>
+            `;
+        }
+        
+        function populateBalanceSheet(balanceData) {
+            const balanceTable = document.querySelector('#balanceReport tbody');
+            
+            // Calculate totals
+            const totalAssets = balanceData.assets.reduce((sum, item) => sum + item.amount, 0);
+            const totalLiabilities = balanceData.liabilities.reduce((sum, item) => sum + item.amount, 0);
+            const totalEquity = balanceData.equity.reduce((sum, item) => sum + item.amount, 0);
+            
+            // Calculate missing equity if needed
+            const calculatedEquity = totalAssets - totalLiabilities;
+            const displayEquity = totalEquity > 0 ? totalEquity : calculatedEquity;
+            
+            balanceTable.innerHTML = `
+                <tr class="section-header">
+                    <td><strong>Assets</strong></td>
+                    <td></td>
+                </tr>
+                ${balanceData.assets
+                    .filter(item => item.amount > 0)
+                    .map(item => `
+                        <tr>
+                            <td>&nbsp;&nbsp;${item.item}</td>
+                            <td style="text-align: right;">${formatCurrency(item.amount)}</td>
+                        </tr>
+                    `).join('')}
+                <tr class="subtotal">
+                    <td><strong>Total Assets</strong></td>
+                    <td style="text-align: right;"><strong>${formatCurrency(totalAssets)}</strong></td>
+                </tr>
+                <tr class="section-header">
+                    <td><strong>Liabilities</strong></td>
+                    <td></td>
+                </tr>
+                ${balanceData.liabilities
+                    .filter(item => item.amount > 0)
+                    .map(item => `
+                        <tr>
+                            <td>&nbsp;&nbsp;${item.item}</td>
+                            <td style="text-align: right;">${formatCurrency(item.amount)}</td>
+                        </tr>
+                    `).join('')}
+                <tr class="subtotal">
+                    <td><strong>Total Liabilities</strong></td>
+                    <td style="text-align: right;"><strong>${formatCurrency(totalLiabilities)}</strong></td>
+                </tr>
+                <tr class="section-header">
+                    <td><strong>Equity</strong></td>
+                    <td></td>
+                </tr>
+                ${totalEquity > 0 ? 
+                    balanceData.equity
+                        .filter(item => item.amount > 0)
+                        .map(item => `
+                            <tr>
+                                <td>&nbsp;&nbsp;${item.item}</td>
+                                <td style="text-align: right;">${formatCurrency(item.amount)}</td>
+                            </tr>
+                        `).join('') 
+                    : 
+                    `<tr>
+                        <td>&nbsp;&nbsp;Calculated Equity</td>
+                        <td style="text-align: right;">${formatCurrency(calculatedEquity)}</td>
+                    </tr>`
+                }
+                <tr class="subtotal">
+                    <td><strong>Total Equity</strong></td>
+                    <td style="text-align: right;"><strong>${formatCurrency(displayEquity)}</strong></td>
+                </tr>
+                <tr class="total-line">
+                    <td><strong>Total Liabilities & Equity</strong></td>
+                    <td style="text-align: right;"><strong>${formatCurrency(totalLiabilities + displayEquity)}</strong></td>
+                </tr>
+            `;
+        }
+        
+        function populateCashFlowStatement(cashFlowData) {
+            const cashFlowTable = document.querySelector('#cashflowReport tbody');
+            
+            // Calculate totals
+            const netOperating = cashFlowData.operating.reduce((sum, item) => sum + item.amount, 0);
+            const netInvesting = cashFlowData.investing.reduce((sum, item) => sum + item.amount, 0);
+            const netFinancing = cashFlowData.financing.reduce((sum, item) => sum + item.amount, 0);
+            const netCashChange = netOperating + netInvesting + netFinancing;
+            
+            cashFlowTable.innerHTML = `
+                <tr class="section-header">
+                    <td><strong>Operating Activities</strong></td>
+                    <td></td>
+                </tr>
+                ${cashFlowData.operating
+                    .filter(item => item.amount !== 0)
+                    .map(item => `
+                        <tr>
+                            <td>&nbsp;&nbsp;${item.item}</td>
+                            <td style="text-align: right;">${formatCurrency(item.amount)}</td>
+                        </tr>
+                    `).join('')}
+                <tr class="subtotal">
+                    <td><strong>Net Cash from Operating</strong></td>
+                    <td style="text-align: right;"><strong>${formatCurrency(netOperating)}</strong></td>
+                </tr>
+                <tr class="section-header">
+                    <td><strong>Investing Activities</strong></td>
+                    <td></td>
+                </tr>
+                ${cashFlowData.investing
+                    .filter(item => item.amount !== 0)
+                    .map(item => `
+                        <tr>
+                            <td>&nbsp;&nbsp;${item.item}</td>
+                            <td style="text-align: right;">${formatCurrency(item.amount)}</td>
+                        </tr>
+                    `).join('')}
+                <tr class="subtotal">
+                    <td><strong>Net Cash from Investing</strong></td>
+                    <td style="text-align: right;"><strong>${formatCurrency(netInvesting)}</strong></td>
+                </tr>
+                <tr class="section-header">
+                    <td><strong>Financing Activities</strong></td>
+                    <td></td>
+                </tr>
+                ${cashFlowData.financing
+                    .filter(item => item.amount !== 0)
+                    .map(item => `
+                        <tr>
+                            <td>&nbsp;&nbsp;${item.item}</td>
+                            <td style="text-align: right;">${formatCurrency(item.amount)}</td>
+                        </tr>
+                    `).join('')}
+                <tr class="subtotal">
+                    <td><strong>Net Cash from Financing</strong></td>
+                    <td style="text-align: right;"><strong>${formatCurrency(netFinancing)}</strong></td>
+                </tr>
+                <tr class="total-line">
+                    <td><strong>Net Change in Cash</strong></td>
+                    <td style="text-align: right;"><strong>${formatCurrency(netCashChange)}</strong></td>
+                </tr>
+            `;
+        }
+        
         function updateFileList() {
             fileList.innerHTML = '';
             uploadedFiles.forEach((file, index) => {
