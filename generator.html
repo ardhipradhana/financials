@@ -467,6 +467,192 @@
             border-top: 1px solid rgba(59, 130, 246, 0.1);
         }
 
+        /* Report Tabs */
+        .report-tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 32px;
+            border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+        }
+        
+        .tab-btn {
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            color: #94A3B8;
+            font-weight: 500;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .tab-btn.active {
+            color: #60A5FA;
+            border-bottom-color: #60A5FA;
+        }
+        
+        .tab-btn:hover {
+            color: #F8FAFC;
+        }
+        
+        /* Report Container */
+        .report-container {
+            display: none;
+        }
+        
+        .report-container.active {
+            display: block;
+        }
+        
+        .report-header {
+            margin-bottom: 24px;
+            text-align: center;
+        }
+        
+        .report-header h4 {
+            font-size: 1.3rem;
+            color: #F8FAFC;
+            margin-bottom: 8px;
+        }
+        
+        .report-header p {
+            color: #94A3B8;
+            font-size: 0.9rem;
+        }
+        
+        /* Financial Table */
+        .financial-table {
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+        
+        .financial-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .financial-table th {
+            background: rgba(59, 130, 246, 0.1);
+            color: #F8FAFC;
+            padding: 16px;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+        }
+        
+        .financial-table td {
+            padding: 12px 16px;
+            color: #E2E8F0;
+            border-bottom: 1px solid rgba(59, 130, 246, 0.1);
+        }
+        
+        .financial-table .section-header td {
+            background: rgba(30, 41, 59, 0.8);
+            color: #60A5FA;
+            font-weight: 600;
+            padding-top: 16px;
+        }
+        
+        .financial-table .subtotal td {
+            border-top: 1px solid rgba(59, 130, 246, 0.3);
+            font-weight: 600;
+            color: #F8FAFC;
+        }
+        
+        .financial-table .total-line td {
+            border-top: 2px solid #60A5FA;
+            font-weight: 700;
+            color: #60A5FA;
+            font-size: 1.05rem;
+            padding-top: 16px;
+        }
+
+        /* Export Toolbar */
+        .export-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+        }
+        
+        .export-actions {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .export-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            font-size: 0.85rem;
+        }
+        
+        .export-icon {
+            font-size: 1rem;
+        }
+        
+        .export-options {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .export-select {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 6px;
+            color: #F8FAFC;
+            padding: 8px 12px;
+            font-size: 0.85rem;
+            min-width: 180px;
+        }
+        
+        .export-select:focus {
+            outline: none;
+            border-color: #60A5FA;
+            box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2);
+        }
+        
+        /* Loading state for export buttons */
+        .export-btn.loading {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        
+        .export-btn.loading::after {
+            content: '';
+            width: 12px;
+            height: 12px;
+            border: 2px solid transparent;
+            border-top: 2px solid currentColor;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 8px;
+        }
+        
+        @media (max-width: 768px) {
+            .export-toolbar {
+                flex-direction: column;
+                gap: 16px;
+                align-items: stretch;
+            }
+            
+            .export-actions {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            
+            .export-options {
+                justify-content: center;
+            }
+        }
+
         /* Responsive Design */
         @media (max-width: 768px) {
             .workspace-hero h1 {
@@ -549,10 +735,12 @@
                         <label class="form-label" for="reportingPeriod">Reporting Period</label>
                         <select id="reportingPeriod" class="form-select">
                             <option value="">Select period</option>
-                            <option value="q1-2025">Q1 2025</option>
-                            <option value="q4-2024">Q4 2024</option>
-                            <option value="q3-2024">Q3 2024</option>
-                            <option value="q2-2024">Q2 2024</option>
+                            <option value="jan-2025">January 2025</option>
+                            <option value="dec-2024">December 2024</option>
+                            <option value="nov-2024">November 2024</option>
+                            <option value="oct-2024">October 2024</option>
+                            <option value="sep-2024">September 2024</option>
+                            <option value="aug-2024">August 2024</option>
                         </select>
                     </div>
                 </div>
@@ -571,6 +759,17 @@
                     <input type="file" class="file-input" id="fileInput" multiple accept=".pdf">
                 </div>
                 <div class="file-list" id="fileList"></div>
+
+                <div class="upload-actions" id="uploadActions" style="display: none;">
+                    <div style="margin-top: 32px; text-align: center;">
+                        <button class="btn btn-primary" id="generateBtn" onclick="startAnalysis()">
+                            Generate Financial Reports
+                        </button>
+                        <p style="color: #94A3B8; font-size: 0.9rem; margin-top: 12px;">
+                            This will process your bank statements and create professional financial reports
+                        </p>
+                    </div>
+                </div>
             </div>
 
             <!-- Processing Card -->
@@ -610,32 +809,260 @@
                     <span class="card-icon">✓</span>
                     Your Financial Statements
                 </h3>
-                <div class="results-grid">
-                    <div class="result-card">
-                        <div class="result-icon">📊</div>
-                        <div class="result-title">Income Statement</div>
-                        <div class="result-description">Comprehensive profit & loss analysis</div>
-                        <button class="btn btn-success">Download PDF</button>
+                
+                <!-- Report Navigation Tabs -->
+                <div class="report-tabs">
+                    <button class="tab-btn active" onclick="showReport('income')">Income Statement</button>
+                    <button class="tab-btn" onclick="showReport('balance')">Balance Sheet</button>
+                    <button class="tab-btn" onclick="showReport('cashflow')">Cash Flow Statement</button>
+                </div>
+            
+                <!-- Income Statement Report -->
+                <div class="report-container active" id="incomeReport">
+                    <div class="report-header">
+                        <h4>Income Statement</h4>
+                        <p>For the period ending <span id="reportPeriod1">December 2024</span></p>
                     </div>
-                    <div class="result-card">
-                        <div class="result-icon">⚖️</div>
-                        <div class="result-title">Balance Sheet</div>
-                        <div class="result-description">Assets, liabilities & equity breakdown</div>
-                        <button class="btn btn-success">Download PDF</button>
-                    </div>
-                    <div class="result-card">
-                        <div class="result-icon">💰</div>
-                        <div class="result-title">Cash Flow Statement</div>
-                        <div class="result-description">Operating, investing & financing activities</div>
-                        <button class="btn btn-success">Download PDF</button>
+                    <div class="financial-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="text-align: left;">Item</th>
+                                    <th style="text-align: right;">Amount (USD)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="section-header">
+                                    <td><strong>Revenue</strong></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>&nbsp;&nbsp;Sales Revenue</td>
+                                    <td style="text-align: right;">$125,000</td>
+                                </tr>
+                                <tr>
+                                    <td>&nbsp;&nbsp;Service Revenue</td>
+                                    <td style="text-align: right;">$45,000</td>
+                                </tr>
+                                <tr class="subtotal">
+                                    <td><strong>Total Revenue</strong></td>
+                                    <td style="text-align: right;"><strong>$170,000</strong></td>
+                                </tr>
+                                <tr class="section-header">
+                                    <td><strong>Expenses</strong></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>&nbsp;&nbsp;Cost of Goods Sold</td>
+                                    <td style="text-align: right;">$65,000</td>
+                                </tr>
+                                <tr>
+                                    <td>&nbsp;&nbsp;Operating Expenses</td>
+                                    <td style="text-align: right;">$45,000</td>
+                                </tr>
+                                <tr>
+                                    <td>&nbsp;&nbsp;Interest Expense</td>
+                                    <td style="text-align: right;">$2,500</td>
+                                </tr>
+                                <tr class="subtotal">
+                                    <td><strong>Total Expenses</strong></td>
+                                    <td style="text-align: right;"><strong>$112,500</strong></td>
+                                </tr>
+                                <tr class="total-line">
+                                    <td><strong>Net Income</strong></td>
+                                    <td style="text-align: right;"><strong>$57,500</strong></td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-                <div class="action-bar">
-                    <button class="btn btn-secondary">Generate New Report</button>
-                    <button class="btn btn-primary">Analyze Creditworthiness</button>
+            
+                <!-- Balance Sheet Report -->
+                <div class="report-container" id="balanceReport">
+                    <div class="report-header">
+                        <h4>Balance Sheet</h4>
+                        <p>As of <span id="reportPeriod2">December 31, 2024</span></p>
+                    </div>
+                    <div class="financial-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="text-align: left;">Item</th>
+                                    <th style="text-align: right;">Amount (USD)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="section-header">
+                                    <td><strong>Assets</strong></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>&nbsp;&nbsp;Cash and Cash Equivalents</td>
+                                    <td style="text-align: right;">$85,000</td>
+                                </tr>
+                                <tr>
+                                    <td>&nbsp;&nbsp;Accounts Receivable</td>
+                                    <td style="text-align: right;">$35,000</td>
+                                </tr>
+                                <tr>
+                                    <td>&nbsp;&nbsp;Inventory</td>
+                                    <td style="text-align: right;">$25,000</td>
+                                </tr>
+                                <tr>
+                                    <td>&nbsp;&nbsp;Property, Plant & Equipment</td>
+                                    <td style="text-align: right;">$120,000</td>
+                                </tr>
+                                <tr class="subtotal">
+                                    <td><strong>Total Assets</strong></td>
+                                    <td style="text-align: right;"><strong>$265,000</strong></td>
+                                </tr>
+                                <tr class="section-header">
+                                    <td><strong>Liabilities</strong></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>&nbsp;&nbsp;Accounts Payable</td>
+                                    <td style="text-align: right;">$15,000</td>
+                                </tr>
+                                <tr>
+                                    <td>&nbsp;&nbsp;Short-term Debt</td>
+                                    <td style="text-align: right;">$25,000</td>
+                                </tr>
+                                <tr>
+                                    <td>&nbsp;&nbsp;Long-term Debt</td>
+                                    <td style="text-align: right;">$80,000</td>
+                                </tr>
+                                <tr class="subtotal">
+                                    <td><strong>Total Liabilities</strong></td>
+                                    <td style="text-align: right;"><strong>$120,000</strong></td>
+                                </tr>
+                                <tr class="section-header">
+                                    <td><strong>Equity</strong></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>&nbsp;&nbsp;Owner's Capital</td>
+                                    <td style="text-align: right;">$87,500</td>
+                                </tr>
+                                <tr>
+                                    <td>&nbsp;&nbsp;Retained Earnings</td>
+                                    <td style="text-align: right;">$57,500</td>
+                                </tr>
+                                <tr class="subtotal">
+                                    <td><strong>Total Equity</strong></td>
+                                    <td style="text-align: right;"><strong>$145,000</strong></td>
+                                </tr>
+                                <tr class="total-line">
+                                    <td><strong>Total Liabilities & Equity</strong></td>
+                                    <td style="text-align: right;"><strong>$265,000</strong></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            
+                <!-- Cash Flow Statement Report -->
+                <div class="report-container" id="cashflowReport">
+                    <div class="report-header">
+                        <h4>Cash Flow Statement</h4>
+                        <p>For the period ending <span id="reportPeriod3">December 2024</span></p>
+                    </div>
+                    <div class="financial-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="text-align: left;">Item</th>
+                                    <th style="text-align: right;">Amount (USD)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="section-header">
+                                    <td><strong>Operating Activities</strong></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>&nbsp;&nbsp;Net Income</td>
+                                    <td style="text-align: right;">$57,500</td>
+                                </tr>
+                                <tr>
+                                    <td>&nbsp;&nbsp;Depreciation</td>
+                                    <td style="text-align: right;">$8,000</td>
+                                </tr>
+                                <tr>
+                                    <td>&nbsp;&nbsp;Changes in Working Capital</td>
+                                    <td style="text-align: right;">($5,000)</td>
+                                </tr>
+                                <tr class="subtotal">
+                                    <td><strong>Net Cash from Operating</strong></td>
+                                    <td style="text-align: right;"><strong>$60,500</strong></td>
+                                </tr>
+                                <tr class="section-header">
+                                    <td><strong>Investing Activities</strong></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>&nbsp;&nbsp;Equipment Purchase</td>
+                                    <td style="text-align: right;">($15,000)</td>
+                                </tr>
+                                <tr class="subtotal">
+                                    <td><strong>Net Cash from Investing</strong></td>
+                                    <td style="text-align: right;"><strong>($15,000)</strong></td>
+                                </tr>
+                                <tr class="section-header">
+                                    <td><strong>Financing Activities</strong></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>&nbsp;&nbsp;Loan Repayment</td>
+                                    <td style="text-align: right;">($10,000)</td>
+                                </tr>
+                                <tr>
+                                    <td>&nbsp;&nbsp;Owner Contributions</td>
+                                    <td style="text-align: right;">$15,000</td>
+                                </tr>
+                                <tr class="subtotal">
+                                    <td><strong>Net Cash from Financing</strong></td>
+                                    <td style="text-align: right;"><strong>$5,000</strong></td>
+                                </tr>
+                                <tr class="total-line">
+                                    <td><strong>Net Change in Cash</strong></td>
+                                    <td style="text-align: right;"><strong>$50,500</strong></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
+            <!-- Export Toolbar -->
+            <div class="export-toolbar">
+                <div class="export-actions">
+                    <button class="btn btn-secondary export-btn" onclick="exportReport('pdf')">
+                        <span class="export-icon">📄</span>
+                        Export PDF
+                    </button>
+                    <button class="btn btn-secondary export-btn" onclick="exportReport('excel')">
+                        <span class="export-icon">📊</span>
+                        Export Excel
+                    </button>
+                    <button class="btn btn-secondary export-btn" onclick="exportReport('csv')">
+                        <span class="export-icon">📋</span>
+                        Export CSV
+                    </button>
+                </div>
+                <div class="export-options">
+                    <select class="export-select" id="exportScope">
+                        <option value="current">Current Report Only</option>
+                        <option value="all">All Financial Statements</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="action-bar">
+                <button class="btn btn-secondary" onclick="resetWorkspace()">Generate New Report</button>
+                <button class="btn btn-primary">Analyze Creditworthiness →</button>
+            </div>
+            
         </div>
     </div>
 
@@ -666,10 +1093,11 @@
             const companyName = document.getElementById('companyName').value.trim();
             const industry = document.getElementById('industry').value;
             const businessSize = document.getElementById('businessSize').value;
+            const reportingPeriod = document.getElementById('reportingPeriod').value;
             
-            return companyName && industry && businessSize;
+            return companyName && industry && businessSize && reportingPeriod;
         }
-
+        
         function updateProgress(step) {
             const progressPercentages = [25, 50, 75, 100];
             const progressTexts = [
@@ -693,7 +1121,7 @@
 
         // Company info validation
         document.addEventListener('input', (e) => {
-            if (['companyName', 'industry', 'businessSize'].includes(e.target.id)) {
+            if (['companyName', 'industry', 'businessSize', 'reportingPeriod'].includes(e.target.id)) {
                 if (validateCompanyInfo() && currentStep === 1) {
                     currentStep = 2;
                     updateProgress(2);
@@ -735,17 +1163,24 @@
                 uploadedFiles = [...uploadedFiles, ...pdfFiles];
                 updateFileList();
                 
-                if (currentStep === 2) {
-                    currentStep = 3;
-                    updateProgress(3);
-                    setTimeout(() => {
-                        showCard(processingCard);
-                        startProcessing();
-                    }, 1000);
-                }
+                // Show the generate button when files are uploaded
+                document.getElementById('uploadActions').style.display = 'block';
+                
             } else {
                 alert('Only PDF files are accepted for bank statements.');
             }
+        }
+
+        function startAnalysis() {
+            if (uploadedFiles.length === 0) {
+                alert('Please upload at least one bank statement to continue.');
+                return;
+            }
+            
+            currentStep = 3;
+            updateProgress(3);
+            showCard(processingCard);
+            startProcessing();
         }
 
         function updateFileList() {
@@ -770,6 +1205,11 @@
         function removeFile(index) {
             uploadedFiles.splice(index, 1);
             updateFileList();
+            
+            // Hide generate button if no files left
+            if (uploadedFiles.length === 0) {
+                document.getElementById('uploadActions').style.display = 'none';
+            }
         }
 
         function startProcessing() {
@@ -795,6 +1235,110 @@
                     }, 1000);
                 }
             }, 1500);
+        }
+
+        function showReport(reportType) {
+            // Hide all reports
+            document.querySelectorAll('.report-container').forEach(container => {
+                container.classList.remove('active');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected report
+            const reportMap = {
+                'income': 'incomeReport',
+                'balance': 'balanceReport', 
+                'cashflow': 'cashflowReport'
+            };
+            
+            document.getElementById(reportMap[reportType]).classList.add('active');
+            
+            // Activate clicked tab
+            event.target.classList.add('active');
+        }
+
+        function exportReport(format) {
+            const exportScope = document.getElementById('exportScope').value;
+            const currentReport = getCurrentReportType();
+            
+            // Show loading state
+            const btn = event.target.closest('.export-btn');
+            btn.classList.add('loading');
+            
+            // Simulate export process (replace with actual backend call)
+            setTimeout(() => {
+                btn.classList.remove('loading');
+                
+                if (exportScope === 'current') {
+                    downloadCurrentReport(format, currentReport);
+                } else {
+                    downloadAllReports(format);
+                }
+            }, 1500);
+        }
+        
+        function getCurrentReportType() {
+            const activeReport = document.querySelector('.report-container.active');
+            if (activeReport.id === 'incomeReport') return 'income';
+            if (activeReport.id === 'balanceReport') return 'balance';
+            if (activeReport.id === 'cashflowReport') return 'cashflow';
+        }
+        
+        function downloadCurrentReport(format, reportType) {
+            const reportNames = {
+                'income': 'Income Statement',
+                'balance': 'Balance Sheet',
+                'cashflow': 'Cash Flow Statement'
+            };
+            
+            const fileName = `${reportNames[reportType]}_${getCurrentDate()}.${format}`;
+            
+            // Simulate download (replace with actual file generation)
+            console.log(`Downloading: ${fileName}`);
+            alert(`${reportNames[reportType]} exported as ${format.toUpperCase()} successfully!`);
+        }
+        
+        function downloadAllReports(format) {
+            const fileName = `Financial_Statements_Package_${getCurrentDate()}.${format === 'excel' ? 'xlsx' : format}`;
+            
+            // Simulate download (replace with actual file generation)
+            console.log(`Downloading: ${fileName}`);
+            alert(`All financial statements exported as ${format.toUpperCase()} successfully!`);
+        }
+        
+        function getCurrentDate() {
+            const now = new Date();
+            return now.toISOString().split('T')[0]; // Returns YYYY-MM-DD format
+        }
+
+        function resetWorkspace() {
+            // Reset form
+            document.getElementById('companyName').value = '';
+            document.getElementById('industry').value = '';
+            document.getElementById('businessSize').value = '';
+            document.getElementById('reportingPeriod').value = '';
+            
+            // Clear files
+            uploadedFiles = [];
+            updateFileList();
+            document.getElementById('uploadActions').style.display = 'none';
+            
+            // Reset progress
+            currentStep = 1;
+            updateProgress(1);
+            
+            // Hide all cards except company card
+            uploadCard.classList.add('hidden');
+            processingCard.classList.add('hidden');
+            resultsCard.classList.add('hidden');
+            companyCard.classList.add('active');
+            
+            // Scroll back to top
+            document.querySelector('.workspace-hero').scrollIntoView({ behavior: 'smooth' });
         }
 
         // Initialize
