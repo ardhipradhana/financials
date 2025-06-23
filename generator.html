@@ -493,8 +493,8 @@
         }
 
         .processing-steps {
-            margin-top: 40px;
-            max-width: 400px;
+            margin-top: 32px;
+            max-width: 320px;
             margin-left: auto;
             margin-right: auto;
         }
@@ -502,12 +502,12 @@
         .processing-step {
             display: flex;
             align-items: center;
-            gap: 16px;
-            padding: 16px 20px;
-            margin-bottom: 12px;
+            gap: 12px;
+            padding: 12px 16px;
+            margin-bottom: 8px;
             background: rgba(15, 23, 42, 0.4);
             border: 1px solid rgba(59, 130, 246, 0.1);
-            border-radius: 12px;
+            border-radius: 8px;
             color: #64748B;
             transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
@@ -549,14 +549,14 @@
         }
         
         .step-indicator {
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
             border: 2px solid currentColor;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.8rem;
+            font-size: 0.7rem;
             font-weight: 600;
             flex-shrink: 0;
             transition: all 0.5s ease;
@@ -588,7 +588,7 @@
         
         .processing-step span {
             font-weight: 500;
-            font-size: 0.95rem;
+            font-size: 0.85rem;
             letter-spacing: 0.02em;
         }
 
@@ -1216,14 +1216,14 @@
         
         .btn-generate-premium {
             width: 100%;
-            max-width: 400px;
+            max-width: 350px; /* Reduced from 400px */
             background: linear-gradient(135deg, #1E40AF 0%, #3B82F6 50%, #60A5FA 100%);
             border: none;
-            border-radius: 16px;
-            padding: 20px 24px;
+            border-radius: 12px; /* Reduced from 16px */
+            padding: 16px 20px; /* Reduced from 20px 24px */
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 12px; /* Reduced from 16px */
             cursor: pointer;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
@@ -1252,10 +1252,10 @@
         }
         
         .btn-generate-icon {
-            width: 44px;
-            height: 44px;
+            width: 36px; /* Reduced from 44px */
+            height: 36px; /* Reduced from 44px */
             background: rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
+            border-radius: 8px; /* Reduced from 10px */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -2726,12 +2726,34 @@
             // Start the satisfying progress animation FIRST
             startSatisfyingProgress();
             
-            // Keep the existing step animation but don't interfere with progress
+            // Better timing for 4-step progression
             const steps = document.querySelectorAll('.processing-step');
             let currentProcessingStep = 0;
             
-            // Don't store this interval globally to avoid conflicts
-            const stepInterval = setInterval(() => {
+            // Dynamic timing based on file count and size
+            const totalFiles = uploadedFiles.length;
+            const totalSize = uploadedFiles.reduce((sum, file) => sum + file.size, 0);
+            const totalSizeMB = totalSize / 1024 / 1024;
+            
+            // Calculate step intervals based on processing complexity
+            let baseInterval;
+            if (totalSizeMB < 5) {
+                baseInterval = 6000; // 6 seconds per step for small files
+            } else if (totalSizeMB < 10) {
+                baseInterval = 8000; // 8 seconds per step for medium files  
+            } else {
+                baseInterval = 12000; // 12 seconds per step for large files
+            }
+            
+            // Different timing for each step to feel more realistic
+            const stepTimings = [
+                baseInterval * 0.3,  // Step 1: 30% of base (extraction is usually fastest)
+                baseInterval * 0.4,  // Step 2: 40% of base (categorization takes more time)
+                baseInterval * 0.25, // Step 3: 25% of base (generation is automated)
+                baseInterval * 0.05  // Step 4: 5% of base (finalization is quick)
+            ];
+            
+            function advanceToNextStep() {
                 if (currentProcessingStep > 0) {
                     steps[currentProcessingStep - 1].classList.remove('active');
                     steps[currentProcessingStep - 1].classList.add('completed');
@@ -2740,11 +2762,17 @@
                 
                 if (currentProcessingStep < steps.length) {
                     steps[currentProcessingStep].classList.add('active');
+                    
+                    // Schedule next step with appropriate timing
+                    if (currentProcessingStep < stepTimings.length - 1) {
+                        setTimeout(advanceToNextStep, stepTimings[currentProcessingStep]);
+                    }
                     currentProcessingStep++;
-                } else {
-                    clearInterval(stepInterval);
                 }
-            }, 1500);
+            }
+            
+            // Start the first step immediately
+            advanceToNextStep();
         }
 
         function showReport(reportType) {
