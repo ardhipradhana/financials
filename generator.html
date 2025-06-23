@@ -196,14 +196,104 @@
         .workspace-hero {
             text-align: center;
             margin-bottom: 60px;
+            margin-top: 80px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .trust-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.05));
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 25px;
+            padding: 12px 20px;
+            margin-bottom: 32px;
+            color: #10B981;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        
+        .trust-icon {
+            width: 20px;
+            height: 20px;
+            color: #10B981;
         }
 
         .workspace-hero h1 {
             font-size: 3rem;
             font-weight: 700;
             color: #F8FAFC;
-            margin-bottom: 16px;
+            margin-bottom: 24px;
             letter-spacing: -1px;
+            line-height: 1.1;
+        }
+
+        .hero-description {
+            font-size: 1.2rem;
+            color: #94A3B8;
+            line-height: 1.7;
+            margin-bottom: 40px;
+        }
+        
+        .hero-description strong {
+            color: #10B981;
+            font-weight: 600;
+        }
+        
+        .hero-benefits {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+        }
+        
+        .benefit-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #CBD5E1;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+        
+        .benefit-icon {
+            font-size: 1.2rem;
+        }
+        
+        .social-proof {
+            padding-top: 24px;
+            border-top: 1px solid rgba(59, 130, 246, 0.1);
+        }
+        
+        .proof-text {
+            color: #64748B;
+            font-size: 0.9rem;
+            font-style: italic;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .workspace-hero h1 {
+                font-size: 2.2rem;
+            }
+            
+            .hero-benefits {
+                gap: 20px;
+                justify-content: space-around;
+            }
+            
+            .benefit-item {
+                font-size: 0.85rem;
+            }
+            
+            .trust-badge {
+                font-size: 0.8rem;
+                padding: 10px 16px;
+            }
         }
 
         .workspace-hero p {
@@ -1628,10 +1718,49 @@
             </div>
         </nav>
         
-        <!-- Workspace Hero -->
+        <!-- Enhanced Workspace Hero -->
         <div class="workspace-hero" data-aos="fade-up">
+            <!-- Trust Badge -->
+            <div class="trust-badge">
+                <div class="trust-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 12l2 2 4-4"/>
+                        <path d="M21 12c-1 0-3-1-3-3s2-3 3-3 3 1 3 3-2 3-3 3"/>
+                        <path d="M3 12c1 0 3-1 3-3s-2-3-3-3-3 1-3 3 2 3 3 3"/>
+                        <path d="M12 3c0 1-1 3-3 3s-3-2-3-3 1-3 3-3 3 2 3 3"/>
+                        <path d="M12 21c0-1 1-3 3-3s3 2 3 3-1 3-3 3-3-2-3-3"/>
+                    </svg>
+                </div>
+                <span>Bank-Grade Security • SOC 2 Compliant • Zero Data Retention</span>
+            </div>
+        
+            <!-- Main Hero Content -->
             <h1>Financial Intelligence Workspace</h1>
-            <p>Securely transform raw bank statements into investor-grade reports in minutes. Let our AI do the heavy lifting.</p>
+            <p class="hero-description">
+                Transform raw banking data into institutional-grade financial statements 
+                trusted by lenders and investors. Our AI processes your documents in a 
+                <strong>secure, isolated environment</strong> with zero permanent storage.
+            </p>
+        
+            <!-- Key Benefits -->
+            <div class="hero-benefits">
+                <div class="benefit-item">
+                    <div class="benefit-icon">⚡</div>
+                    <span>Minutes, not hours</span>
+                </div>
+                <div class="benefit-item">
+                    <div class="benefit-icon">🛡️</div>
+                    <span>Enterprise security</span>
+                </div>
+                <div class="benefit-item">
+                    <div class="benefit-icon">📊</div>
+                    <span>Investor-ready output</span>
+                </div>
+                <div class="benefit-item">
+                    <div class="benefit-icon">🏦</div>
+                    <span>Lender-approved format</span>
+                </div>
+            </div>
         </div>
 
         <!-- Replace the standalone security notice with this integrated version -->
