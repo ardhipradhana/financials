@@ -2183,6 +2183,51 @@
         .btn-generate-insights:active {
             transform: translateY(-1px);
         }
+
+        .export-sections {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .export-section-label {
+            color: #F8FAFC;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .export-checkboxes {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        
+        .export-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #CBD5E1;
+            font-size: 0.85rem;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .export-checkbox input[type="checkbox"] {
+            width: 14px;
+            height: 14px;
+            accent-color: #3B82F6;
+        }
+        
+        .export-checkbox:hover {
+            color: #F8FAFC;
+        }
+        
+        @media (max-width: 768px) {
+            .export-checkboxes {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+        }
         
     </style>
 </head>
@@ -2754,7 +2799,7 @@
             <!-- Export Toolbar -->
             <div class="export-toolbar">
                 <div class="export-actions">
-                    <button class="btn btn-secondary export-btn" onclick="exportReport('pdf')">
+                    <button class="btn btn-secondary export-btn" onclick="exportSelectedReports('pdf')" id="exportPdfBtn">
                         <span class="export-icon">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -2766,7 +2811,7 @@
                         </span>
                         Export to PDF
                     </button>
-                    <button class="btn btn-secondary export-btn" onclick="exportReport('csv')">
+                    <button class="btn btn-secondary export-btn" onclick="exportSelectedReports('csv')" id="exportCsvBtn">
                         <span class="export-icon">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -2779,15 +2824,36 @@
                     </button>
                 </div>
                 <div class="export-options">
+                    <div class="export-sections">
+                        <label class="export-section-label">Include Reports:</label>
+                        <div class="export-checkboxes">
+                            <label class="export-checkbox">
+                                <input type="checkbox" id="exportIncome" checked>
+                                <span>Income Statement</span>
+                            </label>
+                            <label class="export-checkbox">
+                                <input type="checkbox" id="exportBalance" checked>
+                                <span>Balance Sheet</span>
+                            </label>
+                            <label class="export-checkbox">
+                                <input type="checkbox" id="exportCashflow" checked>
+                                <span>Cash Flow Statement</span>
+                            </label>
+                            <label class="export-checkbox">
+                                <input type="checkbox" id="exportRatios" checked>
+                                <span>Financial Ratios</span>
+                            </label>
+                            <label class="export-checkbox">
+                                <input type="checkbox" id="exportInsights">
+                                <span>Insights</span>
+                            </label>
+                        </div>
+                    </div>
                     <select class="export-select" id="currencySelect" onchange="changeCurrency()">
                         <option value="IDR">Indonesian Rupiah (Rp)</option>
                         <option value="USD">US Dollar ($)</option>
                         <option value="EUR">Euro (€)</option>
                         <option value="SGD">Singapore Dollar (S$)</option>
-                    </select>
-                    <select class="export-select" id="exportScope">
-                        <option value="current">Current Report Only</option>
-                        <option value="all">All Financial Statements</option>
                     </select>
                 </div>
             </div>
@@ -4568,83 +4634,6 @@
                 sortedPeriods.map(period => `<option value="${period}">${period}</option>`).join('');
         }
         
-        function generateCurrentReportPDF(reportType) {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            
-            // Get company info
-            const companyName = document.getElementById('companyName').value;
-            const reportingPeriod = formatReportingPeriod(document.getElementById('reportingPeriod').value);
-            const currency = document.getElementById('currencySelect').value;
-            
-            // PDF Header
-            addPDFHeader(doc, companyName, reportingPeriod);
-            
-            let yPosition = 60;
-            
-            // Generate specific report
-            if (reportType === 'income') {
-                yPosition = generateIncomeStatementPDF(doc, yPosition, currency);
-            } else if (reportType === 'balance') {
-                yPosition = generateBalanceSheetPDF(doc, yPosition, currency);
-            } else if (reportType === 'cashflow') {
-                yPosition = generateCashFlowPDF(doc, yPosition, currency);
-            }
-            
-            // Add footer
-            addPDFFooter(doc);
-            
-            // Download
-            const reportNames = {
-                'income': 'Income_Statement',
-                'balance': 'Balance_Sheet',
-                'cashflow': 'Cash_Flow_Statement'
-            };
-            
-            const fileName = `${companyName.replace(/[^a-zA-Z0-9]/g, '_')}_${reportNames[reportType]}_${getCurrentDateString()}.pdf`;
-            doc.save(fileName);
-        }
-        
-        function generateAllReportsPDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            
-            // Get company info
-            const companyName = document.getElementById('companyName').value;
-            const reportingPeriod = formatReportingPeriod(document.getElementById('reportingPeriod').value);
-            const currency = document.getElementById('currencySelect').value;
-            
-            // PDF Header
-            addPDFHeader(doc, companyName, reportingPeriod);
-            
-            let yPosition = 60;
-            
-            // Generate all three reports
-            yPosition = generateIncomeStatementPDF(doc, yPosition, currency);
-            
-            // Add new page for Balance Sheet
-            doc.addPage();
-            addPDFHeader(doc, companyName, reportingPeriod);
-            yPosition = 60;
-            yPosition = generateBalanceSheetPDF(doc, yPosition, currency);
-            
-            // Add new page for Cash Flow
-            doc.addPage();
-            addPDFHeader(doc, companyName, reportingPeriod);
-            yPosition = 60;
-            yPosition = generateCashFlowPDF(doc, yPosition, currency);
-            
-            // Add footer to all pages
-            const pageCount = doc.internal.getNumberOfPages();
-            for (let i = 1; i <= pageCount; i++) {
-                doc.setPage(i);
-                addPDFFooter(doc);
-            }
-            
-            const fileName = `${companyName.replace(/[^a-zA-Z0-9]/g, '_')}_Financial_Statements_${getCurrentDateString()}.pdf`;
-            doc.save(fileName);
-        }
-        
         function addPDFHeader(doc, companyName, reportingPeriod) {
             // Company name
             doc.setFontSize(20);
@@ -4918,42 +4907,6 @@
         function getCurrentDateString() {
             return new Date().toISOString().split('T')[0];
         }
-
-        function generateCurrentReportCSV(reportType) {
-            let csvContent = '';
-            const companyName = document.getElementById('companyName').value;
-            const reportingPeriod = formatReportingPeriod(document.getElementById('reportingPeriod').value);
-            
-            if (reportType === 'income') {
-                csvContent = generateIncomeStatementCSV();
-            } else if (reportType === 'balance') {
-                csvContent = generateBalanceSheetCSV();
-            } else if (reportType === 'cashflow') {
-                csvContent = generateCashFlowCSV();
-            }
-            
-            const reportNames = {
-                'income': 'Income_Statement',
-                'balance': 'Balance_Sheet',
-                'cashflow': 'Cash_Flow_Statement'
-            };
-            
-            downloadCSV(csvContent, `${companyName.replace(/[^a-zA-Z0-9]/g, '_')}_${reportNames[reportType]}_${getCurrentDateString()}.csv`);
-        }
-        
-        function generateAllReportsCSV() {
-            const companyName = document.getElementById('companyName').value;
-            const reportingPeriod = formatReportingPeriod(document.getElementById('reportingPeriod').value);
-            
-            let csvContent = `Company: ${companyName}\n`;
-            csvContent += `Period: ${reportingPeriod}\n\n`;
-            
-            csvContent += generateIncomeStatementCSV() + '\n\n';
-            csvContent += generateBalanceSheetCSV() + '\n\n';
-            csvContent += generateCashFlowCSV();
-            
-            downloadCSV(csvContent, `${companyName.replace(/[^a-zA-Z0-9]/g, '_')}_Financial_Statements_${getCurrentDateString()}.csv`);
-        }
         
         function generateIncomeStatementCSV() {
             if (!window.currentFinancialData) return '';
@@ -5076,18 +5029,6 @@
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-        }
-        
-        function getCurrentReportType() {
-            const activeReport = document.querySelector('.report-container.active');
-            if (activeReport.id === 'incomeReport') return 'income';
-            if (activeReport.id === 'balanceReport') return 'balance';
-            if (activeReport.id === 'cashflowReport') return 'cashflow';
-        }
-        
-        function getCurrentDate() {
-            const now = new Date();
-            return now.toISOString().split('T')[0]; // Returns YYYY-MM-DD format
         }
 
         function resetWorkspace() {
@@ -5411,6 +5352,290 @@
             ];
             
             displayInsights(demoInsights);
+        }
+
+        function exportSelectedReports(format) {
+            // Get selected reports
+            const selectedReports = {
+                income: document.getElementById('exportIncome').checked,
+                balance: document.getElementById('exportBalance').checked,
+                cashflow: document.getElementById('exportCashflow').checked,
+                ratios: document.getElementById('exportRatios').checked,
+                insights: document.getElementById('exportInsights').checked
+            };
+            
+            // Check if at least one report is selected
+            const hasSelection = Object.values(selectedReports).some(selected => selected);
+            if (!hasSelection) {
+                alert('Please select at least one report to export.');
+                return;
+            }
+            
+            // Get company info for filename
+            const companyName = document.getElementById('companyName').value;
+            const timestamp = getCurrentDateString();
+            
+            if (format === 'pdf') {
+                generateSelectedPDF(selectedReports, companyName, timestamp);
+            } else if (format === 'csv') {
+                generateSelectedCSV(selectedReports, companyName, timestamp);
+            }
+        }
+        
+        function generateSelectedPDF(selectedReports, companyName, timestamp) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            const reportingPeriod = formatReportingPeriod(document.getElementById('reportingPeriod').value);
+            const currency = document.getElementById('currencySelect').value;
+            
+            let isFirstPage = true;
+            let yPosition = 60;
+            
+            // Add reports in order
+            if (selectedReports.income) {
+                if (!isFirstPage) {
+                    doc.addPage();
+                    yPosition = 60;
+                }
+                addPDFHeader(doc, companyName, reportingPeriod);
+                yPosition = generateIncomeStatementPDF(doc, yPosition, currency);
+                isFirstPage = false;
+            }
+            
+            if (selectedReports.balance) {
+                if (!isFirstPage) {
+                    doc.addPage();
+                    yPosition = 60;
+                }
+                addPDFHeader(doc, companyName, reportingPeriod);
+                yPosition = generateBalanceSheetPDF(doc, yPosition, currency);
+                isFirstPage = false;
+            }
+            
+            if (selectedReports.cashflow) {
+                if (!isFirstPage) {
+                    doc.addPage();
+                    yPosition = 60;
+                }
+                addPDFHeader(doc, companyName, reportingPeriod);
+                yPosition = generateCashFlowPDF(doc, yPosition, currency);
+                isFirstPage = false;
+            }
+            
+            if (selectedReports.ratios) {
+                if (!isFirstPage) {
+                    doc.addPage();
+                    yPosition = 60;
+                }
+                addPDFHeader(doc, companyName, reportingPeriod);
+                yPosition = generateRatiosPDF(doc, yPosition, currency);
+                isFirstPage = false;
+            }
+            
+            if (selectedReports.insights) {
+                if (!isFirstPage) {
+                    doc.addPage();
+                    yPosition = 60;
+                }
+                addPDFHeader(doc, companyName, reportingPeriod);
+                yPosition = generateInsightsPDF(doc, yPosition);
+                isFirstPage = false;
+            }
+            
+            // Add footer to all pages
+            const pageCount = doc.internal.getNumberOfPages();
+            for (let i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                addPDFFooter(doc);
+            }
+            
+            // Generate filename based on selected reports
+            const reportTypes = [];
+            if (selectedReports.income) reportTypes.push('Income');
+            if (selectedReports.balance) reportTypes.push('Balance');
+            if (selectedReports.cashflow) reportTypes.push('CashFlow');
+            if (selectedReports.ratios) reportTypes.push('Ratios');
+            if (selectedReports.insights) reportTypes.push('Insights');
+            
+            const fileName = `${companyName.replace(/[^a-zA-Z0-9]/g, '_')}_${reportTypes.join('_')}_${timestamp}.pdf`;
+            doc.save(fileName);
+        }
+        
+        function generateSelectedCSV(selectedReports, companyName, timestamp) {
+            const reportingPeriod = formatReportingPeriod(document.getElementById('reportingPeriod').value);
+            
+            let csvContent = `Company: ${companyName}\n`;
+            csvContent += `Period: ${reportingPeriod}\n`;
+            csvContent += `Generated: ${new Date().toLocaleDateString()}\n\n`;
+            
+            if (selectedReports.income) {
+                csvContent += generateIncomeStatementCSV() + '\n\n';
+            }
+            
+            if (selectedReports.balance) {
+                csvContent += generateBalanceSheetCSV() + '\n\n';
+            }
+            
+            if (selectedReports.cashflow) {
+                csvContent += generateCashFlowCSV() + '\n\n';
+            }
+            
+            if (selectedReports.ratios) {
+                csvContent += generateRatiosCSV() + '\n\n';
+            }
+            
+            if (selectedReports.insights) {
+                csvContent += generateInsightsCSV() + '\n\n';
+            }
+            
+            // Generate filename
+            const reportTypes = [];
+            if (selectedReports.income) reportTypes.push('Income');
+            if (selectedReports.balance) reportTypes.push('Balance');
+            if (selectedReports.cashflow) reportTypes.push('CashFlow');
+            if (selectedReports.ratios) reportTypes.push('Ratios');
+            if (selectedReports.insights) reportTypes.push('Insights');
+            
+            const fileName = `${companyName.replace(/[^a-zA-Z0-9]/g, '_')}_${reportTypes.join('_')}_${timestamp}.csv`;
+            downloadCSV(csvContent, fileName);
+        }
+        
+        // New PDF generation functions for Ratios and Insights
+        function generateRatiosPDF(doc, startY, currency) {
+            doc.setFontSize(16);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Financial Ratios Analysis', 20, startY);
+            
+            let yPos = startY + 15;
+            
+            // Get ratios data (you'll need to extract this from your existing ratios display)
+            const ratiosData = extractRatiosData();
+            
+            Object.keys(ratiosData).forEach(category => {
+                // Category header
+                doc.setFontSize(12);
+                doc.setFont('helvetica', 'bold');
+                doc.text(category, 20, yPos);
+                yPos += 10;
+                
+                // Ratios in this category
+                doc.setFont('helvetica', 'normal');
+                ratiosData[category].forEach(ratio => {
+                    doc.text(`  ${ratio.name}`, 25, yPos);
+                    doc.text(ratio.formattedValue, 150, yPos, { align: 'right' });
+                    yPos += 6;
+                });
+                yPos += 8;
+            });
+            
+            return yPos + 20;
+        }
+        
+        function generateInsightsPDF(doc, startY) {
+            doc.setFontSize(16);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Financial Insights', 20, startY);
+            
+            let yPos = startY + 15;
+            
+            // Get insights data from the current display
+            const insights = extractInsightsData();
+            
+            insights.forEach(insight => {
+                // Category and Title
+                doc.setFontSize(12);
+                doc.setFont('helvetica', 'bold');
+                doc.text(`${insight.category}: ${insight.title}`, 20, yPos);
+                yPos += 10;
+                
+                // Content
+                doc.setFont('helvetica', 'normal');
+                const contentLines = doc.splitTextToSize(insight.content, 170);
+                contentLines.forEach(line => {
+                    doc.text(line, 25, yPos);
+                    yPos += 6;
+                });
+                yPos += 4;
+                
+                // Action
+                doc.setFont('helvetica', 'italic');
+                const actionLines = doc.splitTextToSize(`Action: ${insight.action}`, 170);
+                actionLines.forEach(line => {
+                    doc.text(line, 25, yPos);
+                    yPos += 6;
+                });
+                yPos += 12;
+            });
+            
+            return yPos + 20;
+        }
+        
+        // CSV generation functions for new reports
+        function generateRatiosCSV() {
+            let csv = 'Financial Ratios Analysis\n';
+            csv += 'Category,Ratio Name,Value\n';
+            
+            const ratiosData = extractRatiosData();
+            
+            Object.keys(ratiosData).forEach(category => {
+                ratiosData[category].forEach(ratio => {
+                    csv += `"${category}","${ratio.name}","${ratio.formattedValue}"\n`;
+                });
+            });
+            
+            return csv;
+        }
+        
+        function generateInsightsCSV() {
+            let csv = 'Financial Insights\n';
+            csv += 'Category,Title,Content,Action,Priority\n';
+            
+            const insights = extractInsightsData();
+            
+            insights.forEach(insight => {
+                csv += `"${insight.category}","${insight.title}","${insight.content}","${insight.action}","${insight.priority}"\n`;
+            });
+            
+            return csv;
+        }
+        
+        // Helper functions to extract data from current display
+        function extractRatiosData() {
+            // Extract ratios from the current DOM display
+            const ratiosData = {};
+            
+            document.querySelectorAll('.ratio-category-card').forEach(card => {
+                const categoryName = card.querySelector('h5').textContent;
+                const ratios = [];
+                
+                card.querySelectorAll('.ratio-item').forEach(item => {
+                    const name = item.querySelector('.ratio-name').textContent;
+                    const value = item.querySelector('.ratio-number').textContent;
+                    ratios.push({ name, formattedValue: value });
+                });
+                
+                ratiosData[categoryName] = ratios;
+            });
+            
+            return ratiosData;
+        }
+        
+        function extractInsightsData() {
+            // Extract insights from the current DOM display
+            const insights = [];
+            
+            document.querySelectorAll('.insight-card').forEach(card => {
+                const category = card.querySelector('.insight-category').textContent;
+                const title = card.querySelector('.insight-title').textContent;
+                const content = card.querySelector('.insight-content').textContent;
+                const action = card.querySelector('.insight-action').textContent.replace('💡 ', '');
+                const priority = card.classList.contains('priority-high') ? 'high' : 'medium';
+                
+                insights.push({ category, title, content, action, priority });
+            });
+            
+            return insights;
         }
 
         document.addEventListener('DOMContentLoaded', () => {
