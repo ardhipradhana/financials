@@ -1893,6 +1893,139 @@
             border-color: #60A5FA;
             box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2);
         }
+
+        /* Financial Ratios Styling */
+        .ratios-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+        
+        .ratio-category-card {
+            background: linear-gradient(145deg, rgba(15, 23, 42, 0.6), rgba(30, 41, 59, 0.4));
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 16px;
+            padding: 24px;
+            transition: all 0.3s ease;
+        }
+        
+        .ratio-category-card:hover {
+            border-color: rgba(59, 130, 246, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(59, 130, 246, 0.1);
+        }
+        
+        .ratio-category-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(59, 130, 246, 0.1);
+        }
+        
+        .ratio-category-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #1E40AF, #60A5FA);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+        
+        .ratio-category-header h5 {
+            color: #F8FAFC;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .ratio-items {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .ratio-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px solid rgba(59, 130, 246, 0.1);
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+        
+        .ratio-item:hover {
+            background: rgba(59, 130, 246, 0.05);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+        
+        .ratio-name {
+            color: #E2E8F0;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        
+        .ratio-value {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .ratio-number {
+            color: #F8FAFC;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        
+        .ratio-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        .ratio-excellent {
+            background: #10B981;
+            box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+        }
+        
+        .ratio-good {
+            background: #F59E0B;
+            box-shadow: 0 0 8px rgba(245, 158, 11, 0.4);
+        }
+        
+        .ratio-poor {
+            background: #EF4444;
+            box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+        }
+        
+        .ratio-neutral {
+            background: #6B7280;
+            box-shadow: 0 0 8px rgba(107, 114, 128, 0.4);
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .ratios-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            
+            .ratio-category-card {
+                padding: 20px;
+            }
+        }
         
     </style>
 </head>
@@ -2110,6 +2243,7 @@
                     <button class="tab-btn active" onclick="showReport('income')">Income Statement</button>
                     <button class="tab-btn" onclick="showReport('balance')">Balance Sheet</button>
                     <button class="tab-btn" onclick="showReport('cashflow')">Cash Flow Statement</button>
+                    <button class="tab-btn" onclick="showReport('ratios')">Financial Ratios</button>
                 </div>
             
                 <!-- Income Statement Report -->
@@ -2325,6 +2459,71 @@
                                 </tr>
                             </tbody>
                         </table>
+                    </div>
+                </div>
+
+                <!-- Financial Ratios Report -->
+                <div class="report-container" id="ratiosReport">
+                    <div class="report-header">
+                        <h4>Financial Ratios Analysis</h4>
+                        <p>For the period ending <span id="reportPeriod4">December 2024</span></p>
+                    </div>
+                    
+                    <div class="ratios-grid">
+                        <!-- Profitability Ratios -->
+                        <div class="ratio-category-card">
+                            <div class="ratio-category-header">
+                                <div class="ratio-category-icon">📈</div>
+                                <h5>Profitability Ratios</h5>
+                            </div>
+                            <div class="ratio-items" id="profitabilityRatios">
+                                <!-- Ratios will be populated here -->
+                            </div>
+                        </div>
+                        
+                        <!-- Liquidity Ratios -->
+                        <div class="ratio-category-card">
+                            <div class="ratio-category-header">
+                                <div class="ratio-category-icon">💧</div>
+                                <h5>Liquidity Ratios</h5>
+                            </div>
+                            <div class="ratio-items" id="liquidityRatios">
+                                <!-- Ratios will be populated here -->
+                            </div>
+                        </div>
+                        
+                        <!-- Solvency Ratios -->
+                        <div class="ratio-category-card">
+                            <div class="ratio-category-header">
+                                <div class="ratio-category-icon">🏦</div>
+                                <h5>Solvency Ratios</h5>
+                            </div>
+                            <div class="ratio-items" id="solvencyRatios">
+                                <!-- Ratios will be populated here -->
+                            </div>
+                        </div>
+                        
+                        <!-- Efficiency Ratios -->
+                        <div class="ratio-category-card">
+                            <div class="ratio-category-header">
+                                <div class="ratio-category-icon">⚡</div>
+                                <h5>Efficiency Ratios</h5>
+                            </div>
+                            <div class="ratio-items" id="efficiencyRatios">
+                                <!-- Ratios will be populated here -->
+                            </div>
+                        </div>
+                        
+                        <!-- Cash Flow Ratios -->
+                        <div class="ratio-category-card">
+                            <div class="ratio-category-header">
+                                <div class="ratio-category-icon">💰</div>
+                                <h5>Cash Flow Ratios</h5>
+                            </div>
+                            <div class="ratio-items" id="cashflowRatios">
+                                <!-- Ratios will be populated here -->
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -2881,6 +3080,7 @@
             populateIncomeStatement(financialStatements.incomeStatement);
             populateBalanceSheet(financialStatements.balanceSheet);
             populateCashFlowStatement(financialStatements.cashFlow);
+            populateFinancialRatios(financialStatements);
         }
         
         function formatReportingPeriod(period) {
@@ -3366,6 +3566,247 @@
             
             cashFlowTable.innerHTML = html;
         }
+
+        function populateFinancialRatios(financialData) {
+            // Extract data from financial statements
+            const income = financialData.incomeStatement;
+            const balance = financialData.balanceSheet;
+            const cashFlow = financialData.cashFlow;
+            
+            // Calculate key totals
+            const revenue = income.revenue.reduce((sum, item) => sum + item.amount, 0);
+            const netIncome = window.calculatedNetIncome || 0;
+            const totalAssets = balance.assets.reduce((sum, item) => sum + item.amount, 0);
+            const totalLiabilities = balance.liabilities.reduce((sum, item) => sum + item.amount, 0);
+            const totalEquity = balance.equity.reduce((sum, item) => sum + item.amount, 0);
+            
+            // Get specific items
+            const currentAssets = getCurrentAssets(balance.assets);
+            const currentLiabilities = getCurrentLiabilities(balance.liabilities);
+            const inventory = getItemAmount(balance.assets, ['inventory']);
+            const cash = getItemAmount(balance.assets, ['cash']);
+            const operatingCashFlow = cashFlow.operating.reduce((sum, item) => sum + item.amount, 0);
+            
+            // Calculate ratios by category
+            const ratios = {
+                profitability: calculateProfitabilityRatios(revenue, netIncome, totalAssets, totalEquity),
+                liquidity: calculateLiquidityRatios(currentAssets, currentLiabilities, inventory, cash),
+                solvency: calculateSolvencyRatios(totalLiabilities, totalAssets, totalEquity),
+                efficiency: calculateEfficiencyRatios(revenue, totalAssets),
+                cashflow: calculateCashFlowRatios(operatingCashFlow, currentLiabilities, totalLiabilities)
+            };
+            
+            // Populate each category
+            populateRatioCategory('profitabilityRatios', ratios.profitability);
+            populateRatioCategory('liquidityRatios', ratios.liquidity);
+            populateRatioCategory('solvencyRatios', ratios.solvency);
+            populateRatioCategory('efficiencyRatios', ratios.efficiency);
+            populateRatioCategory('cashflowRatios', ratios.cashflow);
+        }
+
+        // Helper functions to extract specific data
+        function getCurrentAssets(assets) {
+            const currentAssetLabels = ['cash', 'accounts receivable', 'inventory', 'prepaid', 'short-term investments'];
+            return assets.filter(item => 
+                currentAssetLabels.some(label => item.item.toLowerCase().includes(label))
+            ).reduce((sum, item) => sum + item.amount, 0);
+        }
+        
+        function getCurrentLiabilities(liabilities) {
+            const currentLiabLabels = ['accounts payable', 'accrued', 'short-term', 'tax payable', 'deferred revenue', 'current liabilities'];
+            return liabilities.filter(item => 
+                currentLiabLabels.some(label => item.item.toLowerCase().includes(label))
+            ).reduce((sum, item) => sum + item.amount, 0);
+        }
+        
+        function getItemAmount(items, searchLabels) {
+            const item = items.find(item => 
+                searchLabels.some(label => item.item.toLowerCase().includes(label))
+            );
+            return item ? item.amount : 0;
+        }
+        
+        // Ratio calculation functions
+        function calculateProfitabilityRatios(revenue, netIncome, totalAssets, totalEquity) {
+            const grossProfit = window.calculatedGrossProfit || 0;
+            const operatingProfit = window.calculatedOperatingProfit || 0;
+            const ebitda = window.calculatedEBITDA || 0;
+            
+            return [
+                {
+                    name: 'Gross Margin',
+                    value: revenue > 0 ? ((grossProfit / revenue) * 100) : 0,
+                    format: 'percentage',
+                    benchmark: { excellent: 40, good: 20, poor: 10 }
+                },
+                {
+                    name: 'Net Margin',
+                    value: revenue > 0 ? ((netIncome / revenue) * 100) : 0,
+                    format: 'percentage',
+                    benchmark: { excellent: 15, good: 5, poor: 0 }
+                },
+                {
+                    name: 'Operating Margin',
+                    value: revenue > 0 ? ((operatingProfit / revenue) * 100) : 0,
+                    format: 'percentage',
+                    benchmark: { excellent: 20, good: 10, poor: 0 }
+                },
+                {
+                    name: 'EBITDA Margin',
+                    value: revenue > 0 ? ((ebitda / revenue) * 100) : 0,
+                    format: 'percentage',
+                    benchmark: { excellent: 25, good: 15, poor: 5 }
+                },
+                {
+                    name: 'Return on Assets (ROA)',
+                    value: totalAssets > 0 ? ((netIncome / totalAssets) * 100) : 0,
+                    format: 'percentage',
+                    benchmark: { excellent: 10, good: 5, poor: 0 }
+                },
+                {
+                    name: 'Return on Equity (ROE)',
+                    value: totalEquity > 0 ? ((netIncome / totalEquity) * 100) : 0,
+                    format: 'percentage',
+                    benchmark: { excellent: 15, good: 10, poor: 0 }
+                }
+            ];
+        }
+        
+        function calculateLiquidityRatios(currentAssets, currentLiabilities, inventory, cash) {
+            const workingCapital = currentAssets - currentLiabilities;
+            
+            return [
+                {
+                    name: 'Current Ratio',
+                    value: currentLiabilities > 0 ? (currentAssets / currentLiabilities) : 0,
+                    format: 'ratio',
+                    benchmark: { excellent: 2.0, good: 1.5, poor: 1.0 }
+                },
+                {
+                    name: 'Quick Ratio',
+                    value: currentLiabilities > 0 ? ((currentAssets - inventory) / currentLiabilities) : 0,
+                    format: 'ratio',
+                    benchmark: { excellent: 1.5, good: 1.0, poor: 0.5 }
+                },
+                {
+                    name: 'Cash Ratio',
+                    value: currentLiabilities > 0 ? (cash / currentLiabilities) : 0,
+                    format: 'ratio',
+                    benchmark: { excellent: 0.5, good: 0.2, poor: 0.1 }
+                },
+                {
+                    name: 'Working Capital',
+                    value: workingCapital,
+                    format: 'currency',
+                    benchmark: { excellent: 1000000, good: 100000, poor: 0 }
+                }
+            ];
+        }
+        
+        function calculateSolvencyRatios(totalLiabilities, totalAssets, totalEquity) {
+            return [
+                {
+                    name: 'Debt-to-Equity',
+                    value: totalEquity > 0 ? (totalLiabilities / totalEquity) : 0,
+                    format: 'ratio',
+                    benchmark: { excellent: 0.3, good: 0.6, poor: 1.0 },
+                    reverse: true // Lower is better
+                },
+                {
+                    name: 'Debt-to-Assets',
+                    value: totalAssets > 0 ? ((totalLiabilities / totalAssets) * 100) : 0,
+                    format: 'percentage',
+                    benchmark: { excellent: 30, good: 50, poor: 70 },
+                    reverse: true
+                },
+                {
+                    name: 'Equity Ratio',
+                    value: totalAssets > 0 ? ((totalEquity / totalAssets) * 100) : 0,
+                    format: 'percentage',
+                    benchmark: { excellent: 70, good: 50, poor: 30 }
+                }
+            ];
+        }
+        
+        function calculateEfficiencyRatios(revenue, totalAssets) {
+            return [
+                {
+                    name: 'Asset Turnover',
+                    value: totalAssets > 0 ? (revenue / totalAssets) : 0,
+                    format: 'ratio',
+                    benchmark: { excellent: 1.5, good: 1.0, poor: 0.5 }
+                }
+            ];
+        }
+        
+        function calculateCashFlowRatios(operatingCashFlow, currentLiabilities, totalLiabilities) {
+            return [
+                {
+                    name: 'Operating Cash Flow Ratio',
+                    value: currentLiabilities > 0 ? (operatingCashFlow / currentLiabilities) : 0,
+                    format: 'ratio',
+                    benchmark: { excellent: 0.4, good: 0.2, poor: 0.1 }
+                },
+                {
+                    name: 'Cash Coverage Ratio',
+                    value: totalLiabilities > 0 ? (operatingCashFlow / totalLiabilities) : 0,
+                    format: 'ratio',
+                    benchmark: { excellent: 0.3, good: 0.15, poor: 0.05 }
+                }
+            ];
+        }
+        
+        function populateRatioCategory(containerId, ratios) {
+            const container = document.getElementById(containerId);
+            
+            container.innerHTML = ratios.map(ratio => {
+                const indicator = getRatioIndicator(ratio);
+                const formattedValue = formatRatioValue(ratio.value, ratio.format);
+                
+                return `
+                    <div class="ratio-item">
+                        <div class="ratio-name">${ratio.name}</div>
+                        <div class="ratio-value">
+                            <div class="ratio-number">${formattedValue}</div>
+                            <div class="ratio-indicator ${indicator}"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function getRatioIndicator(ratio) {
+            if (!ratio.benchmark) return 'ratio-neutral';
+            
+            const value = ratio.value;
+            const { excellent, good, poor } = ratio.benchmark;
+            const isReverse = ratio.reverse;
+            
+            if (isReverse) {
+                if (value <= excellent) return 'ratio-excellent';
+                if (value <= good) return 'ratio-good';
+                if (value <= poor) return 'ratio-poor';
+                return 'ratio-poor';
+            } else {
+                if (value >= excellent) return 'ratio-excellent';
+                if (value >= good) return 'ratio-good';
+                if (value >= poor) return 'ratio-poor';
+                return 'ratio-poor';
+            }
+        }
+        
+        function formatRatioValue(value, format) {
+            switch (format) {
+                case 'percentage':
+                    return `${value.toFixed(1)}%`;
+                case 'ratio':
+                    return `${value.toFixed(2)}x`;
+                case 'currency':
+                    return formatCurrency(value);
+                default:
+                    return value.toFixed(2);
+            }
+        }
         
         function updateFileList() {
             fileList.innerHTML = '';
@@ -3495,7 +3936,8 @@
             const reportMap = {
                 'income': 'incomeReport',
                 'balance': 'balanceReport', 
-                'cashflow': 'cashflowReport'
+                'cashflow': 'cashflowReport',
+                'ratios': 'ratiosReport'
             };
             
             document.getElementById(reportMap[reportType]).classList.add('active');
