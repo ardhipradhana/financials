@@ -2032,6 +2032,93 @@
                 padding: 20px;
             }
         }
+
+        /* Financial Insights Styling */
+        .insights-content {
+            min-height: 300px;
+        }
+        
+        .insight-loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            color: #94A3B8;
+        }
+        
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(59, 130, 246, 0.2);
+            border-top: 3px solid #3B82F6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 16px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .insights-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
+        
+        .insight-card {
+            background: linear-gradient(145deg, rgba(15, 23, 42, 0.6), rgba(30, 41, 59, 0.4));
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 16px;
+            padding: 24px;
+            transition: all 0.3s ease;
+        }
+        
+        .insight-card:hover {
+            border-color: rgba(59, 130, 246, 0.4);
+            transform: translateY(-2px);
+        }
+        
+        .insight-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .insight-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        
+        .insight-title {
+            color: #F8FAFC;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        .insight-content {
+            color: #E2E8F0;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+        
+        .insight-action {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: #60A5FA;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
         
     </style>
 </head>
@@ -2250,6 +2337,7 @@
                     <button class="tab-btn" onclick="showReport('balance')">Balance Sheet</button>
                     <button class="tab-btn" onclick="showReport('cashflow')">Cash Flow Statement</button>
                     <button class="tab-btn" onclick="showReport('ratios')">Financial Ratios</button>
+                    <button class="tab-btn" onclick="showReport('insights')">Insights Generator</button>
                 </div>
             
                 <!-- Income Statement Report -->
@@ -2568,6 +2656,21 @@
                                 <h5>Market & Valuation</h5>
                             </div>
                             <div class="ratio-items" id="marketRatios"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Financial Insights Report -->
+                <div class="report-container" id="insightsReport">
+                    <div class="report-header">
+                        <h4>Financial Insights</h4>
+                        <p>Smart insights for <span id="reportPeriod5">December 2024</span></p>
+                    </div>
+                    
+                    <div class="insights-content" id="insightsContent">
+                        <div class="insight-loading">
+                            <div class="loading-spinner"></div>
+                            <p>Generating your personalized insights...</p>
                         </div>
                     </div>
                 </div>
@@ -3120,6 +3223,8 @@
             document.getElementById('reportPeriod1').textContent = periodText;
             document.getElementById('reportPeriod2').textContent = periodText;
             document.getElementById('reportPeriod3').textContent = periodText;
+            document.getElementById('reportPeriod4').textContent = periodText;
+            document.getElementById('reportPeriod5').textContent = periodText;
             
             // Populate each statement
             populateIncomeStatement(financialStatements.incomeStatement);
@@ -4079,7 +4184,8 @@
                 'income': 'incomeReport',
                 'balance': 'balanceReport', 
                 'cashflow': 'cashflowReport',
-                'ratios': 'ratiosReport'
+                'ratios': 'ratiosReport',
+                'insights': 'insightsReport'
             };
             
             document.getElementById(reportMap[reportType]).classList.add('active');
@@ -5009,6 +5115,128 @@
             const input = container.querySelector('input[type="month"]');
             input.focus();
             input.showPicker(); // This opens the calendar directly
+        }
+
+        async function generateInsights() {
+            const insightsContent = document.getElementById('insightsContent');
+            
+            // Show loading state
+            insightsContent.innerHTML = `
+                <div class="insight-loading">
+                    <div class="loading-spinner"></div>
+                    <p>Generating your personalized insights...</p>
+                </div>
+            `;
+            
+            try {
+                // Prepare enhanced data for backend
+                const requestData = {
+                    // Company Info
+                    companyName: document.getElementById('companyName').value,
+                    industry: document.getElementById('industry').value,
+                    businessSize: document.getElementById('businessSize').value,
+                    reportingPeriod: document.getElementById('reportingPeriod').value,
+                    
+                    // Complete Financial Data
+                    financialData: window.currentFinancialData,
+                    
+                    // Calculated Metrics (helpful for insights)
+                    calculatedMetrics: {
+                        netIncome: window.calculatedNetIncome || 0,
+                        depreciation: window.calculatedDepreciation || 0,
+                        grossProfit: window.calculatedGrossProfit || 0,
+                        operatingProfit: window.calculatedOperatingProfit || 0,
+                        ebitda: window.calculatedEBITDA || 0
+                    },
+                    
+                    // File metadata (useful for context)
+                    fileInfo: {
+                        totalFiles: uploadedFiles.length,
+                        totalSizeBytes: uploadedFiles.reduce((sum, file) => sum + file.size, 0)
+                    },
+                    
+                    // Currency for formatting
+                    currency: document.getElementById('currencySelect').value,
+                    
+                    // Metadata
+                    timestamp: new Date().toISOString(),
+                    version: '1.0'
+                };
+                
+                // Call backend (placeholder URL)
+                const response = await fetch('https://montpro.app.n8n.cloud/webhook/financier-generator-insights', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const insights = await response.json();
+                displayInsights(insights);
+                
+            } catch (error) {
+                console.error('Error generating insights:', error);
+                
+                // Show error state with fallback to demo insights
+                insightsContent.innerHTML = `
+                    <div class="insight-loading">
+                        <p style="color: #EF4444;">Unable to generate live insights. Showing demo insights...</p>
+                    </div>
+                `;
+                
+                // Show demo insights after 2 seconds
+                setTimeout(() => {
+                    displayDemoInsights();
+                }, 2000);
+            }
+        }
+        
+        function displayInsights(insights) {
+            // This will be populated when backend returns real data
+            const insightsContent = document.getElementById('insightsContent');
+            insightsContent.innerHTML = `
+                <div class="insights-grid">
+                    ${insights.map(insight => `
+                        <div class="insight-card">
+                            <div class="insight-header">
+                                <div class="insight-icon" style="background: ${insight.iconColor}">
+                                    ${insight.icon}
+                                </div>
+                                <div class="insight-title">${insight.title}</div>
+                            </div>
+                            <div class="insight-content">${insight.content}</div>
+                            ${insight.action ? `<div class="insight-action">${insight.action}</div>` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+        
+        function displayDemoInsights() {
+            // Demo insights for testing
+            const demoInsights = [
+                {
+                    title: "Cash Flow Health",
+                    content: "You have approximately 3.2 months of operating expenses in cash reserves. This provides a good safety cushion for your business operations.",
+                    action: "💡 Consider building up to 6 months for stronger financial security",
+                    icon: "💰",
+                    iconColor: "linear-gradient(135deg, #10B981, #059669)"
+                },
+                {
+                    title: "Revenue Growth",
+                    content: "Your revenue shows steady growth patterns. The current trajectory indicates healthy business expansion.",
+                    action: "📈 Focus on maintaining this growth momentum",
+                    icon: "📊",
+                    iconColor: "linear-gradient(135deg, #3B82F6, #1E40AF)"
+                }
+            ];
+            
+            displayInsights(demoInsights);
         }
 
         document.addEventListener('DOMContentLoaded', () => {
