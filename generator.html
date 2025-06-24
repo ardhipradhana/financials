@@ -3468,11 +3468,19 @@
             // Close modal
             closeHistoryModal();
             
-            // Scroll to results
+            // Scroll specifically to the Financial Intelligence Dashboard
             setTimeout(() => {
-                document.getElementById('resultsCard').scrollIntoView({ behavior: 'smooth' });
-                // Hide completed steps when loading previous analysis
-                hideCompletedSteps();
+                const resultsCard = document.getElementById('resultsCard');
+                if (resultsCard) {
+                    const cardTop = resultsCard.offsetTop;
+                    const navHeight = 70; // Height of the fixed navigation
+                    const offset = navHeight + 20; // Extra spacing for perfect positioning
+                    
+                    window.scrollTo({
+                        top: cardTop - offset,
+                        behavior: 'smooth'
+                    });
+                }
             }, 500);
         }
         
