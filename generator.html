@@ -5305,19 +5305,14 @@
                 
                 // n8n often wraps responses in an array, so extract the actual insights
                 let insights;
-                if (Array.isArray(result) && result.length > 0) {
-                    // If result is an array, check if first item contains the insights
-                    if (Array.isArray(result[0])) {
-                        insights = result[0]; // n8n wrapped it twice
-                    } else if (result[0].insights && Array.isArray(result[0].insights)) {
-                        insights = result[0].insights; // insights are in a property
-                    } else {
-                        insights = result; // the result array itself contains the insights
-                    }
-                } else if (Array.isArray(result)) {
-                    insights = result; // empty array or direct array
+                if (Array.isArray(result)) {
+                    // If it's an array, use it directly
+                    insights = result;
+                } else if (result && typeof result === 'object') {
+                    // If it's a single object (n8n flattened the array), wrap it back in an array
+                    insights = [result];
                 } else {
-                    insights = result; // direct object
+                    insights = [];
                 }
                 
                 console.log('Extracted insights:', insights);
@@ -5353,8 +5348,9 @@
             let insightsArray;
             if (Array.isArray(insights)) {
                 insightsArray = insights;
-            } else if (insights && typeof insights === 'object') {
-                insightsArray = [insights]; // Single object, wrap in array
+            } else if (insights && typeof insights === 'object' && insights.title) {
+                // Single insight object, wrap in array
+                insightsArray = [insights];
             } else {
                 insightsArray = [];
             }
