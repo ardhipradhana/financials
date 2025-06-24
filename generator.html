@@ -1734,6 +1734,17 @@
         .btn-hero-start:hover svg {
             transform: translateX(4px);
         }
+
+        .form-input[type="month"],
+        .form-input[type="date"] {
+            cursor: pointer;
+        }
+        
+        .form-input[type="month"]::-webkit-calendar-picker-indicator,
+        .form-input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            cursor: pointer;
+        }
         
     </style>
 </head>
@@ -1824,22 +1835,15 @@
                         <label class="form-label" for="businessSize">Business Size</label>
                         <select id="businessSize" class="form-select">
                             <option value="">Select size</option>
-                            <option value="micro">Micro (1-9 employees)</option>
-                            <option value="small">Small (10-49 employees)</option>
-                            <option value="medium">Medium (50-249 employees)</option>
+                            <option value="micro">Micro (1-10 employees)</option>
+                            <option value="small">Small (11-50 employees)</option>
+                            <option value="medium">Medium (51-250 employees)</option>
+                            <option value="big">Big (250+ employees)</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label class="form-label" for="reportingPeriod">Reporting Period</label>
-                        <select id="reportingPeriod" class="form-select">
-                            <option value="">Select period</option>
-                            <option value="jan-2025">January 2025</option>
-                            <option value="dec-2024">December 2024</option>
-                            <option value="nov-2024">November 2024</option>
-                            <option value="oct-2024">October 2024</option>
-                            <option value="sep-2024">September 2024</option>
-                            <option value="aug-2024">August 2024</option>
-                        </select>
+                        <input type="month" id="reportingPeriod" class="form-input" max="2030-12">
                     </div>
                 </div>
             </div>
@@ -3869,6 +3873,17 @@
                 top: elementTop + offset,
                 behavior: 'smooth'
             });
+        }
+
+        function formatReportingPeriod(period) {
+            if (period.includes('-')) {
+                // Handle month input (YYYY-MM format)
+                const [year, month] = period.split('-');
+                const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                                   'July', 'August', 'September', 'October', 'November', 'December'];
+                return `${monthNames[parseInt(month) - 1]} ${year}`;
+            }
+            return period;
         }
 
         // Initialize
