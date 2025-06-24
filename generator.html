@@ -2476,6 +2476,9 @@
                 return;
             }
             
+            // Reset processing animation state
+            resetProcessingAnimation();
+            
             // Prepare form data
             const formData = new FormData();
             
@@ -2498,11 +2501,66 @@
             currentStep = 3;
             updateProgress(3);
             showCard(processingCard);
-
+        
             startSatisfyingProgress();
             
             // Send to backend
             sendToBackend(formData);
+        }
+
+        function resetProcessingAnimation() {
+            // Reset the processing animation to initial state
+            const processingAnimation = document.querySelector('.processing-animation');
+            if (processingAnimation) {
+                processingAnimation.innerHTML = `
+                    <div class="ai-processor-compact">
+                        <div class="processor-core">
+                            <div class="processor-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="4" y="4" width="16" height="16" rx="2"/>
+                                    <rect x="9" y="9" width="6" height="6"/>
+                                    <line x1="9" y1="1" x2="9" y2="4"/>
+                                    <line x1="15" y1="1" x2="15" y2="4"/>
+                                    <line x1="9" y1="20" x2="9" y2="23"/>
+                                    <line x1="15" y1="20" x2="15" y2="23"/>
+                                    <line x1="20" y1="9" x2="23" y2="9"/>
+                                    <line x1="20" y1="14" x2="23" y2="14"/>
+                                    <line x1="1" y1="9" x2="4" y2="9"/>
+                                    <line x1="1" y1="14" x2="4" y2="14"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="processing-dots">
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                        </div>
+                    </div>
+                    <div class="processing-status-compact">
+                        <h4>AI Processing Your Financial Data</h4>
+                        <p>Analyzing transaction patterns and building statements...</p>
+                    </div>
+                `;
+            }
+            
+            // Reset all processing steps to initial state
+            const steps = document.querySelectorAll('.processing-step');
+            steps.forEach((step, index) => {
+                step.classList.remove('active', 'completed');
+                step.querySelector('.step-indicator').textContent = index + 1;
+            });
+            
+            // Clear any existing intervals
+            if (progressInterval) {
+                clearInterval(progressInterval);
+            }
+            if (window.processingInterval) {
+                clearInterval(window.processingInterval);
+            }
+            
+            // Reset progress variables
+            currentProgress = 0;
+            progressSpeed = 1;
         }
         
         async function sendToBackend(formData) {
@@ -2562,10 +2620,16 @@
                 // Backend is still processing, poll for updates
                 pollForResults(result.jobId);
             } else if (result.status === 'complete') {
+                // Parse the JSON strings from backend into objects
+                const financialStatements = {
+                    incomeStatement: JSON.parse(result.financialStatements.incomeStatement).incomeStatement,
+                    balanceSheet: JSON.parse(result.financialStatements.balanceSheet).balanceSheet,
+                    cashFlow: JSON.parse(result.financialStatements.cashFlow).cashFlow
+                };
+                
                 // Processing complete, show results
-                populateResults(result.financialStatements);
-
-                saveAnalysis(result.financialStatements);
+                populateResults(financialStatements);
+                saveAnalysis(financialStatements);
                 
                 currentStep = 4;
                 updateProgress(4);
