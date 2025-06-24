@@ -5239,48 +5239,55 @@
             try {
                 // Prepare enhanced data for backend
                 const requestData = {
-                // Company Info
-                companyName: document.getElementById('companyName').value,
-                industry: document.getElementById('industry').value,
-                businessSize: document.getElementById('businessSize').value,
-                reportingPeriod: document.getElementById('reportingPeriod').value,
-                
-                // Raw Financial Data
-                financialData: window.currentFinancialData,
-                
-                // Pre-calculated Key Metrics (add these)
-                keyMetrics: {
-                    // Revenue & Profitability
-                    totalRevenue: window.currentFinancialData.incomeStatement.revenue.reduce((sum, item) => sum + item.amount, 0),
-                    totalExpenses: window.currentFinancialData.incomeStatement.expenses.reduce((sum, item) => sum + item.amount, 0),
-                    netIncome: window.calculatedNetIncome || 0,
-                    grossProfit: window.calculatedGrossProfit || 0,
-                    netMargin: window.currentFinancialData ? (window.calculatedNetIncome / window.currentFinancialData.incomeStatement.revenue.reduce((sum, item) => sum + item.amount, 0)) * 100 : 0,
+                    // Company Info
+                    companyName: document.getElementById('companyName').value,
+                    industry: document.getElementById('industry').value,
+                    businessSize: document.getElementById('businessSize').value,
+                    reportingPeriod: document.getElementById('reportingPeriod').value,
                     
-                    // Balance Sheet
-                    totalAssets: window.currentFinancialData.balanceSheet.assets.reduce((sum, item) => sum + item.amount, 0),
-                    totalLiabilities: window.currentFinancialData.balanceSheet.liabilities.reduce((sum, item) => sum + item.amount, 0),
-                    totalEquity: window.currentFinancialData.balanceSheet.equity.reduce((sum, item) => sum + item.amount, 0),
+                    // Complete Financial Data
+                    financialData: window.currentFinancialData,
                     
-                    // Cash Flow
-                    operatingCashFlow: window.currentFinancialData.cashFlow.operating.reduce((sum, item) => sum + item.amount, 0),
-                    cashBalance: window.currentFinancialData.balanceSheet.assets.find(item => 
-                        item.item.toLowerCase().includes('cash'))?.amount || 0,
+                    // Pre-calculated Key Metrics
+                    keyMetrics: {
+                        // Revenue & Profitability
+                        totalRevenue: window.currentFinancialData.incomeStatement.revenue.reduce((sum, item) => sum + item.amount, 0),
+                        totalExpenses: window.currentFinancialData.incomeStatement.expenses.reduce((sum, item) => sum + item.amount, 0),
+                        netIncome: window.calculatedNetIncome || 0,
+                        grossProfit: window.calculatedGrossProfit || 0,
+                        netMargin: window.currentFinancialData ? (window.calculatedNetIncome / window.currentFinancialData.incomeStatement.revenue.reduce((sum, item) => sum + item.amount, 0)) * 100 : 0,
+                        
+                        // Balance Sheet
+                        totalAssets: window.currentFinancialData.balanceSheet.assets.reduce((sum, item) => sum + item.amount, 0),
+                        totalLiabilities: window.currentFinancialData.balanceSheet.liabilities.reduce((sum, item) => sum + item.amount, 0),
+                        totalEquity: window.currentFinancialData.balanceSheet.equity.reduce((sum, item) => sum + item.amount, 0),
+                        
+                        // Cash Flow
+                        operatingCashFlow: window.currentFinancialData.cashFlow.operating.reduce((sum, item) => sum + item.amount, 0),
+                        beginningCash: window.currentFinancialData.cashFlow.beginningBalance || 0,
+                        endingCash: window.currentFinancialData.cashFlow.endingBalance || 0,
+                        netCashChange: window.currentFinancialData.cashFlow.netChangeInCash || 0,
+                        cashBalance: window.currentFinancialData.balanceSheet.assets.find(item => 
+                            item.item.toLowerCase().includes('cash'))?.amount || 0,
+                        
+                        // Key Ratios (simplified calculations)
+                        currentRatio: calculateSimpleCurrentRatio(),
+                        debtToEquity: calculateSimpleDebtToEquity(),
+                        roa: calculateSimpleROA(),
+                        roe: calculateSimpleROE()
+                    },
                     
-                    // Key Ratios (simplified calculations)
-                    currentRatio: calculateSimpleCurrentRatio(),
-                    debtToEquity: calculateSimpleDebtToEquity(),
-                    roa: calculateSimpleROA(),
-                    roe: calculateSimpleROE()
-                },
+                    // Currency for formatting
+                    currency: document.getElementById('currencySelect').value,
+                    
+                    // Metadata
+                    timestamp: new Date().toISOString(),
+                    version: '1.0'
+                };
                 
-                // Context
-                currency: document.getElementById('currencySelect').value,
-                timestamp: new Date().toISOString(),
-                version: '1.0'
-            };
+                console.log('Sending request data:', requestData); // Debug log
                 
-                // Call backend (placeholder URL)
+                // Call backend
                 const response = await fetch('https://montpro.app.n8n.cloud/webhook/financier-generator-insights', {
                     method: 'POST',
                     headers: {
@@ -5289,20 +5296,36 @@
                     body: JSON.stringify(requestData)
                 });
                 
+                console.log('Response status:', response.status); // Debug log
+                console.log('Response headers:', response.headers); // Debug log
+                
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 
-                const insights = await response.json();
+                const responseText = await response.text(); // Get raw text first
+                console.log('Raw response:', responseText); // Debug log
+                
+                let insights;
+                try {
+                    insights = JSON.parse(responseText); // Then parse
+                } catch (parseError) {
+                    console.error('JSON parse error:', parseError);
+                    throw new Error('Invalid JSON response from server');
+                }
+                
+                console.log('Parsed insights:', insights); // Debug log
+                
                 displayInsights(insights);
                 
             } catch (error) {
                 console.error('Error generating insights:', error);
                 
-                // Show error state with fallback to demo insights
+                // Show detailed error message
                 insightsContent.innerHTML = `
                     <div class="insight-loading">
-                        <p style="color: #EF4444;">Unable to generate live insights. Showing demo insights...</p>
+                        <p style="color: #EF4444;">Error: ${error.message}</p>
+                        <p style="color: #94A3B8; font-size: 0.9rem;">Check console for details. Showing demo insights...</p>
                     </div>
                 `;
                 
@@ -5314,20 +5337,33 @@
         }
         
         function displayInsights(insights) {
-            // This will be populated when backend returns real data
             const insightsContent = document.getElementById('insightsContent');
+            
+            // Handle array wrapper (if backend returns [data] instead of data)
+            const insightsArray = Array.isArray(insights) ? insights : [insights];
+            
+            if (!insightsArray || insightsArray.length === 0) {
+                insightsContent.innerHTML = `
+                    <div class="insight-loading">
+                        <p style="color: #EF4444;">No insights generated. Please try again.</p>
+                    </div>
+                `;
+                return;
+            }
+            
             insightsContent.innerHTML = `
                 <div class="insights-grid">
-                    ${insights.map(insight => `
-                        <div class="insight-card">
+                    ${insightsArray.map(insight => `
+                        <div class="insight-card ${insight.priority === 'high' ? 'priority-high' : ''}">
                             <div class="insight-header">
                                 <div class="insight-icon" style="background: ${insight.iconColor}">
                                     ${insight.icon}
                                 </div>
                                 <div class="insight-title">${insight.title}</div>
+                                <div class="insight-category">${insight.category}</div>
                             </div>
                             <div class="insight-content">${insight.content}</div>
-                            ${insight.action ? `<div class="insight-action">${insight.action}</div>` : ''}
+                            <div class="insight-action">💡 ${insight.action}</div>
                         </div>
                     `).join('')}
                 </div>
