@@ -3513,9 +3513,12 @@
                 let matchesMonth = true;
                 
                 if (monthFilter && analysis) {
-                    const analysisDate = new Date(analysis.timestamp);
-                    const analysisMonthYear = analysisDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-                    matchesMonth = analysisMonthYear === monthFilter;
+                    const reportingPeriod = analysis.reportingPeriod; // e.g., "2025-06"
+                    const [year, month] = reportingPeriod.split('-');
+                    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                                       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                    const formattedPeriod = `${monthNames[parseInt(month) - 1]} ${year}`;
+                    matchesMonth = formattedPeriod === monthFilter;
                 }
                 
                 if (matchesSearch && matchesMonth) {
@@ -3526,50 +3529,33 @@
             });
         }
         
-        // Add month filter to populateHistoryList function
         function populateMonthFilter() {
             const savedAnalyses = getSavedAnalyses();
             const monthFilter = document.getElementById('monthFilter');
-            const months = new Set();
+            const periods = new Set();
             
             savedAnalyses.forEach(analysis => {
-                const date = new Date(analysis.timestamp);
-                const monthYear = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-                months.add(monthYear);
+                if (analysis.reportingPeriod) {
+                    const [year, month] = analysis.reportingPeriod.split('-');
+                    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                                       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                    const formattedPeriod = `${monthNames[parseInt(month) - 1]} ${year}`;
+                    periods.add(formattedPeriod);
+                }
             });
             
-            const sortedMonths = Array.from(months).sort((a, b) => new Date(b) - new Date(a));
+            const sortedPeriods = Array.from(periods).sort((a, b) => {
+                // Sort by year desc, then month desc
+                const [monthA, yearA] = a.split(' ');
+                const [monthB, yearB] = b.split(' ');
+                if (yearA !== yearB) return yearB - yearA;
+                const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                                   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                return monthNames.indexOf(monthB) - monthNames.indexOf(monthA);
+            });
             
-            monthFilter.innerHTML = '<option value="">All months</option>' + 
-                sortedMonths.map(month => `<option value="${month}">${month}</option>`).join('');
-        }
-
-        // PDF Export Functions
-        function exportReport(format) {
-            const exportScope = document.getElementById('exportScope').value;
-            const currentReport = getCurrentReportType();
-            
-            // Show loading state
-            const btn = event.target.closest('.export-btn');
-            btn.classList.add('loading');
-            
-            setTimeout(() => {
-                btn.classList.remove('loading');
-                
-                if (format === 'pdf') {
-                    if (exportScope === 'current') {
-                        generateCurrentReportPDF(currentReport);
-                    } else {
-                        generateAllReportsPDF();
-                    }
-                } else if (format === 'csv') {
-                    if (exportScope === 'current') {
-                        generateCurrentReportCSV(currentReport);
-                    } else {
-                        generateAllReportsCSV();
-                    }
-                }
-            }, 1000);
+            monthFilter.innerHTML = '<option value="">All periods</option>' + 
+                sortedPeriods.map(period => `<option value="${period}">${period}</option>`).join('');
         }
         
         function generateCurrentReportPDF(reportType) {
