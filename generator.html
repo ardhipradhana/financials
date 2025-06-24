@@ -2306,7 +2306,7 @@
             </div>
 
             <div class="action-bar">
-                <button class="btn btn-secondary" onclick="scrollToForms()">Generate New Report</button>
+                <button class="btn btn-secondary" onclick="resetWorkspace()">Generate New Report</button>
                 <button class="btn btn-primary">Analyze Creditworthiness →</button>
             </div>
             
@@ -2459,9 +2459,18 @@
         function showCard(card) {
             card.classList.remove('hidden');
             card.classList.add('active');
+            
+            // Smooth scroll to the newly shown card with proper timing
             setTimeout(() => {
-                card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }, 100);
+                const cardTop = card.offsetTop;
+                const navHeight = 70; // Height of the fixed navigation
+                const offset = navHeight + 20; // Extra spacing
+                
+                window.scrollTo({
+                    top: cardTop - offset,
+                    behavior: 'smooth'
+                });
+            }, 300); // Give the card time to fully render before scrolling
         }
 
         // Company info validation
@@ -3976,6 +3985,7 @@
         }
 
         function resetWorkspace() {
+            scrollToForms();
             // Reset form
             document.getElementById('companyName').value = '';
             document.getElementById('industry').value = '';
