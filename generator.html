@@ -3613,7 +3613,7 @@
             
             // COST OF GOODS SOLD SECTION
             const cogsItems = incomeData.expenses.filter(item => 
-                item.item.toLowerCase().includes('cost of goods') ||
+                item.item.toLowerCase().includes('cost of goods sold') ||
                 item.item.toLowerCase().includes('direct materials') ||
                 item.item.toLowerCase().includes('direct labor') ||
                 item.item.toLowerCase().includes('manufacturing overhead')
@@ -3628,11 +3628,17 @@
                 const totalCOGS = cogsItems.reduce((sum, item) => sum + item.amount, 0);
                 const grossProfit = netRevenue - totalCOGS;
                 html += addRowIfValue('Gross Profit', grossProfit, true);
+                
+                // Store for global use
+                window.calculatedGrossProfit = grossProfit;
+            } else {
+                // If no COGS found, gross profit equals net revenue
+                window.calculatedGrossProfit = netRevenue;
             }
             
             // OPERATING EXPENSES SECTION
             const operatingExpenses = incomeData.expenses.filter(item => 
-                !item.item.toLowerCase().includes('cost of goods') &&
+                !item.item.toLowerCase().includes('cost of goods sold') &&
                 !item.item.toLowerCase().includes('direct materials') &&
                 !item.item.toLowerCase().includes('direct labor') &&
                 !item.item.toLowerCase().includes('manufacturing overhead') &&
@@ -3652,9 +3658,12 @@
             // Calculate EBITDA
             const totalOperatingExpenses = operatingExpenses.reduce((sum, item) => sum + item.amount, 0);
             const totalCOGS = cogsItems.reduce((sum, item) => sum + item.amount, 0);
-            const grossProfitForEBITDA = totalCOGS > 0 ? (netRevenue - totalCOGS) : netRevenue;
-            const ebitda = grossProfitForEBITDA - totalOperatingExpenses;
+            const grossProfit = window.calculatedGrossProfit || netRevenue;
+            const ebitda = grossProfit - totalOperatingExpenses;
             html += addRowIfValue('EBITDA', ebitda, true);
+            
+            // Store for global use
+            window.calculatedEBITDA = ebitda;
             
             // DEPRECIATION & AMORTIZATION
             const depreciationItems = incomeData.expenses.filter(item => 
