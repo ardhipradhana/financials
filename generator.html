@@ -2263,6 +2263,113 @@
                 font-size: 0.8rem;
             }
         }
+
+        /* Export Modal */
+        .export-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .export-modal.hidden {
+            display: none;
+        }
+        
+        .export-modal-backdrop {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(4px);
+        }
+        
+        .export-modal-content {
+            position: relative;
+            background: linear-gradient(145deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95));
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 16px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.3);
+        }
+        
+        .export-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 24px;
+            border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+        }
+        
+        .export-header h3 {
+            color: #F8FAFC;
+            font-size: 1.5rem;
+            margin: 0;
+        }
+        
+        .export-body {
+            padding: 24px;
+        }
+        
+        .export-section h4 {
+            color: #F8FAFC;
+            margin-bottom: 16px;
+            font-size: 1.1rem;
+        }
+        
+        .export-checkboxes {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+        
+        .export-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid rgba(59, 130, 246, 0.1);
+        }
+        
+        .export-checkbox:hover {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+        
+        .export-checkbox input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #3B82F6;
+        }
+        
+        .checkbox-text {
+            color: #CBD5E1;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+        
+        .export-checkbox:hover .checkbox-text {
+            color: #F8FAFC;
+        }
+        
+        .export-actions-modal {
+            display: flex;
+            justify-content: space-between;
+            padding: 24px;
+            border-top: 1px solid rgba(59, 130, 246, 0.1);
+        }
         
     </style>
 </head>
@@ -2831,10 +2938,10 @@
                 </div>
             </div>
 
-            <!-- Export Toolbar -->
+            <!-- Clean Export Toolbar -->
             <div class="export-toolbar">
                 <div class="export-actions">
-                    <button class="btn btn-secondary export-btn" onclick="exportSelectedReports('pdf')" id="exportPdfBtn">
+                    <button class="btn btn-secondary export-btn" onclick="showExportModal('pdf')" id="exportPdfBtn">
                         <span class="export-icon">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -2846,7 +2953,7 @@
                         </span>
                         Export to PDF
                     </button>
-                    <button class="btn btn-secondary export-btn" onclick="exportSelectedReports('csv')" id="exportCsvBtn">
+                    <button class="btn btn-secondary export-btn" onclick="showExportModal('csv')" id="exportCsvBtn">
                         <span class="export-icon">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -2859,30 +2966,6 @@
                     </button>
                 </div>
                 <div class="export-options">
-                    <div class="export-sections">
-                        <div class="export-checkboxes">
-                            <label class="export-checkbox">
-                                <input type="checkbox" id="exportIncome" checked>
-                                <span class="checkbox-text">Income Statement</span>
-                            </label>
-                            <label class="export-checkbox">
-                                <input type="checkbox" id="exportBalance" checked>
-                                <span class="checkbox-text">Balance Sheet</span>
-                            </label>
-                            <label class="export-checkbox">
-                                <input type="checkbox" id="exportCashflow" checked>
-                                <span class="checkbox-text">Cash Flow</span>
-                            </label>
-                            <label class="export-checkbox">
-                                <input type="checkbox" id="exportRatios" checked>
-                                <span class="checkbox-text">Ratios</span>
-                            </label>
-                            <label class="export-checkbox">
-                                <input type="checkbox" id="exportInsights">
-                                <span class="checkbox-text">Insights</span>
-                            </label>
-                        </div>
-                    </div>
                     <select class="export-select" id="currencySelect" onchange="changeCurrency()">
                         <option value="IDR">Indonesian Rupiah (Rp)</option>
                         <option value="USD">US Dollar ($)</option>
@@ -4695,7 +4778,7 @@
             doc.setFontSize(8);
             doc.setTextColor(100, 100, 100);
             doc.text(`Generated on ${new Date().toLocaleDateString()}`, 20, pageHeight - 10);
-            doc.text('MontPro Financier - montpro.app', 150, pageHeight - 10);
+            doc.text('MontPro Financier - financier.montpro.xyz', 150, pageHeight - 10);
         }
         
         function generateIncomeStatementPDF(doc, startY, currency) {
@@ -5709,6 +5792,51 @@
             return insights;
         }
 
+        let currentExportFormat = 'pdf';
+
+        function showExportModal(format) {
+            currentExportFormat = format;
+            document.getElementById('exportModalTitle').textContent = `Export to ${format.toUpperCase()}`;
+            document.getElementById('executeExportBtn').textContent = `Export to ${format.toUpperCase()}`;
+            document.getElementById('exportModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeExportModal() {
+            document.getElementById('exportModal').classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+        
+        function executeExport() {
+            const selectedReports = {
+                income: document.getElementById('modalExportIncome').checked,
+                balance: document.getElementById('modalExportBalance').checked,
+                cashflow: document.getElementById('modalExportCashflow').checked,
+                ratios: document.getElementById('modalExportRatios').checked,
+                insights: document.getElementById('modalExportInsights').checked
+            };
+            
+            // Check if at least one report is selected
+            const hasSelection = Object.values(selectedReports).some(selected => selected);
+            if (!hasSelection) {
+                alert('Please select at least one report to export.');
+                return;
+            }
+            
+            // Close modal and export
+            closeExportModal();
+            
+            // Use your existing export logic
+            const companyName = document.getElementById('companyName').value;
+            const timestamp = getCurrentDateString();
+            
+            if (currentExportFormat === 'pdf') {
+                generateSelectedPDF(selectedReports, companyName, timestamp);
+            } else if (currentExportFormat === 'csv') {
+                generateSelectedCSV(selectedReports, companyName, timestamp);
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             const searchInput = document.getElementById('historySearch');
             const monthFilter = document.getElementById('monthFilter');
@@ -5753,6 +5881,50 @@
         <div class="history-actions">
             <button class="btn btn-secondary" onclick="clearAllAnalyses()">Clear All History</button>
             <button class="btn btn-secondary" onclick="closeHistoryModal()">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- Export Selection Modal -->
+<div class="export-modal hidden" id="exportModal">
+    <div class="export-modal-backdrop" onclick="closeExportModal()"></div>
+    <div class="export-modal-content">
+        <div class="export-header">
+            <h3 id="exportModalTitle">Export to PDF</h3>
+            <button class="close-btn" onclick="closeExportModal()">×</button>
+        </div>
+        
+        <div class="export-body">
+            <div class="export-section">
+                <h4>Select Reports to Include:</h4>
+                <div class="export-checkboxes">
+                    <label class="export-checkbox">
+                        <input type="checkbox" id="modalExportIncome" checked>
+                        <span class="checkbox-text">Income Statement</span>
+                    </label>
+                    <label class="export-checkbox">
+                        <input type="checkbox" id="modalExportBalance" checked>
+                        <span class="checkbox-text">Balance Sheet</span>
+                    </label>
+                    <label class="export-checkbox">
+                        <input type="checkbox" id="modalExportCashflow" checked>
+                        <span class="checkbox-text">Cash Flow Statement</span>
+                    </label>
+                    <label class="export-checkbox">
+                        <input type="checkbox" id="modalExportRatios" checked>
+                        <span class="checkbox-text">Financial Ratios</span>
+                    </label>
+                    <label class="export-checkbox">
+                        <input type="checkbox" id="modalExportInsights">
+                        <span class="checkbox-text">Financial Insights</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+        
+        <div class="export-actions-modal">
+            <button class="btn btn-secondary" onclick="closeExportModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="executeExport()" id="executeExportBtn">Export Selected Reports</button>
         </div>
     </div>
 </div>
