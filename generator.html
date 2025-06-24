@@ -2476,9 +2476,7 @@
                                 <div class="ratio-category-icon">📈</div>
                                 <h5>Profitability Ratios</h5>
                             </div>
-                            <div class="ratio-items" id="profitabilityRatios">
-                                <!-- Ratios will be populated here -->
-                            </div>
+                            <div class="ratio-items" id="profitabilityRatios"></div>
                         </div>
                         
                         <!-- Liquidity Ratios -->
@@ -2487,42 +2485,43 @@
                                 <div class="ratio-category-icon">💧</div>
                                 <h5>Liquidity Ratios</h5>
                             </div>
-                            <div class="ratio-items" id="liquidityRatios">
-                                <!-- Ratios will be populated here -->
-                            </div>
+                            <div class="ratio-items" id="liquidityRatios"></div>
                         </div>
                         
-                        <!-- Solvency Ratios -->
+                        <!-- Solvency & Leverage Ratios -->
                         <div class="ratio-category-card">
                             <div class="ratio-category-header">
                                 <div class="ratio-category-icon">🏦</div>
-                                <h5>Solvency Ratios</h5>
+                                <h5>Solvency & Leverage</h5>
                             </div>
-                            <div class="ratio-items" id="solvencyRatios">
-                                <!-- Ratios will be populated here -->
-                            </div>
+                            <div class="ratio-items" id="solvencyRatios"></div>
                         </div>
                         
-                        <!-- Efficiency Ratios -->
+                        <!-- Efficiency & Activity Ratios -->
                         <div class="ratio-category-card">
                             <div class="ratio-category-header">
                                 <div class="ratio-category-icon">⚡</div>
-                                <h5>Efficiency Ratios</h5>
+                                <h5>Efficiency & Activity</h5>
                             </div>
-                            <div class="ratio-items" id="efficiencyRatios">
-                                <!-- Ratios will be populated here -->
-                            </div>
+                            <div class="ratio-items" id="efficiencyRatios"></div>
                         </div>
                         
-                        <!-- Cash Flow Ratios -->
+                        <!-- Cash Flow & Coverage Ratios -->
                         <div class="ratio-category-card">
                             <div class="ratio-category-header">
                                 <div class="ratio-category-icon">💰</div>
-                                <h5>Cash Flow Ratios</h5>
+                                <h5>Cash Flow & Coverage</h5>
                             </div>
-                            <div class="ratio-items" id="cashflowRatios">
-                                <!-- Ratios will be populated here -->
+                            <div class="ratio-items" id="cashflowRatios"></div>
+                        </div>
+                        
+                        <!-- Market & Valuation Ratios -->
+                        <div class="ratio-category-card">
+                            <div class="ratio-category-header">
+                                <div class="ratio-category-icon">📊</div>
+                                <h5>Market & Valuation</h5>
                             </div>
+                            <div class="ratio-items" id="marketRatios"></div>
                         </div>
                     </div>
                 </div>
@@ -3568,7 +3567,6 @@
         }
 
         function populateFinancialRatios(financialData) {
-            // Extract data from financial statements
             const income = financialData.incomeStatement;
             const balance = financialData.balanceSheet;
             const cashFlow = financialData.cashFlow;
@@ -3576,6 +3574,7 @@
             // Calculate key totals
             const revenue = income.revenue.reduce((sum, item) => sum + item.amount, 0);
             const netIncome = window.calculatedNetIncome || 0;
+            const ebit = window.calculatedOperatingProfit || 0;
             const totalAssets = balance.assets.reduce((sum, item) => sum + item.amount, 0);
             const totalLiabilities = balance.liabilities.reduce((sum, item) => sum + item.amount, 0);
             const totalEquity = balance.equity.reduce((sum, item) => sum + item.amount, 0);
@@ -3585,15 +3584,19 @@
             const currentLiabilities = getCurrentLiabilities(balance.liabilities);
             const inventory = getItemAmount(balance.assets, ['inventory']);
             const cash = getItemAmount(balance.assets, ['cash']);
+            const accountsReceivable = getItemAmount(balance.assets, ['accounts receivable', 'receivable']);
+            const interestExpense = getItemAmount(income.expenses, ['interest expense', 'interest']);
+            const cogs = getItemAmount(income.expenses, ['cost of goods sold', 'cogs']);
             const operatingCashFlow = cashFlow.operating.reduce((sum, item) => sum + item.amount, 0);
             
             // Calculate ratios by category
             const ratios = {
                 profitability: calculateProfitabilityRatios(revenue, netIncome, totalAssets, totalEquity),
                 liquidity: calculateLiquidityRatios(currentAssets, currentLiabilities, inventory, cash),
-                solvency: calculateSolvencyRatios(totalLiabilities, totalAssets, totalEquity),
-                efficiency: calculateEfficiencyRatios(revenue, totalAssets),
-                cashflow: calculateCashFlowRatios(operatingCashFlow, currentLiabilities, totalLiabilities)
+                solvency: calculateSolvencyRatios(totalLiabilities, totalAssets, totalEquity, ebit, interestExpense),
+                efficiency: calculateEfficiencyRatios(revenue, totalAssets, accountsReceivable, inventory, cogs),
+                cashflow: calculateCashFlowRatios(operatingCashFlow, currentLiabilities, totalLiabilities, ebit, interestExpense),
+                market: calculateMarketRatios(revenue, totalAssets, totalEquity, netIncome)
             };
             
             // Populate each category
@@ -3602,6 +3605,7 @@
             populateRatioCategory('solvencyRatios', ratios.solvency);
             populateRatioCategory('efficiencyRatios', ratios.efficiency);
             populateRatioCategory('cashflowRatios', ratios.cashflow);
+            populateRatioCategory('marketRatios', ratios.market);
         }
 
         // Helper functions to extract specific data
@@ -3703,14 +3707,14 @@
             ];
         }
         
-        function calculateSolvencyRatios(totalLiabilities, totalAssets, totalEquity) {
+        function calculateSolvencyRatios(totalLiabilities, totalAssets, totalEquity, ebit, interestExpense) {
             return [
                 {
                     name: 'Debt-to-Equity',
                     value: totalEquity > 0 ? (totalLiabilities / totalEquity) : 0,
                     format: 'ratio',
                     benchmark: { excellent: 0.3, good: 0.6, poor: 1.0 },
-                    reverse: true // Lower is better
+                    reverse: true
                 },
                 {
                     name: 'Debt-to-Assets',
@@ -3724,22 +3728,55 @@
                     value: totalAssets > 0 ? ((totalEquity / totalAssets) * 100) : 0,
                     format: 'percentage',
                     benchmark: { excellent: 70, good: 50, poor: 30 }
+                },
+                {
+                    name: 'Times Interest Earned',
+                    value: interestExpense > 0 ? (ebit / interestExpense) : 0,
+                    format: 'ratio',
+                    benchmark: { excellent: 5.0, good: 2.5, poor: 1.5 }
                 }
             ];
         }
         
-        function calculateEfficiencyRatios(revenue, totalAssets) {
+        // Updated Efficiency & Activity Ratios (expanded)
+        function calculateEfficiencyRatios(revenue, totalAssets, accountsReceivable, inventory, cogs) {
+            const receivablesTurnover = accountsReceivable > 0 ? (revenue / accountsReceivable) : 0;
+            const inventoryTurnover = inventory > 0 ? (cogs / inventory) : 0;
+            const daysSalesOutstanding = receivablesTurnover > 0 ? (365 / receivablesTurnover) : 0;
+            
             return [
                 {
                     name: 'Asset Turnover',
                     value: totalAssets > 0 ? (revenue / totalAssets) : 0,
                     format: 'ratio',
                     benchmark: { excellent: 1.5, good: 1.0, poor: 0.5 }
+                },
+                {
+                    name: 'Receivables Turnover',
+                    value: receivablesTurnover,
+                    format: 'ratio',
+                    benchmark: { excellent: 12, good: 8, poor: 4 }
+                },
+                {
+                    name: 'Inventory Turnover',
+                    value: inventoryTurnover,
+                    format: 'ratio',
+                    benchmark: { excellent: 8, good: 5, poor: 2 }
+                },
+                {
+                    name: 'Days Sales Outstanding',
+                    value: daysSalesOutstanding,
+                    format: 'days',
+                    benchmark: { excellent: 30, good: 45, poor: 60 },
+                    reverse: true
                 }
             ];
         }
         
-        function calculateCashFlowRatios(operatingCashFlow, currentLiabilities, totalLiabilities) {
+        // Updated Cash Flow & Coverage Ratios (expanded)
+        function calculateCashFlowRatios(operatingCashFlow, currentLiabilities, totalLiabilities, ebit, interestExpense) {
+            const cashCoverage = ebit > 0 ? ((ebit + operatingCashFlow) / interestExpense) : 0;
+            
             return [
                 {
                     name: 'Operating Cash Flow Ratio',
@@ -3752,6 +3789,38 @@
                     value: totalLiabilities > 0 ? (operatingCashFlow / totalLiabilities) : 0,
                     format: 'ratio',
                     benchmark: { excellent: 0.3, good: 0.15, poor: 0.05 }
+                },
+                {
+                    name: 'Cash to Debt',
+                    value: interestExpense > 0 ? cashCoverage : 0,
+                    format: 'ratio',
+                    benchmark: { excellent: 3.0, good: 1.5, poor: 1.0 }
+                }
+            ];
+        }
+        
+        // New Market & Valuation Ratios
+        function calculateMarketRatios(revenue, totalAssets, totalEquity, netIncome) {
+            return [
+                {
+                    name: 'Asset Intensity',
+                    value: revenue > 0 ? (totalAssets / revenue) : 0,
+                    format: 'ratio',
+                    benchmark: { excellent: 0.5, good: 1.0, poor: 2.0 },
+                    reverse: true
+                },
+                {
+                    name: 'Capital Efficiency',
+                    value: totalEquity > 0 ? (revenue / totalEquity) : 0,
+                    format: 'ratio',
+                    benchmark: { excellent: 3.0, good: 2.0, poor: 1.0 }
+                },
+                {
+                    name: 'Equity Multiplier',
+                    value: totalEquity > 0 ? (totalAssets / totalEquity) : 0,
+                    format: 'ratio',
+                    benchmark: { excellent: 1.5, good: 2.0, poor: 3.0 },
+                    reverse: true
                 }
             ];
         }
@@ -3803,6 +3872,8 @@
                     return `${value.toFixed(2)}x`;
                 case 'currency':
                     return formatCurrency(value);
+                case 'days':
+                    return `${value.toFixed(0)} days`;
                 default:
                     return value.toFixed(2);
             }
