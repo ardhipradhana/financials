@@ -2119,6 +2119,70 @@
             font-size: 0.9rem;
             font-weight: 500;
         }
+
+        /* Insights Trigger Styling */
+        .insights-trigger {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 40px;
+            text-align: center;
+            min-height: 300px;
+        }
+        
+        .trigger-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin-bottom: 24px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .insights-trigger h3 {
+            color: #F8FAFC;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+        
+        .insights-trigger p {
+            color: #94A3B8;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            max-width: 400px;
+            margin-bottom: 32px;
+        }
+        
+        .btn-generate-insights {
+            background: linear-gradient(135deg, #1E40AF, #60A5FA);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+        }
+        
+        .btn-generate-insights:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(59, 130, 246, 0.4);
+        }
+        
+        .btn-generate-insights:active {
+            transform: translateY(-1px);
+        }
         
     </style>
 </head>
@@ -2668,9 +2732,20 @@
                     </div>
                     
                     <div class="insights-content" id="insightsContent">
-                        <div class="insight-loading">
-                            <div class="loading-spinner"></div>
-                            <p>Generating your personalized insights...</p>
+                        <div class="insights-trigger">
+                            <div class="trigger-icon">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+                                </svg>
+                            </div>
+                            <h3>Generate AI Insights</h3>
+                            <p>Get personalized financial insights and actionable recommendations based on your statements</p>
+                            <button class="btn-generate-insights" onclick="generateInsights()">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polygon points="13,2 3,14 12,14 11,22 21,10 12,10"/>
+                                </svg>
+                                <span>Generate Insights</span>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -4192,6 +4267,8 @@
             
             // Activate clicked tab
             event.target.classList.add('active');
+            
+            // No auto-generation - user clicks button manually
         }
 
         // Storage Management System
