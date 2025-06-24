@@ -3631,6 +3631,7 @@
             const inventory = getItemAmount(balance.assets, ['inventory']);
             const cash = getItemAmount(balance.assets, ['cash']);
             const accountsReceivable = getItemAmount(balance.assets, ['accounts receivable', 'receivable']);
+            const accountsPayable = getItemAmount(balance.liabilities, ['accounts payable', 'payable']);
             const interestExpense = getItemAmount(income.expenses, ['interest expense', 'interest']);
             const cogs = getItemAmount(income.expenses, ['cost of goods sold', 'cogs']);
             const operatingCashFlow = cashFlow.operating.reduce((sum, item) => sum + item.amount, 0);
@@ -3638,7 +3639,7 @@
             // Calculate ratios by category
             const ratios = {
                 profitability: calculateProfitabilityRatios(revenue, netIncome, totalAssets, totalEquity),
-                liquidity: calculateLiquidityRatios(currentAssets, currentLiabilities, inventory, cash, accountsReceivable, cogs, revenue),
+                liquidity: calculateLiquidityRatios(currentAssets, currentLiabilities, inventory, cash, accountsReceivable, cogs, revenue, accountsPayable),
                 solvency: calculateSolvencyRatios(totalLiabilities, totalAssets, totalEquity, ebit, interestExpense),
                 efficiency: calculateEfficiencyRatios(revenue, totalAssets, accountsReceivable, inventory, cogs),
                 cashflow: calculateCashFlowRatios(operatingCashFlow, currentLiabilities, totalLiabilities, ebit, interestExpense),
@@ -3722,14 +3723,21 @@
             ];
         }
         
-        function calculateLiquidityRatios(currentAssets, currentLiabilities, inventory, cash, accountsReceivable, cogs, revenue) {
+        function calculateLiquidityRatios(currentAssets, currentLiabilities, inventory, cash, accountsReceivable, cogs, revenue, accountsPayable) {
             const workingCapital = currentAssets - currentLiabilities;
             
             // Calculate Cash Conversion Cycle components
             const daysInventoryOutstanding = inventory > 0 && cogs > 0 ? (inventory / cogs) * 365 : 0;
             const daysSalesOutstanding = accountsReceivable > 0 && revenue > 0 ? (accountsReceivable / revenue) * 365 : 0;
-            const daysPayableOutstanding = 30; // Approximate since we don't have detailed payables turnover
-            const cashConversionCycle = daysInventoryOutstanding + daysSalesOutstanding - daysPayableOutstanding;
+            
+            // Calculate Days Payable Outstanding properly
+            const daysPayableOutstanding = accountsPayable > 0 && cogs > 0 ? (accountsPayable / cogs) * 365 : null;
+            
+            // Cash Conversion Cycle - only calculate if we have all components
+            let cashConversionCycle = null;
+            if (daysPayableOutstanding !== null && (daysInventoryOutstanding > 0 || daysSalesOutstanding > 0)) {
+                cashConversionCycle = daysInventoryOutstanding + daysSalesOutstanding - daysPayableOutstanding;
+            }
             
             return [
                 {
@@ -3924,6 +3932,10 @@
         }
         
         function formatRatioValue(value, format) {
+            if (value === null || value === undefined) {
+                return 'N/A';
+            }
+            
             switch (format) {
                 case 'percentage':
                     return `${value.toFixed(1)}%`;
