@@ -5339,10 +5339,8 @@
         function displayInsights(insights) {
             const insightsContent = document.getElementById('insightsContent');
             
-            // Handle array wrapper (if backend returns [data] instead of data)
-            const insightsArray = Array.isArray(insights) ? insights : [insights];
-            
-            if (!insightsArray || insightsArray.length === 0) {
+            // The backend already returns an array, so use it directly
+            if (!insights || insights.length === 0) {
                 insightsContent.innerHTML = `
                     <div class="insight-loading">
                         <p style="color: #EF4444;">No insights generated. Please try again.</p>
@@ -5353,7 +5351,7 @@
             
             insightsContent.innerHTML = `
                 <div class="insights-grid">
-                    ${insightsArray.map(insight => `
+                    ${insights.map(insight => `
                         <div class="insight-card ${insight.priority === 'high' ? 'priority-high' : ''}">
                             <div class="insight-header">
                                 <div class="insight-icon" style="background: ${insight.iconColor}">
