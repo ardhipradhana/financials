@@ -1515,40 +1515,6 @@
             animation: pulseRing 2s ease-out infinite 0.5s;
         }
         
-        /* Floating Data Particles */
-        .data-particle {
-            position: absolute;
-            width: 8px;
-            height: 8px;
-            background: linear-gradient(135deg, #10B981, #059669);
-            border-radius: 50%;
-            opacity: 0;
-        }
-        
-        .particle-1 {
-            top: 10px;
-            left: 50%;
-            animation: particleFloat1 4s ease-in-out infinite;
-        }
-        
-        .particle-2 {
-            top: 50%;
-            right: 10px;
-            animation: particleFloat2 4s ease-in-out infinite 1s;
-        }
-        
-        .particle-3 {
-            bottom: 10px;
-            left: 50%;
-            animation: particleFloat3 4s ease-in-out infinite 2s;
-        }
-        
-        .particle-4 {
-            top: 50%;
-            left: 10px;
-            animation: particleFloat4 4s ease-in-out infinite 3s;
-        }
-        
         /* Status Text */
         .processing-status-modern {
             margin-bottom: 32px;
@@ -1644,34 +1610,6 @@
         @keyframes segmentGlow {
             0% { box-shadow: 0 0 8px rgba(59, 130, 246, 0.5); }
             100% { box-shadow: 0 0 16px rgba(59, 130, 246, 0.8), 0 0 24px rgba(59, 130, 246, 0.3); }
-        }
-        
-        @keyframes particleFloat1 {
-            0%, 100% { opacity: 0; transform: translateY(0px) scale(1); }
-            25% { opacity: 1; transform: translateY(-20px) scale(1.2); }
-            50% { opacity: 0.7; transform: translateY(-30px) scale(0.8); }
-            75% { opacity: 0.3; transform: translateY(-40px) scale(0.6); }
-        }
-        
-        @keyframes particleFloat2 {
-            0%, 100% { opacity: 0; transform: translateX(0px) scale(1); }
-            25% { opacity: 1; transform: translateX(20px) scale(1.2); }
-            50% { opacity: 0.7; transform: translateX(30px) scale(0.8); }
-            75% { opacity: 0.3; transform: translateX(40px) scale(0.6); }
-        }
-        
-        @keyframes particleFloat3 {
-            0%, 100% { opacity: 0; transform: translateY(0px) scale(1); }
-            25% { opacity: 1; transform: translateY(20px) scale(1.2); }
-            50% { opacity: 0.7; transform: translateY(30px) scale(0.8); }
-            75% { opacity: 0.3; transform: translateY(40px) scale(0.6); }
-        }
-        
-        @keyframes particleFloat4 {
-            0%, 100% { opacity: 0; transform: translateX(0px) scale(1); }
-            25% { opacity: 1; transform: translateX(-20px) scale(1.2); }
-            50% { opacity: 0.7; transform: translateX(-30px) scale(0.8); }
-            75% { opacity: 0.3; transform: translateX(-40px) scale(0.6); }
         }
 
         .security-notice {
@@ -2069,12 +2007,6 @@
                             <div class="pulse-ring"></div>
                             <div class="pulse-ring-2"></div>
                         </div>
-                        
-                        <!-- Floating Data Particles -->
-                        <div class="data-particle particle-1"></div>
-                        <div class="data-particle particle-2"></div>
-                        <div class="data-particle particle-3"></div>
-                        <div class="data-particle particle-4"></div>
                     </div>
                     
                     <!-- Status Display -->
@@ -3170,35 +3102,44 @@
                 {
                     title: "Parsing Bank Statements...",
                     subtitle: "Extracting transaction data with OCR technology",
-                    duration: 18000 // 18 seconds
+                    duration: 18000, // 18 seconds
+                    startPercent: 0,
+                    endPercent: 25
                 },
                 {
                     title: "Applying AI Classification...",
-                    subtitle: "Categorizing transactions using machine learning",
-                    duration: 22000 // 22 seconds
+                    subtitle: "Categorizing transactions using machine learning", 
+                    duration: 22000, // 22 seconds
+                    startPercent: 25,
+                    endPercent: 50
                 },
                 {
                     title: "Generating Financial Statements...",
                     subtitle: "Building comprehensive reports and calculations",
-                    duration: 12000 // 12 seconds
+                    duration: 12000, // 12 seconds
+                    startPercent: 50,
+                    endPercent: 75
                 },
                 {
                     title: "Finalizing Executive Reports...",
                     subtitle: "Applying finishing touches and validations",
-                    duration: 8000 // 8 seconds
+                    duration: 8000, // 8 seconds
+                    startPercent: 75,
+                    endPercent: 100
                 }
             ];
             
             let currentPhase = 0;
-            let overallProgress = 0;
             
             function updatePhase() {
                 if (currentPhase < phases.length) {
-                    // Update text
-                    titleEl.textContent = phases[currentPhase].title;
-                    subtitleEl.textContent = phases[currentPhase].subtitle;
+                    const phase = phases[currentPhase];
                     
-                    // Activate segment
+                    // Update text immediately
+                    titleEl.textContent = phase.title;
+                    subtitleEl.textContent = phase.subtitle;
+                    
+                    // Activate current segment
                     segments[currentPhase].classList.add('active');
                     
                     // Complete previous segments
@@ -3207,15 +3148,22 @@
                         segments[i].classList.add('completed');
                     }
                     
-                    // Update progress
-                    const phaseProgress = (currentPhase + 1) * 25;
-                    percentEl.textContent = `${phaseProgress}%`;
+                    // Smooth progress animation within this phase
+                    let progress = phase.startPercent;
+                    const increment = (phase.endPercent - phase.startPercent) / (phase.duration / 100);
                     
-                    // Schedule next phase
-                    setTimeout(() => {
-                        currentPhase++;
-                        updatePhase();
-                    }, phases[currentPhase].duration);
+                    const progressInterval = setInterval(() => {
+                        progress += increment;
+                        if (progress >= phase.endPercent) {
+                            progress = phase.endPercent;
+                            clearInterval(progressInterval);
+                            
+                            // Move to next phase after completing this one
+                            currentPhase++;
+                            setTimeout(updatePhase, 200);
+                        }
+                        percentEl.textContent = `${Math.round(progress)}%`;
+                    }, 100);
                 }
             }
             
