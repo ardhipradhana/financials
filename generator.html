@@ -917,11 +917,12 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(15, 23, 42, 0.6);
+            background: linear-gradient(145deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9));
             border: 1px solid rgba(59, 130, 246, 0.2);
-            border-radius: 8px;
-            padding: 16px 20px;
+            border-radius: 12px;
+            padding: 20px 24px;
             margin-bottom: 24px;
+            backdrop-filter: blur(20px);
         }
         
         .export-actions {
@@ -944,7 +945,7 @@
         .export-options {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 24px;
         }
         
         .export-select {
@@ -978,12 +979,6 @@
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin-left: 8px;
-        }
-
-        .export-options {
-            display: flex;
-            align-items: center;
-            gap: 16px;
         }
         
         @media (max-width: 768px) {
@@ -2198,34 +2193,74 @@
         
         .export-checkboxes {
             display: flex;
-            gap: 16px;
-            flex-wrap: wrap;
+            gap: 20px;
+            align-items: center;
         }
         
         .export-checkbox {
             display: flex;
             align-items: center;
-            gap: 6px;
-            color: #CBD5E1;
-            font-size: 0.85rem;
+            gap: 8px;
             cursor: pointer;
             user-select: none;
+            transition: all 0.2s ease;
+            padding: 6px 12px;
+            border-radius: 8px;
+            border: 1px solid transparent;
+        }
+
+        .checkbox-text {
+            color: #CBD5E1;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        @media (max-width: 1024px) {
+            .export-toolbar {
+                flex-direction: column;
+                gap: 20px;
+                align-items: stretch;
+            }
+            
+            .export-options {
+                flex-direction: column;
+                gap: 16px;
+                align-items: stretch;
+            }
+            
+            .export-checkboxes {
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 12px;
+            }
+        }
+
+        .export-checkbox:hover .checkbox-text {
+            color: #F8FAFC;
         }
         
         .export-checkbox input[type="checkbox"] {
-            width: 14px;
-            height: 14px;
+            width: 16px;
+            height: 16px;
             accent-color: #3B82F6;
+            cursor: pointer;
         }
         
         .export-checkbox:hover {
-            color: #F8FAFC;
+            background: rgba(59, 130, 246, 0.1);
+            border-color: rgba(59, 130, 246, 0.3);
         }
         
         @media (max-width: 768px) {
             .export-checkboxes {
                 grid-template-columns: repeat(2, 1fr);
                 gap: 8px;
+            }
+            
+            .checkbox-text {
+                font-size: 0.8rem;
             }
         }
         
@@ -2825,27 +2860,26 @@
                 </div>
                 <div class="export-options">
                     <div class="export-sections">
-                        <label class="export-section-label">Include Reports:</label>
                         <div class="export-checkboxes">
                             <label class="export-checkbox">
                                 <input type="checkbox" id="exportIncome" checked>
-                                <span>Income Statement</span>
+                                <span class="checkbox-text">Income Statement</span>
                             </label>
                             <label class="export-checkbox">
                                 <input type="checkbox" id="exportBalance" checked>
-                                <span>Balance Sheet</span>
+                                <span class="checkbox-text">Balance Sheet</span>
                             </label>
                             <label class="export-checkbox">
                                 <input type="checkbox" id="exportCashflow" checked>
-                                <span>Cash Flow Statement</span>
+                                <span class="checkbox-text">Cash Flow</span>
                             </label>
                             <label class="export-checkbox">
                                 <input type="checkbox" id="exportRatios" checked>
-                                <span>Financial Ratios</span>
+                                <span class="checkbox-text">Ratios</span>
                             </label>
                             <label class="export-checkbox">
                                 <input type="checkbox" id="exportInsights">
-                                <span>Insights</span>
+                                <span class="checkbox-text">Insights</span>
                             </label>
                         </div>
                     </div>
@@ -5508,11 +5542,20 @@
             doc.text('Financial Ratios Analysis', 20, startY);
             
             let yPos = startY + 15;
+            const pageHeight = doc.internal.pageSize.height;
+            const maxY = pageHeight - 40; // Leave space for footer
             
-            // Get ratios data (you'll need to extract this from your existing ratios display)
+            // Get ratios data
             const ratiosData = extractRatiosData();
             
             Object.keys(ratiosData).forEach(category => {
+                // Check if we need a new page
+                if (yPos > maxY - 60) { // 60px needed for category + some ratios
+                    doc.addPage();
+                    addPDFHeader(doc, document.getElementById('companyName').value, formatReportingPeriod(document.getElementById('reportingPeriod').value));
+                    yPos = 60;
+                }
+                
                 // Category header
                 doc.setFontSize(12);
                 doc.setFont('helvetica', 'bold');
@@ -5522,6 +5565,13 @@
                 // Ratios in this category
                 doc.setFont('helvetica', 'normal');
                 ratiosData[category].forEach(ratio => {
+                    // Check if we need a new page for individual ratios
+                    if (yPos > maxY - 20) {
+                        doc.addPage();
+                        addPDFHeader(doc, document.getElementById('companyName').value, formatReportingPeriod(document.getElementById('reportingPeriod').value));
+                        yPos = 60;
+                    }
+                    
                     doc.text(`  ${ratio.name}`, 25, yPos);
                     doc.text(ratio.formattedValue, 150, yPos, { align: 'right' });
                     yPos += 6;
@@ -5538,11 +5588,21 @@
             doc.text('Financial Insights', 20, startY);
             
             let yPos = startY + 15;
+            const pageHeight = doc.internal.pageSize.height;
+            const maxY = pageHeight - 40; // Leave space for footer
             
-            // Get insights data from the current display
+            // Get insights data
             const insights = extractInsightsData();
             
             insights.forEach(insight => {
+                // Check if we need a new page for this insight
+                const estimatedHeight = 80; // Rough estimate for insight block
+                if (yPos > maxY - estimatedHeight) {
+                    doc.addPage();
+                    addPDFHeader(doc, document.getElementById('companyName').value, formatReportingPeriod(document.getElementById('reportingPeriod').value));
+                    yPos = 60;
+                }
+                
                 // Category and Title
                 doc.setFontSize(12);
                 doc.setFont('helvetica', 'bold');
@@ -5553,6 +5613,12 @@
                 doc.setFont('helvetica', 'normal');
                 const contentLines = doc.splitTextToSize(insight.content, 170);
                 contentLines.forEach(line => {
+                    // Check for page break on each line
+                    if (yPos > maxY - 15) {
+                        doc.addPage();
+                        addPDFHeader(doc, document.getElementById('companyName').value, formatReportingPeriod(document.getElementById('reportingPeriod').value));
+                        yPos = 60;
+                    }
                     doc.text(line, 25, yPos);
                     yPos += 6;
                 });
@@ -5562,6 +5628,11 @@
                 doc.setFont('helvetica', 'italic');
                 const actionLines = doc.splitTextToSize(`Action: ${insight.action}`, 170);
                 actionLines.forEach(line => {
+                    if (yPos > maxY - 15) {
+                        doc.addPage();
+                        addPDFHeader(doc, document.getElementById('companyName').value, formatReportingPeriod(document.getElementById('reportingPeriod').value));
+                        yPos = 60;
+                    }
                     doc.text(line, 25, yPos);
                     yPos += 6;
                 });
