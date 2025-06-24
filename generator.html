@@ -3602,12 +3602,10 @@
                 html += addRowIfValue(item.item, item.amount, false, false, true);
             });
             
-            // Calculate Net Revenue
-            const salesRevenue = incomeData.revenue.find(item => item.item.toLowerCase().includes('sales'))?.amount || 0;
-            const serviceRevenue = incomeData.revenue.find(item => item.item.toLowerCase().includes('service'))?.amount || 0;
-            const otherRevenue = incomeData.revenue.find(item => item.item.toLowerCase().includes('other'))?.amount || 0;
+            // Calculate Net Revenue - sum ALL revenue items
+            const totalRevenue = incomeData.revenue.reduce((sum, item) => sum + item.amount, 0);
             const discounts = incomeData.revenue.find(item => item.item.toLowerCase().includes('discount'))?.amount || 0;
-            const netRevenue = salesRevenue + serviceRevenue + otherRevenue - discounts;
+            const netRevenue = totalRevenue - discounts;
             
             html += addRowIfValue('Net Revenue', netRevenue, true);
             
