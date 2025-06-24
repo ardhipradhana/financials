@@ -1928,12 +1928,158 @@
         .ratio-category-icon {
             width: 36px;
             height: 36px;
-            background: linear-gradient(135deg, #1E40AF, #60A5FA);
             border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Profitability Icon - Rising Bars */
+        .icon-profitability {
+            background: linear-gradient(135deg, #10B981, #059669);
+        }
+        
+        .icon-profitability::before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(45deg, 
+                transparent 40%, 
+                rgba(255,255,255,0.8) 45%, 
+                rgba(255,255,255,0.8) 50%, 
+                transparent 55%,
+                transparent 65%,
+                rgba(255,255,255,0.8) 70%,
+                rgba(255,255,255,0.8) 75%,
+                transparent 80%,
+                transparent 85%,
+                rgba(255,255,255,0.8) 90%,
+                rgba(255,255,255,0.8) 95%
+            );
+        }
+        
+        /* Liquidity Icon - Flowing Waves */
+        .icon-liquidity {
+            background: linear-gradient(135deg, #3B82F6, #1E40AF);
+        }
+        
+        .icon-liquidity::before {
+            content: '';
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            border: 2px solid rgba(255,255,255,0.8);
+            border-radius: 50% 50% 0 0;
+            border-bottom: none;
+        }
+        
+        .icon-liquidity::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.6);
+            border-radius: 50% 50% 0 0;
+            border-bottom: none;
+            top: 8px;
+        }
+        
+        /* Solvency Icon - Balanced Pillars */
+        .icon-solvency {
+            background: linear-gradient(135deg, #8B5CF6, #7C3AED);
+        }
+        
+        .icon-solvency::before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 4px;
+            background: rgba(255,255,255,0.8);
+            box-shadow: 
+                -6px 6px 0 rgba(255,255,255,0.8),
+                6px 6px 0 rgba(255,255,255,0.8),
+                -6px -6px 0 rgba(255,255,255,0.8),
+                6px -6px 0 rgba(255,255,255,0.8);
+        }
+        
+        /* Efficiency Icon - Rotating Arrows */
+        .icon-efficiency {
+            background: linear-gradient(135deg, #F59E0B, #D97706);
+        }
+        
+        .icon-efficiency::before {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255,255,255,0.8);
+            border-radius: 50%;
+            border-top-color: transparent;
+            border-right-color: transparent;
+            transform: rotate(45deg);
+        }
+        
+        .icon-efficiency::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 4px solid transparent;
+            border-right: 4px solid transparent;
+            border-bottom: 6px solid rgba(255,255,255,0.8);
+            top: 6px;
+            right: 8px;
+            transform: rotate(45deg);
+        }
+        
+        /* Cash Flow Icon - Flow Lines */
+        .icon-cashflow {
+            background: linear-gradient(135deg, #06B6D4, #0891B2);
+        }
+        
+        .icon-cashflow::before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 2px;
+            background: rgba(255,255,255,0.8);
+            box-shadow: 
+                0 -6px 0 rgba(255,255,255,0.6),
+                0 6px 0 rgba(255,255,255,0.6);
+        }
+        
+        .icon-cashflow::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 6px solid rgba(255,255,255,0.8);
+            border-top: 3px solid transparent;
+            border-bottom: 3px solid transparent;
+            right: 6px;
+        }
+        
+        /* Market Icon - Network Grid */
+        .icon-market {
+            background: linear-gradient(135deg, #EF4444, #DC2626);
+        }
+        
+        .icon-market::before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: 
+                radial-gradient(circle at 25% 25%, rgba(255,255,255,0.8) 2px, transparent 2px),
+                radial-gradient(circle at 75% 25%, rgba(255,255,255,0.8) 2px, transparent 2px),
+                radial-gradient(circle at 25% 75%, rgba(255,255,255,0.8) 2px, transparent 2px),
+                radial-gradient(circle at 75% 75%, rgba(255,255,255,0.8) 2px, transparent 2px),
+                linear-gradient(rgba(255,255,255,0.3) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.3) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 10px 10px, 10px 10px;
         }
         
         .ratio-category-header h5 {
@@ -2473,7 +2619,7 @@
                         <!-- Profitability Ratios -->
                         <div class="ratio-category-card">
                             <div class="ratio-category-header">
-                                <div class="ratio-category-icon">📈</div>
+                                <div class="ratio-category-icon icon-profitability"></div>
                                 <h5>Profitability Ratios</h5>
                             </div>
                             <div class="ratio-items" id="profitabilityRatios"></div>
@@ -2482,7 +2628,7 @@
                         <!-- Liquidity Ratios -->
                         <div class="ratio-category-card">
                             <div class="ratio-category-header">
-                                <div class="ratio-category-icon">💧</div>
+                                <div class="ratio-category-icon icon-liquidity"></div>
                                 <h5>Liquidity Ratios</h5>
                             </div>
                             <div class="ratio-items" id="liquidityRatios"></div>
@@ -2491,7 +2637,7 @@
                         <!-- Solvency & Leverage Ratios -->
                         <div class="ratio-category-card">
                             <div class="ratio-category-header">
-                                <div class="ratio-category-icon">🏦</div>
+                                <div class="ratio-category-icon icon-solvency"></div>
                                 <h5>Solvency & Leverage</h5>
                             </div>
                             <div class="ratio-items" id="solvencyRatios"></div>
@@ -2500,7 +2646,7 @@
                         <!-- Efficiency & Activity Ratios -->
                         <div class="ratio-category-card">
                             <div class="ratio-category-header">
-                                <div class="ratio-category-icon">⚡</div>
+                                <div class="ratio-category-icon icon-efficiency"></div>
                                 <h5>Efficiency & Activity</h5>
                             </div>
                             <div class="ratio-items" id="efficiencyRatios"></div>
@@ -2509,7 +2655,7 @@
                         <!-- Cash Flow & Coverage Ratios -->
                         <div class="ratio-category-card">
                             <div class="ratio-category-header">
-                                <div class="ratio-category-icon">💰</div>
+                                <div class="ratio-category-icon icon-cashflow"></div>
                                 <h5>Cash Flow & Coverage</h5>
                             </div>
                             <div class="ratio-items" id="cashflowRatios"></div>
@@ -2518,7 +2664,7 @@
                         <!-- Market & Valuation Ratios -->
                         <div class="ratio-category-card">
                             <div class="ratio-category-header">
-                                <div class="ratio-category-icon">📊</div>
+                                <div class="ratio-category-icon icon-market"></div>
                                 <h5>Market & Valuation</h5>
                             </div>
                             <div class="ratio-items" id="marketRatios"></div>
