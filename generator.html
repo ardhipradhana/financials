@@ -5208,37 +5208,45 @@
             try {
                 // Prepare enhanced data for backend
                 const requestData = {
-                    // Company Info
-                    companyName: document.getElementById('companyName').value,
-                    industry: document.getElementById('industry').value,
-                    businessSize: document.getElementById('businessSize').value,
-                    reportingPeriod: document.getElementById('reportingPeriod').value,
+                // Company Info
+                companyName: document.getElementById('companyName').value,
+                industry: document.getElementById('industry').value,
+                businessSize: document.getElementById('businessSize').value,
+                reportingPeriod: document.getElementById('reportingPeriod').value,
+                
+                // Raw Financial Data
+                financialData: window.currentFinancialData,
+                
+                // Pre-calculated Key Metrics (add these)
+                keyMetrics: {
+                    // Revenue & Profitability
+                    totalRevenue: window.currentFinancialData.incomeStatement.revenue.reduce((sum, item) => sum + item.amount, 0),
+                    totalExpenses: window.currentFinancialData.incomeStatement.expenses.reduce((sum, item) => sum + item.amount, 0),
+                    netIncome: window.calculatedNetIncome || 0,
+                    grossMargin: calculateGrossMargin(),
+                    netMargin: calculateNetMargin(),
                     
-                    // Complete Financial Data
-                    financialData: window.currentFinancialData,
+                    // Balance Sheet
+                    totalAssets: window.currentFinancialData.balanceSheet.assets.reduce((sum, item) => sum + item.amount, 0),
+                    totalLiabilities: window.currentFinancialData.balanceSheet.liabilities.reduce((sum, item) => sum + item.amount, 0),
+                    totalEquity: window.currentFinancialData.balanceSheet.equity.reduce((sum, item) => sum + item.amount, 0),
                     
-                    // Calculated Metrics (helpful for insights)
-                    calculatedMetrics: {
-                        netIncome: window.calculatedNetIncome || 0,
-                        depreciation: window.calculatedDepreciation || 0,
-                        grossProfit: window.calculatedGrossProfit || 0,
-                        operatingProfit: window.calculatedOperatingProfit || 0,
-                        ebitda: window.calculatedEBITDA || 0
-                    },
+                    // Cash Flow
+                    operatingCashFlow: window.currentFinancialData.cashFlow.operating.reduce((sum, item) => sum + item.amount, 0),
+                    cashBalance: getItemAmount(window.currentFinancialData.balanceSheet.assets, ['cash']),
                     
-                    // File metadata (useful for context)
-                    fileInfo: {
-                        totalFiles: uploadedFiles.length,
-                        totalSizeBytes: uploadedFiles.reduce((sum, file) => sum + file.size, 0)
-                    },
-                    
-                    // Currency for formatting
-                    currency: document.getElementById('currencySelect').value,
-                    
-                    // Metadata
-                    timestamp: new Date().toISOString(),
-                    version: '1.0'
-                };
+                    // Key Ratios (already calculated in frontend)
+                    currentRatio: getCurrentRatio(),
+                    debtToEquity: getDebtToEquityRatio(),
+                    roa: getROA(),
+                    roe: getROE()
+                },
+                
+                // Context
+                currency: document.getElementById('currencySelect').value,
+                timestamp: new Date().toISOString(),
+                version: '1.0'
+            };
                 
                 // Call backend (placeholder URL)
                 const response = await fetch('https://montpro.app.n8n.cloud/webhook/financier-generator-insights', {
