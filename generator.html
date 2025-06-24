@@ -3991,8 +3991,33 @@
             currentStep = 1;
             updateProgress(1);
             
-            // Show all steps again and hide results
-            showAllSteps();
+            // Reset card visibility states
+            companyCard.classList.remove('hidden');
+            companyCard.classList.add('active');
+            uploadCard.classList.add('hidden');
+            uploadCard.classList.remove('active');
+            processingCard.classList.add('hidden');
+            processingCard.classList.remove('active');
+            resultsCard.classList.add('hidden');
+            resultsCard.classList.remove('active');
+            
+            // Reset any processing intervals
+            if (progressInterval) {
+                clearInterval(progressInterval);
+            }
+            if (window.processingInterval) {
+                clearInterval(window.processingInterval);
+            }
+            
+            // Reset progress variables
+            currentProgress = 0;
+            progressSpeed = 1;
+            
+            // Reset progress bar
+            const progressFill = document.getElementById('progressFill');
+            const progressText = document.getElementById('progressText');
+            progressFill.style.width = '25%';
+            progressText.textContent = 'Step 1 of 4: Company Information';
             
             // Scroll back to top
             document.querySelector('.workspace-hero').scrollIntoView({ behavior: 'smooth' });
