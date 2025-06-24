@@ -3196,7 +3196,7 @@
             html += addSectionHeader('EQUITY');
             
             const equityItems = [
-                { key: 'ownersEquity', labels: ['owner\'s equity', 'owners equity', 'paid-in capital'] },
+                { key: 'ownersEquity', labels: ['owner\'s equity', 'owners equity', 'owner equity', 'paid-in capital'] },
                 { key: 'retainedEarnings', labels: ['retained earnings'] },
                 { key: 'contributedCapital', labels: ['contributed capital', 'additional paid-in capital'] },
                 { key: 'otherEquity', labels: ['other equity'] }
@@ -3205,7 +3205,7 @@
             let totalEquity = 0;
             equityItems.forEach(equityType => {
                 const equity = balanceData.equity.find(item => 
-                    equityType.labels.some(label => item.item.toLowerCase().includes(label))
+                    equityType.labels.some(label => item.item.toLowerCase().includes(label.toLowerCase()))
                 );
                 if (equity && equity.amount > 0) {
                     html += addRowIfValue(equity.item, equity.amount, false, false, true);
