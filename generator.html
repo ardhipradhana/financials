@@ -1207,6 +1207,7 @@
             justify-content: space-between;
             align-items: flex-start;
             margin-bottom: 16px;
+            padding-right: 40px;
         }
         
         .history-item-title {
@@ -1845,10 +1846,10 @@
 
         .history-delete-btn {
             position: absolute;
-            top: 16px;
-            right: 16px;
-            width: 32px;
-            height: 32px;
+            top: 24px;
+            right: 24px;
+            width: 28px;
+            height: 28px;
             border: none;
             background: rgba(239, 68, 68, 0.1);
             color: #EF4444;
@@ -1857,7 +1858,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.2rem;
+            font-size: 1rem;
             font-weight: 600;
             opacity: 0;
             transition: all 0.3s ease;
@@ -3404,15 +3405,12 @@
                     </div>
                     <div class="history-item-details">
                         <div class="history-detail-badge">
-                            <span class="badge-icon">🏭</span>
                             <span>${analysis.industry}</span>
                         </div>
                         <div class="history-detail-badge">
-                            <span class="badge-icon">👥</span>
                             <span>${formatBusinessSize(analysis.businessSize)}</span>
                         </div>
                         <div class="history-detail-badge">
-                            <span class="badge-icon">📅</span>
                             <span>${formatReportingPeriod(analysis.reportingPeriod)}</span>
                         </div>
                     </div>
@@ -3507,10 +3505,18 @@
             
             historyItems.forEach(item => {
                 const title = item.querySelector('.history-item-title').textContent.toLowerCase();
-                const date = item.querySelector('.history-item-date').textContent;
+                const analysisId = item.getAttribute('data-id');
+                const savedAnalyses = getSavedAnalyses();
+                const analysis = savedAnalyses.find(a => a.id === analysisId);
                 
                 const matchesSearch = title.includes(searchTerm);
-                const matchesMonth = !monthFilter || date.includes(monthFilter);
+                let matchesMonth = true;
+                
+                if (monthFilter && analysis) {
+                    const analysisDate = new Date(analysis.timestamp);
+                    const analysisMonthYear = analysisDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+                    matchesMonth = analysisMonthYear === monthFilter;
+                }
                 
                 if (matchesSearch && matchesMonth) {
                     item.style.display = 'block';
@@ -4223,7 +4229,6 @@
                 <select id="monthFilter" class="filter-select">
                     <option value="">All months</option>
                 </select>
-                <button class="search-btn">🔍</button>
             </div>
             <div class="history-stats">
                 <span id="historyCount">0 analyses saved</span>
