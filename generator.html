@@ -1932,142 +1932,15 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            position: relative;
-            overflow: hidden;
+            color: white;
         }
         
-        /* Profitability Icon - Simple Rising Bars */
-        .icon-profitability {
-            background: linear-gradient(135deg, #10B981, #059669);
-        }
-        
-        .icon-profitability::before {
-            content: '';
-            position: absolute;
-            width: 18px;
-            height: 18px;
-            background: 
-                linear-gradient(to top, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.9) 33%, transparent 33%),
-                linear-gradient(to top, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.7) 66%, transparent 66%),
-                linear-gradient(to top, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.5) 100%, transparent 100%);
-            background-size: 4px 18px, 4px 18px, 4px 18px;
-            background-position: 0px 0px, 6px 0px, 12px 0px;
-            background-repeat: no-repeat;
-        }
-        
-        /* Liquidity Icon - Simple Wave */
-        .icon-liquidity {
-            background: linear-gradient(135deg, #3B82F6, #1E40AF);
-        }
-        
-        .icon-liquidity::before {
-            content: '';
-            position: absolute;
-            width: 20px;
-            height: 10px;
-            border: 2px solid rgba(255,255,255,0.8);
-            border-radius: 50px 50px 0 0;
-            border-bottom: none;
-        }
-        
-        /* Solvency Icon - Simple Balance */
-        .icon-solvency {
-            background: linear-gradient(135deg, #8B5CF6, #7C3AED);
-        }
-        
-        .icon-solvency::before {
-            content: '';
-            position: absolute;
-            width: 16px;
-            height: 2px;
-            background: rgba(255,255,255,0.8);
-            box-shadow: 
-                -6px 6px 0 rgba(255,255,255,0.8),
-                6px 6px 0 rgba(255,255,255,0.8);
-        }
-        
-        /* Efficiency Icon - Simple Arrow Circle */
-        .icon-efficiency {
-            background: linear-gradient(135deg, #F59E0B, #D97706);
-        }
-        
-        .icon-efficiency::before {
-            content: '';
-            position: absolute;
-            width: 16px;
-            height: 16px;
-            border: 2px solid rgba(255,255,255,0.8);
-            border-radius: 50%;
-            border-left-color: transparent;
-        }
-        
-        .icon-efficiency::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 0;
-            border-left: 4px solid transparent;
-            border-right: 4px solid transparent;
-            border-bottom: 4px solid rgba(255,255,255,0.8);
-            top: 10px;
-            right: 11px;
-        }
-        
-        /* Cash Flow Icon - Simple Flow Arrow */
-        .icon-cashflow {
-            background: linear-gradient(135deg, #06B6D4, #0891B2);
-        }
-        
-        .icon-cashflow::before {
-            content: '';
-            position: absolute;
-            width: 14px;
-            height: 2px;
-            background: rgba(255,255,255,0.8);
-            box-shadow: 
-                0 -4px 0 rgba(255,255,255,0.6),
-                0 4px 0 rgba(255,255,255,0.6);
-        }
-        
-        .icon-cashflow::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 0;
-            border-left: 4px solid rgba(255,255,255,0.8);
-            border-top: 2px solid transparent;
-            border-bottom: 2px solid transparent;
-            right: 8px;
-        }
-        
-        /* Market Icon - Simple Grid */
-        .icon-market {
-            background: linear-gradient(135deg, #EF4444, #DC2626);
-        }
-        
-        .icon-market::before {
-            content: '';
-            position: absolute;
-            width: 16px;
-            height: 16px;
-            background: 
-                linear-gradient(rgba(255,255,255,0.8) 2px, transparent 2px),
-                linear-gradient(90deg, rgba(255,255,255,0.8) 2px, transparent 2px);
-            background-size: 8px 8px;
-        }
-        
-        .icon-market::after {
-            content: '';
-            position: absolute;
-            width: 3px;
-            height: 3px;
-            background: rgba(255,255,255,0.9);
-            border-radius: 50%;
-            box-shadow: 
-                6px 0 0 rgba(255,255,255,0.9),
-                0 6px 0 rgba(255,255,255,0.9),
-                6px 6px 0 rgba(255,255,255,0.9);
-        }
+        .icon-profitability { background: linear-gradient(135deg, #10B981, #059669); }
+        .icon-liquidity { background: linear-gradient(135deg, #3B82F6, #1E40AF); }
+        .icon-solvency { background: linear-gradient(135deg, #8B5CF6, #7C3AED); }
+        .icon-efficiency { background: linear-gradient(135deg, #F59E0B, #D97706); }
+        .icon-cashflow { background: linear-gradient(135deg, #06B6D4, #0891B2); }
+        .icon-market { background: linear-gradient(135deg, #EF4444, #DC2626); }
         
         .ratio-category-header h5 {
             color: #F8FAFC;
@@ -2606,7 +2479,12 @@
                         <!-- Profitability Ratios -->
                         <div class="ratio-category-card">
                             <div class="ratio-category-header">
-                                <div class="ratio-category-icon icon-profitability"></div>
+                                <div class="ratio-category-icon icon-profitability">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="22,6 12,13 8,9 2,15"/>
+                                        <polyline points="16,6 22,6 22,12"/>
+                                    </svg>
+                                </div>
                                 <h5>Profitability Ratios</h5>
                             </div>
                             <div class="ratio-items" id="profitabilityRatios"></div>
@@ -2615,7 +2493,12 @@
                         <!-- Liquidity Ratios -->
                         <div class="ratio-category-card">
                             <div class="ratio-category-header">
-                                <div class="ratio-category-icon icon-liquidity"></div>
+                                <div class="ratio-category-icon icon-liquidity">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M7 16.5c0 2.5 2 4.5 4.5 4.5s4.5-2 4.5-4.5c0-1.5-3-6.5-4.5-6.5S7 15 7 16.5z"/>
+                                        <path d="M12 2v8"/>
+                                    </svg>
+                                </div>
                                 <h5>Liquidity Ratios</h5>
                             </div>
                             <div class="ratio-items" id="liquidityRatios"></div>
@@ -2624,7 +2507,20 @@
                         <!-- Solvency & Leverage Ratios -->
                         <div class="ratio-category-card">
                             <div class="ratio-category-header">
-                                <div class="ratio-category-icon icon-solvency"></div>
+                                <div class="ratio-category-icon icon-solvency">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                        <line x1="16" y1="2" x2="16" y2="6"/>
+                                        <line x1="8" y1="2" x2="8" y2="6"/>
+                                        <line x1="3" y1="10" x2="21" y2="10"/>
+                                        <path d="M8 14h.01"/>
+                                        <path d="M12 14h.01"/>
+                                        <path d="M16 14h.01"/>
+                                        <path d="M8 18h.01"/>
+                                        <path d="M12 18h.01"/>
+                                        <path d="M16 18h.01"/>
+                                    </svg>
+                                </div>
                                 <h5>Solvency & Leverage</h5>
                             </div>
                             <div class="ratio-items" id="solvencyRatios"></div>
@@ -2633,7 +2529,11 @@
                         <!-- Efficiency & Activity Ratios -->
                         <div class="ratio-category-card">
                             <div class="ratio-category-header">
-                                <div class="ratio-category-icon icon-efficiency"></div>
+                                <div class="ratio-category-icon icon-efficiency">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polygon points="13,2 3,14 12,14 11,22 21,10 12,10"/>
+                                    </svg>
+                                </div>
                                 <h5>Efficiency & Activity</h5>
                             </div>
                             <div class="ratio-items" id="efficiencyRatios"></div>
@@ -2642,7 +2542,14 @@
                         <!-- Cash Flow & Coverage Ratios -->
                         <div class="ratio-category-card">
                             <div class="ratio-category-header">
-                                <div class="ratio-category-icon icon-cashflow"></div>
+                                <div class="ratio-category-icon icon-cashflow">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <line x1="12" y1="1" x2="12" y2="23"/>
+                                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                                        <polyline points="11,18 6,23 11,23"/>
+                                        <polyline points="13,6 18,1 13,1"/>
+                                    </svg>
+                                </div>
                                 <h5>Cash Flow & Coverage</h5>
                             </div>
                             <div class="ratio-items" id="cashflowRatios"></div>
@@ -2651,7 +2558,16 @@
                         <!-- Market & Valuation Ratios -->
                         <div class="ratio-category-card">
                             <div class="ratio-category-header">
-                                <div class="ratio-category-icon icon-market"></div>
+                                <div class="ratio-category-icon icon-market">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                                        <line x1="8" y1="21" x2="16" y2="21"/>
+                                        <line x1="12" y1="17" x2="12" y2="21"/>
+                                        <path d="M6 11h4"/>
+                                        <path d="M6 7h8"/>
+                                        <path d="M18 7v4"/>
+                                    </svg>
+                                </div>
                                 <h5>Market & Valuation</h5>
                             </div>
                             <div class="ratio-items" id="marketRatios"></div>
