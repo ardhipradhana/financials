@@ -3012,7 +3012,8 @@
             
             // Calculate EBITDA
             const totalOperatingExpenses = operatingExpenses.reduce((sum, item) => sum + item.amount, 0);
-            const grossProfitForEBITDA = grossProfit || netRevenue;
+            const totalCOGS = cogsItems.reduce((sum, item) => sum + item.amount, 0);
+            const grossProfitForEBITDA = totalCOGS > 0 ? (netRevenue - totalCOGS) : netRevenue;
             const ebitda = grossProfitForEBITDA - totalOperatingExpenses;
             html += addRowIfValue('EBITDA', ebitda, true);
             
