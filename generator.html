@@ -1735,7 +1735,11 @@
             transform: translateX(4px);
         }
 
-        .form-input[type="month"],
+        .form-input[type="month"] {
+            cursor: pointer;
+            position: relative;
+        }
+        
         .form-input[type="date"] {
             cursor: pointer;
         }
@@ -1744,6 +1748,18 @@
         .form-input[type="date"]::-webkit-calendar-picker-indicator {
             filter: invert(1);
             cursor: pointer;
+        }
+
+        .form-group {
+            position: relative;
+        }
+        
+        .form-group[data-clickable="true"] {
+            cursor: pointer;
+        }
+        
+        .form-group[data-clickable="true"]:hover .form-input {
+            border-color: #60A5FA;
         }
         
     </style>
@@ -1841,9 +1857,9 @@
                             <option value="big">Big (250+ employees)</option>
                         </select>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group" data-clickable="true" onclick="openMonthPicker(this)">
                         <label class="form-label" for="reportingPeriod">Reporting Period</label>
-                        <input type="month" id="reportingPeriod" class="form-input" max="2030-12">
+                        <input type="month" id="reportingPeriod" class="form-input" max="2025-06">
                     </div>
                 </div>
             </div>
@@ -2207,7 +2223,7 @@
                                 <polyline points="10,9 9,9 8,9"/>
                             </svg>
                         </span>
-                        Export PDF
+                        Export to PDF
                     </button>
                     <button class="btn btn-secondary export-btn" onclick="exportReport('csv')">
                         <span class="export-icon">
@@ -2218,7 +2234,7 @@
                                 <line x1="9" y1="17" x2="15" y2="17"/>
                             </svg>
                         </span>
-                        Export CSV
+                        Export to CSV
                     </button>
                 </div>
                 <div class="export-options">
@@ -3884,6 +3900,12 @@
                 return `${monthNames[parseInt(month) - 1]} ${year}`;
             }
             return period;
+        }
+
+        function openMonthPicker(container) {
+            const input = container.querySelector('input[type="month"]');
+            input.focus();
+            input.showPicker(); // This opens the calendar directly
         }
 
         // Initialize
