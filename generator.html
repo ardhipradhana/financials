@@ -5285,8 +5285,6 @@
                     version: '1.0'
                 };
                 
-                console.log('Sending request data:', requestData); // Debug log
-                
                 // Call backend
                 const response = await fetch('https://montpro.app.n8n.cloud/webhook/financier-generator-insights', {
                     method: 'POST',
@@ -5296,25 +5294,35 @@
                     body: JSON.stringify(requestData)
                 });
                 
-                console.log('Response status:', response.status); // Debug log
-                console.log('Response headers:', response.headers); // Debug log
-                
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 
-                const responseText = await response.text(); // Get raw text first
-                console.log('Raw response:', responseText); // Debug log
+                const result = await response.json();
+                console.log('Full backend response:', result);
+                console.log('Type of result:', typeof result);
+                console.log('Is result an array?', Array.isArray(result));
                 
+                // n8n often wraps responses in an array, so extract the actual insights
                 let insights;
-                try {
-                    insights = JSON.parse(responseText); // Then parse
-                } catch (parseError) {
-                    console.error('JSON parse error:', parseError);
-                    throw new Error('Invalid JSON response from server');
+                if (Array.isArray(result) && result.length > 0) {
+                    // If result is an array, check if first item contains the insights
+                    if (Array.isArray(result[0])) {
+                        insights = result[0]; // n8n wrapped it twice
+                    } else if (result[0].insights && Array.isArray(result[0].insights)) {
+                        insights = result[0].insights; // insights are in a property
+                    } else {
+                        insights = result; // the result array itself contains the insights
+                    }
+                } else if (Array.isArray(result)) {
+                    insights = result; // empty array or direct array
+                } else {
+                    insights = result; // direct object
                 }
                 
-                console.log('Parsed insights:', insights); // Debug log
+                console.log('Extracted insights:', insights);
+                console.log('Type of insights:', typeof insights);
+                console.log('Is insights an array?', Array.isArray(insights));
                 
                 displayInsights(insights);
                 
@@ -5339,8 +5347,19 @@
         function displayInsights(insights) {
             const insightsContent = document.getElementById('insightsContent');
             
-            // The backend already returns an array, so use it directly
-            if (!insights || insights.length === 0) {
+            console.log('displayInsights received:', insights);
+            
+            // Ensure we have an array
+            let insightsArray;
+            if (Array.isArray(insights)) {
+                insightsArray = insights;
+            } else if (insights && typeof insights === 'object') {
+                insightsArray = [insights]; // Single object, wrap in array
+            } else {
+                insightsArray = [];
+            }
+            
+            if (insightsArray.length === 0) {
                 insightsContent.innerHTML = `
                     <div class="insight-loading">
                         <p style="color: #EF4444;">No insights generated. Please try again.</p>
@@ -5351,7 +5370,7 @@
             
             insightsContent.innerHTML = `
                 <div class="insights-grid">
-                    ${insights.map(insight => `
+                    ${insightsArray.map(insight => `
                         <div class="insight-card ${insight.priority === 'high' ? 'priority-high' : ''}">
                             <div class="insight-header">
                                 <div class="insight-icon" style="background: ${insight.iconColor}">
