@@ -1738,28 +1738,14 @@
         }
         
         // File upload handling
-        const uploadZone = document.getElementById('uploadZone');
         const fileInput = document.getElementById('fileInput');
         const fileList = document.getElementById('fileList');
-
-        if (uploadZone && fileInput) {
-            uploadZone.addEventListener('click', () => fileInput.click());
+        
+        if (fileInput) {
             fileInput.addEventListener('change', handleFiles);
-            
-            uploadZone.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                uploadZone.style.borderColor = '#60A5FA';
-            });
-            
-            uploadZone.addEventListener('dragleave', () => {
-                uploadZone.style.borderColor = 'rgba(59, 130, 246, 0.3)';
-            });
-            
-            uploadZone.addEventListener('drop', (e) => {
-                e.preventDefault();
-                uploadZone.style.borderColor = 'rgba(59, 130, 246, 0.3)';
-                handleFiles({ target: { files: e.dataTransfer.files } });
-            });
+            console.log('File input connected successfully'); // Debug line
+        } else {
+            console.error('File input not found!'); // Debug line
         }
 
         function handleFiles(event) {
