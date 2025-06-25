@@ -1254,14 +1254,17 @@
                             <div class="upload-hint">Supported formats: PDF, Excel (.xlsx), CSV</div>
                             <input type="file" class="file-input" id="fileInput" multiple accept=".pdf,.xlsx,.xls,.csv">
                         </div>
-                        <div class="file-list" id="fileList"></div>
-                        <!-- Analysis Action -->
-                        <div class="analysis-action" id="analysisAction" style="display: none;">
-                            <button class="btn btn-gold" onclick="startCreditAnalysis()">
-                                <span>Analyze Creditworthiness</span>
-                                <span>→</span>
-                            </button>
-                        </div>
+                    </div>
+                    
+                    <!-- File List (Always visible when files exist) -->
+                    <div class="file-list" id="fileList"></div>
+                    
+                    <!-- Analysis Action (Always visible when files exist) -->
+                    <div class="analysis-action" id="analysisAction" style="display: none;">
+                        <button class="btn btn-gold" onclick="startCreditAnalysis()">
+                            <span>Analyze Creditworthiness</span>
+                            <span>→</span>
+                        </button>
                     </div>
 
                     <div class="upload-tips">
@@ -1617,7 +1620,8 @@
         // Upload method selection
         function selectUploadMethod(method) {
             if (method === 'new') {
-                // Directly trigger file input instead of showing upload area
+                // Show the upload area first, then trigger file input
+                document.getElementById('fileUploadArea').style.display = 'block';
                 document.getElementById('fileInput').click();
             } else if (method === 'import') {
                 showImportModal();
@@ -1767,7 +1771,7 @@
                 ${files.map(file => `<div>• ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)</div>`).join('')}
             `;
             
-            // Insert after upload options
+            // Insert after upload interface
             const uploadInterface = document.querySelector('.upload-interface');
             const existingSuccess = uploadInterface.querySelector('.success-container');
             if (existingSuccess) existingSuccess.remove();
@@ -1775,12 +1779,11 @@
             successContainer.className = 'success-container';
             uploadInterface.appendChild(successContainer);
             
-            // Auto-remove success message only (not the file list) after 3 seconds
+            // Auto-remove after 3 seconds
             setTimeout(() => {
                 if (successContainer.parentNode) {
                     successContainer.remove();
                 }
-                // File list should remain visible via updateFileList()
             }, 3000);
         }
 
