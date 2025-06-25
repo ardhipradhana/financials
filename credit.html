@@ -923,6 +923,226 @@
                 flex-direction: column;
             }
         }
+
+        #businessWorkflow,
+        #financierWorkflow {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-origin: top;
+        }
+        
+        #businessWorkflow.hiding,
+        #financierWorkflow.hiding {
+            opacity: 0;
+            transform: translateY(-20px) scale(0.98);
+            pointer-events: none;
+        }
+        
+        #businessWorkflow.showing,
+        #financierWorkflow.showing {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
+        }
+        
+        .role-option {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #94A3B8;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            z-index: 2;
+        }
+        
+        .role-option.active {
+            color: #0F172A;
+            background: linear-gradient(135deg, #D4AF37, #F4D03F);
+            box-shadow: 0 2px 8px rgba(212, 175, 55, 0.3);
+            transform: scale(1.02);
+        }
+
+        /* Import Modal Styles */
+        .import-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .import-modal.hidden {
+            display: none;
+        }
+        
+        .import-modal-backdrop {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+        }
+        
+        .import-modal-content {
+            position: relative;
+            background: linear-gradient(145deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95));
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 
+                0 25px 80px rgba(0, 0, 0, 0.3),
+                0 12px 40px rgba(212, 175, 55, 0.15);
+            animation: modalSlideIn 0.3s ease;
+        }
+        
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        .import-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 24px;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+        }
+        
+        .import-header h3 {
+            color: #F8FAFC;
+            font-size: 1.4rem;
+            margin: 0;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            color: #94A3B8;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .close-btn:hover {
+            background: rgba(239, 68, 68, 0.1);
+            color: #EF4444;
+        }
+        
+        .import-body {
+            padding: 32px 24px;
+            text-align: center;
+        }
+        
+        .import-icon {
+            margin-bottom: 20px;
+            color: #D4AF37;
+        }
+        
+        .import-body h4 {
+            color: #F8FAFC;
+            font-size: 1.3rem;
+            margin-bottom: 16px;
+        }
+        
+        .import-body p {
+            color: #94A3B8;
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+        
+        .feature-list {
+            text-align: left;
+            margin: 0 auto 24px;
+            max-width: 300px;
+            color: #CBD5E1;
+            list-style: none;
+            padding: 0;
+        }
+        
+        .feature-list li {
+            padding: 8px 0;
+            padding-left: 24px;
+            position: relative;
+        }
+        
+        .feature-list li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #D4AF37;
+            font-weight: bold;
+        }
+        
+        .eta-badge {
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(244, 208, 63, 0.05));
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 20px;
+            padding: 8px 16px;
+            display: inline-block;
+        }
+        
+        .eta-badge span {
+            background: linear-gradient(135deg, #D4AF37, #F4D03F);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+        
+        .import-actions {
+            padding: 20px 24px;
+            border-top: 1px solid rgba(212, 175, 55, 0.1);
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .upload-tips {
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.05), rgba(16, 185, 129, 0.05));
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-top: 24px;
+            font-size: 0.9rem;
+        }
+        
+        .tips-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #D4AF37;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .tips-list {
+            color: #CBD5E1;
+            line-height: 1.6;
+        }
+        
     </style>
 </head>
 <body>
@@ -950,7 +1170,7 @@
         <section class="hero-section">
             <div class="hero-container">
                 <div class="hero-badge">
-                    <span class="badge-text">Advanced Credit Intelligence Platform</span>
+                    <span class="badge-text">Bank-Grade Analysis</span>
                 </div>
                 <h1 class="hero-title">
                     <span class="gradient-text">Credit Intelligence.</span>
@@ -1000,7 +1220,7 @@
                                 </svg>
                             </div>
                             <div class="upload-title">Upload Financial Statements</div>
-                            <div class="upload-description">Upload your Income Statement, Balance Sheet, and Cash Flow Statement</div>
+                            <div class="upload-description">Upload recent financial statements (last 12-24 months). Include Income Statement, Balance Sheet, and Cash Flow Statement for comprehensive analysis.</div>
                         </div>
                         
                         <!-- Divider -->
@@ -1012,9 +1232,17 @@
                         
                         <!-- Import from Generator -->
                         <div class="upload-option" onclick="selectUploadMethod('import')">
-                            <div class="upload-icon">🔗</div>
+                            <div class="upload-icon">
+                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                    <polyline points="17,8 12,3 7,8"/>
+                                    <line x1="12" y1="3" x2="12" y2="15"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                    <path d="M12 1v6"/>
+                                </svg>
+                            </div>
                             <div class="upload-title">Import from Generator</div>
-                            <div class="upload-description">Use previously generated financial statements from our generator tool</div>
+                            <div class="upload-description">Import financial statements previously created with our Statement Generator. Maintains data consistency and saves time.</div>
                         </div>
                     </div>
                     
@@ -1027,6 +1255,23 @@
                             <input type="file" class="file-input" id="fileInput" multiple accept=".pdf,.xlsx,.xls,.csv">
                         </div>
                         <div class="file-list" id="fileList"></div>
+                    </div>
+
+                    <div class="upload-tips">
+                        <div class="tips-header">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                                <path d="M12 17h.01"/>
+                            </svg>
+                            For best results:
+                        </div>
+                        <div class="tips-list">
+                            • Include 12-24 months of statements for trend analysis
+                            • Ensure all three statements cover the same time period
+                            • Use audited or reviewed statements when available
+                            • PDF format preferred for accuracy
+                        </div>
                     </div>
                     
                     <!-- Analysis Action -->
@@ -1250,6 +1495,44 @@
         </div>
     </div>
 
+    <!-- Import Modal -->
+    <div class="import-modal hidden" id="importModal">
+        <div class="import-modal-backdrop" onclick="closeImportModal()"></div>
+        <div class="import-modal-content">
+            <div class="import-header">
+                <h3>Import from Generator</h3>
+                <button class="close-btn" onclick="closeImportModal()">×</button>
+            </div>
+            
+            <div class="import-body">
+                <div class="import-icon">
+                    <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="17,8 12,3 7,8"/>
+                        <line x1="12" y1="3" x2="12" y2="15"/>
+                        <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                </div>
+                <h4>Feature Coming Soon</h4>
+                <p>We're building seamless integration with our Financial Statement Generator. Soon you'll be able to:</p>
+                <ul class="feature-list">
+                    <li>Browse your previously generated reports</li>
+                    <li>Import financial data with one click</li>
+                    <li>Maintain analysis history across tools</li>
+                    <li>Export comprehensive credit packages</li>
+                </ul>
+                <div class="eta-badge">
+                    <span>Expected Launch: Q3 2025</span>
+                </div>
+            </div>
+            
+            <div class="import-actions">
+                <button class="btn btn-secondary" onclick="closeImportModal()">Close</button>
+                <button class="btn btn-gold" onclick="redirectToGenerator()">Use Generator First →</button>
+            </div>
+        </div>
+    </div>
+
     <!-- AOS Script -->
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script>
@@ -1267,31 +1550,77 @@
 
         // Role switching
         function switchRole(role) {
+            if (currentRole === role) return; // Prevent unnecessary transitions
+            
             currentRole = role;
             
-            // Update toggle appearance
+            // Update toggle appearance with animation
             document.querySelectorAll('.role-option').forEach(option => {
                 option.classList.remove('active');
+                // Add a slight scale animation for the deselected option
+                if (!option.textContent.trim().toLowerCase().includes(role)) {
+                    option.style.transform = 'scale(0.98)';
+                    setTimeout(() => option.style.transform = '', 200);
+                }
             });
-            event.target.classList.add('active');
             
-            // Show/hide appropriate workflow
+            // Find and activate the correct option
+            const targetOption = Array.from(document.querySelectorAll('.role-option'))
+                .find(option => option.textContent.trim().toLowerCase().includes(role));
+            if (targetOption) {
+                targetOption.classList.add('active');
+            }
+            
+            // Animate workflow transition
+            const businessWorkflow = document.getElementById('businessWorkflow');
+            const financierWorkflow = document.getElementById('financierWorkflow');
+            
             if (role === 'business') {
-                document.getElementById('businessWorkflow').style.display = 'flex';
-                document.getElementById('financierWorkflow').style.display = 'none';
+                // Hide financier first
+                if (financierWorkflow.style.display !== 'none') {
+                    financierWorkflow.classList.add('hiding');
+                    setTimeout(() => {
+                        financierWorkflow.style.display = 'none';
+                        financierWorkflow.classList.remove('hiding');
+                    }, 400);
+                }
+                
+                // Show business after a short delay
+                setTimeout(() => {
+                    businessWorkflow.style.display = 'flex';
+                    businessWorkflow.classList.add('showing');
+                    setTimeout(() => {
+                        businessWorkflow.classList.remove('showing');
+                    }, 400);
+                }, 200);
+                
             } else {
-                document.getElementById('businessWorkflow').style.display = 'none';
-                document.getElementById('financierWorkflow').style.display = 'flex';
+                // Hide business first
+                if (businessWorkflow.style.display !== 'none') {
+                    businessWorkflow.classList.add('hiding');
+                    setTimeout(() => {
+                        businessWorkflow.style.display = 'none';
+                        businessWorkflow.classList.remove('hiding');
+                    }, 400);
+                }
+                
+                // Show financier after a short delay
+                setTimeout(() => {
+                    financierWorkflow.style.display = 'flex';
+                    financierWorkflow.classList.add('showing');
+                    setTimeout(() => {
+                        financierWorkflow.classList.remove('showing');
+                    }, 400);
+                }, 200);
             }
         }
 
         // Upload method selection
         function selectUploadMethod(method) {
             if (method === 'new') {
-                document.getElementById('fileUploadArea').style.display = 'block';
-                showAnalysisAction();
+                // Directly trigger file input instead of showing upload area
+                document.getElementById('fileInput').click();
             } else if (method === 'import') {
-                // TODO: Open generator history modal
                 showImportModal();
             }
         }
@@ -1301,11 +1630,20 @@
         }
 
         function showImportModal() {
-            // TODO: Implement generator history modal integration
-            console.log('Opening import modal...');
-            alert('Import from Generator feature coming soon!');
+            document.getElementById('importModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
         }
-
+        
+        function closeImportModal() {
+            document.getElementById('importModal').classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+        
+        function redirectToGenerator() {
+            window.open('generator.html', '_blank');
+            closeImportModal();
+        }
+        
         // File upload handling
         const uploadZone = document.getElementById('uploadZone');
         const fileInput = document.getElementById('fileInput');
@@ -1333,9 +1671,117 @@
 
         function handleFiles(event) {
             const files = Array.from(event.target.files);
-            uploadedFiles = [...uploadedFiles, ...files];
-            updateFileList();
-            showAnalysisAction();
+            const validFiles = [];
+            const errors = [];
+            
+            files.forEach(file => {
+                // Check file type
+                const allowedTypes = [
+                    'application/pdf',
+                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+                    'application/vnd.ms-excel', // .xls
+                    'text/csv'
+                ];
+                
+                if (!allowedTypes.includes(file.type)) {
+                    errors.push(`${file.name}: Unsupported file type. Please use PDF, Excel, or CSV files.`);
+                    return;
+                }
+                
+                // Check file size (max 50MB)
+                const maxSize = 50 * 1024 * 1024; // 50MB in bytes
+                if (file.size > maxSize) {
+                    errors.push(`${file.name}: File too large. Maximum size is 50MB.`);
+                    return;
+                }
+                
+                // Check minimum size (at least 1KB)
+                if (file.size < 1024) {
+                    errors.push(`${file.name}: File too small. Minimum size is 1KB.`);
+                    return;
+                }
+                
+                validFiles.push(file);
+            });
+            
+            // Show errors if any
+            if (errors.length > 0) {
+                showFileErrors(errors);
+            }
+            
+            // Add valid files
+            if (validFiles.length > 0) {
+                uploadedFiles = [...uploadedFiles, ...validFiles];
+                updateFileList();
+                showAnalysisAction();
+                showFileSuccess(validFiles);
+            }
+        }
+
+        function showFileErrors(errors) {
+            const errorContainer = document.createElement('div');
+            errorContainer.style.cssText = `
+                background: rgba(239, 68, 68, 0.1);
+                border: 1px solid rgba(239, 68, 68, 0.3);
+                border-radius: 8px;
+                padding: 16px;
+                margin: 16px 0;
+                color: #EF4444;
+                font-size: 0.9rem;
+            `;
+            
+            errorContainer.innerHTML = `
+                <div style="font-weight: 600; margin-bottom: 8px;">⚠ Upload Errors:</div>
+                ${errors.map(error => `<div>• ${error}</div>`).join('')}
+            `;
+            
+            // Insert after upload options
+            const uploadInterface = document.querySelector('.upload-interface');
+            const existingError = uploadInterface.querySelector('.error-container');
+            if (existingError) existingError.remove();
+            
+            errorContainer.className = 'error-container';
+            uploadInterface.appendChild(errorContainer);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (errorContainer.parentNode) {
+                    errorContainer.remove();
+                }
+            }, 5000);
+        }
+        
+        function showFileSuccess(files) {
+            const successContainer = document.createElement('div');
+            successContainer.style.cssText = `
+                background: rgba(16, 185, 129, 0.1);
+                border: 1px solid rgba(16, 185, 129, 0.3);
+                border-radius: 8px;
+                padding: 16px;
+                margin: 16px 0;
+                color: #10B981;
+                font-size: 0.9rem;
+            `;
+            
+            successContainer.innerHTML = `
+                <div style="font-weight: 600; margin-bottom: 8px;">✓ Files Added Successfully:</div>
+                ${files.map(file => `<div>• ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)</div>`).join('')}
+            `;
+            
+            // Insert after upload options
+            const uploadInterface = document.querySelector('.upload-interface');
+            const existingSuccess = uploadInterface.querySelector('.success-container');
+            if (existingSuccess) existingSuccess.remove();
+            
+            successContainer.className = 'success-container';
+            uploadInterface.appendChild(successContainer);
+            
+            // Auto-remove after 3 seconds
+            setTimeout(() => {
+                if (successContainer.parentNode) {
+                    successContainer.remove();
+                }
+            }, 3000);
         }
 
         function updateFileList() {
@@ -1366,9 +1812,25 @@
 
         // Credit analysis process
         function startCreditAnalysis() {
+            // Check if user has uploaded files or imported data
             if (uploadedFiles.length === 0 && !importedData) {
-                alert('Please upload files or import data first.');
+                showEmptyStateError();
                 return;
+            }
+            
+            // Validate that we have the right types of files
+            if (uploadedFiles.length > 0) {
+                const hasFinancialStatement = uploadedFiles.some(file => 
+                    file.name.toLowerCase().includes('income') ||
+                    file.name.toLowerCase().includes('balance') ||
+                    file.name.toLowerCase().includes('cash') ||
+                    file.name.toLowerCase().includes('financial')
+                );
+                
+                if (!hasFinancialStatement) {
+                    showMissingStatementsWarning();
+                    return;
+                }
             }
             
             // Show processing card
@@ -1379,6 +1841,106 @@
             setTimeout(() => {
                 completeAnalysis();
             }, 5000);
+        }
+
+        function showEmptyStateError() {
+            const errorContainer = document.createElement('div');
+            errorContainer.style.cssText = `
+                background: rgba(239, 68, 68, 0.1);
+                border: 1px solid rgba(239, 68, 68, 0.3);
+                border-radius: 12px;
+                padding: 24px;
+                margin: 20px 0;
+                text-align: center;
+                animation: shake 0.5s ease-in-out;
+            `;
+            
+            errorContainer.innerHTML = `
+                <div style="font-size: 2rem; margin-bottom: 16px;">📊</div>
+                <div style="color: #EF4444; font-weight: 600; font-size: 1.1rem; margin-bottom: 8px;">
+                    No Financial Data Found
+                </div>
+                <div style="color: #94A3B8; font-size: 0.9rem; margin-bottom: 20px;">
+                    Please upload your financial statements or import data from the generator to begin credit analysis.
+                </div>
+                <button onclick="this.parentElement.remove()" style="
+                    background: linear-gradient(135deg, #EF4444, #DC2626);
+                    color: white;
+                    border: none;
+                    padding: 8px 16px;
+                    border-radius: 6px;
+                    font-weight: 500;
+                    cursor: pointer;
+                ">Got it</button>
+            `;
+            
+            // Add shake animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes shake {
+                    0%, 100% { transform: translateX(0); }
+                    25% { transform: translateX(-5px); }
+                    75% { transform: translateX(5px); }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            // Insert before analysis action
+            const analysisAction = document.getElementById('analysisAction');
+            analysisAction.parentNode.insertBefore(errorContainer, analysisAction);
+            
+            // Auto-remove after 8 seconds
+            setTimeout(() => {
+                if (errorContainer.parentNode) {
+                    errorContainer.remove();
+                }
+            }, 8000);
+        }
+        
+        function showMissingStatementsWarning() {
+            const warningContainer = document.createElement('div');
+            warningContainer.style.cssText = `
+                background: rgba(245, 158, 11, 0.1);
+                border: 1px solid rgba(245, 158, 11, 0.3);
+                border-radius: 12px;
+                padding: 24px;
+                margin: 20px 0;
+                text-align: center;
+            `;
+            
+            warningContainer.innerHTML = `
+                <div style="font-size: 2rem; margin-bottom: 16px;">⚠️</div>
+                <div style="color: #F59E0B; font-weight: 600; font-size: 1.1rem; margin-bottom: 8px;">
+                    Financial Statements Required
+                </div>
+                <div style="color: #94A3B8; font-size: 0.9rem; margin-bottom: 20px;">
+                    For accurate credit analysis, please upload your Income Statement, Balance Sheet, and Cash Flow Statement.
+                </div>
+                <div style="display: flex; gap: 12px; justify-content: center;">
+                    <button onclick="this.parentElement.parentElement.remove()" style="
+                        background: transparent;
+                        color: #94A3B8;
+                        border: 1px solid rgba(148, 163, 184, 0.3);
+                        padding: 8px 16px;
+                        border-radius: 6px;
+                        font-weight: 500;
+                        cursor: pointer;
+                    ">Proceed Anyway</button>
+                    <button onclick="this.parentElement.parentElement.remove(); document.getElementById('fileInput').click();" style="
+                        background: linear-gradient(135d, #F59E0B, #D97706);
+                        color: white;
+                        border: none;
+                        padding: 8px 16px;
+                        border-radius: 6px;
+                        font-weight: 500;
+                        cursor: pointer;
+                    ">Add More Files</button>
+                </div>
+            `;
+            
+            // Insert before analysis action
+            const analysisAction = document.getElementById('analysisAction');
+            analysisAction.parentNode.insertBefore(warningContainer, analysisAction);
         }
 
         function showCard(cardId) {
@@ -1458,8 +2020,20 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
-            // Set initial role
-            switchRole('business');
+            // Set initial role to business and update UI
+            currentRole = 'business';
+            
+            // Set business as active in toggle
+            document.querySelectorAll('.role-option').forEach(option => {
+                option.classList.remove('active');
+                if (option.textContent.trim() === 'Business') {
+                    option.classList.add('active');
+                }
+            });
+            
+            // Show business workflow
+            document.getElementById('businessWorkflow').style.display = 'flex';
+            document.getElementById('financierWorkflow').style.display = 'none';
         });
     </script>
 </body>
