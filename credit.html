@@ -242,6 +242,40 @@
             margin-right: auto;
         }
 
+        .hero-cta {
+            margin-bottom: 40px;
+            margin-top: 40px;
+        }
+        
+        .btn-hero-start {
+            background: linear-gradient(135deg, #D4AF37, #F4D03F);
+            color: #0F172A;
+            border: none;
+            border-radius: 12px;
+            padding: 16px 32px;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.3);
+        }
+        
+        .btn-hero-start:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(212, 175, 55, 0.4);
+        }
+        
+        .btn-hero-start svg {
+            transition: transform 0.3s ease;
+        }
+        
+        .btn-hero-start:hover svg {
+            transform: translateX(4px);
+        }
+
         /* Workspace Cards */
         .workspace-container {
             display: flex;
@@ -356,6 +390,19 @@
             font-size: 2.5rem;
             margin-bottom: 16px;
             color: #60A5FA;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .upload-icon svg {
+            color: #60A5FA;
+            transition: all 0.3s ease;
+        }
+        
+        .upload-option:hover .upload-icon svg {
+            color: #D4AF37;
+            transform: scale(1.1);
         }
 
         .upload-title {
@@ -906,13 +953,21 @@
                     <span class="badge-text">Advanced Credit Intelligence Platform</span>
                 </div>
                 <h1 class="hero-title">
-                    <span class="gradient-text">Credit Intelligence.</span><br>
-                    Unlock Your Financial Potential.
+                    <span class="gradient-text">Credit Intelligence.</span>
                 </h1>
                 <p class="hero-subtitle">
                     Institutional-grade creditworthiness analysis powered by AI. Get comprehensive scoring, 
                     market benchmarks, and actionable insights to secure better financing opportunities.
                 </p>
+                <div class="hero-cta">
+                    <button class="btn-hero-start" onclick="scrollToUpload()">
+                        <span>Start Analyzing</span>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                            <polyline points="12,5 19,12 12,19"/>
+                        </svg>
+                    </button>
+                </div>
             </div>
         </section>
 
@@ -936,7 +991,14 @@
                     <div class="upload-options">
                         <!-- Upload New Files -->
                         <div class="upload-option" onclick="selectUploadMethod('new')">
-                            <div class="upload-icon">📊</div>
+                            <div class="upload-icon">
+                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                    <polyline points="14,2 14,8 20,8"/>
+                                    <line x1="9" y1="13" x2="15" y2="13"/>
+                                    <line x1="12" y1="10" x2="12" y2="16"/>
+                                </svg>
+                            </div>
                             <div class="upload-title">Upload Financial Statements</div>
                             <div class="upload-description">Upload your Income Statement, Balance Sheet, and Cash Flow Statement</div>
                         </div>
@@ -1380,6 +1442,18 @@
 
         function exploreFinancing() {
             alert('Financing marketplace integration coming soon!');
+        }
+
+        function scrollToUpload() {
+            const uploadCard = document.getElementById('uploadCard');
+            const cardTop = uploadCard.offsetTop;
+            const navHeight = 70;
+            const offset = navHeight + 20;
+            
+            window.scrollTo({
+                top: cardTop - offset,
+                behavior: 'smooth'
+            });
         }
 
         // Initialize
