@@ -1255,6 +1255,13 @@
                             <input type="file" class="file-input" id="fileInput" multiple accept=".pdf,.xlsx,.xls,.csv">
                         </div>
                         <div class="file-list" id="fileList"></div>
+                        <!-- Analysis Action -->
+                        <div class="analysis-action" id="analysisAction" style="display: none;">
+                            <button class="btn btn-gold" onclick="startCreditAnalysis()">
+                                <span>Analyze Creditworthiness</span>
+                                <span>→</span>
+                            </button>
+                        </div>
                     </div>
 
                     <div class="upload-tips">
@@ -1272,14 +1279,6 @@
                             • Use audited or reviewed statements when available
                             • PDF format preferred for accuracy
                         </div>
-                    </div>
-                    
-                    <!-- Analysis Action -->
-                    <div class="analysis-action" id="analysisAction" style="display: none;">
-                        <button class="btn btn-gold" onclick="startCreditAnalysis()">
-                            <span>Analyze Creditworthiness</span>
-                            <span>→</span>
-                        </button>
                     </div>
                 </div>
             </div>
@@ -1776,11 +1775,12 @@
             successContainer.className = 'success-container';
             uploadInterface.appendChild(successContainer);
             
-            // Auto-remove after 3 seconds
+            // Auto-remove success message only (not the file list) after 3 seconds
             setTimeout(() => {
                 if (successContainer.parentNode) {
                     successContainer.remove();
                 }
+                // File list should remain visible via updateFileList()
             }, 3000);
         }
 
