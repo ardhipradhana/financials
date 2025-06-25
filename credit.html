@@ -1142,6 +1142,86 @@
             color: #CBD5E1;
             line-height: 1.6;
         }
+
+        .generate-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+            margin-top: 32px;
+            text-align: center;
+            width: 100%;
+        }
+        
+        .btn-generate-premium {
+            background: linear-gradient(135deg, #D4AF37 0%, #F4D03F 50%, #F4D03F 100%);
+            border: none;
+            border-radius: 12px;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(212, 175, 55, 0.3);
+            white-space: nowrap;
+            color: #1E293B;
+            margin-bottom: 16px;
+        }
+        
+        .btn-generate-premium::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s ease;
+        }
+        
+        .btn-generate-premium:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(212, 175, 55, 0.4);
+        }
+        
+        .btn-generate-premium:hover::before { 
+            left: 100%; 
+        }
+        
+        .btn-generate-icon {
+            width: 28px; 
+            height: 28px;
+            background: rgba(30, 41, 59, 0.2);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1E293B;
+        }
+        
+        .btn-generate-content { 
+            flex: 0 0 auto;
+            text-align: center; 
+        }
+        
+        .btn-generate-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+        
+        .btn-generate-arrow {
+            font-size: 1.2rem; 
+            font-weight: bold;
+            transition: transform 0.3s ease;
+        }
+        
+        .btn-generate-premium:hover .btn-generate-arrow { 
+            transform: translateX(4px); 
+        }
         
     </style>
 </head>
@@ -1222,7 +1302,6 @@
                             <div class="upload-title">Upload Financial Statements</div>
                             <div class="upload-description">Upload recent financial statements (last 12-24 months). Include Income Statement, Balance Sheet, and Cash Flow Statement for comprehensive analysis.</div>
                         </div>
-                        <input type="file" class="file-input" id="fileInput" multiple accept=".pdf,.xlsx,.xls,.csv" style="display: none;">
                         
                         <!-- Divider -->
                         <div class="divider">
@@ -1246,16 +1325,37 @@
                             <div class="upload-description">Import financial statements previously created with our Statement Generator. Maintains data consistency and saves time.</div>
                         </div>
                     </div>
+
+                    <!-- Hidden File Input -->
+                    <input type="file" class="file-input" id="fileInput" multiple accept=".pdf,.xlsx,.xls,.csv" style="display: none;">
                     
                     <!-- File List (Always visible when files exist) -->
                     <div class="file-list" id="fileList"></div>
                     
                     <!-- Analysis Action (Always visible when files exist) -->
                     <div class="analysis-action" id="analysisAction" style="display: none;">
-                        <button class="btn btn-gold" onclick="startCreditAnalysis()">
-                            <span>Analyze Creditworthiness</span>
-                            <span>→</span>
-                        </button>
+                        <div class="generate-container">
+                            <button class="btn-generate-premium" id="analyzeBtn" onclick="startCreditAnalysis()">
+                                <div class="btn-generate-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="4" y="4" width="16" height="16" rx="2"/>
+                                        <rect x="9" y="9" width="6" height="6"/>
+                                        <line x1="9" y1="1" x2="9" y2="4"/>
+                                        <line x1="15" y1="1" x2="15" y2="4"/>
+                                        <line x1="9" y1="20" x2="9" y2="23"/>
+                                        <line x1="15" y1="20" x2="15" y2="23"/>
+                                        <line x1="20" y1="9" x2="23" y2="9"/>
+                                        <line x1="20" y1="14" x2="23" y2="14"/>
+                                        <line x1="1" y1="9" x2="4" y2="9"/>
+                                        <line x1="1" y1="14" x2="4" y2="14"/>
+                                    </svg>
+                                </div>
+                                <div class="btn-generate-content">
+                                    <div class="btn-generate-title">Analyze Creditworthiness</div>
+                                </div>
+                                <div class="btn-generate-arrow">→</div>
+                            </button>
+                        </div>
                     </div>
 
                     <div class="upload-tips">
