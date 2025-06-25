@@ -1809,6 +1809,9 @@
                 showAnalysisAction();
                 showFileSuccess(validFiles);
             }
+            
+            // Clear the input so same file can be selected again
+            event.target.value = '';
         }
 
         function showFileErrors(errors) {
