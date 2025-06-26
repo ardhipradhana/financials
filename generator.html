@@ -6164,7 +6164,18 @@
         
         function calculateSimpleROE() {
             const netIncome = window.calculatedNetIncome || 0;
-            const totalEquity = window.currentFinancialData.balanceSheet.equity.reduce((sum, item) => sum + item.amount, 0);
+            
+            // Use the same equity calculation as above
+            const backendEquity = window.currentFinancialData.balanceSheet.equity.reduce((sum, item) => sum + item.amount, 0);
+            const totalAssets = window.currentFinancialData.balanceSheet.assets.reduce((sum, item) => sum + item.amount, 0);
+            const totalLiabilities = window.currentFinancialData.balanceSheet.liabilities.reduce((sum, item) => sum + item.amount, 0);
+            
+            let totalEquity;
+            if (backendEquity < 1000) {
+                totalEquity = totalAssets - totalLiabilities;
+            } else {
+                totalEquity = backendEquity;
+            }
             
             return totalEquity > 0 ? ((netIncome / totalEquity) * 100) : 0;
         }
@@ -6204,7 +6215,17 @@
                         // Balance Sheet
                         totalAssets: window.currentFinancialData.balanceSheet.assets.reduce((sum, item) => sum + item.amount, 0),
                         totalLiabilities: window.currentFinancialData.balanceSheet.liabilities.reduce((sum, item) => sum + item.amount, 0),
-                        totalEquity: window.currentFinancialData.balanceSheet.equity.reduce((sum, item) => sum + item.amount, 0),
+                        totalEquity: (() => {
+                            const backendEquity = window.currentFinancialData.balanceSheet.equity.reduce((sum, item) => sum + item.amount, 0);
+                            const totalAssets = window.currentFinancialData.balanceSheet.assets.reduce((sum, item) => sum + item.amount, 0);
+                            const totalLiabilities = window.currentFinancialData.balanceSheet.liabilities.reduce((sum, item) => sum + item.amount, 0);
+                            
+                            // If backend equity is 0 or very small, calculate it from Assets - Liabilities
+                            if (backendEquity < 1000) {
+                                return totalAssets - totalLiabilities;
+                            }
+                            return backendEquity;
+                        })(),
                         
                         // Cash Flow
                         operatingCashFlow: window.currentFinancialData.cashFlow.operating.reduce((sum, item) => sum + item.amount, 0),
