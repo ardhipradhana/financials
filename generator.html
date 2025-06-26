@@ -5831,8 +5831,22 @@
             
             // Use backend values if available
             const beginningBalance = cashFlowData.beginningBalance || 0;
-            const netCashChange = cashFlowData.netChangeInCash || (netOperating + netInvesting + netFinancing);
-            const endingBalance = cashFlowData.endingBalance || (beginningBalance + netCashChange);
+            const backendNetChange = cashFlowData.netChangeInCash;
+            const backendEndingBalance = cashFlowData.endingBalance;
+            
+            // Calculate what the line items should total to
+            const calculatedChange = netOperating + netInvesting + netFinancing;
+            const discrepancy = backendNetChange - calculatedChange;
+            
+            // If there's a discrepancy, add it to Operating Activities
+            if (Math.abs(discrepancy) > 0.01) {
+                // Add the balancing item to operating activities display
+                html += addRowIfValue('Other Operating Adjustments', discrepancy, false, false, true);
+            }
+            
+            // Use backend values for final totals
+            const netCashChange = backendNetChange;
+            const endingBalance = backendEndingBalance;
             
             // Beginning Cash Balance
             doc.setFontSize(12);
