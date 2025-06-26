@@ -4019,18 +4019,31 @@
             const totalLiabilities = currentLiabilitiesTotal + nonCurrentLiabilitiesTotal;
             html += addRowIfValue('Total Liabilities', totalLiabilities, true);
             
-            // EQUITY SECTION
+            // EQUITY SECTION WITH NET INCOME CONNECTION
             html += addSectionHeader('EQUITY');
             
-            const equityItems = [
+            // Get Net Income from global variable (calculated in Income Statement)
+            const currentNetIncome = window.calculatedNetIncome || 0;
+            
+            // Find existing Retained Earnings
+            const existingRetainedEarnings = balanceData.equity.find(item => 
+                item.item.toLowerCase().includes('retained earnings')
+            );
+            
+            // Calculate updated Retained Earnings = Previous RE + Current Net Income
+            const previousRetainedEarnings = existingRetainedEarnings ? existingRetainedEarnings.amount : 0;
+            const updatedRetainedEarnings = previousRetainedEarnings + currentNetIncome;
+            
+            let totalEquity = 0;
+            
+            // Add other equity items (excluding retained earnings - we'll add it separately)
+            const otherEquityItems = [
                 { key: 'ownersEquity', labels: ['owner\'s equity', 'owners equity', 'owner equity', 'paid-in capital'] },
-                { key: 'retainedEarnings', labels: ['retained earnings'] },
                 { key: 'contributedCapital', labels: ['contributed capital', 'additional paid-in capital'] },
                 { key: 'otherEquity', labels: ['other equity'] }
             ];
             
-            let totalEquity = 0;
-            equityItems.forEach(equityType => {
+            otherEquityItems.forEach(equityType => {
                 const equity = balanceData.equity.find(item => 
                     equityType.labels.some(label => item.item.toLowerCase().includes(label.toLowerCase()))
                 );
@@ -4040,22 +4053,27 @@
                 }
             });
             
-            // BALANCING LOGIC
+            // Add Retained Earnings (with Net Income connection)
+            if (updatedRetainedEarnings !== 0) {
+                html += addRowIfValue('Retained Earnings', updatedRetainedEarnings, false, false, true);
+                totalEquity += updatedRetainedEarnings;
+            }
+            
+            // BALANCING LOGIC (Safety Net)
             const liabilitiesAndEquity = totalLiabilities + totalEquity;
             const imbalance = totalAssets - liabilitiesAndEquity;
             
-            // Add balancing adjustment if needed
-            if (Math.abs(imbalance) > 0.01) { // Allow for small rounding differences
-                if (imbalance > 0) {
-                    // Assets > Liab + Equity, add to Other Current Liabilities
+            // Add balancing adjustment if needed (only for small discrepancies)
+            if (Math.abs(imbalance) > 0.01) { 
+                if (Math.abs(imbalance) < totalAssets * 0.01) { // Less than 1% of total assets
                     html += addRowIfValue('Balancing Adjustment', imbalance, false, false, true);
-                    currentLiabilitiesTotal += imbalance;
+                    totalEquity += imbalance;
                 } else {
-                    // Liab + Equity > Assets, add to Other Current Assets
-                    html += addRowIfValue('Balancing Adjustment', Math.abs(imbalance), false, false, true);
-                    currentAssetsTotal += Math.abs(imbalance);
+                    // Large imbalance - might indicate data issue
+                    console.warn('Large balance sheet imbalance detected:', imbalance);
+                    html += addRowIfValue('Balancing Adjustment (Review Required)', imbalance, false, false, true);
+                    totalEquity += imbalance;
                 }
-                totalEquity += imbalance > 0 ? imbalance : 0;
             }
             
             html += addRowIfValue('Total Equity', totalEquity, true);
@@ -4065,6 +4083,10 @@
             html += addRowIfValue('Total Liabilities & Equity', finalLiabilitiesAndEquity, false, true);
             
             balanceTable.innerHTML = html;
+            
+            // Store calculated values globally for use in ratios
+            window.calculatedTotalEquity = totalEquity;
+            window.calculatedRetainedEarnings = updatedRetainedEarnings;
         }
         
         function populateCashFlowStatement(cashFlowData) {
