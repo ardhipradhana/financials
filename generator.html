@@ -4127,51 +4127,33 @@
             
             let html = '';
             
-            // EXTRACT NET INCOME AND DEPRECIATION FROM INCOME STATEMENT
-            // Get the calculated Net Income from Income Statement (stored globally)
-            const incomeStatementNetIncome = window.calculatedNetIncome || 0;
-            const incomeStatementDepreciation = window.calculatedDepreciation || 0;
+            // Use backend values as the source of truth
+            const beginningBalance = cashFlowData.beginningBalance || 0;
+            const backendNetChange = cashFlowData.netChangeInCash || 0;
+            const backendEndingBalance = cashFlowData.endingBalance || 0;
+            
+            // Calculate totals from line items
+            const operatingTotal = cashFlowData.operating.reduce((sum, item) => sum + item.amount, 0);
+            const investingTotal = cashFlowData.investing.reduce((sum, item) => sum + item.amount, 0);
+            const financingTotal = cashFlowData.financing.reduce((sum, item) => sum + item.amount, 0);
             
             // Beginning Cash Balance
-            const beginningBalance = cashFlowData.beginningBalance || 0;
             html += addRowIfValue('Beginning Cash Balance', beginningBalance, false, true);
             html += '<tr><td colspan="2" style="height: 12px;"></td></tr>';
             
             // OPERATING ACTIVITIES SECTION
-            let operatingTotal = cashFlowData.operating.reduce((sum, item) => sum + item.amount, 0);
-            
-            // Extract and adjust for Net Income
-            let adjustedOtherOperating = 0;
-            const otherOperatingItem = cashFlowData.operating.find(item => 
-                item.item.toLowerCase().includes('other operating')
-            );
-            
-            if (otherOperatingItem) {
-                adjustedOtherOperating = otherOperatingItem.amount - incomeStatementNetIncome - incomeStatementDepreciation;
-            }
-            
             html += addSectionHeader('CASH FLOW FROM OPERATING ACTIVITIES', operatingTotal);
             
-            // Show extracted Net Income
-            html += addRowIfValue('Net Income', incomeStatementNetIncome, false, false, true);
+            // Get Net Income from Income Statement (backend calculated)
+            const netIncomeFromBackend = window.currentFinancialData?.incomeStatement?.netIncome || 0;
+            html += addRowIfValue('Net Income', netIncomeFromBackend, false, false, true);
             
-            // Show extracted Depreciation & Amortization
-            html += addRowIfValue('Depreciation & Amortization', incomeStatementDepreciation, false, false, true);
-            
-            // Show other operating items (excluding the "other operating" item we're adjusting)
+            // Show other operating items
             cashFlowData.operating.forEach(item => {
-                if (!item.item.toLowerCase().includes('other operating') && 
-                    !item.item.toLowerCase().includes('net income') &&
-                    !item.item.toLowerCase().includes('depreciation')) {
-                    html += addRowIfValue(item.item, item.amount, false, false, true);
-                }
+                html += addRowIfValue(item.item, item.amount, false, false, true);
             });
             
-            // Show adjusted Other Operating Activities
-            html += addRowIfValue('Other Operating Cash Flow', adjustedOtherOperating, false, false, true);
-            
             // INVESTING ACTIVITIES SECTION
-            const investingTotal = cashFlowData.investing.reduce((sum, item) => sum + item.amount, 0);
             html += addSectionHeader('CASH FLOW FROM INVESTING ACTIVITIES', investingTotal);
             
             cashFlowData.investing.forEach(item => {
@@ -4181,7 +4163,6 @@
             });
             
             // FINANCING ACTIVITIES SECTION
-            const financingTotal = cashFlowData.financing.reduce((sum, item) => sum + item.amount, 0);
             html += addSectionHeader('CASH FLOW FROM FINANCING ACTIVITIES', financingTotal);
             
             cashFlowData.financing.forEach(item => {
@@ -4190,28 +4171,20 @@
                 }
             });
             
-            // FINAL CALCULATIONS
+            // FINAL CALCULATIONS - Use backend values
             html += '<tr><td colspan="2" style="height: 12px;"></td></tr>';
             
-            const netCashChange = operatingTotal + investingTotal + financingTotal;
-            const endingBalance = beginningBalance + netCashChange;
+            // Calculate what line items total to
+            const calculatedChange = operatingTotal + investingTotal + financingTotal + netIncomeFromBackend;
+            const discrepancy = backendNetChange - calculatedChange;
             
-            // Check if backend ending balance matches our calculation
-            const backendEndingBalance = cashFlowData.endingBalance;
-            let finalEndingBalance = endingBalance;
-            
-            if (backendEndingBalance && Math.abs(backendEndingBalance - endingBalance) > 0.01) {
-                // There's an imbalance, adjust Other Operating Activities
-                const balancingAdjustment = backendEndingBalance - endingBalance;
-                adjustedOtherOperating += balancingAdjustment;
-                finalEndingBalance = backendEndingBalance;
-                
-                // Update the Other Operating Activities row (we'll need to regenerate)
-                // For now, use the backend ending balance
+            // If there's a significant discrepancy, show it
+            if (Math.abs(discrepancy) > 0.01) {
+                html += addRowIfValue('Reconciling Items', discrepancy, false, false, true);
             }
             
-            html += addRowIfValue('Net Change in Cash', netCashChange, false, true);
-            html += addRowIfValue('Ending Cash Balance', finalEndingBalance, false, true);
+            html += addRowIfValue('Net Change in Cash', backendNetChange, false, true);
+            html += addRowIfValue('Ending Cash Balance', backendEndingBalance, false, true);
             
             cashFlowTable.innerHTML = html;
         }
