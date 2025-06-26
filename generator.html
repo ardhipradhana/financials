@@ -2524,6 +2524,27 @@
         .comparison-tab-content.active {
             display: block;
         }
+
+        .comparison-table .section-header td {
+            background: rgba(30, 41, 59, 0.8);
+            color: #60A5FA !important;
+            font-weight: 600;
+            padding-top: 16px;
+        }
+        
+        .comparison-table .subtotal td {
+            border-top: 1px solid rgba(59, 130, 246, 0.3);
+            font-weight: 600;
+            color: #F8FAFC;
+        }
+        
+        .comparison-table .total-line td {
+            border-top: 2px solid #60A5FA;
+            font-weight: 700;
+            color: #60A5FA;
+            font-size: 1.05rem;
+            padding-top: 16px;
+        }
         
         .positive-change {
             color: #10B981;
@@ -5271,36 +5292,92 @@
         function populateIncomeComparison(income1, income2) {
             const tbody = document.getElementById('incomeComparisonBody');
             
-            // Get all unique items from both periods
-            const allItems = new Set();
-            income1.revenue.forEach(item => allItems.add(item.item));
-            income1.expenses.forEach(item => allItems.add(item.item));
-            income2.revenue.forEach(item => allItems.add(item.item));
-            income2.expenses.forEach(item => allItems.add(item.item));
+            // Create comprehensive comparison including calculated totals
+            const comparisons = [];
             
-            const comparisons = Array.from(allItems).map(itemName => {
-                const item1 = [...income1.revenue, ...income1.expenses].find(item => item.item === itemName);
-                const item2 = [...income2.revenue, ...income2.expenses].find(item => item.item === itemName);
-                
+            // REVENUE SECTION
+            comparisons.push({ name: 'REVENUE', isHeader: true });
+            
+            // All revenue items
+            const allRevenueItems = new Set();
+            income1.revenue.forEach(item => allRevenueItems.add(item.item));
+            income2.revenue.forEach(item => allRevenueItems.add(item.item));
+            
+            Array.from(allRevenueItems).forEach(itemName => {
+                const item1 = income1.revenue.find(item => item.item === itemName);
+                const item2 = income2.revenue.find(item => item.item === itemName);
                 const value1 = item1 ? item1.amount : 0;
                 const value2 = item2 ? item2.amount : 0;
                 
-                return { name: itemName, value1, value2 };
-            }).filter(item => item.value1 > 0 || item.value2 > 0); // Only show items with values
+                if (value1 > 0 || value2 > 0) {
+                    comparisons.push({ name: itemName, value1, value2, indent: true });
+                }
+            });
             
+            // Calculate Net Revenue
+            const netRevenue1 = income1.revenue.reduce((sum, item) => sum + item.amount, 0);
+            const netRevenue2 = income2.revenue.reduce((sum, item) => sum + item.amount, 0);
+            comparisons.push({ name: 'Net Revenue', value1: netRevenue1, value2: netRevenue2, isSubtotal: true });
+            
+            // EXPENSES SECTION
+            comparisons.push({ name: 'EXPENSES', isHeader: true });
+            
+            // All expense items
+            const allExpenseItems = new Set();
+            income1.expenses.forEach(item => allExpenseItems.add(item.item));
+            income2.expenses.forEach(item => allExpenseItems.add(item.item));
+            
+            Array.from(allExpenseItems).forEach(itemName => {
+                const item1 = income1.expenses.find(item => item.item === itemName);
+                const item2 = income2.expenses.find(item => item.item === itemName);
+                const value1 = item1 ? item1.amount : 0;
+                const value2 = item2 ? item2.amount : 0;
+                
+                if (value1 > 0 || value2 > 0) {
+                    comparisons.push({ name: itemName, value1, value2, indent: true });
+                }
+            });
+            
+            // Calculate Total Expenses
+            const totalExpenses1 = income1.expenses.reduce((sum, item) => sum + item.amount, 0);
+            const totalExpenses2 = income2.expenses.reduce((sum, item) => sum + item.amount, 0);
+            comparisons.push({ name: 'Total Expenses', value1: totalExpenses1, value2: totalExpenses2, isSubtotal: true });
+            
+            // Calculate Net Income
+            const netIncome1 = netRevenue1 - totalExpenses1;
+            const netIncome2 = netRevenue2 - totalExpenses2;
+            comparisons.push({ name: 'Net Income', value1: netIncome1, value2: netIncome2, isTotal: true });
+            
+            // Generate HTML
             tbody.innerHTML = comparisons.map(item => {
+                if (item.isHeader) {
+                    return `
+                        <tr class="section-header">
+                            <td style="font-weight: bold; color: #60A5FA; padding-top: 16px;"><strong>${item.name}</strong></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    `;
+                }
+                
                 const change = item.value2 - item.value1;
-                const changePercent = item.value1 !== 0 ? ((change / Math.abs(item.value1)) * 100) : (item.value2 > 0 ? 100 : 0);
+                const changePercent = item.value1 !== 0 ? ((change / Math.abs(item.value1)) * 100) : (item.value2 > 0 ? 100 : item.value2 < 0 ? -100 : 0);
                 const changeClass = change >= 0 ? 'positive-change' : 'negative-change';
                 const changeSign = change >= 0 ? '+' : '';
                 
+                const rowClass = item.isTotal ? 'total-line' : (item.isSubtotal ? 'subtotal' : '');
+                const nameStyle = item.indent ? 'padding-left: 20px;' : '';
+                const fontWeight = (item.isSubtotal || item.isTotal) ? 'font-weight: bold;' : '';
+                
                 return `
-                    <tr>
-                        <td>${item.name}</td>
-                        <td>${formatCurrency(item.value1)}</td>
-                        <td>${formatCurrency(item.value2)}</td>
-                        <td class="${changeClass}">${changeSign}${formatCurrency(change)}</td>
-                        <td class="${changeClass}">${changeSign}${changePercent.toFixed(1)}%</td>
+                    <tr class="${rowClass}">
+                        <td style="${nameStyle}${fontWeight}">${item.name}</td>
+                        <td style="${fontWeight}">${formatCurrency(item.value1)}</td>
+                        <td style="${fontWeight}">${formatCurrency(item.value2)}</td>
+                        <td class="${changeClass}" style="${fontWeight}">${changeSign}${formatCurrency(change)}</td>
+                        <td class="${changeClass}" style="${fontWeight}">${changeSign}${changePercent.toFixed(1)}%</td>
                     </tr>
                 `;
             }).join('');
@@ -5309,38 +5386,115 @@
         function populateBalanceComparison(balance1, balance2) {
             const tbody = document.getElementById('balanceComparisonBody');
             
-            // Get all unique items from both periods
-            const allItems = new Set();
-            balance1.assets.forEach(item => allItems.add(item.item));
-            balance1.liabilities.forEach(item => allItems.add(item.item));
-            balance1.equity.forEach(item => allItems.add(item.item));
-            balance2.assets.forEach(item => allItems.add(item.item));
-            balance2.liabilities.forEach(item => allItems.add(item.item));
-            balance2.equity.forEach(item => allItems.add(item.item));
+            const comparisons = [];
             
-            const comparisons = Array.from(allItems).map(itemName => {
-                const item1 = [...balance1.assets, ...balance1.liabilities, ...balance1.equity].find(item => item.item === itemName);
-                const item2 = [...balance2.assets, ...balance2.liabilities, ...balance2.equity].find(item => item.item === itemName);
-                
+            // ASSETS SECTION
+            comparisons.push({ name: 'ASSETS', isHeader: true });
+            
+            // All asset items
+            const allAssetItems = new Set();
+            balance1.assets.forEach(item => allAssetItems.add(item.item));
+            balance2.assets.forEach(item => allAssetItems.add(item.item));
+            
+            Array.from(allAssetItems).forEach(itemName => {
+                const item1 = balance1.assets.find(item => item.item === itemName);
+                const item2 = balance2.assets.find(item => item.item === itemName);
                 const value1 = item1 ? item1.amount : 0;
                 const value2 = item2 ? item2.amount : 0;
                 
-                return { name: itemName, value1, value2 };
-            }).filter(item => item.value1 > 0 || item.value2 > 0); // Only show items with values
+                if (value1 > 0 || value2 > 0) {
+                    comparisons.push({ name: itemName, value1, value2, indent: true });
+                }
+            });
             
+            // Calculate Total Assets
+            const totalAssets1 = balance1.assets.reduce((sum, item) => sum + item.amount, 0);
+            const totalAssets2 = balance2.assets.reduce((sum, item) => sum + item.amount, 0);
+            comparisons.push({ name: 'Total Assets', value1: totalAssets1, value2: totalAssets2, isTotal: true });
+            
+            // LIABILITIES SECTION
+            comparisons.push({ name: 'LIABILITIES', isHeader: true });
+            
+            // All liability items
+            const allLiabilityItems = new Set();
+            balance1.liabilities.forEach(item => allLiabilityItems.add(item.item));
+            balance2.liabilities.forEach(item => allLiabilityItems.add(item.item));
+            
+            Array.from(allLiabilityItems).forEach(itemName => {
+                const item1 = balance1.liabilities.find(item => item.item === itemName);
+                const item2 = balance2.liabilities.find(item => item.item === itemName);
+                const value1 = item1 ? item1.amount : 0;
+                const value2 = item2 ? item2.amount : 0;
+                
+                if (value1 > 0 || value2 > 0) {
+                    comparisons.push({ name: itemName, value1, value2, indent: true });
+                }
+            });
+            
+            // Calculate Total Liabilities
+            const totalLiabilities1 = balance1.liabilities.reduce((sum, item) => sum + item.amount, 0);
+            const totalLiabilities2 = balance2.liabilities.reduce((sum, item) => sum + item.amount, 0);
+            comparisons.push({ name: 'Total Liabilities', value1: totalLiabilities1, value2: totalLiabilities2, isSubtotal: true });
+            
+            // EQUITY SECTION
+            comparisons.push({ name: 'EQUITY', isHeader: true });
+            
+            // All equity items
+            const allEquityItems = new Set();
+            balance1.equity.forEach(item => allEquityItems.add(item.item));
+            balance2.equity.forEach(item => allEquityItems.add(item.item));
+            
+            Array.from(allEquityItems).forEach(itemName => {
+                const item1 = balance1.equity.find(item => item.item === itemName);
+                const item2 = balance2.equity.find(item => item.item === itemName);
+                const value1 = item1 ? item1.amount : 0;
+                const value2 = item2 ? item2.amount : 0;
+                
+                if (value1 > 0 || value2 > 0) {
+                    comparisons.push({ name: itemName, value1, value2, indent: true });
+                }
+            });
+            
+            // Calculate Total Equity
+            const totalEquity1 = balance1.equity.reduce((sum, item) => sum + item.amount, 0);
+            const totalEquity2 = balance2.equity.reduce((sum, item) => sum + item.amount, 0);
+            comparisons.push({ name: 'Total Equity', value1: totalEquity1, value2: totalEquity2, isSubtotal: true });
+            
+            // Calculate Total Liabilities & Equity
+            const totalLiabEquity1 = totalLiabilities1 + totalEquity1;
+            const totalLiabEquity2 = totalLiabilities2 + totalEquity2;
+            comparisons.push({ name: 'Total Liabilities & Equity', value1: totalLiabEquity1, value2: totalLiabEquity2, isTotal: true });
+            
+            // Generate HTML (same pattern as income statement)
             tbody.innerHTML = comparisons.map(item => {
+                if (item.isHeader) {
+                    return `
+                        <tr class="section-header">
+                            <td style="font-weight: bold; color: #60A5FA; padding-top: 16px;"><strong>${item.name}</strong></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    `;
+                }
+                
                 const change = item.value2 - item.value1;
-                const changePercent = item.value1 !== 0 ? ((change / Math.abs(item.value1)) * 100) : (item.value2 > 0 ? 100 : 0);
+                const changePercent = item.value1 !== 0 ? ((change / Math.abs(item.value1)) * 100) : (item.value2 > 0 ? 100 : item.value2 < 0 ? -100 : 0);
                 const changeClass = change >= 0 ? 'positive-change' : 'negative-change';
                 const changeSign = change >= 0 ? '+' : '';
                 
+                const rowClass = item.isTotal ? 'total-line' : (item.isSubtotal ? 'subtotal' : '');
+                const nameStyle = item.indent ? 'padding-left: 20px;' : '';
+                const fontWeight = (item.isSubtotal || item.isTotal) ? 'font-weight: bold;' : '';
+                
                 return `
-                    <tr>
-                        <td>${item.name}</td>
-                        <td>${formatCurrency(item.value1)}</td>
-                        <td>${formatCurrency(item.value2)}</td>
-                        <td class="${changeClass}">${changeSign}${formatCurrency(change)}</td>
-                        <td class="${changeClass}">${changeSign}${changePercent.toFixed(1)}%</td>
+                    <tr class="${rowClass}">
+                        <td style="${nameStyle}${fontWeight}">${item.name}</td>
+                        <td style="${fontWeight}">${formatCurrency(item.value1)}</td>
+                        <td style="${fontWeight}">${formatCurrency(item.value2)}</td>
+                        <td class="${changeClass}" style="${fontWeight}">${changeSign}${formatCurrency(change)}</td>
+                        <td class="${changeClass}" style="${fontWeight}">${changeSign}${changePercent.toFixed(1)}%</td>
                     </tr>
                 `;
             }).join('');
