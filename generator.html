@@ -2565,16 +2565,15 @@
         }
 
         .statement-area {
-            flex: 0 0 70%;
+            flex: 0 0 75%;
             display: flex;
             flex-direction: column;
             gap: 24px;
         }
 
         .buffer-area {
-            flex: 0 0 30%;
-            position: fixed;
-            right: 0;
+            flex: 0 0 25%;
+            position: sticky;
             top: 100px;
         }
 
@@ -2624,8 +2623,19 @@
             display: none;
         }
 
+        .statement-header {
+            font-size: 1.25rem;
+            margin-bottom: 8px;
+            width: 100%;
+        }
+
+        .category-header {
+            font-size: 1.1rem;
+            margin-bottom: 4px;
+        }
+
         .gl-account-title {
-            font-size: 0.85rem;
+            font-size: 1rem;
             margin-bottom: 4px;
             font-weight: 600;
             cursor: pointer;
@@ -3347,14 +3357,14 @@
                         <div class="transaction-lists">
                             <div class="statement-area">
                                 <div class="statement-section">
-                                <h5>Income Statement</h5>
+                                <h1 class="statement-header">Income Statement</h1>
                                 <div class="category-column">
-                                    <h6>Revenue</h6>
+                                    <h2 class="category-header">Revenue</h2>
                                     <div id="income-revenue-lists" class="gl-account-lists"></div>
                                     <button class="add-account-btn" data-statement="income" data-category="Revenue">+ Add Account</button>
                                 </div>
                                 <div class="category-column">
-                                    <h6>Expense</h6>
+                                    <h2 class="category-header">Expense</h2>
                                     <div id="income-expense-lists" class="gl-account-lists"></div>
                                     <button class="add-account-btn" data-statement="income" data-category="Expense">+ Add Account</button>
                                 </div>
@@ -3374,51 +3384,19 @@
                                 </div>
                                 </div>
                                 <div class="statement-section">
-                                <h5>Cash Flow</h5>
+                                <h1 class="statement-header">Balance Sheet</h1>
                                 <div class="category-column">
-                                    <h6>Operating</h6>
-                                    <div id="cashflow-operating-lists" class="gl-account-lists"></div>
-                                    <button class="add-account-btn" data-statement="cashflow" data-category="Operating">+ Add Account</button>
-                                </div>
-                                <div class="category-column">
-                                    <h6>Investing</h6>
-                                    <div id="cashflow-investing-lists" class="gl-account-lists"></div>
-                                    <button class="add-account-btn" data-statement="cashflow" data-category="Investing">+ Add Account</button>
-                                </div>
-                                <div class="category-column">
-                                    <h6>Financing</h6>
-                                    <div id="cashflow-financing-lists" class="gl-account-lists"></div>
-                                    <button class="add-account-btn" data-statement="cashflow" data-category="Financing">+ Add Account</button>
-                                </div>
-                                <div class="statement-footer">
-                                    <div class="summary-item">
-                                        <span>Operating:</span>
-                                        <span id="cashflowOperatingTotal" class="amount">$0</span>
-                                    </div>
-                                    <div class="summary-item">
-                                        <span>Investing:</span>
-                                        <span id="cashflowInvestingTotal" class="amount">$0</span>
-                                    </div>
-                                    <div class="summary-item">
-                                        <span>Financing:</span>
-                                        <span id="cashflowFinancingTotal" class="amount">$0</span>
-                                    </div>
-                                </div>
-                                </div>
-                                <div class="statement-section">
-                                <h5>Balance Sheet</h5>
-                                <div class="category-column">
-                                    <h6>Asset</h6>
+                                    <h2 class="category-header">Asset</h2>
                                     <div id="balance-asset-lists" class="gl-account-lists"></div>
                                     <button class="add-account-btn" data-statement="balance" data-category="Asset">+ Add Account</button>
                                 </div>
                                 <div class="category-column">
-                                    <h6>Liability</h6>
+                                    <h2 class="category-header">Liability</h2>
                                     <div id="balance-liability-lists" class="gl-account-lists"></div>
                                     <button class="add-account-btn" data-statement="balance" data-category="Liability">+ Add Account</button>
                                 </div>
                                 <div class="category-column">
-                                    <h6>Equity</h6>
+                                    <h2 class="category-header">Equity</h2>
                                     <div id="balance-equity-lists" class="gl-account-lists"></div>
                                     <button class="add-account-btn" data-statement="balance" data-category="Equity">+ Add Account</button>
                                 </div>
@@ -3437,10 +3415,42 @@
                                     </div>
                                 </div>
                                 </div>
+                                <div class="statement-section">
+                                <h1 class="statement-header">Cash Flow Statement</h1>
+                                <div class="category-column">
+                                    <h2 class="category-header">Operating</h2>
+                                    <div id="cashflow-operating-lists" class="gl-account-lists"></div>
+                                    <button class="add-account-btn" data-statement="cashflow" data-category="Operating">+ Add Account</button>
+                                </div>
+                                <div class="category-column">
+                                    <h2 class="category-header">Investing</h2>
+                                    <div id="cashflow-investing-lists" class="gl-account-lists"></div>
+                                    <button class="add-account-btn" data-statement="cashflow" data-category="Investing">+ Add Account</button>
+                                </div>
+                                <div class="category-column">
+                                    <h2 class="category-header">Financing</h2>
+                                    <div id="cashflow-financing-lists" class="gl-account-lists"></div>
+                                    <button class="add-account-btn" data-statement="cashflow" data-category="Financing">+ Add Account</button>
+                                </div>
+                                <div class="statement-footer">
+                                    <div class="summary-item">
+                                        <span>Operating:</span>
+                                        <span id="cashflowOperatingTotal" class="amount">$0</span>
+                                    </div>
+                                    <div class="summary-item">
+                                        <span>Investing:</span>
+                                        <span id="cashflowInvestingTotal" class="amount">$0</span>
+                                    </div>
+                                    <div class="summary-item">
+                                        <span>Financing:</span>
+                                        <span id="cashflowFinancingTotal" class="amount">$0</span>
+                                    </div>
+                                </div>
+                                </div>
                             </div>
                             <div class="buffer-area">
                                 <div class="statement-section">
-                                    <h5>Buffer</h5>
+                                    <h1 class="statement-header">Buffer</h1>
                                     <div id="buffer-list" class="transaction-list" data-statement="buffer" data-category="Buffer"></div>
                                 </div>
                             </div>
@@ -6371,7 +6381,7 @@
                         section.className = 'gl-account-section';
                         section.dataset.glAccount = account;
 
-                        const title = document.createElement('div');
+                        const title = document.createElement('h3');
                         title.className = 'gl-account-title';
                         title.textContent = account;
                         section.appendChild(title);
@@ -6447,7 +6457,7 @@ function createGLEmptySection(statement, category, account, container) {
         section.className = 'gl-account-section';
         section.dataset.glAccount = account;
 
-        const title = document.createElement('div');
+        const title = document.createElement('h3');
         title.className = 'gl-account-title';
         title.textContent = account;
         section.appendChild(title);
