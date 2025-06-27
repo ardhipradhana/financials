@@ -4476,6 +4476,7 @@
             // EQUITY SECTION
             html += addSectionHeader('EQUITY');
             
+            // Retained Earnings is handled separately to avoid duplicate rows
             const equityAccounts = [
                 ['Owner\'s Equity', ['Owner\'s Equity']],
                 ['Capital Stock', ['Capital Stock']],
@@ -4483,7 +4484,6 @@
                 ['Preferred Stock', ['Preferred Stock']],
                 ['Paid-in Capital', ['Paid-in Capital']],
                 ['Additional Paid-in Capital', ['Additional Paid-in Capital']],
-                ['Retained Earnings', ['Retained Earnings']],
                 ['Treasury Stock', ['Treasury Stock']],
                 ['Accumulated Other Comprehensive Income', ['Accumulated Other Comprehensive Income']],
                 ['Current Year Earnings', ['Current Year Earnings']],
