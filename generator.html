@@ -2579,6 +2579,11 @@
             border-radius: 6px;
         }
 
+        /* Buffer list mirrors default transaction list styling */
+        #buffer-list {
+            min-height: 40px;
+        }
+
 
         /* Individual Transaction Cards */
         .transaction-card {
@@ -3338,6 +3343,10 @@
                                     <h6>Equity</h6>
                                     <div id="balance-equity-list" class="transaction-list" data-statement="balance" data-category="Equity"></div>
                                 </div>
+                            </div>
+                            <div class="statement-section">
+                                <h5>Buffer</h5>
+                                <div id="buffer-list" class="transaction-list" data-statement="buffer" data-category="Buffer"></div>
                             </div>
                         </div>
                         
@@ -6217,7 +6226,12 @@
             document.querySelectorAll('.transaction-list').forEach(list => list.innerHTML = '');
 
             currentTransactions.forEach(tx => {
-                const container = document.getElementById(`${tx.statement}-${tx.category.toLowerCase()}-list`);
+                let container;
+                if (tx.statement === 'buffer') {
+                    container = document.getElementById('buffer-list');
+                } else {
+                    container = document.getElementById(`${tx.statement}-${tx.category.toLowerCase()}-list`);
+                }
                 if (!container) return;
 
                 const card = document.createElement('div');
@@ -6234,7 +6248,7 @@
         }
 
         function initDragAndDrop() {
-            document.querySelectorAll('.transaction-list').forEach(list => {
+            document.querySelectorAll('.transaction-list, #buffer-list').forEach(list => {
                 Sortable.create(list, {
                     group: 'transactions',
                     animation: 150,
@@ -6338,6 +6352,7 @@
             const expenseGroups = {};
             
             transactions.forEach(tx => {
+                if (tx.statement === 'buffer') return;
                 if (tx.category === 'Revenue' || (tx.amount > 0 && tx.category !== 'Expense')) {
                     const key = tx.subcategory || 'Other Revenue';
                     if (!revenueGroups[key]) {
