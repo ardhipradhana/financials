@@ -2675,7 +2675,13 @@
             font-size: 0.8rem;
             line-height: 1.4;
         }
-        
+
+        .transaction-meta {
+            color: #94A3B8;
+            font-size: 0.75rem;
+            margin-top: 4px;
+        }
+
         .transaction-date {
             color: #64748B;
             font-size: 0.75rem;
@@ -3994,16 +4000,34 @@
             const income = financialStatements.incomeStatement.incomeStatement || financialStatements.incomeStatement;
             const balance = financialStatements.balanceSheet.balanceSheet || financialStatements.balanceSheet;
             const cashFlow = financialStatements.cashFlow.cashFlow || financialStatements.cashFlow;
-            
+
             return transactions.map(tx => {
-                // Simple category determination based on amount
-                let category = 'Other';
-                if (tx.amount > 0) {
-                    category = 'Revenue';
-                } else if (tx.amount < 0) {
-                    category = 'Expense';
+                const info = findTransactionCategory(tx.transaction_index, {
+                    incomeStatement: income,
+                    balanceSheet: balance,
+                    cashFlow: cashFlow
+                });
+
+                // Determine final category using detected info or amount sign
+                let category = info.type;
+                if (category === 'Other') {
+                    if (tx.amount > 0) {
+                        category = 'Revenue';
+                    } else if (tx.amount < 0) {
+                        category = 'Expense';
+                    }
                 }
-                
+
+                // Map statement based on category type
+                let statement = '';
+                if (category === 'Revenue' || category === 'Expense') {
+                    statement = 'income';
+                } else if (category === 'Operating' || category === 'Investing' || category === 'Financing') {
+                    statement = 'cashflow';
+                } else if (category === 'Asset' || category === 'Liability' || category === 'Equity') {
+                    statement = 'balance';
+                }
+
                 return {
                     id: tx.transaction_index,
                     date: tx.date, // Keep original date format
@@ -4012,7 +4036,9 @@
                     context: tx.business_context,
                     confidence: tx.confidence_score,
                     category: category,
-                    subcategory: 'General',
+                    subcategory: info.item || 'General',
+                    statement: statement,
+                    glAccount: info.item || null,
                     isIncome: tx.amount > 0,
                     editable: true
                 };
@@ -6232,6 +6258,7 @@
                 </div>
                 <div class="transaction-description">${transaction.description}</div>
                 <div class="transaction-context">${transaction.context}</div>
+                <div class="transaction-meta">${transaction.statement || ''}${transaction.glAccount ? ' - ' + transaction.glAccount : ''}</div>
                 <div class="transaction-date">${formatTransactionDate(transaction.date)}</div>
             `;
             
@@ -6324,7 +6351,11 @@
             const transaction = currentTransactions.find(t => t.id == transactionId);
             if (transaction) {
                 transaction.category = newCategory;
-                
+
+                if (newCategory === 'Revenue' || newCategory === 'Expense') {
+                    transaction.statement = 'income';
+                }
+
                 // Update subcategory based on new category
                 if (newCategory === 'Revenue') {
                     transaction.subcategory = 'Other Revenue';
