@@ -4394,28 +4394,16 @@
             const totalLiabilities = currentLiabilitiesTotal + nonCurrentLiabilitiesTotal;
             html += addRowIfValue('Total Liabilities', totalLiabilities, true);
             
-            // EQUITY SECTION WITH NET INCOME CONNECTION
+            // EQUITY SECTION
             html += addSectionHeader('EQUITY');
             
-            // Get Net Income from global variable (calculated in Income Statement)
-            const currentNetIncome = window.calculatedNetIncome || 0;
-            
             let totalEquity = 0;
-            
-            // If backend equity is negative or very small, calculate from Assets - Liabilities
-            if (Math.abs(backendEquity) < 1000 || backendEquity < 0) {
-                const calculatedEquity = totalAssets - totalLiabilities;
-                html += addRowIfValue('Calculated Equity (Assets - Liabilities)', calculatedEquity, false, false, true);
-                totalEquity = calculatedEquity;
-            } else {
-                // Use backend equity values
-                balanceData.equity.forEach(equity => {
-                    if (equity.amount !== 0) {
-                        html += addRowIfValue(equity.item, equity.amount, false, false, true);
-                        totalEquity += equity.amount;
-                    }
-                });
-            }
+            balanceData.equity.forEach(equity => {
+                if (equity.amount !== 0) {
+                    html += addRowIfValue(equity.item, equity.amount, false, false, true);
+                    totalEquity += equity.amount;
+                }
+            });
             
             // BALANCING LOGIC (Safety Net)
             const liabilitiesAndEquity = totalLiabilities + totalEquity;
@@ -6846,6 +6834,7 @@
 
         function openMonthPicker(container) {
             const input = container.querySelector('input[type="month"]');
+            input.focus();
             input.click();
         }
 
