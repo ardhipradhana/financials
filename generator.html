@@ -6255,7 +6255,7 @@
         function handleDragStart(e) {
             draggedTransaction = e.target;
             e.target.classList.add('dragging');
-            
+
             // Store transaction data
             e.dataTransfer.setData('text/plain', e.target.dataset.transactionId);
             e.dataTransfer.effectAllowed = 'move';
@@ -6264,6 +6264,20 @@
         function handleDragEnd(e) {
             e.target.classList.remove('dragging');
             draggedTransaction = null;
+        }
+
+        // Determine placement relative to other cards
+        function getDragAfterElement(container, y) {
+            const elements = [...container.querySelectorAll('.transaction-card:not(.dragging)')];
+            return elements.reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offset = y - box.top - box.height / 2;
+                if (offset < 0 && offset > closest.offset) {
+                    return { offset, element: child };
+                } else {
+                    return closest;
+                }
+            }, { offset: Number.NEGATIVE_INFINITY }).element;
         }
         
         // Set up drop zones when transactions tab is loaded
@@ -6280,6 +6294,13 @@
         
         function handleDragOver(e) {
             e.preventDefault();
+            const zone = e.currentTarget;
+            const afterElement = getDragAfterElement(zone, e.clientY);
+            if (afterElement == null) {
+                zone.appendChild(draggedTransaction);
+            } else if (afterElement !== draggedTransaction) {
+                zone.insertBefore(draggedTransaction, afterElement);
+            }
             e.dataTransfer.dropEffect = 'move';
         }
         
@@ -6303,37 +6324,59 @@
         
         function handleDrop(e) {
             e.preventDefault();
-            
+
             const column = e.target.closest('.category-column');
             if (column) {
                 column.classList.remove('drag-over');
-                
+
                 const transactionId = e.dataTransfer.getData('text/plain');
                 const newCategory = column.dataset.category;
-                
-                // Update transaction category
-                moveTransactionToCategory(transactionId, newCategory);
-                
+
+                const zone = column.querySelector('.transaction-drop-zone');
+                const afterElement = getDragAfterElement(zone, e.clientY);
+                const beforeId = afterElement ? afterElement.dataset.transactionId : null;
+
+                // Update transaction category and order
+                moveTransactionToCategory(transactionId, newCategory, beforeId);
+
                 // Re-populate zones and update calculations
                 populateTransactionZones();
                 updateLiveSummary();
             }
         }
         
-        function moveTransactionToCategory(transactionId, newCategory) {
-            const transaction = currentTransactions.find(t => t.id == transactionId);
-            if (transaction) {
-                transaction.category = newCategory;
-                
-                // Update subcategory based on new category
-                if (newCategory === 'Revenue') {
-                    transaction.subcategory = 'Other Revenue';
-                } else if (newCategory === 'Expense') {
-                    transaction.subcategory = 'Other Expenses';
-                } else {
-                    transaction.subcategory = 'Unclassified';
+        function moveTransactionToCategory(transactionId, newCategory, beforeId) {
+            const index = currentTransactions.findIndex(t => t.id == transactionId);
+            if (index === -1) return;
+
+            const [transaction] = currentTransactions.splice(index, 1);
+            transaction.category = newCategory;
+
+            // Update subcategory based on new category
+            if (newCategory === 'Revenue') {
+                transaction.subcategory = 'Other Revenue';
+            } else if (newCategory === 'Expense') {
+                transaction.subcategory = 'Other Expenses';
+            } else {
+                transaction.subcategory = 'Unclassified';
+            }
+
+            let insertIndex = currentTransactions.length;
+
+            if (beforeId) {
+                insertIndex = currentTransactions.findIndex(t => t.id == beforeId);
+                if (insertIndex === -1) insertIndex = currentTransactions.length;
+            } else {
+                // place at end of same category
+                for (let i = currentTransactions.length - 1; i >= 0; i--) {
+                    if (currentTransactions[i].category === newCategory) {
+                        insertIndex = i + 1;
+                        break;
+                    }
                 }
             }
+
+            currentTransactions.splice(insertIndex, 0, transaction);
         }
         
         // Real-time calculation functions
