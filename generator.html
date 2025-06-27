@@ -3897,13 +3897,17 @@
                 // Handle array response format from backend
                 const result = Array.isArray(data) ? data[0] : data;
                 
+                console.log('Processing backend result:', result);
+                
                 if (result.status === 'complete') {
-                    // Parse and validate the JSON strings from backend
+                    // Parse the JSON strings from backend properly
                     const financialStatements = {
-                        incomeStatement: parseAndValidateJSON(result.financialStatements.incomeStatement, 'Income Statement'),
-                        balanceSheet: parseAndValidateJSON(result.financialStatements.balanceSheet, 'Balance Sheet'),
-                        cashFlow: parseAndValidateJSON(result.financialStatements.cashFlow, 'Cash Flow')
+                        incomeStatement: JSON.parse(result.financialStatements.incomeStatement),
+                        balanceSheet: JSON.parse(result.financialStatements.balanceSheet),
+                        cashFlow: JSON.parse(result.financialStatements.cashFlow)
                     };
+                    
+                    console.log('Parsed financial statements:', financialStatements);
                     
                     // Validate data structure
                     if (validateFinancialStatements(financialStatements)) {
@@ -3927,6 +3931,8 @@
                     } else {
                         throw new Error('Invalid financial statement structure received from backend');
                     }
+                } else {
+                    throw new Error('Backend processing incomplete');
                 }
             } catch (error) {
                 console.error('Error processing backend response:', error);
