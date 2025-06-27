@@ -4307,6 +4307,12 @@
         
         function populateBalanceSheet(balanceData) {
             const balanceTable = document.querySelector('#balanceReport tbody');
+
+            let currentAssetsTotal = 0;
+            let nonCurrentAssetsTotal = 0;
+            let currentLiabilitiesTotal = 0;
+            let nonCurrentLiabilitiesTotal = 0;
+            let totalEquity = 0;
             
             function addRowIfValue(label, amount, isSubtotal = false, isTotal = false, indent = false) {
                 if (amount && Math.abs(amount) > 0.01) {
@@ -4361,7 +4367,6 @@
                 ['Other Current Assets', ['Other Current Assets']]
             ];
             
-            let currentAssetsTotal = 0;
             currentAssetAccounts.forEach(([label, searchTerms]) => {
                 const amount = findAccountAmount(balanceData.assets, searchTerms);
                 if (amount > 0) {
@@ -4396,7 +4401,6 @@
                 ['Other Non-current Assets', ['Other Non-current Assets']]
             ];
             
-            let nonCurrentAssetsTotal = 0;
             nonCurrentAssetAccounts.forEach(([label, searchTerms]) => {
                 const amount = findAccountAmount(balanceData.assets, searchTerms);
                 if (amount > 0) {
@@ -4433,7 +4437,6 @@
                 ['Other Current Liabilities', ['Other Current Liabilities']]
             ];
             
-            let currentLiabilitiesTotal = 0;
             currentLiabilityAccounts.forEach(([label, searchTerms]) => {
                 const amount = findAccountAmount(balanceData.liabilities, searchTerms);
                 if (amount > 0) {
@@ -4457,7 +4460,6 @@
                 ['Other Non-current Liabilities', ['Other Non-current Liabilities']]
             ];
             
-            let nonCurrentLiabilitiesTotal = 0;
             nonCurrentLiabilityAccounts.forEach(([label, searchTerms]) => {
                 const amount = findAccountAmount(balanceData.liabilities, searchTerms);
                 if (amount > 0) {
@@ -4497,7 +4499,6 @@
                 totalEquity += retainedEarnings;
             }
             
-            let totalEquity = 0;
             equityAccounts.forEach(([label, searchTerms]) => {
                 const amount = findAccountAmount(balanceData.equity, searchTerms);
                 if (amount !== 0) { // Allow negative equity
