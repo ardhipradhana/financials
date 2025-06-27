@@ -3968,48 +3968,58 @@
             const balance = financialStatements.balanceSheet.balanceSheet || financialStatements.balanceSheet;
             const cashFlow = financialStatements.cashFlow.cashFlow || financialStatements.cashFlow;
 
-            return transactions.map(tx => {
-                const info = findTransactionCategory(tx.transaction_index, {
+            let processed = [];
+            transactions.forEach(tx => {
+                const matches = findTransactionCategories(tx.transaction_index, {
                     incomeStatement: income,
                     balanceSheet: balance,
                     cashFlow: cashFlow
                 });
 
-                // Determine final category using detected info or amount sign
-                let category = info.type;
-                if (category === 'Other') {
-                    if (tx.amount > 0) {
-                        category = 'Revenue';
-                    } else if (tx.amount < 0) {
-                        category = 'Expense';
+                const infos = matches.length > 0 ? matches : [{ statement: '', type: 'Other', item: 'Unclassified' }];
+
+                infos.forEach((info, idx) => {
+                    // Determine final category using detected info or amount sign
+                    let category = info.type;
+                    if (category === 'Other') {
+                        if (tx.amount > 0) {
+                            category = 'Revenue';
+                        } else if (tx.amount < 0) {
+                            category = 'Expense';
+                        }
                     }
-                }
 
-                // Map statement based on category type
-                let statement = '';
-                if (category === 'Revenue' || category === 'Expense') {
-                    statement = 'income';
-                } else if (category === 'Operating' || category === 'Investing' || category === 'Financing') {
-                    statement = 'cashflow';
-                } else if (category === 'Asset' || category === 'Liability' || category === 'Equity') {
-                    statement = 'balance';
-                }
+                    // Map statement based on category type if not provided
+                    let statement = info.statement || '';
+                    if (!statement) {
+                        if (category === 'Revenue' || category === 'Expense') {
+                            statement = 'income';
+                        } else if (category === 'Operating' || category === 'Investing' || category === 'Financing') {
+                            statement = 'cashflow';
+                        } else if (category === 'Asset' || category === 'Liability' || category === 'Equity') {
+                            statement = 'balance';
+                        }
+                    }
 
-                return {
-                    id: tx.transaction_index,
-                    date: tx.date, // Keep original date format
-                    amount: tx.amount,
-                    description: tx.counterparty,
-                    context: tx.business_context,
-                    confidence: tx.confidence_score,
-                    category: category,
-                    subcategory: info.item || 'General',
-                    statement: statement,
-                    glAccount: info.item || null,
-                    isIncome: tx.amount > 0,
-                    editable: true
-                };
+                    processed.push({
+                        id: `${tx.transaction_index}-${idx}`,
+                        baseId: tx.transaction_index,
+                        date: tx.date, // Keep original date format
+                        amount: tx.amount,
+                        description: tx.counterparty,
+                        context: tx.business_context,
+                        confidence: tx.confidence_score,
+                        category: category,
+                        subcategory: info.item || 'General',
+                        statement: statement,
+                        glAccount: info.item || null,
+                        isIncome: tx.amount > 0,
+                        editable: true
+                    });
+                });
             });
+
+            return processed;
         }
         
         function convertDateFormat(dateStr) {
@@ -4018,57 +4028,63 @@
             return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
         }
         
-        function findTransactionCategory(txIndex, statements) {
-            // Check Income Statement
+        function findTransactionCategories(txIndex, statements) {
+            const matches = [];
+
+            // Income Statement
             const income = statements.incomeStatement;
             for (let item of income.revenue) {
                 if (item.transaction_index && item.transaction_index.includes(txIndex)) {
-                    return { type: 'Revenue', item: item.item };
+                    matches.push({ statement: 'income', type: 'Revenue', item: item.item });
                 }
             }
             for (let item of income.expenses) {
                 if (item.transaction_index && item.transaction_index.includes(txIndex)) {
-                    return { type: 'Expense', item: item.item };
+                    matches.push({ statement: 'income', type: 'Expense', item: item.item });
                 }
             }
-            // Check Balance Sheet
+
+            // Balance Sheet
             const balance = statements.balanceSheet;
             for (let item of balance.assets) {
                 if (item.transaction_index && item.transaction_index.includes(txIndex)) {
-                    return { type: 'Asset', item: item.item };
+                    matches.push({ statement: 'balance', type: 'Asset', item: item.item });
                 }
             }
             for (let item of balance.liabilities) {
                 if (item.transaction_index && item.transaction_index.includes(txIndex)) {
-                    return { type: 'Liability', item: item.item };
+                    matches.push({ statement: 'balance', type: 'Liability', item: item.item });
                 }
             }
             for (let item of balance.equity) {
                 if (item.transaction_index && item.transaction_index.includes(txIndex)) {
-                    return { type: 'Equity', item: item.item };
+                    matches.push({ statement: 'balance', type: 'Equity', item: item.item });
                 }
             }
 
-            // Check Cash Flow
+            // Cash Flow
             const cashFlow = statements.cashFlow;
             for (let item of cashFlow.operating) {
                 if (item.transaction_index && item.transaction_index.includes(txIndex)) {
-                    return { type: 'Operating', item: item.item };
+                    matches.push({ statement: 'cashflow', type: 'Operating', item: item.item });
                 }
             }
             for (let item of cashFlow.investing) {
                 if (item.transaction_index && item.transaction_index.includes(txIndex)) {
-                    return { type: 'Investing', item: item.item };
+                    matches.push({ statement: 'cashflow', type: 'Investing', item: item.item });
                 }
             }
             for (let item of cashFlow.financing) {
                 if (item.transaction_index && item.transaction_index.includes(txIndex)) {
-                    return { type: 'Financing', item: item.item };
+                    matches.push({ statement: 'cashflow', type: 'Financing', item: item.item });
                 }
             }
 
-            // Default
-            return { type: 'Other', item: 'Unclassified' };
+            if (matches.length === 0) {
+                matches.push({ statement: '', type: 'Other', item: 'Unclassified' });
+            }
+
+            return matches;
         }
 
         function populateResults(financialStatements) {
@@ -6208,6 +6224,7 @@
                 card.className = 'transaction-card';
                 card.draggable = true;
                 card.dataset.id = tx.id;
+                card.dataset.baseId = tx.baseId;
                 card.innerHTML = `
                     <span class="transaction-description">${tx.description}</span>
                     <span class="transaction-amount ${tx.amount >= 0 ? 'positive' : 'negative'}">${formatCurrency(tx.amount)}</span>
@@ -6223,10 +6240,17 @@
                     animation: 150,
                     onAdd: (evt) => {
                         const txId = evt.item.dataset.id;
+                        const baseId = evt.item.dataset.baseId;
                         const statement = evt.to.dataset.statement;
                         const category = evt.to.dataset.category;
                         const tx = currentTransactions.find(t => String(t.id) === String(txId));
                         if (tx) {
+                            const duplicate = currentTransactions.find(t => t.baseId === tx.baseId && t.statement === statement && t.id !== tx.id);
+                            if (duplicate) {
+                                evt.from.appendChild(evt.item);
+                                showUpdateNotification('Transaction already exists in that statement!');
+                                return;
+                            }
                             tx.statement = statement;
                             tx.category = category;
                         }
