@@ -4862,6 +4862,9 @@
             
             // Show results directly
             populateResults(analysis.financialData);
+            if (analysis.financialData.insights) {
+                displayInsights(analysis.financialData.insights);
+            }
             
             // Update UI state
             currentStep = 4;
@@ -6300,6 +6303,16 @@
                 console.log('Final insights to display:', insights);
                 
                 displayInsights(insights);
+
+                if (insights && insights.length > 0) {
+                    // Save insights to current financial data
+                    if (window.currentFinancialData) {
+                        window.currentFinancialData.insights = insights;
+                        
+                        // Re-save the analysis with insights included
+                        saveAnalysisWithInsights(window.currentFinancialData);
+                    }
+                }
                 
             } catch (error) {
                 console.error('Error generating insights:', error);
@@ -6376,6 +6389,27 @@
             ];
             
             displayInsights(demoInsights);
+        }
+
+        function saveAnalysisWithInsights(financialDataWithInsights) {
+            try {
+                const analysisId = getCurrentAnalysisId(); // You'll need to track this
+                let savedAnalyses = getSavedAnalyses();
+                
+                // Find and update the current analysis
+                const analysisIndex = savedAnalyses.findIndex(analysis => analysis.id === analysisId);
+                if (analysisIndex !== -1) {
+                    savedAnalyses[analysisIndex].financialData = financialDataWithInsights;
+                    savedAnalyses[analysisIndex].hasInsights = true;
+                    savedAnalyses[analysisIndex].lastUpdated = new Date().toISOString();
+                    
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(savedAnalyses));
+                    
+                    showSaveNotification('Insights added to saved analysis');
+                }
+            } catch (error) {
+                console.error('Error saving insights:', error);
+            }
         }
 
         function exportSelectedReports(format) {
