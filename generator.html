@@ -6259,10 +6259,10 @@
                         const category = evt.to.dataset.category;
                         const tx = currentTransactions.find(t => String(t.id) === String(txId));
                         if (tx) {
-                            const duplicate = currentTransactions.find(t => t.baseId === tx.baseId && t.statement === statement && t.id !== tx.id);
+                            const duplicate = currentTransactions.find(t => t.baseId === baseId && t.statement === statement && t.id !== tx.id);
                             if (duplicate) {
                                 evt.from.appendChild(evt.item);
-                                showUpdateNotification('Transaction already exists in that statement!');
+                                showUpdateNotification("This transaction already exists in this statement");
                                 return;
                             }
                             tx.statement = statement;
