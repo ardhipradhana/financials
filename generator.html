@@ -3623,6 +3623,17 @@
             }
         });
 
+        // Also listen for change events (for select and date inputs)
+        document.addEventListener('change', (e) => {
+            if (['companyName', 'industry', 'businessSize', 'reportingPeriod'].includes(e.target.id)) {
+                if (validateCompanyInfo() && currentStep === 1) {
+                    currentStep = 2;
+                    updateProgress(2);
+                    setTimeout(() => showCard(uploadCard), 500);
+                }
+            }
+        });
+
         // File upload handling - CORRECTED VERSION
         const uploadZone = document.getElementById('uploadZone');
         const fileInput = document.getElementById('fileInput');
@@ -6860,7 +6871,7 @@
         function openMonthPicker(container) {
             const input = container.querySelector('input[type="month"]');
             input.focus();
-            input.showPicker(); // This opens the calendar directly
+            input.click();
         }
 
         function calculateSimpleCurrentRatio() {
