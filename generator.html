@@ -2550,6 +2550,199 @@
             color: #EF4444;
             font-weight: 600;
         }
+
+        /* Transaction Editor Styles */
+        .transaction-editor {
+            margin-top: 24px;
+        }
+        
+        .category-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 32px;
+            min-height: 500px;
+        }
+        
+        .category-column {
+            background: linear-gradient(145deg, rgba(15, 23, 42, 0.4), rgba(30, 41, 59, 0.2));
+            border: 2px dashed rgba(59, 130, 246, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .category-column.drag-over {
+            border-color: #60A5FA;
+            background: rgba(59, 130, 246, 0.1);
+            transform: scale(1.02);
+        }
+        
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+        
+        .revenue-header {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.1));
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        
+        .expense-header {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(220, 38, 38, 0.1));
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+        
+        .other-header {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(217, 119, 6, 0.1));
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+        
+        .category-header h5 {
+            color: #F8FAFC;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+        
+        .category-total {
+            color: #F8FAFC;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        
+        .transaction-drop-zone {
+            min-height: 400px;
+            padding: 8px;
+        }
+        
+        /* Individual Transaction Cards */
+        .transaction-card {
+            background: linear-gradient(145deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9));
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+            cursor: grab;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+        
+        .transaction-card:hover {
+            border-color: rgba(59, 130, 246, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+        }
+        
+        .transaction-card.dragging {
+            opacity: 0.5;
+            transform: rotate(5deg);
+            cursor: grabbing;
+        }
+        
+        .transaction-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .transaction-amount {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        
+        .transaction-amount.positive {
+            color: #10B981;
+        }
+        
+        .transaction-amount.negative {
+            color: #EF4444;
+        }
+        
+        .transaction-description {
+            color: #F8FAFC;
+            font-weight: 500;
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+        }
+        
+        .transaction-context {
+            color: #94A3B8;
+            font-size: 0.8rem;
+            line-height: 1.4;
+        }
+        
+        .transaction-date {
+            color: #64748B;
+            font-size: 0.75rem;
+            margin-top: 4px;
+        }
+        
+        /* Live Summary */
+        .live-summary {
+            background: linear-gradient(145deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9));
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 24px;
+        }
+        
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 8px;
+        }
+        
+        .summary-item.highlight {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(30, 41, 59, 0.8));
+            border: 1px solid rgba(59, 130, 246, 0.4);
+        }
+        
+        .summary-item span:first-child {
+            color: #94A3B8;
+            font-weight: 500;
+        }
+        
+        .amount {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+        
+        .amount.positive {
+            color: #10B981;
+        }
+        
+        .amount.negative {
+            color: #EF4444;
+        }
+        
+        .transaction-actions {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+        }
+        
+        @media (max-width: 768px) {
+            .category-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            
+            .live-summary {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+        }
         
     </style>
 </head>
@@ -2791,6 +2984,7 @@
                     <button class="tab-btn" onclick="showReport('balance')">Balance Sheet</button>
                     <button class="tab-btn" onclick="showReport('cashflow')">Cash Flow Statement</button>
                     <button class="tab-btn" onclick="showReport('ratios')">Financial Ratios</button>
+                    <button class="tab-btn" onclick="showReport('transactions')">Review Transactions</button>
                     <button class="tab-btn" onclick="showReport('insights')">Insights Generator</button>
                 </div>
             
@@ -3110,6 +3304,74 @@
                                 <h5>Market & Valuation</h5>
                             </div>
                             <div class="ratio-items" id="marketRatios"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Transaction Review Report -->
+                <div class="report-container" id="transactionsReport">
+                    <div class="report-header">
+                        <h4>Transaction Review & Editing</h4>
+                        <p>Drag transactions between categories to adjust your financial statements</p>
+                    </div>
+                    
+                    <div class="transaction-editor">
+                        <!-- Category Columns -->
+                        <div class="category-grid">
+                            <!-- Revenue Column -->
+                            <div class="category-column" data-category="Revenue">
+                                <div class="category-header revenue-header">
+                                    <h5>💰 Revenue</h5>
+                                    <span class="category-total" id="revenueTotalDisplay">$0</span>
+                                </div>
+                                <div class="transaction-drop-zone" id="revenueZone">
+                                    <!-- Revenue transactions will appear here -->
+                                </div>
+                            </div>
+                            
+                            <!-- Expense Column -->
+                            <div class="category-column" data-category="Expense">
+                                <div class="category-header expense-header">
+                                    <h5>💸 Expenses</h5>
+                                    <span class="category-total" id="expenseTotalDisplay">$0</span>
+                                </div>
+                                <div class="transaction-drop-zone" id="expenseZone">
+                                    <!-- Expense transactions will appear here -->
+                                </div>
+                            </div>
+                            
+                            <!-- Other Column -->
+                            <div class="category-column" data-category="Other">
+                                <div class="category-header other-header">
+                                    <h5>❓ Needs Review</h5>
+                                    <span class="category-total" id="otherTotalDisplay">$0</span>
+                                </div>
+                                <div class="transaction-drop-zone" id="otherZone">
+                                    <!-- Unclassified transactions will appear here -->
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Live Summary -->
+                        <div class="live-summary">
+                            <div class="summary-item">
+                                <span>Total Revenue:</span>
+                                <span id="liveTotalRevenue" class="amount positive">$0</span>
+                            </div>
+                            <div class="summary-item">
+                                <span>Total Expenses:</span>
+                                <span id="liveTotalExpenses" class="amount negative">$0</span>
+                            </div>
+                            <div class="summary-item highlight">
+                                <span>Net Income:</span>
+                                <span id="liveNetIncome" class="amount">$0</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="transaction-actions">
+                            <button class="btn btn-secondary" onclick="resetTransactions()">Reset to Original</button>
+                            <button class="btn btn-primary" onclick="applyTransactionChanges()">Apply Changes & Regenerate</button>
                         </div>
                     </div>
                 </div>
@@ -3626,46 +3888,31 @@
         
         function handleBackendResponse(data) {
             completeProgressSatisfying();
-            // Stop the processing animation immediately
+            
+            // Stop the processing animation
             if (window.processingInterval) {
                 clearInterval(window.processingInterval);
             }
             
-            // Replace spinner with success checkmark
-            const processingAnimation = document.querySelector('.processing-animation');
-            if (processingAnimation) {
-                processingAnimation.innerHTML = `
-                    <div style="width: 60px; height: 60px; background: #10B981; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; color: white; font-size: 1.5rem;">
-                        ✓
-                    </div>
-                    <h4 style="color: #10B981; margin-bottom: 16px;">Processing Complete!</h4>
-                    <p style="color: #94A3B8;">Your financial statements are ready</p>
-                `;
-            }
-            
-            // Complete all processing steps instantly
-            const steps = document.querySelectorAll('.processing-step');
-            steps.forEach(step => {
-                step.classList.remove('active');
-                step.classList.add('completed');
-                step.querySelector('.step-indicator').textContent = '✓';
-            });
-            
-            // Handle array response format from your backend
+            // Handle array response format from backend
             const result = Array.isArray(data) ? data[0] : data;
             
-            if (result.status === 'processing') {
-                // Backend is still processing, poll for updates
-                pollForResults(result.jobId);
-            } else if (result.status === 'complete') {
+            if (result.status === 'complete') {
                 // Parse the JSON strings from backend into objects
                 const financialStatements = {
-                    incomeStatement: JSON.parse(result.financialStatements.incomeStatement).incomeStatement,
-                    balanceSheet: JSON.parse(result.financialStatements.balanceSheet).balanceSheet,
-                    cashFlow: JSON.parse(result.financialStatements.cashFlow).cashFlow
+                    incomeStatement: JSON.parse(result.financialStatements.incomeStatement),
+                    balanceSheet: JSON.parse(result.financialStatements.balanceSheet),
+                    cashFlow: JSON.parse(result.financialStatements.cashFlow)
                 };
                 
-                // Processing complete, show results
+                // Store transaction data globally
+                window.rawTransactions = result.transactions;
+                window.originalFinancialStatements = financialStatements;
+                
+                // Process transactions for editing
+                window.editableTransactions = processTransactionsForEditing(result.transactions, financialStatements);
+                
+                // Populate results with original data
                 populateResults(financialStatements);
                 saveAnalysis(financialStatements);
                 
@@ -3673,10 +3920,61 @@
                 updateProgress(4);
                 setTimeout(() => {
                     showCard(resultsCard);
-                    // Hide completed steps after results are shown
                     hideCompletedSteps();
                 }, 500);
             }
+        }
+
+        function processTransactionsForEditing(transactions, financialStatements) {
+            return transactions.map(tx => {
+                // Find which statement line this transaction belongs to
+                const category = findTransactionCategory(tx.transaction_index, financialStatements);
+                
+                return {
+                    id: tx.transaction_index,
+                    date: convertDateFormat(tx.date),
+                    amount: tx.amount,
+                    description: tx.counterparty,
+                    context: tx.business_context,
+                    confidence: tx.confidence_score,
+                    category: category.type,
+                    subcategory: category.item,
+                    isIncome: tx.amount > 0,
+                    editable: true
+                };
+            });
+        }
+        
+        function convertDateFormat(dateStr) {
+            // Convert "04/01/2024" to "2024-01-04"
+            const [day, month, year] = dateStr.split('/');
+            return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+        }
+        
+        function findTransactionCategory(txIndex, statements) {
+            // Check Income Statement
+            const income = statements.incomeStatement;
+            for (let item of income.revenue) {
+                if (item.transaction_index && item.transaction_index.includes(txIndex)) {
+                    return { type: 'Revenue', item: item.item };
+                }
+            }
+            for (let item of income.expenses) {
+                if (item.transaction_index && item.transaction_index.includes(txIndex)) {
+                    return { type: 'Expense', item: item.item };
+                }
+            }
+            
+            // Check Cash Flow
+            const cashFlow = statements.cashFlow;
+            for (let item of cashFlow.operating) {
+                if (item.transaction_index && item.transaction_index.includes(txIndex)) {
+                    return { type: 'Operating', item: item.item };
+                }
+            }
+            
+            // Default
+            return { type: 'Other', item: 'Unclassified' };
         }
 
         function populateResults(financialStatements) {
@@ -5551,6 +5849,355 @@
                     </tr>
                 `;
             }).join('');
+        }
+
+        // Global variables for transaction editing
+        let currentTransactions = [];
+        let draggedTransaction = null;
+        
+        // Initialize transaction editor when transactions tab is shown
+        function showTransactionsEditor() {
+            if (!window.editableTransactions) return;
+            
+            // Clone the original transactions for editing
+            currentTransactions = JSON.parse(JSON.stringify(window.editableTransactions));
+            
+            // Populate the transaction zones
+            populateTransactionZones();
+            updateLiveSummary();
+        }
+        
+        function populateTransactionZones() {
+            const revenueZone = document.getElementById('revenueZone');
+            const expenseZone = document.getElementById('expenseZone');
+            const otherZone = document.getElementById('otherZone');
+            
+            // Clear existing content
+            revenueZone.innerHTML = '';
+            expenseZone.innerHTML = '';
+            otherZone.innerHTML = '';
+            
+            // Sort transactions into appropriate zones
+            currentTransactions.forEach(transaction => {
+                const card = createTransactionCard(transaction);
+                
+                if (transaction.category === 'Revenue' || (transaction.isIncome && transaction.category !== 'Expense')) {
+                    revenueZone.appendChild(card);
+                } else if (transaction.category === 'Expense' || (!transaction.isIncome && transaction.category !== 'Revenue')) {
+                    expenseZone.appendChild(card);
+                } else {
+                    otherZone.appendChild(card);
+                }
+            });
+            
+            // Update category totals
+            updateCategoryTotals();
+        }
+        
+        function createTransactionCard(transaction) {
+            const card = document.createElement('div');
+            card.className = 'transaction-card';
+            card.draggable = true;
+            card.dataset.transactionId = transaction.id;
+            
+            const formattedAmount = formatCurrency(Math.abs(transaction.amount));
+            const amountClass = transaction.amount > 0 ? 'positive' : 'negative';
+            const amountSign = transaction.amount > 0 ? '+' : '-';
+            
+            card.innerHTML = `
+                <div class="transaction-header">
+                    <div class="transaction-amount ${amountClass}">${amountSign}${formattedAmount}</div>
+                </div>
+                <div class="transaction-description">${transaction.description}</div>
+                <div class="transaction-context">${transaction.context}</div>
+                <div class="transaction-date">${formatTransactionDate(transaction.date)}</div>
+            `;
+            
+            // Add drag event listeners
+            card.addEventListener('dragstart', handleDragStart);
+            card.addEventListener('dragend', handleDragEnd);
+            
+            return card;
+        }
+        
+        function formatTransactionDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric',
+                year: 'numeric'
+            });
+        }
+        
+        // Drag and Drop Event Handlers
+        function handleDragStart(e) {
+            draggedTransaction = e.target;
+            e.target.classList.add('dragging');
+            
+            // Store transaction data
+            e.dataTransfer.setData('text/plain', e.target.dataset.transactionId);
+            e.dataTransfer.effectAllowed = 'move';
+        }
+        
+        function handleDragEnd(e) {
+            e.target.classList.remove('dragging');
+            draggedTransaction = null;
+        }
+        
+        // Set up drop zones when transactions tab is loaded
+        function setupDropZones() {
+            const dropZones = document.querySelectorAll('.transaction-drop-zone');
+            
+            dropZones.forEach(zone => {
+                zone.addEventListener('dragover', handleDragOver);
+                zone.addEventListener('drop', handleDrop);
+                zone.addEventListener('dragenter', handleDragEnter);
+                zone.addEventListener('dragleave', handleDragLeave);
+            });
+        }
+        
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+        }
+        
+        function handleDragEnter(e) {
+            e.preventDefault();
+            const column = e.target.closest('.category-column');
+            if (column) {
+                column.classList.add('drag-over');
+            }
+        }
+        
+        function handleDragLeave(e) {
+            // Only remove drag-over if we're actually leaving the column
+            if (!e.currentTarget.contains(e.relatedTarget)) {
+                const column = e.target.closest('.category-column');
+                if (column) {
+                    column.classList.remove('drag-over');
+                }
+            }
+        }
+        
+        function handleDrop(e) {
+            e.preventDefault();
+            
+            const column = e.target.closest('.category-column');
+            if (column) {
+                column.classList.remove('drag-over');
+                
+                const transactionId = e.dataTransfer.getData('text/plain');
+                const newCategory = column.dataset.category;
+                
+                // Update transaction category
+                moveTransactionToCategory(transactionId, newCategory);
+                
+                // Re-populate zones and update calculations
+                populateTransactionZones();
+                updateLiveSummary();
+            }
+        }
+        
+        function moveTransactionToCategory(transactionId, newCategory) {
+            const transaction = currentTransactions.find(t => t.id == transactionId);
+            if (transaction) {
+                transaction.category = newCategory;
+                
+                // Update subcategory based on new category
+                if (newCategory === 'Revenue') {
+                    transaction.subcategory = 'Other Revenue';
+                } else if (newCategory === 'Expense') {
+                    transaction.subcategory = 'Other Expenses';
+                } else {
+                    transaction.subcategory = 'Unclassified';
+                }
+            }
+        }
+        
+        // Real-time calculation functions
+        function updateCategoryTotals() {
+            const revenueTotal = calculateCategoryTotal('Revenue');
+            const expenseTotal = calculateCategoryTotal('Expense');
+            const otherTotal = calculateCategoryTotal('Other');
+            
+            document.getElementById('revenueTotalDisplay').textContent = formatCurrency(revenueTotal);
+            document.getElementById('expenseTotalDisplay').textContent = formatCurrency(Math.abs(expenseTotal));
+            document.getElementById('otherTotalDisplay').textContent = formatCurrency(Math.abs(otherTotal));
+        }
+        
+        function calculateCategoryTotal(category) {
+            return currentTransactions
+                .filter(t => t.category === category)
+                .reduce((sum, t) => sum + t.amount, 0);
+        }
+        
+        function updateLiveSummary() {
+            const totalRevenue = currentTransactions
+                .filter(t => t.category === 'Revenue' || (t.amount > 0 && t.category !== 'Expense'))
+                .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+            
+            const totalExpenses = currentTransactions
+                .filter(t => t.category === 'Expense' || (t.amount < 0 && t.category !== 'Revenue'))
+                .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+            
+            const netIncome = totalRevenue - totalExpenses;
+            
+            document.getElementById('liveTotalRevenue').textContent = formatCurrency(totalRevenue);
+            document.getElementById('liveTotalExpenses').textContent = formatCurrency(totalExpenses);
+            document.getElementById('liveNetIncome').textContent = formatCurrency(netIncome);
+            
+            // Update net income color
+            const netIncomeElement = document.getElementById('liveNetIncome');
+            netIncomeElement.className = `amount ${netIncome >= 0 ? 'positive' : 'negative'}`;
+        }
+        
+        // Action button functions
+        function resetTransactions() {
+            if (confirm('Are you sure you want to reset all transaction changes?')) {
+                // Reset to original data
+                currentTransactions = JSON.parse(JSON.stringify(window.editableTransactions));
+                populateTransactionZones();
+                updateLiveSummary();
+            }
+        }
+        
+        function applyTransactionChanges() {
+            if (confirm('Apply these changes and regenerate financial statements?')) {
+                // Regenerate financial statements with new categorization
+                const newStatements = regenerateFinancialStatements(currentTransactions);
+                
+                // Update the main reports
+                window.currentFinancialData = newStatements;
+                populateResults(newStatements);
+                
+                // Update stored data
+                window.editableTransactions = JSON.parse(JSON.stringify(currentTransactions));
+                
+                // Show success message
+                showUpdateNotification('Financial statements updated successfully!');
+                
+                // Switch back to Income Statement to show changes
+                setTimeout(() => {
+                    showReport('income');
+                }, 1000);
+            }
+        }
+        
+        function regenerateFinancialStatements(transactions) {
+            // Recreate financial statements based on updated transaction categories
+            const revenue = [];
+            const expenses = [];
+            
+            // Group transactions by subcategory
+            const revenueGroups = {};
+            const expenseGroups = {};
+            
+            transactions.forEach(tx => {
+                if (tx.category === 'Revenue' || (tx.amount > 0 && tx.category !== 'Expense')) {
+                    const key = tx.subcategory || 'Other Revenue';
+                    if (!revenueGroups[key]) {
+                        revenueGroups[key] = { amount: 0, transaction_index: [] };
+                    }
+                    revenueGroups[key].amount += Math.abs(tx.amount);
+                    revenueGroups[key].transaction_index.push(tx.id);
+                } else if (tx.category === 'Expense' || (tx.amount < 0 && tx.category !== 'Revenue')) {
+                    const key = tx.subcategory || 'Other Expenses';
+                    if (!expenseGroups[key]) {
+                        expenseGroups[key] = { amount: 0, transaction_index: [] };
+                    }
+                    expenseGroups[key].amount += Math.abs(tx.amount);
+                    expenseGroups[key].transaction_index.push(tx.id);
+                }
+            });
+            
+            // Convert groups to arrays
+            Object.keys(revenueGroups).forEach(key => {
+                revenue.push({
+                    item: key,
+                    amount: revenueGroups[key].amount,
+                    transaction_index: revenueGroups[key].transaction_index
+                });
+            });
+            
+            Object.keys(expenseGroups).forEach(key => {
+                expenses.push({
+                    item: key,
+                    amount: expenseGroups[key].amount,
+                    transaction_index: expenseGroups[key].transaction_index
+                });
+            });
+            
+            const totalRevenue = revenue.reduce((sum, item) => sum + item.amount, 0);
+            const totalExpenses = expenses.reduce((sum, item) => sum + item.amount, 0);
+            const netIncome = totalRevenue - totalExpenses;
+            
+            // Return new financial statements structure
+            return {
+                incomeStatement: { revenue, expenses, netIncome },
+                balanceSheet: window.originalFinancialStatements.balanceSheet, // Keep original
+                cashFlow: window.originalFinancialStatements.cashFlow // Keep original
+            };
+        }
+        
+        function showUpdateNotification(message) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, #10B981, #059669);
+                color: white;
+                padding: 16px 24px;
+                border-radius: 8px;
+                box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+                z-index: 10000;
+                font-weight: 600;
+                animation: slideInRight 0.3s ease;
+            `;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOutRight 0.3s ease';
+                setTimeout(() => document.body.removeChild(notification), 300);
+            }, 3000);
+        }
+        
+        // Update the showReport function to handle transactions tab
+        function showReport(reportType) {
+            // Hide all reports
+            document.querySelectorAll('.report-container').forEach(container => {
+                container.classList.remove('active');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected report
+            const reportMap = {
+                'income': 'incomeReport',
+                'balance': 'balanceReport', 
+                'cashflow': 'cashflowReport',
+                'ratios': 'ratiosReport',
+                'transactions': 'transactionsReport',
+                'insights': 'insightsReport'
+            };
+            
+            document.getElementById(reportMap[reportType]).classList.add('active');
+            
+            // Activate clicked tab
+            event.target.classList.add('active');
+            
+            // Special handling for transactions tab
+            if (reportType === 'transactions') {
+                setTimeout(() => {
+                    showTransactionsEditor();
+                    setupDropZones();
+                }, 100);
+            }
         }
         
         // Search functionality
