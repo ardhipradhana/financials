@@ -2555,13 +2555,43 @@
         .transaction-editor {
             margin-top: 24px;
         }
-        
-        .category-grid {
+
+        .statement-grid {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
             gap: 24px;
             margin-bottom: 32px;
             min-height: 500px;
+        }
+
+        .statement-section {
+            background: linear-gradient(145deg, rgba(15, 23, 42, 0.4), rgba(30, 41, 59, 0.2));
+            border: 2px dashed rgba(59, 130, 246, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .statement-header h5 {
+            color: #F8FAFC;
+            font-size: 1.1rem;
+            margin: 0 0 12px 0;
+        }
+
+        .gl-account-list {
+            list-style: none;
+            padding-left: 0;
+            min-height: 400px;
+        }
+
+        .gl-account-item {
+            margin-bottom: 12px;
+        }
+
+        .gl-account-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: #F8FAFC;
         }
         
         .category-column {
@@ -2624,11 +2654,12 @@
             background: linear-gradient(145deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9));
             border: 1px solid rgba(59, 130, 246, 0.2);
             border-radius: 8px;
-            padding: 12px;
-            margin-bottom: 8px;
+            padding: 6px;
+            margin-bottom: 6px;
             cursor: grab;
             transition: all 0.3s ease;
             user-select: none;
+            font-size: 0.9rem;
         }
         
         .transaction-card:hover {
@@ -2647,12 +2678,12 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 8px;
+            margin-bottom: 4px;
         }
         
         .transaction-amount {
             font-weight: 600;
-            font-size: 1rem;
+            font-size: 0.9rem;
         }
         
         .transaction-amount.positive {
@@ -3312,43 +3343,28 @@
                 <div class="report-container" id="transactionsReport">
                     <div class="report-header">
                         <h4>Transaction Review & Editing</h4>
-                        <p>Drag transactions between categories to adjust your financial statements</p>
+                        <p>Drag transactions between accounts to adjust your financial statements</p>
                     </div>
-                    
+
                     <div class="transaction-editor">
-                        <!-- Category Columns -->
-                        <div class="category-grid">
-                            <!-- Revenue Column -->
-                            <div class="category-column" data-category="Revenue">
-                                <div class="category-header revenue-header">
-                                    <h5>💰 Revenue</h5>
-                                    <span class="category-total" id="revenueTotalDisplay">$0</span>
+                        <div class="statement-grid">
+                            <div class="statement-section" id="incomeSection">
+                                <div class="statement-header">
+                                    <h5>Income Statement</h5>
                                 </div>
-                                <div class="transaction-drop-zone" id="revenueZone">
-                                    <!-- Revenue transactions will appear here -->
-                                </div>
+                                <ul id="incomeAccountList" class="gl-account-list"></ul>
                             </div>
-                            
-                            <!-- Expense Column -->
-                            <div class="category-column" data-category="Expense">
-                                <div class="category-header expense-header">
-                                    <h5>💸 Expenses</h5>
-                                    <span class="category-total" id="expenseTotalDisplay">$0</span>
+                            <div class="statement-section" id="balanceSection">
+                                <div class="statement-header">
+                                    <h5>Balance Sheet</h5>
                                 </div>
-                                <div class="transaction-drop-zone" id="expenseZone">
-                                    <!-- Expense transactions will appear here -->
-                                </div>
+                                <ul id="balanceAccountList" class="gl-account-list"></ul>
                             </div>
-                            
-                            <!-- Other Column -->
-                            <div class="category-column" data-category="Other">
-                                <div class="category-header other-header">
-                                    <h5>❓ Needs Review</h5>
-                                    <span class="category-total" id="otherTotalDisplay">$0</span>
+                            <div class="statement-section" id="cashflowSection">
+                                <div class="statement-header">
+                                    <h5>Cash Flow</h5>
                                 </div>
-                                <div class="transaction-drop-zone" id="otherZone">
-                                    <!-- Unclassified transactions will appear here -->
-                                </div>
+                                <ul id="cashflowAccountList" class="gl-account-list"></ul>
                             </div>
                         </div>
                         
@@ -4011,6 +4027,8 @@
                     description: tx.counterparty,
                     context: tx.business_context,
                     confidence: tx.confidence_score,
+                    glAccount: tx.glAccount || tx.gl_account || 'Uncategorized',
+                    statement: tx.statement || 'Income Statement',
                     category: category,
                     subcategory: 'General',
                     isIncome: tx.amount > 0,
@@ -6190,29 +6208,53 @@
         }
         
         function populateTransactionZones() {
-            const revenueZone = document.getElementById('revenueZone');
-            const expenseZone = document.getElementById('expenseZone');
-            const otherZone = document.getElementById('otherZone');
-            
-            // Clear existing content
-            revenueZone.innerHTML = '';
-            expenseZone.innerHTML = '';
-            otherZone.innerHTML = '';
-            
-            // Sort transactions into appropriate zones
+            const incomeList = document.getElementById('incomeAccountList');
+            const balanceList = document.getElementById('balanceAccountList');
+            const cashflowList = document.getElementById('cashflowAccountList');
+
+            incomeList.innerHTML = '';
+            balanceList.innerHTML = '';
+            cashflowList.innerHTML = '';
+
+            const accountMaps = {
+                income: {},
+                balance: {},
+                cashflow: {}
+            };
+
             currentTransactions.forEach(transaction => {
-                const card = createTransactionCard(transaction);
-                
-                if (transaction.category === 'Revenue' || (transaction.isIncome && transaction.category !== 'Expense')) {
-                    revenueZone.appendChild(card);
-                } else if (transaction.category === 'Expense' || (!transaction.isIncome && transaction.category !== 'Revenue')) {
-                    expenseZone.appendChild(card);
-                } else {
-                    otherZone.appendChild(card);
+                let sectionKey = (transaction.statement || 'Income Statement').toLowerCase();
+                let target = 'income';
+                if (sectionKey.includes('balance')) target = 'balance';
+                else if (sectionKey.includes('cash')) target = 'cashflow';
+
+                const account = transaction.glAccount || 'Uncategorized';
+
+                if (!accountMaps[target][account]) {
+                    const li = document.createElement('li');
+                    li.className = 'gl-account-item';
+
+                    const title = document.createElement('div');
+                    title.className = 'gl-account-title';
+                    title.textContent = account;
+
+                    const zone = document.createElement('div');
+                    zone.className = 'transaction-drop-zone';
+
+                    li.appendChild(title);
+                    li.appendChild(zone);
+
+                    if (target === 'income') incomeList.appendChild(li);
+                    else if (target === 'balance') balanceList.appendChild(li);
+                    else cashflowList.appendChild(li);
+
+                    accountMaps[target][account] = zone;
                 }
+
+                const card = createTransactionCard(transaction);
+                accountMaps[target][account].appendChild(card);
             });
-            
-            // Update category totals
+
             updateCategoryTotals();
         }
         
@@ -6231,7 +6273,7 @@
                     <div class="transaction-amount ${amountClass}">${amountSign}${formattedAmount}</div>
                 </div>
                 <div class="transaction-description">${transaction.description}</div>
-                <div class="transaction-context">${transaction.context}</div>
+                <div class="transaction-context">${transaction.glAccount}</div>
                 <div class="transaction-date">${formatTransactionDate(transaction.date)}</div>
             `;
             
