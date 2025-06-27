@@ -7530,6 +7530,13 @@
 
         // Initialize
         updateProgress(1);
+
+        // Error catch to prevent total script failure
+        window.onerror = function(msg, url, line) {
+            console.error('JavaScript Error:', msg, 'Line:', line);
+            return false;
+        };
+        
     </script>
 
 <!-- History Dashboard Modal -->
