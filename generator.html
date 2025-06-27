@@ -6280,6 +6280,9 @@
                 Sortable.create(list, {
                     group: 'transactions',
                     animation: 150,
+                    scroll: true,
+                    scrollSensitivity: 60,
+                    scrollSpeed: 15,
                     onAdd: (evt) => {
                         const txId = evt.item.dataset.id;
                         const baseId = evt.item.dataset.baseId;
