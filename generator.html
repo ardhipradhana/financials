@@ -2639,7 +2639,13 @@
             font-size: 0.9rem;
             margin-bottom: 4px;
         }
-        
+
+        .transaction-account {
+            color: #94A3B8;
+            font-size: 0.8rem;
+            margin: 0 8px;
+        }
+
         .transaction-context {
             color: #94A3B8;
             font-size: 0.8rem;
@@ -6241,6 +6247,7 @@
                 card.dataset.baseId = tx.baseId;
                 card.innerHTML = `
                     <span class="transaction-description">${tx.description}</span>
+                    <span class="transaction-account">${tx.glAccount || tx.subcategory || ''}</span>
                     <span class="transaction-amount ${tx.amount >= 0 ? 'positive' : 'negative'}">${formatCurrency(tx.amount)}</span>
                 `;
                 container.appendChild(card);
