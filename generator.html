@@ -2556,77 +2556,6 @@
             margin-top: 24px;
         }
         
-        .category-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 24px;
-            margin-bottom: 32px;
-            min-height: 500px;
-        }
-        
-        .category-column {
-            background: linear-gradient(145deg, rgba(15, 23, 42, 0.4), rgba(30, 41, 59, 0.2));
-            border: 2px dashed rgba(59, 130, 246, 0.3);
-            border-radius: 12px;
-            padding: 16px;
-            transition: all 0.3s ease;
-        }
-        
-        .category-column.drag-over {
-            border-color: #60A5FA;
-            background: rgba(59, 130, 246, 0.1);
-            transform: scale(1.02);
-        }
-        
-        .category-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin-bottom: 16px;
-        }
-        
-        .revenue-header {
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.1));
-            border: 1px solid rgba(16, 185, 129, 0.3);
-        }
-        
-        .expense-header {
-            background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(220, 38, 38, 0.1));
-            border: 1px solid rgba(239, 68, 68, 0.3);
-        }
-        
-        .other-header {
-            background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(217, 119, 6, 0.1));
-            border: 1px solid rgba(245, 158, 11, 0.3);
-        }
-        
-        .category-header h5 {
-            color: #F8FAFC;
-            font-size: 1.1rem;
-            margin: 0;
-        }
-        
-        .category-total {
-            color: #F8FAFC;
-            font-weight: 600;
-            font-size: 1rem;
-        }
-        
-        .transaction-drop-zone {
-            min-height: 400px;
-            padding: 8px;
-            border: 2px dashed rgba(59, 130, 246, 0.3);
-            border-radius: 12px;
-            transition: all 0.3s ease;
-        }
-
-        .transaction-drop-zone.drag-over {
-            border-color: #60A5FA;
-            background: rgba(59, 130, 246, 0.1);
-            transform: scale(1.02);
-        }
         
         /* Individual Transaction Cards */
         .transaction-card {
@@ -2748,10 +2677,6 @@
         }
         
         @media (max-width: 768px) {
-            .category-grid {
-                grid-template-columns: 1fr;
-                gap: 16px;
-            }
             
             .live-summary {
                 grid-template-columns: 1fr;
@@ -2819,10 +2744,6 @@
             
             <!-- Company Profile Card -->
             <div class="workspace-card active" id="companyCard" data-aos="fade-up" data-aos-delay="200">
-                <h3>
-                    <span class="card-icon">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                             <polyline points="14,2 14,8 20,8"/>
                             <line x1="16" y1="13" x2="8" y2="13"/>
                             <line x1="16" y1="17" x2="8" y2="17"/>
@@ -3331,41 +3252,6 @@
                     </div>
                     
                     <div class="transaction-editor">
-                        <!-- Category Columns -->
-                        <div class="category-grid">
-                            <!-- Revenue Column -->
-                            <div class="category-column" data-category="Revenue">
-                                <div class="category-header revenue-header">
-                                    <h5>💰 Revenue</h5>
-                                    <span class="category-total" id="revenueTotalDisplay">$0</span>
-                                </div>
-                                <div class="transaction-drop-zone" id="revenueZone" data-statement-section="income" data-gl-account="Revenue">
-                                    <!-- Revenue transactions will appear here -->
-                                </div>
-                            </div>
-                            
-                            <!-- Expense Column -->
-                            <div class="category-column" data-category="Expense">
-                                <div class="category-header expense-header">
-                                    <h5>💸 Expenses</h5>
-                                    <span class="category-total" id="expenseTotalDisplay">$0</span>
-                                </div>
-                                <div class="transaction-drop-zone" id="expenseZone" data-statement-section="income" data-gl-account="Expense">
-                                    <!-- Expense transactions will appear here -->
-                                </div>
-                            </div>
-                            
-                            <!-- Other Column -->
-                            <div class="category-column" data-category="Other">
-                                <div class="category-header other-header">
-                                    <h5>❓ Needs Review</h5>
-                                    <span class="category-total" id="otherTotalDisplay">$0</span>
-                                </div>
-                                <div class="transaction-drop-zone" id="otherZone" data-statement-section="other" data-gl-account="Unclassified">
-                                    <!-- Unclassified transactions will appear here -->
-                                </div>
-                            </div>
-                        </div>
                         
                         <!-- Live Summary -->
                         <div class="live-summary">
@@ -6210,7 +6096,6 @@
 
         // Global variables for transaction editing
         let currentTransactions = [];
-        let draggedTransaction = null;
         
         // Initialize transaction editor when transactions tab is shown
         function showTransactionsEditor() {
@@ -6219,192 +6104,26 @@
             // Clone the original transactions for editing
             currentTransactions = JSON.parse(JSON.stringify(window.editableTransactions));
             
-            // Populate the transaction zones
-            populateTransactionZones();
             updateLiveSummary();
         }
         
-        function populateTransactionZones() {
-            const revenueZone = document.getElementById('revenueZone');
-            const expenseZone = document.getElementById('expenseZone');
-            const otherZone = document.getElementById('otherZone');
-            
-            // Clear existing content
-            revenueZone.innerHTML = '';
-            expenseZone.innerHTML = '';
-            otherZone.innerHTML = '';
-            
-            // Sort transactions into appropriate zones
-            currentTransactions.forEach(transaction => {
-                const card = createTransactionCard(transaction);
-                
-                if (transaction.category === 'Revenue' || (transaction.isIncome && transaction.category !== 'Expense')) {
-                    revenueZone.appendChild(card);
-                } else if (transaction.category === 'Expense' || (!transaction.isIncome && transaction.category !== 'Revenue')) {
-                    expenseZone.appendChild(card);
-                } else {
-                    otherZone.appendChild(card);
-                }
-            });
-            
-            // Update category totals
-            updateCategoryTotals();
-
-            // Reattach drag/drop listeners for newly populated zones
-            setupDropZones();
-        }
-        
-        function createTransactionCard(transaction) {
-            const card = document.createElement('div');
-            card.className = 'transaction-card';
-            card.draggable = true;
-            card.dataset.transactionId = transaction.id;
-            
-            const formattedAmount = formatCurrency(Math.abs(transaction.amount));
-            const amountClass = transaction.amount > 0 ? 'positive' : 'negative';
-            const amountSign = transaction.amount > 0 ? '+' : '-';
-            
-            card.innerHTML = `
-                <div class="transaction-header">
-                    <div class="transaction-amount ${amountClass}">${amountSign}${formattedAmount}</div>
-                </div>
-                <div class="transaction-description">${transaction.description}</div>
-                <div class="transaction-context">${transaction.context}</div>
-                <div class="transaction-meta">${transaction.statement || ''}${transaction.glAccount ? ' - ' + transaction.glAccount : ''}</div>
-                <div class="transaction-date">${formatTransactionDate(transaction.date)}</div>
-            `;
-            
-            // Add drag event listeners
-            card.addEventListener('dragstart', handleDragStart);
-            card.addEventListener('dragend', handleDragEnd);
-            
-            return card;
-        }
-        
-        function formatTransactionDate(dateStr) {
-            const date = new Date(dateStr);
-            return date.toLocaleDateString('en-US', { 
-                month: 'short', 
-                day: 'numeric',
-                year: 'numeric'
-            });
-        }
-        
-        // Drag and Drop Event Handlers
-        function handleDragStart(e) {
-            draggedTransaction = e.target;
-            e.target.classList.add('dragging');
-            
-            // Store transaction data
-            e.dataTransfer.setData('text/plain', e.target.dataset.transactionId);
-            e.dataTransfer.effectAllowed = 'move';
-        }
-        
-        function handleDragEnd(e) {
-            e.target.classList.remove('dragging');
-            draggedTransaction = null;
-        }
-        
-        // Set up drop zones when transactions tab is loaded
-        function setupDropZones() {
-            const dropZones = document.querySelectorAll('.transaction-drop-zone');
-
-            dropZones.forEach(zone => {
-                zone.removeEventListener('dragover', handleDragOver);
-                zone.removeEventListener('drop', handleDrop);
-                zone.removeEventListener('dragenter', handleDragEnter);
-                zone.removeEventListener('dragleave', handleDragLeave);
-                zone.addEventListener('dragover', handleDragOver);
-                zone.addEventListener('drop', handleDrop);
-                zone.addEventListener('dragenter', handleDragEnter);
-                zone.addEventListener('dragleave', handleDragLeave);
-            });
-        }
-        
-        function handleDragOver(e) {
-            e.preventDefault();
-            e.dataTransfer.dropEffect = 'move';
-        }
-        
-        function handleDragEnter(e) {
-            e.preventDefault();
-            const zone = e.target.closest('.transaction-drop-zone');
-            if (zone) {
-                zone.classList.add('drag-over');
-            }
-        }
-
-        function handleDragLeave(e) {
-            // Only remove drag-over if we're actually leaving the column
-            if (!e.currentTarget.contains(e.relatedTarget)) {
-                const zone = e.target.closest('.transaction-drop-zone');
-                if (zone) {
-                    zone.classList.remove('drag-over');
-                }
-            }
-        }
-        
-        function handleDrop(e) {
-            e.preventDefault();
-            
-            const zone = e.target.closest('.transaction-drop-zone');
-            if (zone) {
-                zone.classList.remove('drag-over');
-
-                const transactionId = e.dataTransfer.getData('text/plain');
-                const statementSection = zone.dataset.statementSection || '';
-                const glAccount = zone.dataset.glAccount || '';
-
-                // Update transaction account info
-                updateTransactionAccount(transactionId, statementSection, glAccount);
-
-                // Re-populate zones and update calculations
-                populateTransactionZones();
-                updateLiveSummary();
-            }
-        }
-
-        function updateTransactionAccount(transactionId, statementSection, glAccount) {
-            const transaction = currentTransactions.find(t => t.id == transactionId);
-            if (transaction) {
-                transaction.statement = statementSection;
-                transaction.glAccount = glAccount;
-            }
-        }
-        
-        // Real-time calculation functions
-        function updateCategoryTotals() {
-            const revenueTotal = calculateCategoryTotal('Revenue');
-            const expenseTotal = calculateCategoryTotal('Expense');
-            const otherTotal = calculateCategoryTotal('Other');
-            
-            document.getElementById('revenueTotalDisplay').textContent = formatCurrency(revenueTotal);
-            document.getElementById('expenseTotalDisplay').textContent = formatCurrency(Math.abs(expenseTotal));
-            document.getElementById('otherTotalDisplay').textContent = formatCurrency(Math.abs(otherTotal));
-        }
-        
-        function calculateCategoryTotal(category) {
-            return currentTransactions
-                .filter(t => t.category === category)
-                .reduce((sum, t) => sum + t.amount, 0);
-        }
         
         function updateLiveSummary() {
-            const totalRevenue = currentTransactions
-                .filter(t => t.category === 'Revenue' || (t.amount > 0 && t.category !== 'Expense'))
+            const incomeTx = currentTransactions.filter(t => t.statement === 'income');
+            const totalRevenue = incomeTx
+                .filter(t => t.amount > 0)
+                .reduce((sum, t) => sum + t.amount, 0);
+
+            const totalExpenses = incomeTx
+                .filter(t => t.amount < 0)
                 .reduce((sum, t) => sum + Math.abs(t.amount), 0);
-            
-            const totalExpenses = currentTransactions
-                .filter(t => t.category === 'Expense' || (t.amount < 0 && t.category !== 'Revenue'))
-                .reduce((sum, t) => sum + Math.abs(t.amount), 0);
-            
+
             const netIncome = totalRevenue - totalExpenses;
-            
+
             document.getElementById('liveTotalRevenue').textContent = formatCurrency(totalRevenue);
             document.getElementById('liveTotalExpenses').textContent = formatCurrency(totalExpenses);
             document.getElementById('liveNetIncome').textContent = formatCurrency(netIncome);
-            
-            // Update net income color
+
             const netIncomeElement = document.getElementById('liveNetIncome');
             netIncomeElement.className = `amount ${netIncome >= 0 ? 'positive' : 'negative'}`;
         }
@@ -6414,7 +6133,6 @@
             if (confirm('Are you sure you want to reset all transaction changes?')) {
                 // Reset to original data
                 currentTransactions = JSON.parse(JSON.stringify(window.editableTransactions));
-                populateTransactionZones();
                 updateLiveSummary();
             }
         }
@@ -6553,7 +6271,6 @@
             if (reportType === 'transactions') {
                 setTimeout(() => {
                     showTransactionsEditor();
-                    setupDropZones();
                 }, 100);
             }
         }
