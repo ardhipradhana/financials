@@ -3889,40 +3889,94 @@
         function handleBackendResponse(data) {
             completeProgressSatisfying();
             
-            // Stop the processing animation
             if (window.processingInterval) {
                 clearInterval(window.processingInterval);
             }
             
-            // Handle array response format from backend
-            const result = Array.isArray(data) ? data[0] : data;
-            
-            if (result.status === 'complete') {
-                // Parse the JSON strings from backend into objects
-                const financialStatements = {
-                    incomeStatement: JSON.parse(result.financialStatements.incomeStatement),
-                    balanceSheet: JSON.parse(result.financialStatements.balanceSheet),
-                    cashFlow: JSON.parse(result.financialStatements.cashFlow)
-                };
+            try {
+                // Handle array response format from backend
+                const result = Array.isArray(data) ? data[0] : data;
                 
-                // Store transaction data globally
-                window.rawTransactions = result.transactions;
-                window.originalFinancialStatements = financialStatements;
-                
-                // Process transactions for editing
-                window.editableTransactions = processTransactionsForEditing(result.transactions, financialStatements);
-                
-                // Populate results with original data
-                populateResults(financialStatements);
-                saveAnalysis(financialStatements);
-                
-                currentStep = 4;
-                updateProgress(4);
-                setTimeout(() => {
-                    showCard(resultsCard);
-                    hideCompletedSteps();
-                }, 500);
+                if (result.status === 'complete') {
+                    // Parse and validate the JSON strings from backend
+                    const financialStatements = {
+                        incomeStatement: parseAndValidateJSON(result.financialStatements.incomeStatement, 'Income Statement'),
+                        balanceSheet: parseAndValidateJSON(result.financialStatements.balanceSheet, 'Balance Sheet'),
+                        cashFlow: parseAndValidateJSON(result.financialStatements.cashFlow, 'Cash Flow')
+                    };
+                    
+                    // Validate data structure
+                    if (validateFinancialStatements(financialStatements)) {
+                        // Store data globally
+                        window.rawTransactions = result.transactions;
+                        window.originalFinancialStatements = financialStatements;
+                        
+                        // Process transactions for editing
+                        window.editableTransactions = processTransactionsForEditing(result.transactions, financialStatements);
+                        
+                        // Populate results
+                        populateResults(financialStatements);
+                        saveAnalysis(financialStatements);
+                        
+                        currentStep = 4;
+                        updateProgress(4);
+                        setTimeout(() => {
+                            showCard(resultsCard);
+                            hideCompletedSteps();
+                        }, 500);
+                    } else {
+                        throw new Error('Invalid financial statement structure received from backend');
+                    }
+                }
+            } catch (error) {
+                console.error('Error processing backend response:', error);
+                showProcessingError(error.message);
             }
+        }
+        
+        function parseAndValidateJSON(jsonString, statementType) {
+            try {
+                const parsed = JSON.parse(jsonString);
+                console.log(`${statementType} parsed successfully:`, parsed);
+                return parsed;
+            } catch (error) {
+                console.error(`Failed to parse ${statementType}:`, error);
+                console.error('Raw JSON string:', jsonString);
+                throw new Error(`Invalid ${statementType} JSON from backend`);
+            }
+        }
+        
+        function validateFinancialStatements(statements) {
+            // Basic validation
+            if (!statements.incomeStatement || !statements.balanceSheet || !statements.cashFlow) {
+                return false;
+            }
+            
+            // Check for duplicate entries in cash flow
+            const cashFlow = statements.cashFlow;
+            if (cashFlow.operating) {
+                const operatingItems = cashFlow.operating.map(item => item.item);
+                if (operatingItems.length !== new Set(operatingItems).size) {
+                    console.warn('Duplicate operating cash flow items detected');
+                }
+            }
+            
+            return true;
+        }
+        
+        function showProcessingError(message) {
+            const processingCard = document.getElementById('processingCard');
+            processingCard.innerHTML = `
+                <h3>
+                    <span class="card-icon">⚠️</span>
+                    Processing Error
+                </h3>
+                <div style="text-align: center; padding: 40px; color: #EF4444;">
+                    <h4>Unable to Process Financial Statements</h4>
+                    <p style="margin: 16px 0; color: #94A3B8;">${message}</p>
+                    <button class="btn btn-primary" onclick="resetWorkspace()">Try Again</button>
+                </div>
+            `;
         }
 
         function processTransactionsForEditing(transactions, financialStatements) {
