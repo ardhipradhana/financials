@@ -3618,18 +3618,17 @@
                 if (validateCompanyInfo() && currentStep === 1) {
                     currentStep = 2;
                     updateProgress(2);
-                    setTimeout(() => showCard(uploadCard), 500);
+                    setTimeout(() => showCard(document.getElementById('uploadCard')), 500);
                 }
             }
         });
-
         // Also listen for change events (for select and date inputs)
         document.addEventListener('change', (e) => {
             if (['companyName', 'industry', 'businessSize', 'reportingPeriod'].includes(e.target.id)) {
                 if (validateCompanyInfo() && currentStep === 1) {
                     currentStep = 2;
                     updateProgress(2);
-                    setTimeout(() => showCard(uploadCard), 500);
+                    setTimeout(() => showCard(document.getElementById('uploadCard')), 500);
                 }
             }
         });
