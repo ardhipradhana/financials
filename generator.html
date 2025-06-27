@@ -4053,12 +4053,19 @@
 
         function populateResults(financialStatements) {
             // Handle nested structure from backend
-            const processedStatements = {
+            let processedStatements = {
                 incomeStatement: financialStatements.incomeStatement.incomeStatement || financialStatements.incomeStatement,
                 balanceSheet: financialStatements.balanceSheet.balanceSheet || financialStatements.balanceSheet,
                 cashFlow: financialStatements.cashFlow.cashFlow || financialStatements.cashFlow
             };
             
+            // FIRST: Populate Income Statement to calculate key figures
+            populateIncomeStatement(processedStatements.incomeStatement);
+            
+            // SECOND: Create inter-statement connections
+            processedStatements = createInterStatementConnections(processedStatements);
+            
+            // THIRD: Store the connected data globally
             window.currentFinancialData = processedStatements;
             
             // Update company info in report headers
@@ -4071,8 +4078,7 @@
             document.getElementById('reportPeriod4').textContent = periodText;
             document.getElementById('reportPeriod5').textContent = periodText;
             
-            // Populate each statement
-            populateIncomeStatement(processedStatements.incomeStatement);
+            // FOURTH: Populate Balance Sheet and Cash Flow with connected data
             populateBalanceSheet(processedStatements.balanceSheet);
             populateCashFlowStatement(processedStatements.cashFlow);
             populateFinancialRatios(processedStatements);
@@ -4124,9 +4130,9 @@
         function populateIncomeStatement(incomeData) {
             const incomeTable = document.querySelector('#incomeReport tbody');
             
-            // Helper function to add rows only if they have values
+            // Helper functions
             function addRowIfValue(label, amount, isSubtotal = false, isTotal = false, indent = false) {
-                if (amount && amount !== 0) {
+                if (amount && Math.abs(amount) > 0.01) {
                     const rowClass = isTotal ? 'total-line' : (isSubtotal ? 'subtotal' : '');
                     const labelText = indent ? `&nbsp;&nbsp;${label}` : label;
                     return `
@@ -4148,139 +4154,162 @@
                 `;
             }
             
+            function findAccountAmount(items, searchTerms) {
+                const item = items.find(item => 
+                    searchTerms.some(term => item.item.toLowerCase().includes(term.toLowerCase()))
+                );
+                return item ? item.amount : 0;
+            }
+            
             let html = '';
             
-            // REVENUE SECTION
+            // REVENUE SECTION - Map all revenue accounts from your backend
             html += addSectionHeader('Revenue');
             
-            // Individual revenue items
-            incomeData.revenue.forEach(item => {
-                html += addRowIfValue(item.item, item.amount, false, false, true);
-            });
+            // Primary Revenue Streams
+            html += addRowIfValue('Sales Revenue', findAccountAmount(incomeData.revenue, ['Sales Revenue']), false, false, true);
+            html += addRowIfValue('Service Revenue', findAccountAmount(incomeData.revenue, ['Service Revenue']), false, false, true);
             
-            // Calculate Net Revenue - sum ALL revenue items
+            // Investment Income
+            const interestIncome = findAccountAmount(incomeData.revenue, ['Interest Income']);
+            const dividendIncome = findAccountAmount(incomeData.revenue, ['Dividend Income']);
+            if (interestIncome > 0) html += addRowIfValue('Interest Income', interestIncome, false, false, true);
+            if (dividendIncome > 0) html += addRowIfValue('Dividend Income', dividendIncome, false, false, true);
+            
+            // Other Operating Income
+            const discountsReceived = findAccountAmount(incomeData.revenue, ['Discounts Received']);
+            const otherOperatingIncome = findAccountAmount(incomeData.revenue, ['Other Operating Income']);
+            const gainOnAssetSales = findAccountAmount(incomeData.revenue, ['Gain on Asset Sales']);
+            const forexGains = findAccountAmount(incomeData.revenue, ['Foreign Exchange Gains']);
+            
+            if (discountsReceived > 0) html += addRowIfValue('Discounts Received', discountsReceived, false, false, true);
+            if (otherOperatingIncome > 0) html += addRowIfValue('Other Operating Income', otherOperatingIncome, false, false, true);
+            if (gainOnAssetSales > 0) html += addRowIfValue('Gain on Asset Sales', gainOnAssetSales, false, false, true);
+            if (forexGains > 0) html += addRowIfValue('Foreign Exchange Gains', forexGains, false, false, true);
+            
+            // Non-Operating Income
+            const nonOperatingIncome = findAccountAmount(incomeData.revenue, ['Non-Operating Income']);
+            const otherRevenue = findAccountAmount(incomeData.revenue, ['Other Revenue']);
+            if (nonOperatingIncome > 0) html += addRowIfValue('Non-Operating Income', nonOperatingIncome, false, false, true);
+            if (otherRevenue > 0) html += addRowIfValue('Other Revenue', otherRevenue, false, false, true);
+            
+            // Calculate Total Revenue
             const totalRevenue = incomeData.revenue.reduce((sum, item) => sum + item.amount, 0);
-            const discounts = incomeData.revenue.find(item => item.item.toLowerCase().includes('discount'))?.amount || 0;
-            const netRevenue = totalRevenue - discounts;
-            
-            html += addRowIfValue('Net Revenue', netRevenue, true);
+            html += addRowIfValue('Total Revenue', totalRevenue, true);
             
             // COST OF GOODS SOLD SECTION
-            const cogsItems = incomeData.expenses.filter(item => 
-                item.item.toLowerCase().includes('cost of goods sold') ||
-                item.item.toLowerCase().includes('direct materials') ||
-                item.item.toLowerCase().includes('direct labor') ||
-                item.item.toLowerCase().includes('manufacturing overhead')
-            );
+            const cogsAccounts = [
+                'Cost of Goods Sold (COGS)', 'Direct Materials', 'Direct Labor', 'Manufacturing Overhead'
+            ];
             
-            if (cogsItems.length > 0) {
-                html += addSectionHeader('Cost of Goods Sold (COGS)');
-                cogsItems.forEach(item => {
-                    html += addRowIfValue(item.item, item.amount, false, false, true);
-                });
-                
-                const totalCOGS = cogsItems.reduce((sum, item) => sum + item.amount, 0);
-                const grossProfit = netRevenue - totalCOGS;
+            let hasCOGS = false;
+            let totalCOGS = 0;
+            
+            cogsAccounts.forEach(account => {
+                const amount = findAccountAmount(incomeData.expenses, [account]);
+                if (amount > 0) {
+                    if (!hasCOGS) {
+                        html += addSectionHeader('Cost of Goods Sold');
+                        hasCOGS = true;
+                    }
+                    html += addRowIfValue(account, amount, false, false, true);
+                    totalCOGS += amount;
+                }
+            });
+            
+            if (hasCOGS) {
+                html += addRowIfValue('Total Cost of Goods Sold', totalCOGS, true);
+                const grossProfit = totalRevenue - totalCOGS;
                 html += addRowIfValue('Gross Profit', grossProfit, true);
-                
-                // Store for global use
                 window.calculatedGrossProfit = grossProfit;
             } else {
-                // If no COGS found, gross profit equals net revenue
-                window.calculatedGrossProfit = netRevenue;
+                window.calculatedGrossProfit = totalRevenue;
             }
             
             // OPERATING EXPENSES SECTION
-            const operatingExpenses = incomeData.expenses.filter(item => 
-                !item.item.toLowerCase().includes('cost of goods sold') &&
-                !item.item.toLowerCase().includes('direct materials') &&
-                !item.item.toLowerCase().includes('direct labor') &&
-                !item.item.toLowerCase().includes('manufacturing overhead') &&
-                !item.item.toLowerCase().includes('depreciation') &&
-                !item.item.toLowerCase().includes('amortization') &&
-                !item.item.toLowerCase().includes('interest') &&
-                !item.item.toLowerCase().includes('tax')
-            );
+            html += addSectionHeader('Operating Expenses');
             
-            if (operatingExpenses.length > 0) {
-                html += addSectionHeader('Operating Expenses');
-                operatingExpenses.forEach(item => {
-                    html += addRowIfValue(item.item, item.amount, false, false, true);
-                });
-            }
+            const operatingExpenseAccounts = [
+                'Selling Expenses', 'Marketing & Advertising', 'General & Administrative Expenses',
+                'Salaries & Wages', 'Employee Benefits', 'Rent Expense', 'Utilities Expense',
+                'Repairs & Maintenance', 'Insurance Expense', 'Professional Fees',
+                'Office Supplies', 'Travel & Entertainment', 'Bank Fees',
+                'Taxes (excluding Income Tax)', 'Other Operating Expenses'
+            ];
             
-            // Calculate EBITDA
-            const totalOperatingExpenses = operatingExpenses.reduce((sum, item) => sum + item.amount, 0);
-            const totalCOGS = cogsItems.reduce((sum, item) => sum + item.amount, 0);
-            const grossProfit = window.calculatedGrossProfit || netRevenue;
+            let totalOperatingExpenses = 0;
+            operatingExpenseAccounts.forEach(account => {
+                const amount = findAccountAmount(incomeData.expenses, [account]);
+                if (amount > 0) {
+                    html += addRowIfValue(account, amount, false, false, true);
+                    totalOperatingExpenses += amount;
+                }
+            });
+            
+            // Handle any unmapped operating expenses
+            const mappedAccounts = [...cogsAccounts, ...operatingExpenseAccounts, 'Depreciation & Amortization', 'Interest Expense', 'Income Tax Expense'];
+            incomeData.expenses.forEach(expense => {
+                if (!mappedAccounts.some(mapped => expense.item.toLowerCase().includes(mapped.toLowerCase()))) {
+                    html += addRowIfValue(expense.item, expense.amount, false, false, true);
+                    totalOperatingExpenses += expense.amount;
+                }
+            });
+            
+            // EBITDA Calculation
+            const grossProfit = window.calculatedGrossProfit || totalRevenue;
             const ebitda = grossProfit - totalOperatingExpenses;
             html += addRowIfValue('EBITDA', ebitda, true);
-            
-            // Store for global use
             window.calculatedEBITDA = ebitda;
             
             // DEPRECIATION & AMORTIZATION
-            const depreciationItems = incomeData.expenses.filter(item => 
-                item.item.toLowerCase().includes('depreciation') ||
-                item.item.toLowerCase().includes('amortization')
-            );
-            
-            if (depreciationItems.length > 0) {
-                depreciationItems.forEach(item => {
-                    html += addRowIfValue(item.item, item.amount, false, false, true);
-                });
+            const depreciation = findAccountAmount(incomeData.expenses, ['Depreciation & Amortization']);
+            if (depreciation > 0) {
+                html += addRowIfValue('Depreciation & Amortization', depreciation, false, false, true);
             }
             
-            // Calculate Operating Profit
-            const totalDepreciation = depreciationItems.reduce((sum, item) => sum + item.amount, 0);
-            const operatingProfit = ebitda - totalDepreciation;
-            html += addRowIfValue('Operating Profit', operatingProfit, true);
+            // Operating Profit
+            const operatingProfit = ebitda - depreciation;
+            html += addRowIfValue('Operating Profit (EBIT)', operatingProfit, true);
+            window.calculatedOperatingProfit = operatingProfit;
             
             // NON-OPERATING ITEMS
             html += addSectionHeader('Non-Operating Items');
             
-            const interestIncome = incomeData.revenue.find(item => item.item.toLowerCase().includes('interest income'))?.amount || 0;
-            const interestExpense = incomeData.expenses.find(item => item.item.toLowerCase().includes('interest'))?.amount || 0;
-            const otherIncome = incomeData.revenue.find(item => item.item.toLowerCase().includes('other') && !item.item.toLowerCase().includes('revenue'))?.amount || 0;
+            const interestExpense = findAccountAmount(incomeData.expenses, ['Interest Expense']);
+            const forexLosses = findAccountAmount(incomeData.expenses, ['Foreign Exchange Losses']);
+            const lossOnAssetSales = findAccountAmount(incomeData.expenses, ['Loss on Asset Sales']);
+            const otherNonOperating = findAccountAmount(incomeData.expenses, ['Other Non-Operating Expenses']);
             
-            html += addRowIfValue('Interest Income', interestIncome, false, false, true);
-            html += addRowIfValue('Interest Expense', interestExpense, false, false, true);
-            html += addRowIfValue('Other Income', otherIncome, false, false, true);
+            if (interestExpense > 0) html += addRowIfValue('Interest Expense', interestExpense, false, false, true);
+            if (forexLosses > 0) html += addRowIfValue('Foreign Exchange Losses', forexLosses, false, false, true);
+            if (lossOnAssetSales > 0) html += addRowIfValue('Loss on Asset Sales', lossOnAssetSales, false, false, true);
+            if (otherNonOperating > 0) html += addRowIfValue('Other Non-Operating Expenses', otherNonOperating, false, false, true);
             
-            // Calculate EBT (Earnings Before Tax)
-            const ebt = operatingProfit + interestIncome - interestExpense + otherIncome;
-            html += addRowIfValue('EBT (Earnings Before Tax)', ebt, true);
+            // Earnings Before Tax
+            const nonOperatingExpenses = interestExpense + forexLosses + lossOnAssetSales + otherNonOperating;
+            const ebt = operatingProfit - nonOperatingExpenses + interestIncome + dividendIncome + nonOperatingIncome;
+            html += addRowIfValue('Earnings Before Tax (EBT)', ebt, true);
             
-            // TAX EXPENSES
-            const taxExpenses = incomeData.expenses.filter(item => 
-                item.item.toLowerCase().includes('tax') && 
-                !item.item.toLowerCase().includes('before tax')
-            );
-            
-            if (taxExpenses.length > 0) {
-                taxExpenses.forEach(item => {
-                    html += addRowIfValue(item.item, item.amount, false, false, true);
-                });
+            // INCOME TAX
+            const incomeTax = findAccountAmount(incomeData.expenses, ['Income Tax Expense']);
+            if (incomeTax > 0) {
+                html += addRowIfValue('Income Tax Expense', incomeTax, false, false, true);
             }
             
-            // Calculate Net Income
-            const totalTaxes = taxExpenses.reduce((sum, item) => sum + item.amount, 0);
-            const netIncome = ebt - totalTaxes;
-            
+            // NET INCOME
+            const netIncome = ebt - incomeTax;
             html += addRowIfValue('Net Income', netIncome, false, true);
             
             incomeTable.innerHTML = html;
-
             window.calculatedNetIncome = netIncome;
-            window.calculatedDepreciation = totalDepreciation;
+            window.calculatedDepreciation = depreciation;
         }
         
         function populateBalanceSheet(balanceData) {
             const balanceTable = document.querySelector('#balanceReport tbody');
             
-            // Helper function to add rows only if they have values
             function addRowIfValue(label, amount, isSubtotal = false, isTotal = false, indent = false) {
-                if (amount && amount !== 0) {
+                if (amount && Math.abs(amount) > 0.01) {
                     const rowClass = isTotal ? 'total-line' : (isSubtotal ? 'subtotal' : '');
                     const labelText = indent ? `&nbsp;&nbsp;${label}` : label;
                     return `
@@ -4300,6 +4329,13 @@
                         <td></td>
                     </tr>
                 `;
+            }
+            
+            function findAccountAmount(items, searchTerms) {
+                const item = items.find(item => 
+                    searchTerms.some(term => item.item.toLowerCase().includes(term.toLowerCase()))
+                );
+                return item ? item.amount : 0;
             }
             
             let html = '';
@@ -4307,140 +4343,193 @@
             // ASSETS SECTION
             html += addSectionHeader('ASSETS');
             
-            // Current Assets
-            const currentAssets = [
-                { key: 'cash', labels: ['cash', 'cash and cash equivalents'] },
-                { key: 'receivables', labels: ['accounts receivable', 'receivables'] },
-                { key: 'inventory', labels: ['inventory'] },
-                { key: 'prepaid', labels: ['prepaid expenses', 'prepaid'] },
-                { key: 'shortInvestments', labels: ['short-term investments', 'short term investments'] },
-                { key: 'otherCurrent', labels: ['other current assets'] }
+            // CURRENT ASSETS
+            html += addSectionHeader('Current Assets');
+            
+            const currentAssetAccounts = [
+                ['Cash and Cash Equivalents', ['Cash and Cash Equivalents']],
+                ['Petty Cash', ['Petty Cash']],
+                ['Accounts Receivable', ['Accounts Receivable']],
+                ['Notes Receivable (Short-term)', ['Notes Receivable (Short-term)', 'Notes Receivable']],
+                ['Interest Receivable', ['Interest Receivable']],
+                ['Inventory', ['Inventory']],
+                ['Prepaid Expenses', ['Prepaid Expenses']],
+                ['Prepaid Insurance', ['Prepaid Insurance']],
+                ['Prepaid Rent', ['Prepaid Rent']],
+                ['Short-term Investments', ['Short-term Investments']],
+                ['Marketable Securities', ['Marketable Securities']],
+                ['Other Current Assets', ['Other Current Assets']]
             ];
             
             let currentAssetsTotal = 0;
-            currentAssets.forEach(assetType => {
-                const asset = balanceData.assets.find(item => 
-                    assetType.labels.some(label => item.item.toLowerCase().includes(label))
-                );
-                if (asset && asset.amount > 0) {
-                    html += addRowIfValue(asset.item, asset.amount, false, false, true);
-                    currentAssetsTotal += asset.amount;
+            currentAssetAccounts.forEach(([label, searchTerms]) => {
+                const amount = findAccountAmount(balanceData.assets, searchTerms);
+                if (amount > 0) {
+                    html += addRowIfValue(label, amount, false, false, true);
+                    currentAssetsTotal += amount;
                 }
             });
             
-            // Non-Current Assets
-            const nonCurrentAssets = [
-                { key: 'ppe', labels: ['property, plant & equipment', 'property, plant and equipment', 'ppe'] },
-                { key: 'intangible', labels: ['intangible assets', 'intangible'] },
-                { key: 'longInvestments', labels: ['long-term investments', 'long term investments'] },
-                { key: 'otherNonCurrent', labels: ['other non-current assets', 'other non current assets'] }
+            html += addRowIfValue('Total Current Assets', currentAssetsTotal, true);
+            
+            // NON-CURRENT ASSETS
+            html += addSectionHeader('Non-Current Assets');
+            
+            const nonCurrentAssetAccounts = [
+                ['Property, Plant & Equipment (PPE)', ['Property, Plant & Equipment (PPE)', 'Property, Plant & Equipment']],
+                ['Land', ['Land']],
+                ['Buildings', ['Buildings']],
+                ['Equipment', ['Equipment']],
+                ['Vehicles', ['Vehicles']],
+                ['Furniture & Fixtures', ['Furniture & Fixtures']],
+                ['Accumulated Depreciation - Buildings', ['Accumulated Depreciation - Buildings']],
+                ['Accumulated Depreciation - Equipment', ['Accumulated Depreciation - Equipment']],
+                ['Accumulated Depreciation - Vehicles', ['Accumulated Depreciation - Vehicles']],
+                ['Intangible Assets', ['Intangible Assets']],
+                ['Goodwill', ['Goodwill']],
+                ['Patents', ['Patents']],
+                ['Trademarks', ['Trademarks']],
+                ['Long-term Investments', ['Long-term Investments']],
+                ['Investment in Subsidiaries', ['Investment in Subsidiaries']],
+                ['Notes Receivable (Long-term)', ['Notes Receivable (Long-term)']],
+                ['Deferred Tax Assets', ['Deferred Tax Assets']],
+                ['Other Non-current Assets', ['Other Non-current Assets']]
             ];
             
             let nonCurrentAssetsTotal = 0;
-            nonCurrentAssets.forEach(assetType => {
-                const asset = balanceData.assets.find(item => 
-                    assetType.labels.some(label => item.item.toLowerCase().includes(label))
-                );
-                if (asset && asset.amount > 0) {
-                    html += addRowIfValue(asset.item, asset.amount, false, false, true);
-                    nonCurrentAssetsTotal += asset.amount;
+            nonCurrentAssetAccounts.forEach(([label, searchTerms]) => {
+                const amount = findAccountAmount(balanceData.assets, searchTerms);
+                if (amount > 0) {
+                    html += addRowIfValue(label, amount, false, false, true);
+                    nonCurrentAssetsTotal += amount;
                 }
             });
             
+            html += addRowIfValue('Total Non-Current Assets', nonCurrentAssetsTotal, true);
+            
             const totalAssets = currentAssetsTotal + nonCurrentAssetsTotal;
-            html += addRowIfValue('Total Assets', totalAssets, false, true);
+            html += addRowIfValue('TOTAL ASSETS', totalAssets, false, true);
             
             // LIABILITIES SECTION
             html += addSectionHeader('LIABILITIES');
             
-            // Current Liabilities
-            const currentLiabilities = [
-                { key: 'payables', labels: ['accounts payable', 'payables'] },
-                { key: 'accrued', labels: ['accrued liabilities', 'accrued'] },
-                { key: 'shortNotes', labels: ['notes payable (short-term)', 'short-term debt', 'short term debt'] },
-                { key: 'taxPayable', labels: ['income tax payable', 'tax payable'] },
-                { key: 'deferredRevenue', labels: ['deferred revenue'] },
-                { key: 'otherCurrentLiab', labels: ['other current liabilities'] }
+            // CURRENT LIABILITIES
+            html += addSectionHeader('Current Liabilities');
+            
+            const currentLiabilityAccounts = [
+                ['Accounts Payable', ['Accounts Payable']],
+                ['Notes Payable (Short-term)', ['Notes Payable (Short-term)', 'Notes Payable']],
+                ['Accrued Liabilities', ['Accrued Liabilities']],
+                ['Accrued Wages', ['Accrued Wages']],
+                ['Accrued Interest', ['Accrued Interest']],
+                ['Income Tax Payable', ['Income Tax Payable']],
+                ['Sales Tax Payable', ['Sales Tax Payable']],
+                ['VAT Payable', ['VAT Payable']],
+                ['Unearned Revenue', ['Unearned Revenue']],
+                ['Deferred Revenue', ['Deferred Revenue']],
+                ['Customer Deposits', ['Customer Deposits']],
+                ['Short-term Bank Loans', ['Short-term Bank Loans']],
+                ['Current Portion of Long-term Debt', ['Current Portion of Long-term Debt']],
+                ['Other Current Liabilities', ['Other Current Liabilities']]
             ];
             
             let currentLiabilitiesTotal = 0;
-            currentLiabilities.forEach(liabType => {
-                const liability = balanceData.liabilities.find(item => 
-                    liabType.labels.some(label => item.item.toLowerCase().includes(label))
-                );
-                if (liability && liability.amount > 0) {
-                    html += addRowIfValue(liability.item, liability.amount, false, false, true);
-                    currentLiabilitiesTotal += liability.amount;
+            currentLiabilityAccounts.forEach(([label, searchTerms]) => {
+                const amount = findAccountAmount(balanceData.liabilities, searchTerms);
+                if (amount > 0) {
+                    html += addRowIfValue(label, amount, false, false, true);
+                    currentLiabilitiesTotal += amount;
                 }
             });
             
-            // Non-Current Liabilities
-            const nonCurrentLiabilities = [
-                { key: 'longNotes', labels: ['notes payable (long-term)', 'long-term debt', 'long term debt'] },
-                { key: 'otherNonCurrentLiab', labels: ['other non-current liabilities', 'other non current liabilities'] }
+            html += addRowIfValue('Total Current Liabilities', currentLiabilitiesTotal, true);
+            
+            // NON-CURRENT LIABILITIES
+            html += addSectionHeader('Non-Current Liabilities');
+            
+            const nonCurrentLiabilityAccounts = [
+                ['Notes Payable (Long-term)', ['Notes Payable (Long-term)']],
+                ['Long-term Bank Loans', ['Long-term Bank Loans']],
+                ['Bonds Payable', ['Bonds Payable']],
+                ['Mortgage Payable', ['Mortgage Payable']],
+                ['Deferred Tax Liabilities', ['Deferred Tax Liabilities']],
+                ['Pension Obligations', ['Pension Obligations']],
+                ['Other Non-current Liabilities', ['Other Non-current Liabilities']]
             ];
             
             let nonCurrentLiabilitiesTotal = 0;
-            nonCurrentLiabilities.forEach(liabType => {
-                const liability = balanceData.liabilities.find(item => 
-                    liabType.labels.some(label => item.item.toLowerCase().includes(label))
-                );
-                if (liability && liability.amount > 0) {
-                    html += addRowIfValue(liability.item, liability.amount, false, false, true);
-                    nonCurrentLiabilitiesTotal += liability.amount;
+            nonCurrentLiabilityAccounts.forEach(([label, searchTerms]) => {
+                const amount = findAccountAmount(balanceData.liabilities, searchTerms);
+                if (amount > 0) {
+                    html += addRowIfValue(label, amount, false, false, true);
+                    nonCurrentLiabilitiesTotal += amount;
                 }
             });
             
+            html += addRowIfValue('Total Non-Current Liabilities', nonCurrentLiabilitiesTotal, true);
+            
             const totalLiabilities = currentLiabilitiesTotal + nonCurrentLiabilitiesTotal;
-            html += addRowIfValue('Total Liabilities', totalLiabilities, true);
+            html += addRowIfValue('TOTAL LIABILITIES', totalLiabilities, false, true);
             
             // EQUITY SECTION
             html += addSectionHeader('EQUITY');
             
+            const equityAccounts = [
+                ['Owner\'s Equity', ['Owner\'s Equity']],
+                ['Capital Stock', ['Capital Stock']],
+                ['Common Stock', ['Common Stock']],
+                ['Preferred Stock', ['Preferred Stock']],
+                ['Paid-in Capital', ['Paid-in Capital']],
+                ['Additional Paid-in Capital', ['Additional Paid-in Capital']],
+                ['Retained Earnings', ['Retained Earnings']],
+                ['Treasury Stock', ['Treasury Stock']],
+                ['Accumulated Other Comprehensive Income', ['Accumulated Other Comprehensive Income']],
+                ['Current Year Earnings', ['Current Year Earnings']],
+                ['Owner\'s Drawings', ['Owner\'s Drawings']],
+                ['Partner\'s Capital', ['Partner\'s Capital']],
+                ['Other Equity', ['Other Equity']]
+            ];
+
+            // In the equity section, for retained earnings:
+            const retainedEarnings = findAccountAmount(balanceData.equity, ['Retained Earnings']);
+            if (retainedEarnings !== 0) {
+                html += addRowIfValue('Retained Earnings', retainedEarnings, false, false, true);
+                totalEquity += retainedEarnings;
+            }
+            
             let totalEquity = 0;
-            balanceData.equity.forEach(equity => {
-                if (equity.amount !== 0) {
-                    html += addRowIfValue(equity.item, equity.amount, false, false, true);
-                    totalEquity += equity.amount;
+            equityAccounts.forEach(([label, searchTerms]) => {
+                const amount = findAccountAmount(balanceData.equity, searchTerms);
+                if (amount !== 0) { // Allow negative equity
+                    html += addRowIfValue(label, amount, false, false, true);
+                    totalEquity += amount;
                 }
             });
             
-            // BALANCING LOGIC (Safety Net)
-            const liabilitiesAndEquity = totalLiabilities + totalEquity;
-            const imbalance = totalAssets - liabilitiesAndEquity;
+            // Balancing logic
+            const calculatedEquity = totalAssets - totalLiabilities;
+            const imbalance = calculatedEquity - totalEquity;
             
-            // Add balancing adjustment if needed (only for small discrepancies)
-            if (Math.abs(imbalance) > 0.01) { 
-                if (Math.abs(imbalance) < totalAssets * 0.01) { // Less than 1% of total assets
-                    html += addRowIfValue('Balancing Adjustment', imbalance, false, false, true);
-                    totalEquity += imbalance;
-                } else {
-                    // Large imbalance - might indicate data issue
-                    console.warn('Large balance sheet imbalance detected:', imbalance);
-                    html += addRowIfValue('Balancing Adjustment (Review Required)', imbalance, false, false, true);
-                    totalEquity += imbalance;
-                }
+            if (Math.abs(imbalance) > 0.01 && totalEquity === 0) {
+                html += addRowIfValue('Calculated Equity', calculatedEquity, false, false, true);
+                totalEquity = calculatedEquity;
+            } else if (Math.abs(imbalance) > 0.01) {
+                html += addRowIfValue('Balancing Adjustment', imbalance, false, false, true);
+                totalEquity += imbalance;
             }
             
-            html += addRowIfValue('Total Equity', totalEquity, true);
-            
-            // FINAL TOTALS
-            const finalLiabilitiesAndEquity = totalLiabilities + totalEquity;
-            html += addRowIfValue('Total Liabilities & Equity', finalLiabilitiesAndEquity, false, true);
+            html += addRowIfValue('TOTAL EQUITY', totalEquity, false, true);
+            html += addRowIfValue('TOTAL LIABILITIES & EQUITY', totalLiabilities + totalEquity, false, true);
             
             balanceTable.innerHTML = html;
-            
-            // Store calculated values globally for use in ratios
             window.calculatedTotalEquity = totalEquity;
-            window.calculatedRetainedEarnings = 0;
         }
         
         function populateCashFlowStatement(cashFlowData) {
             const cashFlowTable = document.querySelector('#cashflowReport tbody');
             
-            // Helper function to add rows only if they have values
             function addRowIfValue(label, amount, isSubtotal = false, isTotal = false, indent = false) {
-                if (amount && amount !== 0) {
+                if (amount && Math.abs(amount) > 0.01) {
                     const rowClass = isTotal ? 'total-line' : (isSubtotal ? 'subtotal' : '');
                     const labelText = indent ? `&nbsp;&nbsp;${label}` : label;
                     return `
@@ -4471,68 +4560,249 @@
                 }
             }
             
+            function findAccountAmount(items, searchTerms) {
+                const item = items.find(item => 
+                    searchTerms.some(term => item.item.toLowerCase().includes(term.toLowerCase()))
+                );
+                return item ? item.amount : 0;
+            }
+            
             let html = '';
             
-            // Use backend values as the source of truth
-            const beginningBalance = cashFlowData.beginningBalance || 0;
-            const backendNetChange = cashFlowData.netChangeInCash || 0;
-            const backendEndingBalance = cashFlowData.endingBalance || 0;
-            
-            // Calculate totals from line items
-            const operatingTotal = cashFlowData.operating.reduce((sum, item) => sum + item.amount, 0);
-            const investingTotal = cashFlowData.investing.reduce((sum, item) => sum + item.amount, 0);
-            const financingTotal = cashFlowData.financing.reduce((sum, item) => sum + item.amount, 0);
-            
             // Beginning Cash Balance
+            const beginningBalance = cashFlowData.beginningBalance || 0;
             html += addRowIfValue('Beginning Cash Balance', beginningBalance, false, true);
             html += '<tr><td colspan="2" style="height: 12px;"></td></tr>';
             
-            // OPERATING ACTIVITIES SECTION
-            html += addSectionHeader('CASH FLOW FROM OPERATING ACTIVITIES', operatingTotal);
+            // OPERATING ACTIVITIES
+            const operatingAccounts = [
+                ['Net Income', ['Net Income']],
+                ['Depreciation & Amortization', ['Depreciation & Amortization']],
+                ['Changes in Accounts Receivable', ['Changes in Accounts Receivable']],
+                ['Changes in Inventory', ['Changes in Inventory']],
+                ['Changes in Prepaid Expenses', ['Changes in Prepaid Expenses']],
+                ['Changes in Accounts Payable', ['Changes in Accounts Payable']],
+                ['Changes in Accrued Liabilities', ['Changes in Accrued Liabilities']],
+                ['Changes in Other Working Capital', ['Changes in Other Working Capital']],
+                ['Other Operating Cash Flow', ['Other Operating Cash Flow']]
+            ];
             
-            // Get Net Income from Income Statement (backend calculated)
-            const netIncomeFromBackend = window.currentFinancialData?.incomeStatement?.netIncome || 0;
-            html += addRowIfValue('Net Income', netIncomeFromBackend, false, false, true);
+            let operatingTotal = 0;
+            let hasOperatingItems = false;
             
-            // Show other operating items
-            cashFlowData.operating.forEach(item => {
-                html += addRowIfValue(item.item, item.amount, false, false, true);
-            });
+            // Add Net Income from Income Statement if not in cash flow data
+            const netIncomeFromIncome = window.calculatedNetIncome || 0;
+            const netIncomeFromCashFlow = findAccountAmount(cashFlowData.operating, ['Net Income']);
             
-            // INVESTING ACTIVITIES SECTION
-            html += addSectionHeader('CASH FLOW FROM INVESTING ACTIVITIES', investingTotal);
+            html += addSectionHeader('CASH FLOW FROM OPERATING ACTIVITIES');
             
-            cashFlowData.investing.forEach(item => {
-                if (item.amount !== 0) {
-                    html += addRowIfValue(item.item, item.amount, false, false, true);
-                }
-            });
-            
-            // FINANCING ACTIVITIES SECTION
-            html += addSectionHeader('CASH FLOW FROM FINANCING ACTIVITIES', financingTotal);
-            
-            cashFlowData.financing.forEach(item => {
-                if (item.amount !== 0) {
-                    html += addRowIfValue(item.item, item.amount, false, false, true);
-                }
-            });
-            
-            // FINAL CALCULATIONS - Use backend values
-            html += '<tr><td colspan="2" style="height: 12px;"></td></tr>';
-            
-            // Calculate what line items total to
-            const calculatedChange = operatingTotal + investingTotal + financingTotal + netIncomeFromBackend;
-            const discrepancy = backendNetChange - calculatedChange;
-            
-            // If there's a significant discrepancy, show it
-            if (Math.abs(discrepancy) > 0.01) {
-                html += addRowIfValue('Reconciling Items', discrepancy, false, false, true);
+            if (netIncomeFromCashFlow === 0 && netIncomeFromIncome !== 0) {
+                html += addRowIfValue('Net Income', netIncomeFromIncome, false, false, true);
+                operatingTotal += netIncomeFromIncome;
+                hasOperatingItems = true;
             }
             
-            html += addRowIfValue('Net Change in Cash', backendNetChange, false, true);
-            html += addRowIfValue('Ending Cash Balance', backendEndingBalance, false, true);
+            operatingAccounts.forEach(([label, searchTerms]) => {
+                const amount = findAccountAmount(cashFlowData.operating, searchTerms);
+                if (amount !== 0) {
+                    html += addRowIfValue(label, amount, false, false, true);
+                    operatingTotal += amount;
+                    hasOperatingItems = true;
+                }
+            });
+            
+            // Add any unmapped operating items
+            cashFlowData.operating.forEach(item => {
+                const isMapped = operatingAccounts.some(([_, searchTerms]) => 
+                    searchTerms.some(term => item.item.toLowerCase().includes(term.toLowerCase()))
+                );
+                if (!isMapped && Math.abs(item.amount) > 0.01) {
+                    html += addRowIfValue(item.item, item.amount, false, false, true);
+                    operatingTotal += item.amount;
+                    hasOperatingItems = true;
+                }
+            });
+            
+            html += addRowIfValue('Net Cash from Operating Activities', operatingTotal, true);
+            
+            // INVESTING ACTIVITIES
+            const investingAccounts = [
+                ['Purchase of Property, Plant & Equipment (PPE)', ['Purchase of Property, Plant & Equipment (PPE)', 'Purchase of PPE']],
+                ['Sale of Property, Plant & Equipment (PPE)', ['Sale of Property, Plant & Equipment (PPE)', 'Sale of PPE']],
+                ['Purchase of Investments', ['Purchase of Investments']],
+                ['Sale of Investments', ['Sale of Investments']],
+                ['Other Investing Cash Flow', ['Other Investing Cash Flow']]
+            ];
+            
+            let investingTotal = 0;
+            let hasInvestingItems = false;
+            
+            html += addSectionHeader('CASH FLOW FROM INVESTING ACTIVITIES');
+            
+            investingAccounts.forEach(([label, searchTerms]) => {
+                const amount = findAccountAmount(cashFlowData.investing, searchTerms);
+                if (amount !== 0) {
+                    html += addRowIfValue(label, amount, false, false, true);
+                    investingTotal += amount;
+                    hasInvestingItems = true;
+                }
+            });
+            
+            // Add any unmapped investing items
+            cashFlowData.investing.forEach(item => {
+                const isMapped = investingAccounts.some(([_, searchTerms]) => 
+                    searchTerms.some(term => item.item.toLowerCase().includes(term.toLowerCase()))
+                );
+                if (!isMapped && Math.abs(item.amount) > 0.01) {
+                    html += addRowIfValue(item.item, item.amount, false, false, true);
+                    investingTotal += item.amount;
+                    hasInvestingItems = true;
+                }
+            });
+            
+            html += addRowIfValue('Net Cash from Investing Activities', investingTotal, true);
+            
+            // FINANCING ACTIVITIES
+            const financingAccounts = [
+                ['Proceeds from Loans', ['Proceeds from Loans']],
+                ['Repayment of Loans', ['Repayment of Loans']],
+                ['Issuance of Equity', ['Issuance of Equity']],
+                ['Owner\'s Drawings/Dividends Paid', ['Owner\'s Drawings', 'Dividends Paid']],
+                ['Other Financing Cash Flow', ['Other Financing Cash Flow']]
+            ];
+            
+            let financingTotal = 0;
+            let hasFinancingItems = false;
+            
+            html += addSectionHeader('CASH FLOW FROM FINANCING ACTIVITIES');
+            
+            financingAccounts.forEach(([label, searchTerms]) => {
+                const amount = findAccountAmount(cashFlowData.financing, searchTerms);
+                if (amount !== 0) {
+                    html += addRowIfValue(label, amount, false, false, true);
+                    financingTotal += amount;
+                    hasFinancingItems = true;
+                }
+            });
+            
+            // Add any unmapped financing items
+            cashFlowData.financing.forEach(item => {
+                const isMapped = financingAccounts.some(([_, searchTerms]) => 
+                    searchTerms.some(term => item.item.toLowerCase().includes(term.toLowerCase()))
+                );
+                if (!isMapped && Math.abs(item.amount) > 0.01) {
+                    html += addRowIfValue(item.item, item.amount, false, false, true);
+                    financingTotal += item.amount;
+                    hasFinancingItems = true;
+                }
+            });
+            
+            html += addRowIfValue('Net Cash from Financing Activities', financingTotal, true);
+            
+            // FINAL CALCULATIONS
+            html += '<tr><td colspan="2" style="height: 12px;"></td></tr>';
+            
+            const netCashChange = cashFlowData.netChangeInCash || (operatingTotal + investingTotal + financingTotal);
+            const endingBalance = cashFlowData.endingBalance || (beginningBalance + netCashChange);
+            
+            html += addRowIfValue('Net Change in Cash', netCashChange, false, true);
+            html += addRowIfValue('Ending Cash Balance', endingBalance, false, true);
             
             cashFlowTable.innerHTML = html;
+        }
+
+        function createInterStatementConnections(processedStatements) {
+            // Get calculated values from Income Statement
+            const netIncome = window.calculatedNetIncome || 0;
+            const depreciation = window.calculatedDepreciation || 0;
+            
+            // 1. CONNECT NET INCOME TO RETAINED EARNINGS
+            // Find or create retained earnings in equity
+            let retainedEarningsIndex = processedStatements.balanceSheet.equity.findIndex(item => 
+                item.item.toLowerCase().includes('retained earnings')
+            );
+            
+            if (retainedEarningsIndex === -1) {
+                // Create retained earnings entry if it doesn't exist
+                processedStatements.balanceSheet.equity.push({
+                    item: 'Retained Earnings',
+                    amount: netIncome,
+                    transaction_index: ['calculated_from_income']
+                });
+            } else {
+                // Update existing retained earnings with net income
+                const existingRetained = processedStatements.balanceSheet.equity[retainedEarningsIndex].amount;
+                processedStatements.balanceSheet.equity[retainedEarningsIndex].amount = existingRetained + netIncome;
+            }
+            
+            // 2. CONNECT NET INCOME TO CASH FLOW OPERATIONS
+            // Ensure Net Income is first item in operating activities
+            let netIncomeInCashFlow = processedStatements.cashFlow.operating.findIndex(item => 
+                item.item.toLowerCase().includes('net income')
+            );
+            
+            if (netIncomeInCashFlow === -1) {
+                // Add Net Income as first item in operating activities
+                processedStatements.cashFlow.operating.unshift({
+                    item: 'Net Income',
+                    amount: netIncome,
+                    transaction_index: ['calculated_from_income']
+                });
+            } else {
+                // Update existing net income in cash flow
+                processedStatements.cashFlow.operating[netIncomeInCashFlow].amount = netIncome;
+            }
+            
+            // 3. ENSURE DEPRECIATION CONNECTION
+            // Add depreciation to cash flow if it exists in income but not in cash flow
+            if (depreciation > 0) {
+                let depreciationInCashFlow = processedStatements.cashFlow.operating.findIndex(item => 
+                    item.item.toLowerCase().includes('depreciation')
+                );
+                
+                if (depreciationInCashFlow === -1) {
+                    // Add depreciation after net income
+                    const netIncomeIndex = processedStatements.cashFlow.operating.findIndex(item => 
+                        item.item.toLowerCase().includes('net income')
+                    );
+                    const insertIndex = netIncomeIndex >= 0 ? netIncomeIndex + 1 : 1;
+                    
+                    processedStatements.cashFlow.operating.splice(insertIndex, 0, {
+                        item: 'Depreciation & Amortization',
+                        amount: depreciation,
+                        transaction_index: ['calculated_from_income']
+                    });
+                }
+            }
+            
+            // 4. BALANCE SHEET BALANCING
+            // Ensure Assets = Liabilities + Equity
+            const totalAssets = processedStatements.balanceSheet.assets.reduce((sum, item) => sum + item.amount, 0);
+            const totalLiabilities = processedStatements.balanceSheet.liabilities.reduce((sum, item) => sum + item.amount, 0);
+            const totalEquity = processedStatements.balanceSheet.equity.reduce((sum, item) => sum + item.amount, 0);
+            
+            const imbalance = totalAssets - (totalLiabilities + totalEquity);
+            
+            if (Math.abs(imbalance) > 0.01) {
+                // Add balancing entry to equity
+                processedStatements.balanceSheet.equity.push({
+                    item: 'Balancing Adjustment',
+                    amount: imbalance,
+                    transaction_index: ['calculated_balancing']
+                });
+            }
+            
+            // 5. CASH FLOW ENDING BALANCE CONNECTION
+            // Ensure ending cash in cash flow matches cash in balance sheet
+            const cashInBalanceSheet = processedStatements.balanceSheet.assets.find(item => 
+                item.item.toLowerCase().includes('cash')
+            );
+            
+            if (cashInBalanceSheet && !processedStatements.cashFlow.endingBalance) {
+                processedStatements.cashFlow.endingBalance = cashInBalanceSheet.amount;
+            }
+            
+            return processedStatements;
         }
 
         function populateFinancialRatios(financialData) {
@@ -6835,7 +7105,7 @@
         function openMonthPicker(container) {
             const input = container.querySelector('input[type="month"]');
             input.focus();
-            input.click();
+            input.showPicker(); // This opens the calendar directly
         }
 
         function calculateSimpleCurrentRatio() {
