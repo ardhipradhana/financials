@@ -3959,7 +3959,24 @@
                     return { type: 'Expense', item: item.item };
                 }
             }
-            
+            // Check Balance Sheet
+            const balance = statements.balanceSheet;
+            for (let item of balance.assets) {
+                if (item.transaction_index && item.transaction_index.includes(txIndex)) {
+                    return { type: 'Asset', item: item.item };
+                }
+            }
+            for (let item of balance.liabilities) {
+                if (item.transaction_index && item.transaction_index.includes(txIndex)) {
+                    return { type: 'Liability', item: item.item };
+                }
+            }
+            for (let item of balance.equity) {
+                if (item.transaction_index && item.transaction_index.includes(txIndex)) {
+                    return { type: 'Equity', item: item.item };
+                }
+            }
+
             // Check Cash Flow
             const cashFlow = statements.cashFlow;
             for (let item of cashFlow.operating) {
@@ -3967,7 +3984,17 @@
                     return { type: 'Operating', item: item.item };
                 }
             }
-            
+            for (let item of cashFlow.investing) {
+                if (item.transaction_index && item.transaction_index.includes(txIndex)) {
+                    return { type: 'Investing', item: item.item };
+                }
+            }
+            for (let item of cashFlow.financing) {
+                if (item.transaction_index && item.transaction_index.includes(txIndex)) {
+                    return { type: 'Financing', item: item.item };
+                }
+            }
+
             // Default
             return { type: 'Other', item: 'Unclassified' };
         }
