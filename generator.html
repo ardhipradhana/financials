@@ -3612,26 +3612,7 @@
             }, 300); // Give the card time to fully render before scrolling
         }
 
-        // Company info validation
-        document.addEventListener('input', (e) => {
-            if (['companyName', 'industry', 'businessSize', 'reportingPeriod'].includes(e.target.id)) {
-                if (validateCompanyInfo() && currentStep === 1) {
-                    currentStep = 2;
-                    updateProgress(2);
-                    setTimeout(() => showCard(document.getElementById('uploadCard')), 500);
-                }
-            }
-        });
-        // Also listen for change events (for select and date inputs)
-        document.addEventListener('change', (e) => {
-            if (['companyName', 'industry', 'businessSize', 'reportingPeriod'].includes(e.target.id)) {
-                if (validateCompanyInfo() && currentStep === 1) {
-                    currentStep = 2;
-                    updateProgress(2);
-                    setTimeout(() => showCard(document.getElementById('uploadCard')), 500);
-                }
-            }
-        });
+        // Company info validation - moved to DOMContentLoaded to ensure variables are defined
 
         // File upload handling - CORRECTED VERSION
         const uploadZone = document.getElementById('uploadZone');
@@ -7519,6 +7500,31 @@
             if (monthFilter) {
                 monthFilter.addEventListener('change', filterHistoryList);
             }
+        });
+
+        // Initialize form validation after DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            // Company info validation
+            document.addEventListener('input', (e) => {
+                if (['companyName', 'industry', 'businessSize', 'reportingPeriod'].includes(e.target.id)) {
+                    if (validateCompanyInfo() && currentStep === 1) {
+                        currentStep = 2;
+                        updateProgress(2);
+                        setTimeout(() => showCard(uploadCard), 500);
+                    }
+                }
+            });
+        
+            // Also listen for change events (for select and date inputs)
+            document.addEventListener('change', (e) => {
+                if (['companyName', 'industry', 'businessSize', 'reportingPeriod'].includes(e.target.id)) {
+                    if (validateCompanyInfo() && currentStep === 1) {
+                        currentStep = 2;
+                        updateProgress(2);
+                        setTimeout(() => showCard(uploadCard), 500);
+                    }
+                }
+            });
         });
 
         // Initialize
