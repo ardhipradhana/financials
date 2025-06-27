@@ -2559,13 +2559,30 @@
 
         .transaction-lists {
             display: flex;
-            flex-wrap: wrap;
-            gap: 16px;
+            align-items: flex-start;
+            gap: 24px;
             margin-bottom: 24px;
+        }
+
+        .statement-area {
+            flex: 0 0 70%;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .buffer-area {
+            flex: 0 0 30%;
+            position: fixed;
+            right: 0;
+            top: 100px;
         }
 
         .statement-section {
             flex: 1 1 280px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
         }
 
         .category-column {
@@ -3309,7 +3326,8 @@
 
                         <!-- Transaction Lists -->
                         <div class="transaction-lists">
-                            <div class="statement-section">
+                            <div class="statement-area">
+                                <div class="statement-section">
                                 <h5>Income Statement</h5>
                                 <div class="category-column">
                                     <h6>Revenue</h6>
@@ -3319,8 +3337,8 @@
                                     <h6>Expense</h6>
                                     <div id="income-expense-list" class="transaction-list" data-statement="income" data-category="Expense"></div>
                                 </div>
-                            </div>
-                            <div class="statement-section">
+                                </div>
+                                <div class="statement-section">
                                 <h5>Cash Flow</h5>
                                 <div class="category-column">
                                     <h6>Operating</h6>
@@ -3334,8 +3352,8 @@
                                     <h6>Financing</h6>
                                     <div id="cashflow-financing-list" class="transaction-list" data-statement="cashflow" data-category="Financing"></div>
                                 </div>
-                            </div>
-                            <div class="statement-section">
+                                </div>
+                                <div class="statement-section">
                                 <h5>Balance Sheet</h5>
                                 <div class="category-column">
                                     <h6>Asset</h6>
@@ -3349,10 +3367,13 @@
                                     <h6>Equity</h6>
                                     <div id="balance-equity-list" class="transaction-list" data-statement="balance" data-category="Equity"></div>
                                 </div>
+                                </div>
                             </div>
-                            <div class="statement-section">
-                                <h5>Buffer</h5>
-                                <div id="buffer-list" class="transaction-list" data-statement="buffer" data-category="Buffer"></div>
+                            <div class="buffer-area">
+                                <div class="statement-section">
+                                    <h5>Buffer</h5>
+                                    <div id="buffer-list" class="transaction-list" data-statement="buffer" data-category="Buffer"></div>
+                                </div>
                             </div>
                         </div>
                         
