@@ -4401,7 +4401,6 @@
             const currentNetIncome = window.calculatedNetIncome || 0;
             
             // Calculate equity properly
-            const totalAssets = balanceData.assets.reduce((sum, item) => sum + item.amount, 0);
             const totalLiabilities = balanceData.liabilities.reduce((sum, item) => sum + item.amount, 0);
             const backendEquity = balanceData.equity.reduce((sum, item) => sum + item.amount, 0);
             
