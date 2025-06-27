@@ -6038,7 +6038,9 @@
         }
 
         function resetWorkspace() {
-            scrollToForms();
+            setTimeout(() => {
+                scrollToForms();
+            }, 100);
             // Reset form
             document.getElementById('companyName').value = '';
             document.getElementById('industry').value = '';
