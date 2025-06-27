@@ -4468,7 +4468,7 @@
             
             // Store calculated values globally for use in ratios
             window.calculatedTotalEquity = totalEquity;
-            window.calculatedRetainedEarnings = updatedRetainedEarnings;
+            window.calculatedRetainedEarnings = 0;
         }
         
         function populateCashFlowStatement(cashFlowData) {
@@ -6870,7 +6870,6 @@
 
         function openMonthPicker(container) {
             const input = container.querySelector('input[type="month"]');
-            input.focus();
             input.click();
         }
 
