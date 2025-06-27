@@ -2589,6 +2589,27 @@
             margin-bottom: 12px;
         }
 
+        .add-account-btn {
+            margin-top: 4px;
+            padding: 4px 8px;
+            font-size: 0.75rem;
+            background: transparent;
+            color: #60A5FA;
+            border: 1px dashed rgba(59, 130, 246, 0.5);
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .add-account-input {
+            margin-top: 4px;
+            width: 100%;
+            padding: 4px 6px;
+            border-radius: 4px;
+            border: 1px solid rgba(59, 130, 246, 0.5);
+            background: rgba(255, 255, 255, 0.05);
+            color: #F8FAFC;
+        }
+
         .gl-account-lists {
             display: flex;
             flex-direction: column;
@@ -3325,10 +3346,12 @@
                                 <div class="category-column">
                                     <h6>Revenue</h6>
                                     <div id="income-revenue-lists" class="gl-account-lists"></div>
+                                    <button class="add-account-btn" data-statement="income" data-category="Revenue">+ Add Account</button>
                                 </div>
                                 <div class="category-column">
                                     <h6>Expense</h6>
                                     <div id="income-expense-lists" class="gl-account-lists"></div>
+                                    <button class="add-account-btn" data-statement="income" data-category="Expense">+ Add Account</button>
                                 </div>
                                 <div class="statement-footer">
                                     <div class="summary-item">
@@ -3350,14 +3373,17 @@
                                 <div class="category-column">
                                     <h6>Operating</h6>
                                     <div id="cashflow-operating-lists" class="gl-account-lists"></div>
+                                    <button class="add-account-btn" data-statement="cashflow" data-category="Operating">+ Add Account</button>
                                 </div>
                                 <div class="category-column">
                                     <h6>Investing</h6>
                                     <div id="cashflow-investing-lists" class="gl-account-lists"></div>
+                                    <button class="add-account-btn" data-statement="cashflow" data-category="Investing">+ Add Account</button>
                                 </div>
                                 <div class="category-column">
                                     <h6>Financing</h6>
                                     <div id="cashflow-financing-lists" class="gl-account-lists"></div>
+                                    <button class="add-account-btn" data-statement="cashflow" data-category="Financing">+ Add Account</button>
                                 </div>
                                 <div class="statement-footer">
                                     <div class="summary-item">
@@ -3379,14 +3405,17 @@
                                 <div class="category-column">
                                     <h6>Asset</h6>
                                     <div id="balance-asset-lists" class="gl-account-lists"></div>
+                                    <button class="add-account-btn" data-statement="balance" data-category="Asset">+ Add Account</button>
                                 </div>
                                 <div class="category-column">
                                     <h6>Liability</h6>
                                     <div id="balance-liability-lists" class="gl-account-lists"></div>
+                                    <button class="add-account-btn" data-statement="balance" data-category="Liability">+ Add Account</button>
                                 </div>
                                 <div class="category-column">
                                     <h6>Equity</h6>
                                     <div id="balance-equity-lists" class="gl-account-lists"></div>
+                                    <button class="add-account-btn" data-statement="balance" data-category="Equity">+ Add Account</button>
                                 </div>
                                 <div class="statement-footer">
                                     <div class="summary-item">
@@ -6283,8 +6312,43 @@
         // Global variables for transaction editing
         let currentTransactions = [];
 
+        // Master list of GL accounts by statement/category
+        const masterGLAccounts = {
+            income: {
+                Revenue: ['Sales Revenue', 'Service Revenue', 'Interest Income', 'Dividend Income', 'Discounts Received', 'Other Operating Income', 'Gain on Asset Sales', 'Foreign Exchange Gains', 'Non-Operating Income', 'Other Revenue'],
+                Expense: [
+                    'Cost of Goods Sold (COGS)', 'Direct Materials', 'Direct Labor', 'Manufacturing Overhead',
+                    'Selling Expenses', 'Marketing & Advertising', 'General & Administrative Expenses',
+                    'Salaries & Wages', 'Employee Benefits', 'Rent Expense', 'Utilities Expense', 'Repairs & Maintenance',
+                    'Insurance Expense', 'Professional Fees', 'Office Supplies', 'Travel & Entertainment', 'Bank Fees',
+                    'Taxes (excluding Income Tax)', 'Other Operating Expenses', 'Depreciation & Amortization',
+                    'Interest Expense', 'Income Tax Expense'
+                ]
+            },
+            balance: {
+                Asset: [
+                    'Cash and Cash Equivalents','Petty Cash','Accounts Receivable','Notes Receivable (Short-term)',
+                    'Interest Receivable','Inventory','Prepaid Expenses','Prepaid Insurance','Prepaid Rent','Short-term Investments','Marketable Securities','Other Current Assets',
+                    'Property, Plant & Equipment (PPE)','Land','Buildings','Equipment','Vehicles','Furniture & Fixtures',
+                    'Accumulated Depreciation - Buildings','Accumulated Depreciation - Equipment','Accumulated Depreciation - Vehicles','Intangible Assets','Goodwill','Patents','Trademarks','Long-term Investments','Investment in Subsidiaries','Notes Receivable (Long-term)','Deferred Tax Assets','Other Non-current Assets'
+                ],
+                Liability: [
+                    'Accounts Payable','Notes Payable (Short-term)','Accrued Liabilities','Accrued Wages','Accrued Interest','Income Tax Payable','Sales Tax Payable','VAT Payable','Unearned Revenue','Deferred Revenue','Customer Deposits','Short-term Bank Loans','Current Portion of Long-term Debt','Other Current Liabilities',
+                    'Notes Payable (Long-term)','Long-term Bank Loans','Bonds Payable','Mortgage Payable','Deferred Tax Liabilities','Pension Obligations','Other Non-current Liabilities'
+                ],
+                Equity: [
+                    "Owner's Equity",'Capital Stock','Common Stock','Preferred Stock','Paid-in Capital','Additional Paid-in Capital','Treasury Stock','Accumulated Other Comprehensive Income','Current Year Earnings','Owner\'s Drawings','Partner\'s Capital','Other Equity','Retained Earnings'
+                ]
+            },
+            cashflow: {
+                Operating: ['Net Income','Depreciation & Amortization','Changes in Accounts Receivable','Changes in Inventory','Changes in Prepaid Expenses','Changes in Accounts Payable','Changes in Accrued Liabilities','Changes in Other Working Capital','Other Operating Cash Flow'],
+                Investing: ['Purchase of Property, Plant & Equipment (PPE)','Sale of Property, Plant & Equipment (PPE)','Purchase of Investments','Sale of Investments','Other Investing Cash Flow'],
+                Financing: ['Proceeds from Loans','Repayment of Loans','Issuance of Equity','Owner\'s Drawings/Dividends Paid','Other Financing Cash Flow']
+            }
+        };
+
         function renderTransactions() {
-            document.querySelectorAll('.gl-account-lists').forEach(c => c.innerHTML = '');
+            document.querySelectorAll('.gl-account-lists .transaction-list').forEach(list => list.innerHTML = '');
             const buffer = document.getElementById('buffer-list');
             if (buffer) buffer.innerHTML = '';
 
@@ -6367,6 +6431,69 @@ function initDragAndDrop() {
                 }
                 updateStatementTotals();
             }
+        });
+    });
+}
+
+function createGLEmptySection(statement, category, account, container) {
+    if (!container.querySelector(`.gl-account-section[data-gl-account="${account}"]`)) {
+        const section = document.createElement('div');
+        section.className = 'gl-account-section';
+        section.dataset.glAccount = account;
+
+        const title = document.createElement('div');
+        title.className = 'gl-account-title';
+        title.textContent = account;
+        section.appendChild(title);
+
+        const list = document.createElement('div');
+        list.className = 'transaction-list';
+        list.dataset.statement = statement;
+        list.dataset.category = category;
+        list.dataset.glAccount = account;
+        section.appendChild(list);
+
+        container.appendChild(section);
+        initDragAndDrop();
+    }
+}
+
+function showAddAccountInput(statement, category, button) {
+    const column = button.parentElement;
+    if (column.querySelector('.add-account-input')) return;
+
+    const listId = `${statement}-${category}-options`;
+    const datalist = document.createElement('datalist');
+    datalist.id = listId;
+    const existing = Array.from(column.querySelectorAll('.gl-account-section')).map(s => s.dataset.glAccount);
+    const options = (masterGLAccounts[statement] && masterGLAccounts[statement][category]) ? masterGLAccounts[statement][category] : [];
+    datalist.innerHTML = options.filter(o => !existing.includes(o)).map(o => `<option value="${o}"></option>`).join('');
+    document.body.appendChild(datalist);
+
+    const input = document.createElement('input');
+    input.className = 'add-account-input';
+    input.setAttribute('list', listId);
+    input.placeholder = 'Account name...';
+    column.appendChild(input);
+    input.focus();
+
+    const finalize = () => {
+        const value = input.value.trim();
+        if (value) {
+            createGLEmptySection(statement, category, value, column.querySelector('.gl-account-lists'));
+        }
+        input.remove();
+        datalist.remove();
+    };
+
+    input.addEventListener('change', finalize);
+    input.addEventListener('blur', finalize);
+}
+
+function initAddAccountButtons() {
+    document.querySelectorAll('.add-account-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            showAddAccountInput(btn.dataset.statement, btn.dataset.category, btn);
         });
     });
 }
@@ -6592,6 +6719,8 @@ function initDragAndDrop() {
                 searchInput.addEventListener('input', filterHistoryList);
             }
         });
+
+        document.addEventListener('DOMContentLoaded', initAddAccountButtons);
         
         function filterHistoryList() {
             const searchTerm = document.getElementById('historySearch').value.toLowerCase();
