@@ -2589,6 +2589,22 @@
             margin-bottom: 12px;
         }
 
+        .gl-account-lists {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .gl-account-section {
+            margin-bottom: 8px;
+        }
+
+        .gl-account-title {
+            font-size: 0.85rem;
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+
         .transaction-list {
             min-height: 40px;
             padding: 8px;
@@ -3308,11 +3324,11 @@
                                 <h5>Income Statement</h5>
                                 <div class="category-column">
                                     <h6>Revenue</h6>
-                                    <div id="income-revenue-list" class="transaction-list" data-statement="income" data-category="Revenue"></div>
+                                    <div id="income-revenue-lists" class="gl-account-lists"></div>
                                 </div>
                                 <div class="category-column">
                                     <h6>Expense</h6>
-                                    <div id="income-expense-list" class="transaction-list" data-statement="income" data-category="Expense"></div>
+                                    <div id="income-expense-lists" class="gl-account-lists"></div>
                                 </div>
                                 <div class="statement-footer">
                                     <div class="summary-item">
@@ -3333,15 +3349,15 @@
                                 <h5>Cash Flow</h5>
                                 <div class="category-column">
                                     <h6>Operating</h6>
-                                    <div id="cashflow-operating-list" class="transaction-list" data-statement="cashflow" data-category="Operating"></div>
+                                    <div id="cashflow-operating-lists" class="gl-account-lists"></div>
                                 </div>
                                 <div class="category-column">
                                     <h6>Investing</h6>
-                                    <div id="cashflow-investing-list" class="transaction-list" data-statement="cashflow" data-category="Investing"></div>
+                                    <div id="cashflow-investing-lists" class="gl-account-lists"></div>
                                 </div>
                                 <div class="category-column">
                                     <h6>Financing</h6>
-                                    <div id="cashflow-financing-list" class="transaction-list" data-statement="cashflow" data-category="Financing"></div>
+                                    <div id="cashflow-financing-lists" class="gl-account-lists"></div>
                                 </div>
                                 <div class="statement-footer">
                                     <div class="summary-item">
@@ -3362,15 +3378,15 @@
                                 <h5>Balance Sheet</h5>
                                 <div class="category-column">
                                     <h6>Asset</h6>
-                                    <div id="balance-asset-list" class="transaction-list" data-statement="balance" data-category="Asset"></div>
+                                    <div id="balance-asset-lists" class="gl-account-lists"></div>
                                 </div>
                                 <div class="category-column">
                                     <h6>Liability</h6>
-                                    <div id="balance-liability-list" class="transaction-list" data-statement="balance" data-category="Liability"></div>
+                                    <div id="balance-liability-lists" class="gl-account-lists"></div>
                                 </div>
                                 <div class="category-column">
                                     <h6>Equity</h6>
-                                    <div id="balance-equity-list" class="transaction-list" data-statement="balance" data-category="Equity"></div>
+                                    <div id="balance-equity-lists" class="gl-account-lists"></div>
                                 </div>
                                 <div class="statement-footer">
                                     <div class="summary-item">
@@ -6266,17 +6282,41 @@
 
         // Global variables for transaction editing
         let currentTransactions = [];
-        let dragInitialized = false;
 
         function renderTransactions() {
-            document.querySelectorAll('.transaction-list').forEach(list => list.innerHTML = '');
+            document.querySelectorAll('.gl-account-lists').forEach(c => c.innerHTML = '');
+            const buffer = document.getElementById('buffer-list');
+            if (buffer) buffer.innerHTML = '';
 
             currentTransactions.forEach(tx => {
                 let container;
                 if (tx.statement === 'buffer') {
-                    container = document.getElementById('buffer-list');
+                    container = buffer;
                 } else {
-                    container = document.getElementById(`${tx.statement}-${tx.category.toLowerCase()}-list`);
+                    const listContainer = document.getElementById(`${tx.statement}-${tx.category.toLowerCase()}-lists`);
+                    if (!listContainer) return;
+                    const account = tx.glAccount || 'Other';
+                    let section = listContainer.querySelector(`.gl-account-section[data-gl-account="${account}"]`);
+                    if (!section) {
+                        section = document.createElement('div');
+                        section.className = 'gl-account-section';
+                        section.dataset.glAccount = account;
+
+                        const title = document.createElement('div');
+                        title.className = 'gl-account-title';
+                        title.textContent = account;
+                        section.appendChild(title);
+
+                        const list = document.createElement('div');
+                        list.className = 'transaction-list';
+                        list.dataset.statement = tx.statement;
+                        list.dataset.category = tx.category;
+                        list.dataset.glAccount = account;
+                        section.appendChild(list);
+
+                        listContainer.appendChild(section);
+                    }
+                    container = section.querySelector('.transaction-list');
                 }
                 if (!container) return;
 
@@ -6292,38 +6332,44 @@
                 `;
                 container.appendChild(card);
             });
+
+            initDragAndDrop();
             updateStatementTotals();
         }
 
-        function initDragAndDrop() {
-            document.querySelectorAll('.transaction-list, #buffer-list').forEach(list => {
-                Sortable.create(list, {
-                    group: 'transactions',
-                    animation: 150,
-                    scroll: true,
-                    scrollSensitivity: 60,
-                    scrollSpeed: 15,
-                    onAdd: (evt) => {
-                        const txId = evt.item.dataset.id;
-                        const baseId = evt.item.dataset.baseId;
-                        const statement = evt.to.dataset.statement;
-                        const category = evt.to.dataset.category;
-                        const tx = currentTransactions.find(t => String(t.id) === String(txId));
-                        if (tx) {
-                            const duplicate = currentTransactions.find(t => t.baseId === baseId && t.statement === statement && t.id !== tx.id);
-                            if (duplicate) {
-                                evt.from.appendChild(evt.item);
-                                showUpdateNotification("This transaction already exists in this statement");
-                                return;
-                            }
-                            tx.statement = statement;
-                            tx.category = category;
-                        }
-                        updateStatementTotals();
+function initDragAndDrop() {
+    document.querySelectorAll('.transaction-list, #buffer-list').forEach(list => {
+        if (list.dataset.sortableBound) return;
+        list.dataset.sortableBound = 'true';
+        Sortable.create(list, {
+            group: 'transactions',
+            animation: 150,
+            scroll: true,
+            scrollSensitivity: 60,
+            scrollSpeed: 15,
+            onAdd: (evt) => {
+                const txId = evt.item.dataset.id;
+                const baseId = evt.item.dataset.baseId;
+                const statement = evt.to.dataset.statement;
+                const category = evt.to.dataset.category;
+                const glAccount = evt.to.dataset.glAccount || null;
+                const tx = currentTransactions.find(t => String(t.id) === String(txId));
+                if (tx) {
+                    const duplicate = currentTransactions.find(t => t.baseId === baseId && t.statement === statement && t.glAccount === glAccount && t.id !== tx.id);
+                    if (duplicate) {
+                        evt.from.appendChild(evt.item);
+                        showUpdateNotification("This transaction already exists in this account");
+                        return;
                     }
-                });
-            });
-        }
+                    tx.statement = statement;
+                    tx.category = category;
+                    tx.glAccount = glAccount;
+                }
+                updateStatementTotals();
+            }
+        });
+    });
+}
         
         // Initialize transaction editor when transactions tab is shown
         function showTransactionsEditor() {
@@ -6333,10 +6379,7 @@
             currentTransactions = JSON.parse(JSON.stringify(window.editableTransactions));
 
             renderTransactions();
-            if (!dragInitialized) {
-                initDragAndDrop();
-                dragInitialized = true;
-            }
+            initDragAndDrop();
             updateStatementTotals();
         }
         
@@ -6430,21 +6473,21 @@
             const revenue = [];
             const expenses = [];
             
-            // Group transactions by subcategory
+            // Group transactions by GL account
             const revenueGroups = {};
             const expenseGroups = {};
             
             transactions.forEach(tx => {
                 if (tx.statement === 'buffer') return;
                 if (tx.category === 'Revenue' || (tx.amount > 0 && tx.category !== 'Expense')) {
-                    const key = tx.subcategory || 'Other Revenue';
+                    const key = tx.glAccount || tx.subcategory || 'Other Revenue';
                     if (!revenueGroups[key]) {
                         revenueGroups[key] = { amount: 0, transaction_index: [] };
                     }
                     revenueGroups[key].amount += Math.abs(tx.amount);
                     revenueGroups[key].transaction_index.push(tx.id);
                 } else if (tx.category === 'Expense' || (tx.amount < 0 && tx.category !== 'Revenue')) {
-                    const key = tx.subcategory || 'Other Expenses';
+                    const key = tx.glAccount || tx.subcategory || 'Other Expenses';
                     if (!expenseGroups[key]) {
                         expenseGroups[key] = { amount: 0, transaction_index: [] };
                     }
