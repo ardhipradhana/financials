@@ -4717,23 +4717,26 @@
             const netIncome = window.calculatedNetIncome || 0;
             const depreciation = window.calculatedDepreciation || 0;
             
-            // 1. HANDLE RETAINED EARNINGS PROPERLY
-            // Check if Retained Earnings already exists
+            console.log('Net Income to use for Retained Earnings:', netIncome);
+            
+            // 1. REPLACE BACKEND'S RETAINED EARNINGS WITH NET INCOME
             let retainedEarningsIndex = processedStatements.balanceSheet.equity.findIndex(item => 
                 item.item.toLowerCase().includes('retained earnings')
             );
             
-            if (retainedEarningsIndex === -1) {
-                // Create retained earnings from net income (only once)
+            if (retainedEarningsIndex !== -1) {
+                // Replace existing retained earnings with net income
+                const oldAmount = processedStatements.balanceSheet.equity[retainedEarningsIndex].amount;
+                processedStatements.balanceSheet.equity[retainedEarningsIndex].amount = netIncome;
+                console.log(`Replaced Retained Earnings: ${oldAmount} → ${netIncome}`);
+            } else {
+                // Create new retained earnings from net income
                 processedStatements.balanceSheet.equity.push({
                     item: 'Retained Earnings',
                     amount: netIncome,
                     transaction_index: ['calculated_from_income']
                 });
-                console.log('Added Retained Earnings:', netIncome);
-            } else {
-                // If it already exists, don't add it again
-                console.log('Retained Earnings already exists:', processedStatements.balanceSheet.equity[retainedEarningsIndex].amount);
+                console.log('Created new Retained Earnings from Net Income:', netIncome);
             }
             
             // 2. CONNECT NET INCOME TO CASH FLOW OPERATIONS
@@ -4771,7 +4774,7 @@
                 }
             }
             
-            // 4. BALANCE SHEET BALANCING  
+            // 4. BALANCE SHEET BALANCING
             const totalAssets = processedStatements.balanceSheet.assets.reduce((sum, item) => sum + item.amount, 0);
             const totalLiabilities = processedStatements.balanceSheet.liabilities.reduce((sum, item) => sum + item.amount, 0);
             const totalEquity = processedStatements.balanceSheet.equity.reduce((sum, item) => sum + item.amount, 0);
