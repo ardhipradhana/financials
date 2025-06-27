@@ -4700,14 +4700,26 @@
             
             html += addRowIfValue('Net Cash from Financing Activities', financingTotal, true);
             
-            // FINAL CALCULATIONS
+            // FINAL CALCULATIONS - Trust backend's cash figures
             html += '<tr><td colspan="2" style="height: 12px;"></td></tr>';
             
-            const netCashChange = cashFlowData.netChangeInCash || (operatingTotal + investingTotal + financingTotal);
-            const endingBalance = cashFlowData.endingBalance || (beginningBalance + netCashChange);
+            // Calculate what our individual line items total to
+            const calculatedNetChange = operatingTotal + investingTotal + financingTotal;
             
-            html += addRowIfValue('Net Change in Cash', netCashChange, false, true);
-            html += addRowIfValue('Ending Cash Balance', endingBalance, false, true);
+            // Use backend's authoritative figures (these are correct)
+            const backendNetChange = cashFlowData.netChangeInCash;
+            const backendEndingBalance = cashFlowData.endingBalance;
+            
+            // Show reconciling difference if there's a discrepancy between line items and actual net change
+            const reconciliationDifference = backendNetChange - calculatedNetChange;
+            
+            if (Math.abs(reconciliationDifference) > 0.01) {
+                html += addRowIfValue('Reconciling Items (Unclassified Transactions)', reconciliationDifference, false, false, true);
+            }
+            
+            // Always use backend's correct figures for final totals
+            html += addRowIfValue('Net Change in Cash', backendNetChange, false, true);
+            html += addRowIfValue('Ending Cash Balance', backendEndingBalance, false, true);
             
             cashFlowTable.innerHTML = html;
         }
