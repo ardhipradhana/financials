@@ -3996,22 +3996,23 @@
             const cashFlow = financialStatements.cashFlow.cashFlow || financialStatements.cashFlow;
             
             return transactions.map(tx => {
-                // Find which statement line this transaction belongs to
-                const category = findTransactionCategory(tx.transaction_index, { 
-                    incomeStatement: income, 
-                    balanceSheet: balance, 
-                    cashFlow: cashFlow 
-                });
+                // Simple category determination based on amount
+                let category = 'Other';
+                if (tx.amount > 0) {
+                    category = 'Revenue';
+                } else if (tx.amount < 0) {
+                    category = 'Expense';
+                }
                 
                 return {
                     id: tx.transaction_index,
-                    date: convertDateFormat(tx.date),
+                    date: tx.date, // Keep original date format
                     amount: tx.amount,
                     description: tx.counterparty,
                     context: tx.business_context,
                     confidence: tx.confidence_score,
-                    category: category.type,
-                    subcategory: category.item,
+                    category: category,
+                    subcategory: 'General',
                     isIncome: tx.amount > 0,
                     editable: true
                 };
