@@ -4717,52 +4717,47 @@
             const netIncome = window.calculatedNetIncome || 0;
             const depreciation = window.calculatedDepreciation || 0;
             
-            // 1. CONNECT NET INCOME TO RETAINED EARNINGS
-            // Find or create retained earnings in equity
+            // 1. HANDLE RETAINED EARNINGS PROPERLY
+            // Check if Retained Earnings already exists
             let retainedEarningsIndex = processedStatements.balanceSheet.equity.findIndex(item => 
                 item.item.toLowerCase().includes('retained earnings')
             );
             
             if (retainedEarningsIndex === -1) {
-                // Create retained earnings entry if it doesn't exist
+                // Create retained earnings from net income (only once)
                 processedStatements.balanceSheet.equity.push({
                     item: 'Retained Earnings',
                     amount: netIncome,
                     transaction_index: ['calculated_from_income']
                 });
+                console.log('Added Retained Earnings:', netIncome);
             } else {
-                // Update existing retained earnings with net income
-                const existingRetained = processedStatements.balanceSheet.equity[retainedEarningsIndex].amount;
-                processedStatements.balanceSheet.equity[retainedEarningsIndex].amount = existingRetained + netIncome;
+                // If it already exists, don't add it again
+                console.log('Retained Earnings already exists:', processedStatements.balanceSheet.equity[retainedEarningsIndex].amount);
             }
             
             // 2. CONNECT NET INCOME TO CASH FLOW OPERATIONS
-            // Ensure Net Income is first item in operating activities
             let netIncomeInCashFlow = processedStatements.cashFlow.operating.findIndex(item => 
                 item.item.toLowerCase().includes('net income')
             );
             
             if (netIncomeInCashFlow === -1) {
-                // Add Net Income as first item in operating activities
                 processedStatements.cashFlow.operating.unshift({
                     item: 'Net Income',
                     amount: netIncome,
                     transaction_index: ['calculated_from_income']
                 });
             } else {
-                // Update existing net income in cash flow
                 processedStatements.cashFlow.operating[netIncomeInCashFlow].amount = netIncome;
             }
             
-            // 3. ENSURE DEPRECIATION CONNECTION
-            // Add depreciation to cash flow if it exists in income but not in cash flow
+            // 3. DEPRECIATION CONNECTION
             if (depreciation > 0) {
                 let depreciationInCashFlow = processedStatements.cashFlow.operating.findIndex(item => 
                     item.item.toLowerCase().includes('depreciation')
                 );
                 
                 if (depreciationInCashFlow === -1) {
-                    // Add depreciation after net income
                     const netIncomeIndex = processedStatements.cashFlow.operating.findIndex(item => 
                         item.item.toLowerCase().includes('net income')
                     );
@@ -4776,8 +4771,7 @@
                 }
             }
             
-            // 4. BALANCE SHEET BALANCING
-            // Ensure Assets = Liabilities + Equity
+            // 4. BALANCE SHEET BALANCING  
             const totalAssets = processedStatements.balanceSheet.assets.reduce((sum, item) => sum + item.amount, 0);
             const totalLiabilities = processedStatements.balanceSheet.liabilities.reduce((sum, item) => sum + item.amount, 0);
             const totalEquity = processedStatements.balanceSheet.equity.reduce((sum, item) => sum + item.amount, 0);
@@ -4785,22 +4779,11 @@
             const imbalance = totalAssets - (totalLiabilities + totalEquity);
             
             if (Math.abs(imbalance) > 0.01) {
-                // Add balancing entry to equity
                 processedStatements.balanceSheet.equity.push({
                     item: 'Balancing Adjustment',
                     amount: imbalance,
                     transaction_index: ['calculated_balancing']
                 });
-            }
-            
-            // 5. CASH FLOW ENDING BALANCE CONNECTION
-            // Ensure ending cash in cash flow matches cash in balance sheet
-            const cashInBalanceSheet = processedStatements.balanceSheet.assets.find(item => 
-                item.item.toLowerCase().includes('cash')
-            );
-            
-            if (cashInBalanceSheet && !processedStatements.cashFlow.endingBalance) {
-                processedStatements.cashFlow.endingBalance = cashInBalanceSheet.amount;
             }
             
             return processedStatements;
