@@ -2681,16 +2681,13 @@
             margin-top: 4px;
         }
         
-        /* Live Summary */
-        .live-summary {
-            background: linear-gradient(145deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9));
-            border: 1px solid rgba(59, 130, 246, 0.3);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 24px;
+
+        .statement-footer {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
-            gap: 24px;
+            gap: 12px;
+            width: 100%;
+            margin-top: 8px;
         }
         
         .summary-item {
@@ -2731,13 +2728,7 @@
             gap: 16px;
         }
         
-        @media (max-width: 768px) {
-            
-            .live-summary {
-                grid-template-columns: 1fr;
-                gap: 12px;
-            }
-        }
+
         
     </style>
 </head>
@@ -3308,21 +3299,7 @@
                     
                     <div class="transaction-editor">
                         
-                        <!-- Live Summary -->
-                        <div class="live-summary">
-                            <div class="summary-item">
-                                <span>Total Revenue:</span>
-                                <span id="liveTotalRevenue" class="amount positive">$0</span>
-                            </div>
-                            <div class="summary-item">
-                                <span>Total Expenses:</span>
-                                <span id="liveTotalExpenses" class="amount negative">$0</span>
-                            </div>
-                            <div class="summary-item highlight">
-                                <span>Net Income:</span>
-                                <span id="liveNetIncome" class="amount">$0</span>
-                            </div>
-                        </div>
+
 
                         <!-- Transaction Lists -->
                         <div class="transaction-lists">
@@ -3336,6 +3313,20 @@
                                 <div class="category-column">
                                     <h6>Expense</h6>
                                     <div id="income-expense-list" class="transaction-list" data-statement="income" data-category="Expense"></div>
+                                </div>
+                                <div class="statement-footer">
+                                    <div class="summary-item">
+                                        <span>Total Revenue:</span>
+                                        <span id="incomeTotalRevenue" class="amount positive">$0</span>
+                                    </div>
+                                    <div class="summary-item">
+                                        <span>Total Expense:</span>
+                                        <span id="incomeTotalExpense" class="amount negative">$0</span>
+                                    </div>
+                                    <div class="summary-item highlight">
+                                        <span>Net Income:</span>
+                                        <span id="incomeNetIncome" class="amount">$0</span>
+                                    </div>
                                 </div>
                                 </div>
                                 <div class="statement-section">
@@ -3352,6 +3343,20 @@
                                     <h6>Financing</h6>
                                     <div id="cashflow-financing-list" class="transaction-list" data-statement="cashflow" data-category="Financing"></div>
                                 </div>
+                                <div class="statement-footer">
+                                    <div class="summary-item">
+                                        <span>Operating:</span>
+                                        <span id="cashflowOperatingTotal" class="amount">$0</span>
+                                    </div>
+                                    <div class="summary-item">
+                                        <span>Investing:</span>
+                                        <span id="cashflowInvestingTotal" class="amount">$0</span>
+                                    </div>
+                                    <div class="summary-item">
+                                        <span>Financing:</span>
+                                        <span id="cashflowFinancingTotal" class="amount">$0</span>
+                                    </div>
+                                </div>
                                 </div>
                                 <div class="statement-section">
                                 <h5>Balance Sheet</h5>
@@ -3366,6 +3371,20 @@
                                 <div class="category-column">
                                     <h6>Equity</h6>
                                     <div id="balance-equity-list" class="transaction-list" data-statement="balance" data-category="Equity"></div>
+                                </div>
+                                <div class="statement-footer">
+                                    <div class="summary-item">
+                                        <span>Total Assets:</span>
+                                        <span id="balanceTotalAssets" class="amount">$0</span>
+                                    </div>
+                                    <div class="summary-item">
+                                        <span>Total Liabilities:</span>
+                                        <span id="balanceTotalLiabilities" class="amount">$0</span>
+                                    </div>
+                                    <div class="summary-item">
+                                        <span>Total Equity:</span>
+                                        <span id="balanceTotalEquity" class="amount">$0</span>
+                                    </div>
                                 </div>
                                 </div>
                             </div>
@@ -6273,6 +6292,7 @@
                 `;
                 container.appendChild(card);
             });
+            updateStatementTotals();
         }
 
         function initDragAndDrop() {
@@ -6299,7 +6319,7 @@
                             tx.statement = statement;
                             tx.category = category;
                         }
-                        updateLiveSummary();
+                        updateStatementTotals();
                     }
                 });
             });
@@ -6317,28 +6337,60 @@
                 initDragAndDrop();
                 dragInitialized = true;
             }
-            updateLiveSummary();
+            updateStatementTotals();
         }
         
         
-        function updateLiveSummary() {
-            const incomeTx = currentTransactions.filter(t => t.statement === 'income');
-            const totalRevenue = incomeTx
-                .filter(t => t.amount > 0)
-                .reduce((sum, t) => sum + t.amount, 0);
 
-            const totalExpenses = incomeTx
-                .filter(t => t.amount < 0)
-                .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+        function updateStatementTotals() {
+            const totals = {
+                income: { revenue: 0, expense: 0 },
+                balance: { asset: 0, liability: 0, equity: 0 },
+                cashflow: { operating: 0, investing: 0, financing: 0 }
+            };
 
-            const netIncome = totalRevenue - totalExpenses;
+            currentTransactions.forEach(tx => {
+                const amt = Math.abs(tx.amount);
+                switch (tx.statement) {
+                    case 'income':
+                        if (tx.category === 'Revenue' || (tx.amount > 0 && tx.category !== 'Expense')) {
+                            totals.income.revenue += amt;
+                        } else if (tx.category === 'Expense' || (tx.amount < 0 && tx.category !== 'Revenue')) {
+                            totals.income.expense += amt;
+                        }
+                        break;
+                    case 'balance':
+                        if (tx.category === 'Asset') totals.balance.asset += amt;
+                        if (tx.category === 'Liability') totals.balance.liability += amt;
+                        if (tx.category === 'Equity') totals.balance.equity += amt;
+                        break;
+                    case 'cashflow':
+                        if (tx.category === 'Operating') totals.cashflow.operating += amt;
+                        if (tx.category === 'Investing') totals.cashflow.investing += amt;
+                        if (tx.category === 'Financing') totals.cashflow.financing += amt;
+                        break;
+                }
+            });
 
-            document.getElementById('liveTotalRevenue').textContent = formatCurrency(totalRevenue);
-            document.getElementById('liveTotalExpenses').textContent = formatCurrency(totalExpenses);
-            document.getElementById('liveNetIncome').textContent = formatCurrency(netIncome);
+            const setText = (id, value) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = formatCurrency(value);
+            };
 
-            const netIncomeElement = document.getElementById('liveNetIncome');
-            netIncomeElement.className = `amount ${netIncome >= 0 ? 'positive' : 'negative'}`;
+            setText('incomeTotalRevenue', totals.income.revenue);
+            setText('incomeTotalExpense', totals.income.expense);
+            const net = totals.income.revenue - totals.income.expense;
+            setText('incomeNetIncome', net);
+            const netEl = document.getElementById('incomeNetIncome');
+            if (netEl) netEl.className = `amount ${net >= 0 ? 'positive' : 'negative'}`;
+
+            setText('balanceTotalAssets', totals.balance.asset);
+            setText('balanceTotalLiabilities', totals.balance.liability);
+            setText('balanceTotalEquity', totals.balance.equity);
+
+            setText('cashflowOperatingTotal', totals.cashflow.operating);
+            setText('cashflowInvestingTotal', totals.cashflow.investing);
+            setText('cashflowFinancingTotal', totals.cashflow.financing);
         }
         
         // Action button functions
@@ -6347,7 +6399,7 @@
                 // Reset to original data
                 currentTransactions = JSON.parse(JSON.stringify(window.editableTransactions));
                 renderTransactions();
-                updateLiveSummary();
+                updateStatementTotals();
             }
         }
         
