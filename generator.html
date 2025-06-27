@@ -3955,18 +3955,31 @@
         function validateFinancialStatements(statements) {
             // Basic validation
             if (!statements.incomeStatement || !statements.balanceSheet || !statements.cashFlow) {
+                console.error('Missing required financial statements');
                 return false;
             }
             
-            // Check for duplicate entries in cash flow
-            const cashFlow = statements.cashFlow;
-            if (cashFlow.operating) {
-                const operatingItems = cashFlow.operating.map(item => item.item);
-                if (operatingItems.length !== new Set(operatingItems).size) {
-                    console.warn('Duplicate operating cash flow items detected');
-                }
+            // Check structure of each statement
+            const income = statements.incomeStatement.incomeStatement || statements.incomeStatement;
+            const balance = statements.balanceSheet.balanceSheet || statements.balanceSheet;
+            const cashFlow = statements.cashFlow.cashFlow || statements.cashFlow;
+            
+            if (!income.revenue || !income.expenses) {
+                console.error('Invalid income statement structure');
+                return false;
             }
             
+            if (!balance.assets || !balance.liabilities || !balance.equity) {
+                console.error('Invalid balance sheet structure');
+                return false;
+            }
+            
+            if (!cashFlow.operating || !cashFlow.investing || !cashFlow.financing) {
+                console.error('Invalid cash flow statement structure');
+                return false;
+            }
+            
+            console.log('Financial statements validation passed');
             return true;
         }
         
@@ -3986,9 +3999,18 @@
         }
 
         function processTransactionsForEditing(transactions, financialStatements) {
+            // Handle nested structure from backend
+            const income = financialStatements.incomeStatement.incomeStatement || financialStatements.incomeStatement;
+            const balance = financialStatements.balanceSheet.balanceSheet || financialStatements.balanceSheet;
+            const cashFlow = financialStatements.cashFlow.cashFlow || financialStatements.cashFlow;
+            
             return transactions.map(tx => {
                 // Find which statement line this transaction belongs to
-                const category = findTransactionCategory(tx.transaction_index, financialStatements);
+                const category = findTransactionCategory(tx.transaction_index, { 
+                    incomeStatement: income, 
+                    balanceSheet: balance, 
+                    cashFlow: cashFlow 
+                });
                 
                 return {
                     id: tx.transaction_index,
@@ -4038,7 +4060,15 @@
         }
 
         function populateResults(financialStatements) {
-            window.currentFinancialData = financialStatements;
+            // Handle nested structure from backend
+            const processedStatements = {
+                incomeStatement: financialStatements.incomeStatement.incomeStatement || financialStatements.incomeStatement,
+                balanceSheet: financialStatements.balanceSheet.balanceSheet || financialStatements.balanceSheet,
+                cashFlow: financialStatements.cashFlow.cashFlow || financialStatements.cashFlow
+            };
+            
+            window.currentFinancialData = processedStatements;
+            
             // Update company info in report headers
             const reportingPeriod = document.getElementById('reportingPeriod').value;
             const periodText = formatReportingPeriod(reportingPeriod);
@@ -4050,10 +4080,10 @@
             document.getElementById('reportPeriod5').textContent = periodText;
             
             // Populate each statement
-            populateIncomeStatement(financialStatements.incomeStatement);
-            populateBalanceSheet(financialStatements.balanceSheet);
-            populateCashFlowStatement(financialStatements.cashFlow);
-            populateFinancialRatios(financialStatements);
+            populateIncomeStatement(processedStatements.incomeStatement);
+            populateBalanceSheet(processedStatements.balanceSheet);
+            populateCashFlowStatement(processedStatements.cashFlow);
+            populateFinancialRatios(processedStatements);
         }
         
         function formatReportingPeriod(period) {
@@ -4378,38 +4408,26 @@
             // Get Net Income from global variable (calculated in Income Statement)
             const currentNetIncome = window.calculatedNetIncome || 0;
             
-            // Find existing Retained Earnings
-            const existingRetainedEarnings = balanceData.equity.find(item => 
-                item.item.toLowerCase().includes('retained earnings')
-            );
-            
-            // Calculate updated Retained Earnings = Previous RE + Current Net Income
-            const previousRetainedEarnings = existingRetainedEarnings ? existingRetainedEarnings.amount : 0;
-            const updatedRetainedEarnings = previousRetainedEarnings + currentNetIncome;
+            // Calculate equity properly
+            const totalAssets = balanceData.assets.reduce((sum, item) => sum + item.amount, 0);
+            const totalLiabilities = balanceData.liabilities.reduce((sum, item) => sum + item.amount, 0);
+            const backendEquity = balanceData.equity.reduce((sum, item) => sum + item.amount, 0);
             
             let totalEquity = 0;
             
-            // Add other equity items (excluding retained earnings - we'll add it separately)
-            const otherEquityItems = [
-                { key: 'ownersEquity', labels: ['owner\'s equity', 'owners equity', 'owner equity', 'paid-in capital'] },
-                { key: 'contributedCapital', labels: ['contributed capital', 'additional paid-in capital'] },
-                { key: 'otherEquity', labels: ['other equity'] }
-            ];
-            
-            otherEquityItems.forEach(equityType => {
-                const equity = balanceData.equity.find(item => 
-                    equityType.labels.some(label => item.item.toLowerCase().includes(label.toLowerCase()))
-                );
-                if (equity && equity.amount > 0) {
-                    html += addRowIfValue(equity.item, equity.amount, false, false, true);
-                    totalEquity += equity.amount;
-                }
-            });
-            
-            // Add Retained Earnings (with Net Income connection)
-            if (updatedRetainedEarnings !== 0) {
-                html += addRowIfValue('Retained Earnings', updatedRetainedEarnings, false, false, true);
-                totalEquity += updatedRetainedEarnings;
+            // If backend equity is negative or very small, calculate from Assets - Liabilities
+            if (Math.abs(backendEquity) < 1000 || backendEquity < 0) {
+                const calculatedEquity = totalAssets - totalLiabilities;
+                html += addRowIfValue('Calculated Equity (Assets - Liabilities)', calculatedEquity, false, false, true);
+                totalEquity = calculatedEquity;
+            } else {
+                // Use backend equity values
+                balanceData.equity.forEach(equity => {
+                    if (equity.amount !== 0) {
+                        html += addRowIfValue(equity.item, equity.amount, false, false, true);
+                        totalEquity += equity.amount;
+                    }
+                });
             }
             
             // BALANCING LOGIC (Safety Net)
