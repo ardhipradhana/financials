@@ -2617,6 +2617,15 @@
         .transaction-drop-zone {
             min-height: 400px;
             padding: 8px;
+            border: 2px dashed rgba(59, 130, 246, 0.3);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .transaction-drop-zone.drag-over {
+            border-color: #60A5FA;
+            background: rgba(59, 130, 246, 0.1);
+            transform: scale(1.02);
         }
         
         /* Individual Transaction Cards */
@@ -3330,7 +3339,7 @@
                                     <h5>💰 Revenue</h5>
                                     <span class="category-total" id="revenueTotalDisplay">$0</span>
                                 </div>
-                                <div class="transaction-drop-zone" id="revenueZone">
+                                <div class="transaction-drop-zone" id="revenueZone" data-statement-section="income" data-gl-account="Revenue">
                                     <!-- Revenue transactions will appear here -->
                                 </div>
                             </div>
@@ -3341,7 +3350,7 @@
                                     <h5>💸 Expenses</h5>
                                     <span class="category-total" id="expenseTotalDisplay">$0</span>
                                 </div>
-                                <div class="transaction-drop-zone" id="expenseZone">
+                                <div class="transaction-drop-zone" id="expenseZone" data-statement-section="income" data-gl-account="Expense">
                                     <!-- Expense transactions will appear here -->
                                 </div>
                             </div>
@@ -3352,7 +3361,7 @@
                                     <h5>❓ Needs Review</h5>
                                     <span class="category-total" id="otherTotalDisplay">$0</span>
                                 </div>
-                                <div class="transaction-drop-zone" id="otherZone">
+                                <div class="transaction-drop-zone" id="otherZone" data-statement-section="other" data-gl-account="Unclassified">
                                     <!-- Unclassified transactions will appear here -->
                                 </div>
                             </div>
@@ -6240,6 +6249,9 @@
             
             // Update category totals
             updateCategoryTotals();
+
+            // Reattach drag/drop listeners for newly populated zones
+            setupDropZones();
         }
         
         function createTransactionCard(transaction) {
@@ -6296,8 +6308,12 @@
         // Set up drop zones when transactions tab is loaded
         function setupDropZones() {
             const dropZones = document.querySelectorAll('.transaction-drop-zone');
-            
+
             dropZones.forEach(zone => {
+                zone.removeEventListener('dragover', handleDragOver);
+                zone.removeEventListener('drop', handleDrop);
+                zone.removeEventListener('dragenter', handleDragEnter);
+                zone.removeEventListener('dragleave', handleDragLeave);
                 zone.addEventListener('dragover', handleDragOver);
                 zone.addEventListener('drop', handleDrop);
                 zone.addEventListener('dragenter', handleDragEnter);
@@ -6312,18 +6328,18 @@
         
         function handleDragEnter(e) {
             e.preventDefault();
-            const column = e.target.closest('.category-column');
-            if (column) {
-                column.classList.add('drag-over');
+            const zone = e.target.closest('.transaction-drop-zone');
+            if (zone) {
+                zone.classList.add('drag-over');
             }
         }
-        
+
         function handleDragLeave(e) {
             // Only remove drag-over if we're actually leaving the column
             if (!e.currentTarget.contains(e.relatedTarget)) {
-                const column = e.target.closest('.category-column');
-                if (column) {
-                    column.classList.remove('drag-over');
+                const zone = e.target.closest('.transaction-drop-zone');
+                if (zone) {
+                    zone.classList.remove('drag-over');
                 }
             }
         }
@@ -6331,39 +6347,28 @@
         function handleDrop(e) {
             e.preventDefault();
             
-            const column = e.target.closest('.category-column');
-            if (column) {
-                column.classList.remove('drag-over');
-                
+            const zone = e.target.closest('.transaction-drop-zone');
+            if (zone) {
+                zone.classList.remove('drag-over');
+
                 const transactionId = e.dataTransfer.getData('text/plain');
-                const newCategory = column.dataset.category;
-                
-                // Update transaction category
-                moveTransactionToCategory(transactionId, newCategory);
-                
+                const statementSection = zone.dataset.statementSection || '';
+                const glAccount = zone.dataset.glAccount || '';
+
+                // Update transaction account info
+                updateTransactionAccount(transactionId, statementSection, glAccount);
+
                 // Re-populate zones and update calculations
                 populateTransactionZones();
                 updateLiveSummary();
             }
         }
-        
-        function moveTransactionToCategory(transactionId, newCategory) {
+
+        function updateTransactionAccount(transactionId, statementSection, glAccount) {
             const transaction = currentTransactions.find(t => t.id == transactionId);
             if (transaction) {
-                transaction.category = newCategory;
-
-                if (newCategory === 'Revenue' || newCategory === 'Expense') {
-                    transaction.statement = 'income';
-                }
-
-                // Update subcategory based on new category
-                if (newCategory === 'Revenue') {
-                    transaction.subcategory = 'Other Revenue';
-                } else if (newCategory === 'Expense') {
-                    transaction.subcategory = 'Other Expenses';
-                } else {
-                    transaction.subcategory = 'Unclassified';
-                }
+                transaction.statement = statementSection;
+                transaction.glAccount = glAccount;
             }
         }
         
