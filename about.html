@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="styles.css">
 
     <style>
-        /* Georgetown-inspired Executive Dashboard */
+        /* Georgetown-inspired Executive Dashboard - About Page */
         * {
             margin: 0;
             padding: 0;
@@ -24,15 +24,15 @@
             position: relative;
             overflow-x: hidden;
         }
-
+    
         h1, h2, h3, h4, h5, h6,
         .hero-title,
         .section-title,
         .card-title,
-        .trust-title {
+        .founder-title {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-
+    
         .brand-text,
         .footer-logo {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -61,8 +61,8 @@
             z-index: 1;
         }
         
-        /* Navigation */
-        .top-nav {
+        /* Navigation - Same as landing page */
+        .main-header {
             position: fixed;
             top: 0;
             left: 0;
@@ -84,7 +84,7 @@
             height: 70px;
         }
         
-        .nav-brand {
+        .nav-logo {
             display: flex;
             align-items: center;
             gap: 12px;
@@ -100,15 +100,11 @@
             justify-content: center;
             padding: 0px;
         }
-
+    
         .brand-icon img {
             width: 100%;
             height: 100%;
             object-fit: contain;
-        }
-
-        .footer-logo .brand-icon {
-            background: white;
         }
         
         .brand-text {
@@ -117,7 +113,7 @@
             color: #F8FAFC;
         }
         
-        .nav-links {
+        .nav-menu {
             display: flex;
             align-items: center;
             gap: 32px;
@@ -128,48 +124,50 @@
             text-decoration: none;
             font-weight: 500;
             transition: color 0.3s ease;
+            position: relative;
         }
         
-        .nav-link:hover {
+        .nav-link:hover,
+        .nav-link.active {
             color: #F8FAFC;
         }
-        
-        .btn-nav-cta {
+    
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 100%;
+            height: 2px;
             background: linear-gradient(135deg, #1E40AF, #60A5FA);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-weight: 600;
+        }
+        
+        .nav-toggle {
+            display: none;
+            flex-direction: column;
             cursor: pointer;
-            transition: all 0.3s ease;
         }
-        
-        .btn-nav-cta:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+    
+        .nav-toggle span {
+            width: 25px;
+            height: 3px;
+            background: #F8FAFC;
+            margin: 3px 0;
+            transition: 0.3s;
         }
-        
+    
         /* Hero Section */
         .hero-section {
             padding: 140px 0 100px;
             position: relative;
             overflow: hidden;
+            text-align: center;
         }
         
         .hero-container {
             max-width: 1400px;
             margin: 0 auto;
             padding: 0 20px;
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 60px;
-            align-items: center;
-            text-align: center;
-        }
-        
-        .hero-content {
-            position: relative;
         }
         
         .hero-badge {
@@ -215,66 +213,45 @@
             margin-left: auto;
             margin-right: auto;
         }
-        
-        .hero-cta {
-            display: flex;
-            gap: 16px;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .btn-hero-primary {
-            background: linear-gradient(135deg, #1E40AF, #60A5FA);
-            color: white;
-            border: none;
-            padding: 16px 32px;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-        }
-        
-        .btn-hero-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 40px rgba(59, 130, 246, 0.4);
-        }
-        
-        .btn-hero-secondary {
-            background: transparent;
-            color: #94A3B8;
-            border: 1px solid rgba(148, 163, 184, 0.3);
-            padding: 16px 24px;
-            border-radius: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-hero-secondary:hover {
-            border-color: rgba(59, 130, 246, 0.5);
-            color: #F8FAFC;
-        }
-        
-        .play-icon {
-            color: #3B82F6;
-        }
-        
-        /* Platform Section */
-        .platform-section {
+    
+        /* About Sections */
+        .about-section,
+        .founder-section,
+        .impact-section,
+        .vision-section {
             padding: 100px 0;
+            position: relative;
+            z-index: 1;
+        }
+    
+        .about-section {
+            background: linear-gradient(180deg, transparent 0%, rgba(15, 23, 42, 0.3) 100%);
+        }
+    
+        .founder-section {
+            background: rgba(15, 23, 42, 0.3);
+            border-top: 1px solid rgba(59, 130, 246, 0.1);
+            border-bottom: 1px solid rgba(59, 130, 246, 0.1);
+        }
+    
+        .impact-section {
             background: linear-gradient(180deg, transparent 0%, rgba(15, 23, 42, 0.5) 100%);
         }
-        
+    
+        .vision-section {
+            background: rgba(15, 23, 42, 0.3);
+            border-top: 1px solid rgba(59, 130, 246, 0.1);
+        }
+    
         .section-header {
             text-align: center;
             margin-bottom: 80px;
         }
-        
+    
+        .section-header.text-center {
+            text-align: center;
+        }
+    
         .section-title {
             font-size: 3rem;
             font-weight: 700;
@@ -282,7 +259,7 @@
             margin-bottom: 20px;
             letter-spacing: -1px;
         }
-        
+    
         .section-subtitle {
             font-size: 1.2rem;
             color: #94A3B8;
@@ -290,155 +267,96 @@
             margin: 0 auto;
             line-height: 1.6;
         }
-        
-        .platform-grid {
+    
+        /* Mission Grid */
+        .mission-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
             gap: 40px;
+            margin-top: 60px;
         }
-        
-        .platform-card {
+    
+        .mission-card {
             background: linear-gradient(145deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9));
             backdrop-filter: blur(20px);
             border-radius: 20px;
             padding: 40px;
             border: 1px solid rgba(59, 130, 246, 0.2);
+            text-align: center;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
         }
-        
-        .platform-card.active {
-            border-color: rgba(59, 130, 246, 0.4);
-            background: linear-gradient(145deg, rgba(59, 130, 246, 0.05), rgba(30, 41, 59, 0.9));
-        }
-        
-        .platform-card:hover {
+    
+        .mission-card:hover {
             transform: translateY(-8px);
             border-color: rgba(59, 130, 246, 0.4);
             box-shadow: 0 25px 80px rgba(59, 130, 246, 0.15);
         }
-        
-        .card-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+    
+        .mission-icon {
+            color: #60A5FA;
             margin-bottom: 24px;
         }
-        
-        .card-icon {
-            font-size: 2.5rem;
-            background: linear-gradient(135deg, #1E40AF, #60A5FA);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        .card-badge {
-            background: linear-gradient(135deg, #10B981, #059669);
-            color: white;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-        
-        .card-badge.coming-soon {
-            background: linear-gradient(135deg, #F59E0B, #D97706);
-        }
-        
-        .card-title {
+    
+        .mission-card h3 {
             font-size: 1.5rem;
             font-weight: 700;
-            color: #F8FAFC;
             margin-bottom: 16px;
+            color: #F8FAFC;
         }
-        
-        .card-description {
+    
+        .mission-card p {
             color: #94A3B8;
             line-height: 1.6;
-            margin-bottom: 24px;
-            font-size: 1rem;
         }
-        
-        .card-features {
-            margin-bottom: 32px;
-        }
-        
-        .feature-item {
-            color: #CBD5E1;
-            margin-bottom: 8px;
-            font-size: 0.9rem;
-            display: flex;
+    
+        /* Founder Section */
+        .founder-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 80px;
             align-items: center;
-            gap: 8px;
         }
-        
-        .btn-card-primary {
-            background: linear-gradient(135deg, #1E40AF, #60A5FA);
-            color: white;
-            border: none;
-            padding: 14px 28px;
-            border-radius: 10px;
-            font-weight: 600;
-            text-decoration: none;
-            display: inline-block;
-            transition: all 0.3s ease;
-            font-size: 0.9rem;
-            letter-spacing: 0.5px;
-        }
-        
-        .btn-card-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 15px 40px rgba(59, 130, 246, 0.4);
-        }
-        
-        .btn-card-disabled {
-            background: linear-gradient(135deg, rgba(75, 85, 99, 0.6), rgba(55, 65, 81, 0.8));
-            color: #9CA3AF;
-            border: 1px solid rgba(75, 85, 99, 0.5);
-            padding: 14px 28px;
-            border-radius: 10px;
-            font-weight: 600;
-            cursor: not-allowed;
-            text-transform: uppercase;
-            font-size: 0.9rem;
-            letter-spacing: 0.5px;
-        }
-        
-        /* Trust Section */
-        .trust-section {
-            padding: 80px 0;
-            background: rgba(15, 23, 42, 0.3);
-            border-top: 1px solid rgba(59, 130, 246, 0.1);
-            border-bottom: 1px solid rgba(59, 130, 246, 0.1);
-        }
-        
-        .trust-content {
+    
+        .founder-image {
             text-align: center;
         }
-        
-        .trust-title {
-            font-size: 2rem;
+    
+        .founder-photo {
+            width: 300px;
+            height: 300px;
+            border-radius: 20px;
+            object-fit: cover;
+            box-shadow: 0 25px 80px rgba(59, 130, 246, 0.15);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+    
+        .founder-title {
+            font-size: 2.5rem;
             font-weight: 700;
+            margin-bottom: 24px;
             color: #F8FAFC;
-            margin-bottom: 50px;
+            letter-spacing: -1px;
         }
-        
-        .trust-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    
+        .founder-description {
+            font-size: 1.125rem;
+            color: #94A3B8;
+            margin-bottom: 24px;
+            line-height: 1.7;
+        }
+    
+        .founder-stats {
+            display: flex;
             gap: 40px;
-            max-width: 800px;
-            margin: 0 auto;
+            margin-top: 40px;
         }
-        
+    
         .stat-item {
             text-align: center;
         }
-        
+    
         .stat-number {
+            display: block;
             font-size: 2.5rem;
             font-weight: 800;
             background: linear-gradient(135deg, #1E40AF, #60A5FA);
@@ -447,13 +365,141 @@
             background-clip: text;
             margin-bottom: 8px;
         }
-        
+    
         .stat-label {
             color: #94A3B8;
             font-weight: 500;
         }
-        
-        /* Footer */
+    
+        /* Impact Section */
+        .impact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+            margin: 60px 0;
+        }
+    
+        .impact-card {
+            background: linear-gradient(145deg, rgba(30, 64, 175, 0.8), rgba(29, 78, 216, 0.9));
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: white;
+            padding: 40px 30px;
+            border-radius: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+    
+        .impact-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 80px rgba(59, 130, 246, 0.2);
+        }
+    
+        .impact-stat {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #FFFFFF, #E0E7FF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    
+        .impact-label {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            opacity: 0.9;
+        }
+    
+        .impact-description {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            line-height: 1.5;
+        }
+    
+        .impact-statement {
+            background: linear-gradient(145deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9));
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            padding: 40px;
+            border-radius: 20px;
+            margin-top: 40px;
+        }
+    
+        .impact-statement h3 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+            color: #F8FAFC;
+        }
+    
+        .impact-statement p {
+            font-size: 1.125rem;
+            color: #94A3B8;
+            line-height: 1.7;
+            margin-bottom: 20px;
+        }
+    
+        /* Vision Section */
+        .roadmap-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 40px;
+            margin-top: 80px;
+        }
+    
+        .roadmap-card {
+            background: linear-gradient(145deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9));
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            padding: 40px 30px;
+            border-radius: 20px;
+            position: relative;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+    
+        .roadmap-card.active {
+            border-color: rgba(59, 130, 246, 0.4);
+            background: linear-gradient(145deg, rgba(59, 130, 246, 0.05), rgba(30, 41, 59, 0.9));
+        }
+    
+        .roadmap-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(59, 130, 246, 0.4);
+            box-shadow: 0 25px 80px rgba(59, 130, 246, 0.15);
+        }
+    
+        .roadmap-badge {
+            position: absolute;
+            top: -12px;
+            left: 30px;
+            background: linear-gradient(135deg, #1E40AF, #60A5FA);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+    
+        .roadmap-card.active .roadmap-badge {
+            background: linear-gradient(135deg, #10B981, #059669);
+        }
+    
+        .roadmap-card h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 20px 0 16px;
+            color: #F8FAFC;
+        }
+    
+        .roadmap-card p {
+            color: #94A3B8;
+            line-height: 1.6;
+        }
+    
+        /* Footer - Same as landing page */
         .main-footer {
             background: #0F172A;
             border-top: 1px solid rgba(59, 130, 246, 0.1);
@@ -479,6 +525,10 @@
             font-size: 1.2rem;
             font-weight: 700;
             color: #F8FAFC;
+        }
+    
+        .footer-logo .brand-icon {
+            background: white;
         }
         
         .footer-tagline {
@@ -516,10 +566,6 @@
             text-align: center;
             color: #64748B;
         }
-
-        #platform {
-            scroll-margin-top: 100px; /* Adjust this value to control how far down it scrolls */
-        }
         
         /* Responsive Design */
         @media (max-width: 1024px) {
@@ -527,12 +573,18 @@
                 font-size: 3rem;
             }
             
-            .platform-grid {
+            .founder-grid {
                 grid-template-columns: 1fr;
+                gap: 40px;
+                text-align: center;
             }
             
-            .nav-links {
+            .nav-menu {
                 display: none;
+            }
+    
+            .nav-toggle {
+                display: flex;
             }
         }
         
@@ -544,14 +596,18 @@
             .hero-title {
                 font-size: 2.5rem;
             }
-            
-            .hero-cta {
-                flex-direction: column;
-                align-items: stretch;
+    
+            .section-title {
+                font-size: 2rem;
             }
             
-            .trust-stats {
-                grid-template-columns: repeat(2, 1fr);
+            .founder-photo {
+                width: 250px;
+                height: 250px;
+            }
+    
+            .founder-stats {
+                justify-content: center;
             }
             
             .footer-content {
