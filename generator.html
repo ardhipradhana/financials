@@ -2558,7 +2558,8 @@
         }
 
         .transaction-lists {
-            display: flex;
+            display: grid;
+            grid-template-columns: 3fr 1fr;
             align-items: flex-start;
             gap: 24px;
             margin-bottom: 24px;
@@ -2572,9 +2573,11 @@
         }
 
         .buffer-area {
-            flex: 10 10 25%;
-            position: sticky;
-            top: 100px;
+            min-height: 600px;
+            background: linear-gradient(145deg, rgba(15, 23, 42, 0.4), rgba(30, 41, 59, 0.2));
+            border: 2px dashed rgba(59, 130, 246, 0.3);
+            border-radius: 12px;
+            padding: 16px;
         }
 
         .statement-section {
@@ -2884,7 +2887,7 @@
             <div class="workspace-card active" id="companyCard" data-aos="fade-up" data-aos-delay="200">
                 <div class="executive-summary-header">
                     <h3>Executive Summary</h3>
-                    <p class="summary-subtitle">Provide your company's key information for financial analysis</p>
+                    <p class="summary-subtitle">Provide your company's key information below</p>
                 </div>
                 
                 <div class="executive-form-grid">
