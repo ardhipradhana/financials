@@ -2961,6 +2961,7 @@
             flex: 1;
             opacity: 0.7;
             min-height: 200px;
+            text-align: center;
         }
         
         .placeholder-icon {
@@ -6810,10 +6811,26 @@
         }
 
         function initDragAndDrop() {
-            document.querySelectorAll('.transaction-list, #buffer-list').forEach(list => {
+            // Clear existing sortable instances
+            document.querySelectorAll('[data-sortable-bound]').forEach(el => {
+                if (el.sortable) {
+                    el.sortable.destroy();
+                }
+                el.removeAttribute('data-sortable-bound');
+            });
+        
+            // Initialize all transaction lists and buffer
+            const allLists = [
+                ...document.querySelectorAll('.transaction-list'),
+                document.getElementById('buffer-transactions'),
+                document.querySelector('.buffer-transaction-list')
+            ].filter(Boolean);
+        
+            allLists.forEach(list => {
                 if (list.dataset.sortableBound) return;
                 list.dataset.sortableBound = 'true';
-                Sortable.create(list, {
+                
+                list.sortable = Sortable.create(list, {
                     group: 'transactions',
                     animation: 150,
                     scroll: true,
@@ -6822,17 +6839,27 @@
                     onAdd: (evt) => {
                         const txId = evt.item.dataset.id;
                         const baseId = evt.item.dataset.baseId;
-                        const statement = evt.to.dataset.statement;
-                        const category = evt.to.dataset.category;
+                        const statement = evt.to.dataset.statement || 'buffer';
+                        const category = evt.to.dataset.category || 'Buffer';
                         const glAccount = evt.to.dataset.glAccount || null;
+                        
                         const tx = currentTransactions.find(t => String(t.id) === String(txId));
                         if (tx) {
-                            const duplicate = currentTransactions.find(t => t.baseId === baseId && t.statement === statement && t.glAccount === glAccount && t.id !== tx.id);
-                            if (duplicate) {
-                                evt.from.appendChild(evt.item);
-                                showUpdateNotification("This transaction already exists in this account");
-                                return;
+                            // Check for duplicates only in non-buffer areas
+                            if (statement !== 'buffer') {
+                                const duplicate = currentTransactions.find(t => 
+                                    t.baseId === baseId && 
+                                    t.statement === statement && 
+                                    t.glAccount === glAccount && 
+                                    t.id !== tx.id
+                                );
+                                if (duplicate) {
+                                    evt.from.appendChild(evt.item);
+                                    showUpdateNotification("This transaction already exists in this account");
+                                    return;
+                                }
                             }
+                            
                             tx.statement = statement;
                             tx.category = category;
                             tx.glAccount = glAccount;
@@ -6988,18 +7015,32 @@
         
         // Initialize transaction editor when transactions tab is shown
         function showTransactionsEditor() {
-            if (!window.editableTransactions && !window.currentFinancialData) return;
+            // Initialize from current data or empty array
+            if (window.editableTransactions) {
+                currentTransactions = JSON.parse(JSON.stringify(window.editableTransactions));
+            } else {
+                currentTransactions = [];
+            }
         
-            // Start with Income Statement transactions if they exist
-            currentTransactions = window.editableTransactions ? 
-                JSON.parse(JSON.stringify(window.editableTransactions)) : [];
+            // Add financial statement data as transactions
+            if (window.currentFinancialData) {
+                addFinancialDataAsTransactions();
+            }
         
-            // Add Balance Sheet transactions from financial data if available
-            if (window.currentFinancialData && window.currentFinancialData.balanceSheet) {
-                const balanceSheet = window.currentFinancialData.balanceSheet;
-                
-                // Convert Balance Sheet assets to transactions
-                balanceSheet.assets.forEach((asset, index) => {
+            console.log('Loaded transactions for editor:', currentTransactions.length);
+            renderTransactions();
+            initDragAndDrop();
+            updateStatementTotals();
+        }
+        
+        function addFinancialDataAsTransactions() {
+            if (!window.currentFinancialData) return;
+        
+            const data = window.currentFinancialData;
+            
+            // Add Balance Sheet transactions
+            if (data.balanceSheet) {
+                data.balanceSheet.assets.forEach((asset, index) => {
                     if (asset.amount !== 0) {
                         currentTransactions.push({
                             id: `balance-asset-${index}`,
@@ -7009,31 +7050,29 @@
                             statement: 'balance',
                             category: 'Asset',
                             glAccount: asset.item,
-                            subcategory: 'Current Assets',
+                            subcategory: 'Assets',
                             date: new Date().toISOString().split('T')[0]
                         });
                     }
                 });
         
-                // Convert Balance Sheet liabilities to transactions
-                balanceSheet.liabilities.forEach((liability, index) => {
+                data.balanceSheet.liabilities.forEach((liability, index) => {
                     if (liability.amount !== 0) {
                         currentTransactions.push({
                             id: `balance-liability-${index}`,
                             baseId: `balance-liability-${index}`,
                             description: liability.item,
-                            amount: -Math.abs(liability.amount), // Liabilities are negative
+                            amount: liability.amount,
                             statement: 'balance',
                             category: 'Liability',
                             glAccount: liability.item,
-                            subcategory: 'Current Liabilities',
+                            subcategory: 'Liabilities',
                             date: new Date().toISOString().split('T')[0]
                         });
                     }
                 });
         
-                // Convert Balance Sheet equity to transactions
-                balanceSheet.equity.forEach((equity, index) => {
+                data.balanceSheet.equity.forEach((equity, index) => {
                     if (equity.amount !== 0) {
                         currentTransactions.push({
                             id: `balance-equity-${index}`,
@@ -7043,74 +7082,33 @@
                             statement: 'balance',
                             category: 'Equity',
                             glAccount: equity.item,
-                            subcategory: 'Owner\'s Equity',
+                            subcategory: 'Equity',
                             date: new Date().toISOString().split('T')[0]
                         });
                     }
                 });
             }
         
-            // Add Cash Flow transactions if available
-            if (window.currentFinancialData && window.currentFinancialData.cashFlow) {
-                const cashFlow = window.currentFinancialData.cashFlow;
-                
-                // Convert Cash Flow operating to transactions
-                cashFlow.operating.forEach((item, index) => {
-                    if (item.amount !== 0) {
-                        currentTransactions.push({
-                            id: `cashflow-operating-${index}`,
-                            baseId: `cashflow-operating-${index}`,
-                            description: item.item,
-                            amount: item.amount,
-                            statement: 'cashflow',
-                            category: 'Operating',
-                            glAccount: item.item,
-                            subcategory: 'Operating Activities',
-                            date: new Date().toISOString().split('T')[0]
-                        });
-                    }
-                });
-        
-                // Similar for investing and financing...
-                cashFlow.investing.forEach((item, index) => {
-                    if (item.amount !== 0) {
-                        currentTransactions.push({
-                            id: `cashflow-investing-${index}`,
-                            baseId: `cashflow-investing-${index}`,
-                            description: item.item,
-                            amount: item.amount,
-                            statement: 'cashflow',
-                            category: 'Investing',
-                            glAccount: item.item,
-                            subcategory: 'Investing Activities',
-                            date: new Date().toISOString().split('T')[0]
-                        });
-                    }
-                });
-        
-                cashFlow.financing.forEach((item, index) => {
-                    if (item.amount !== 0) {
-                        currentTransactions.push({
-                            id: `cashflow-financing-${index}`,
-                            baseId: `cashflow-financing-${index}`,
-                            description: item.item,
-                            amount: item.amount,
-                            statement: 'cashflow',
-                            category: 'Financing',
-                            glAccount: item.item,
-                            subcategory: 'Financing Activities',
-                            date: new Date().toISOString().split('T')[0]
-                        });
-                    }
+            // Add Cash Flow transactions
+            if (data.cashFlow) {
+                ['operating', 'investing', 'financing'].forEach(category => {
+                    data.cashFlow[category].forEach((item, index) => {
+                        if (item.amount !== 0) {
+                            currentTransactions.push({
+                                id: `cashflow-${category}-${index}`,
+                                baseId: `cashflow-${category}-${index}`,
+                                description: item.item,
+                                amount: item.amount,
+                                statement: 'cashflow',
+                                category: category.charAt(0).toUpperCase() + category.slice(1),
+                                glAccount: item.item,
+                                subcategory: category,
+                                date: new Date().toISOString().split('T')[0]
+                            });
+                        }
+                    });
                 });
             }
-        
-            console.log('Loaded transactions:', currentTransactions);
-            console.log('Balance Sheet transactions:', currentTransactions.filter(tx => tx.statement === 'balance'));
-        
-            renderTransactions();
-            initDragAndDrop();
-            updateStatementTotals();
         }
 
         function updateStatementTotals() {
@@ -7325,6 +7323,22 @@
             initAddAccountButtons();
             initCollapseToggle();
             applyCollapsedState();
+            
+            // Add statement tab event listeners
+            const statementTabs = document.querySelectorAll('.statement-tab-btn');
+            statementTabs.forEach((btn, index) => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    let statementType;
+                    if (index === 0) statementType = 'income';
+                    else if (index === 1) statementType = 'balance';
+                    else if (index === 2) statementType = 'cashflow';
+                    
+                    if (statementType) {
+                        showStatement(statementType);
+                    }
+                });
+            });
         });
         
         function filterHistoryList() {
@@ -8554,7 +8568,7 @@
             }
         }
 
-        function showStatement(statementType, buttonElement) {
+        function showStatement(statementType) {
             console.log('showStatement called with:', statementType);
             
             // Remove active class from all tab buttons
@@ -8562,10 +8576,11 @@
                 btn.classList.remove('active');
             });
             
-            // Add active class to clicked button
-            if (buttonElement) {
-                buttonElement.classList.add('active');
-            }
+            // Add active class to the correct button
+            const buttons = document.querySelectorAll('.statement-tab-btn');
+            if (statementType === 'income') buttons[0].classList.add('active');
+            else if (statementType === 'balance') buttons[1].classList.add('active');
+            else if (statementType === 'cashflow') buttons[2].classList.add('active');
             
             // Hide all statement contents
             document.querySelectorAll('.statement-content').forEach(content => {
