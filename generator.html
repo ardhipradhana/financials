@@ -2981,8 +2981,9 @@
             left: 50%;
             transform: translate(-50%, -50%);
             opacity: 0.7;
-            pointer-events: none; /* Allow clicks to go through to the droppable area */
+            pointer-events: none;
             z-index: 1;
+            transition: opacity 0.3s ease;
         }
         
         .placeholder-icon {
@@ -3026,7 +3027,12 @@
 
         .buffer-transaction-list:not(:empty) + .buffer-placeholder,
         .buffer-transaction-list:not(:empty) ~ .buffer-placeholder {
-            display: none;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .buffer-transaction-list:empty:before {
+            display: none !important; /* Remove the default empty message */
         }
 
         [data-sortable-bound="true"] {
@@ -3217,6 +3223,11 @@
             font-style: italic;
             padding: 20px;
             opacity: 0.5;
+        }
+
+        /* But specifically hide it for buffer */
+        #buffer-transactions:empty:before {
+            display: none !important;
         }
 
         .notice-tip {
@@ -7209,11 +7220,10 @@
             setTimeout(() => {
                 // Only get the actual droppable containers (not the outer sections)
                 const allLists = [
-                    ...document.querySelectorAll('.transaction-list'),  // GL account containers
-                    ...document.querySelectorAll('.transaction-items'), // Category containers  
-                    document.getElementById('buffer-transactions'),      // Buffer zone
-                    document.querySelector('.buffer-transaction-list')  // Alternative buffer
-                ].filter(el => el && !el.dataset.sortableBound); // Only unbound elements
+                    ...document.querySelectorAll('.transaction-list'),     // Individual GL account lists
+                    ...document.querySelectorAll('#balance-asset-lists, #balance-liability-lists, #balance-equity-lists, #income-revenue-lists, #income-expense-lists, #cashflow-operating-lists, #cashflow-investing-lists, #cashflow-financing-lists'), // Category containers
+                    document.getElementById('buffer-transactions')         // Buffer zone only
+                ].filter(Boolean);
         
                 console.log('Found droppable containers:', allLists.length);
         
@@ -7238,12 +7248,20 @@
                             dragClass: 'sortable-drag',
                             handle: '.transaction-card',
                             preventOnFilter: false,
-                            filter: '.gl-account-section, .gl-account-title, .account-dropdown, .category-section, .account-group', // Prevent dragging these elements
+                            filter: '.gl-account-section, .gl-account-title, .account-dropdown, .category-section, .account-group, .buffer-placeholder', 
                             forceFallback: false,
                             fallbackTolerance: 0,
+                            // Add strict validation
+                            onMove: function(evt, originalEvent) {
+                                // Only allow drops on exact sortable containers
+                                const target = evt.to;
+                                return target.classList.contains('transaction-list') || 
+                                       target.classList.contains('transaction-items') || 
+                                       target.id === 'buffer-transactions';
+                            },
                             onStart: (evt) => {
                                 // Only add target class to actual droppable containers
-                                document.querySelectorAll('.transaction-list, .transaction-items, .buffer-transaction-list').forEach(zone => {
+                                document.querySelectorAll('.transaction-list, .transaction-items, #buffer-transactions').forEach(zone => {
                                     if (zone !== evt.from && zone.dataset.sortableBound) {
                                         zone.classList.add('sortable-target');
                                     }
