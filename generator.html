@@ -3411,118 +3411,84 @@
                 <div class="report-container" id="transactionsReport">
                     <div class="report-header">
                         <h4>Transaction Review & Editing</h4>
-                        <p>Drag transactions between categories to adjust your financial statements</p>
+                        <p>Review and categorize transactions to refine your financial statements</p>
                     </div>
                     
-                    <div class="transaction-editor">
-                        
-
-
-                        <!-- Transaction Lists -->
-                        <div class="transaction-lists">
-                            <div class="statement-area">
-                                <div class="statement-section">
-                                <h1 class="statement-header">Income Statement</h1>
-                                <div class="category-column">
-                                    <h2 class="category-header">Revenue</h2>
-                                    <div id="income-revenue-lists" class="gl-account-lists"></div>
-                                    <button class="add-account-btn" data-statement="income" data-category="Revenue">+ Add Account</button>
+                    <!-- Statement Sub-Tabs -->
+                    <div class="statement-tabs">
+                        <button class="statement-tab-btn active" onclick="showStatement('income')">Income Statement</button>
+                        <button class="statement-tab-btn" onclick="showStatement('balance')">Balance Sheet</button>
+                        <button class="statement-tab-btn" onclick="showStatement('cashflow')">Cash Flow Statement</button>
+                    </div>
+                    
+                    <div class="statement-editor-container">
+                        <!-- Left Side: Statement Editor (75%) -->
+                        <div class="statement-editor">
+                            <!-- Income Statement Tab -->
+                            <div class="statement-content active" id="incomeStatementEditor">
+                                <h1 class="statement-title">Income Statement</h1>
+                                
+                                <div class="statement-categories">
+                                    <div class="category-section">
+                                        <h2 class="category-title">Revenue</h2>
+                                        <div class="account-groups">
+                                            <div class="account-group">
+                                                <h3 class="account-group-title">Other Revenue</h3>
+                                                <div id="income-revenue-lists" class="transaction-items"></div>
+                                            </div>
+                                        </div>
+                                        <button class="add-account-btn">+ Add Revenue Account</button>
+                                    </div>
+                                    
+                                    <div class="category-section">
+                                        <h2 class="category-title">Expenses</h2>
+                                        <div class="account-groups">
+                                            <div class="account-group">
+                                                <h3 class="account-group-title">Operating Expenses</h3>
+                                                <div id="income-expense-lists" class="transaction-items"></div>
+                                            </div>
+                                        </div>
+                                        <button class="add-account-btn">+ Add Expense Account</button>
+                                    </div>
                                 </div>
-                                <div class="category-column">
-                                    <h2 class="category-header">Expense</h2>
-                                    <div id="income-expense-lists" class="gl-account-lists"></div>
-                                    <button class="add-account-btn" data-statement="income" data-category="Expense">+ Add Account</button>
-                                </div>
-                                <div class="statement-footer">
-                                    <div class="summary-item">
+                                
+                                <div class="statement-summary">
+                                    <div class="summary-line">
                                         <span>Total Revenue:</span>
-                                        <span id="incomeTotalRevenue" class="amount positive">$0</span>
+                                        <span class="amount positive">Rp 25.8B</span>
                                     </div>
-                                    <div class="summary-item">
-                                        <span>Total Expense:</span>
-                                        <span id="incomeTotalExpense" class="amount negative">$0</span>
+                                    <div class="summary-line">
+                                        <span>Total Expenses:</span>
+                                        <span class="amount negative">Rp 18.2B</span>
                                     </div>
-                                    <div class="summary-item highlight">
+                                    <div class="summary-line highlight">
                                         <span>Net Income:</span>
-                                        <span id="incomeNetIncome" class="amount">$0</span>
+                                        <span class="amount positive">Rp 7.6B</span>
                                     </div>
-                                </div>
-                                </div>
-                                <div class="statement-section">
-                                <h1 class="statement-header">Balance Sheet</h1>
-                                <div class="category-column">
-                                    <h2 class="category-header">Asset</h2>
-                                    <div id="balance-asset-lists" class="gl-account-lists"></div>
-                                    <button class="add-account-btn" data-statement="balance" data-category="Asset">+ Add Account</button>
-                                </div>
-                                <div class="category-column">
-                                    <h2 class="category-header">Liability</h2>
-                                    <div id="balance-liability-lists" class="gl-account-lists"></div>
-                                    <button class="add-account-btn" data-statement="balance" data-category="Liability">+ Add Account</button>
-                                </div>
-                                <div class="category-column">
-                                    <h2 class="category-header">Equity</h2>
-                                    <div id="balance-equity-lists" class="gl-account-lists"></div>
-                                    <button class="add-account-btn" data-statement="balance" data-category="Equity">+ Add Account</button>
-                                </div>
-                                <div class="statement-footer">
-                                    <div class="summary-item">
-                                        <span>Total Assets:</span>
-                                        <span id="balanceTotalAssets" class="amount">$0</span>
-                                    </div>
-                                    <div class="summary-item">
-                                        <span>Total Liabilities:</span>
-                                        <span id="balanceTotalLiabilities" class="amount">$0</span>
-                                    </div>
-                                    <div class="summary-item">
-                                        <span>Total Equity:</span>
-                                        <span id="balanceTotalEquity" class="amount">$0</span>
-                                    </div>
-                                </div>
-                                </div>
-                                <div class="statement-section">
-                                <h1 class="statement-header">Cash Flow Statement</h1>
-                                <div class="category-column">
-                                    <h2 class="category-header">Operating</h2>
-                                    <div id="cashflow-operating-lists" class="gl-account-lists"></div>
-                                    <button class="add-account-btn" data-statement="cashflow" data-category="Operating">+ Add Account</button>
-                                </div>
-                                <div class="category-column">
-                                    <h2 class="category-header">Investing</h2>
-                                    <div id="cashflow-investing-lists" class="gl-account-lists"></div>
-                                    <button class="add-account-btn" data-statement="cashflow" data-category="Investing">+ Add Account</button>
-                                </div>
-                                <div class="category-column">
-                                    <h2 class="category-header">Financing</h2>
-                                    <div id="cashflow-financing-lists" class="gl-account-lists"></div>
-                                    <button class="add-account-btn" data-statement="cashflow" data-category="Financing">+ Add Account</button>
-                                </div>
-                                <div class="statement-footer">
-                                    <div class="summary-item">
-                                        <span>Operating:</span>
-                                        <span id="cashflowOperatingTotal" class="amount">$0</span>
-                                    </div>
-                                    <div class="summary-item">
-                                        <span>Investing:</span>
-                                        <span id="cashflowInvestingTotal" class="amount">$0</span>
-                                    </div>
-                                    <div class="summary-item">
-                                        <span>Financing:</span>
-                                        <span id="cashflowFinancingTotal" class="amount">$0</span>
-                                    </div>
-                                </div>
                                 </div>
                             </div>
-                            <div class="buffer-area">
-                                <h1 class="statement-header">Buffer</h1>
-                                <div id="buffer-list" class="transaction-list buffer-drop-zone" data-statement="buffer" data-category="Buffer"></div>
+                            
+                            <!-- Balance Sheet Tab (hidden initially) -->
+                            <div class="statement-content" id="balanceSheetEditor">
+                                <!-- Similar structure for Balance Sheet -->
+                            </div>
+                            
+                            <!-- Cash Flow Tab (hidden initially) -->
+                            <div class="statement-content" id="cashFlowEditor">
+                                <!-- Similar structure for Cash Flow -->
                             </div>
                         </div>
                         
-                        <!-- Action Buttons -->
-                        <div class="transaction-actions">
-                            <button class="btn btn-secondary" onclick="resetTransactions()">Reset to Original</button>
-                            <button class="btn btn-primary" onclick="applyTransactionChanges()">Apply Changes & Regenerate</button>
+                        <!-- Right Side: Buffer Zone (25%) -->
+                        <div class="buffer-zone">
+                            <h2 class="buffer-title">Unassigned Transactions</h2>
+                            <div class="buffer-drop-area" id="bufferDropArea">
+                                <div class="buffer-placeholder">
+                                    <div class="placeholder-icon">📋</div>
+                                    <p>Drag transactions here to review and categorize them</p>
+                                </div>
+                                <div id="buffer-transactions" class="buffer-transaction-list"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
