@@ -7413,59 +7413,130 @@
         }
         
         function regenerateFinancialStatements(transactions) {
-            // Recreate financial statements based on updated transaction categories
+            // Build new statements entirely from the edited transactions
             const revenue = [];
             const expenses = [];
-            
-            // Group transactions by GL account
-            const revenueGroups = {};
-            const expenseGroups = {};
-            
+            const assets = [];
+            const liabilities = [];
+            const equity = [];
+            const operating = [];
+            const investing = [];
+            const financing = [];
+
+            // Group transactions by account within each statement
+            const groups = {
+                income: { Revenue: {}, Expense: {} },
+                balance: { Asset: {}, Liability: {}, Equity: {} },
+                cashflow: { Operating: {}, Investing: {}, Financing: {} }
+            };
+
             transactions.forEach(tx => {
                 if (tx.statement === 'buffer') return;
-                if (tx.category === 'Revenue' || (tx.amount > 0 && tx.category !== 'Expense')) {
-                    const key = tx.glAccount || tx.subcategory || 'Other Revenue';
-                    if (!revenueGroups[key]) {
-                        revenueGroups[key] = { amount: 0, transaction_index: [] };
+                const key = tx.glAccount || tx.subcategory || 'Other';
+                if (tx.statement === 'income') {
+                    const type = (tx.category === 'Revenue' || (tx.amount > 0 && tx.category !== 'Expense')) ? 'Revenue' : 'Expense';
+                    if (!groups.income[type][key]) {
+                        groups.income[type][key] = { amount: 0, transaction_index: [] };
                     }
-                    revenueGroups[key].amount += Math.abs(tx.amount);
-                    revenueGroups[key].transaction_index.push(tx.id);
-                } else if (tx.category === 'Expense' || (tx.amount < 0 && tx.category !== 'Revenue')) {
-                    const key = tx.glAccount || tx.subcategory || 'Other Expenses';
-                    if (!expenseGroups[key]) {
-                        expenseGroups[key] = { amount: 0, transaction_index: [] };
+                    groups.income[type][key].amount += Math.abs(tx.amount);
+                    groups.income[type][key].transaction_index.push(tx.id);
+                } else if (tx.statement === 'balance') {
+                    if (!groups.balance[tx.category][key]) {
+                        groups.balance[tx.category][key] = { amount: 0, transaction_index: [] };
                     }
-                    expenseGroups[key].amount += Math.abs(tx.amount);
-                    expenseGroups[key].transaction_index.push(tx.id);
+                    groups.balance[tx.category][key].amount += Math.abs(tx.amount);
+                    groups.balance[tx.category][key].transaction_index.push(tx.id);
+                } else if (tx.statement === 'cashflow') {
+                    if (!groups.cashflow[tx.category][key]) {
+                        groups.cashflow[tx.category][key] = { amount: 0, transaction_index: [] };
+                    }
+                    groups.cashflow[tx.category][key].amount += tx.amount;
+                    groups.cashflow[tx.category][key].transaction_index.push(tx.id);
                 }
             });
-            
-            // Convert groups to arrays
-            Object.keys(revenueGroups).forEach(key => {
+
+            // Convert grouped data to arrays
+            Object.keys(groups.income.Revenue).forEach(key => {
                 revenue.push({
                     item: key,
-                    amount: revenueGroups[key].amount,
-                    transaction_index: revenueGroups[key].transaction_index
+                    amount: groups.income.Revenue[key].amount,
+                    transaction_index: groups.income.Revenue[key].transaction_index
                 });
             });
-            
-            Object.keys(expenseGroups).forEach(key => {
+            Object.keys(groups.income.Expense).forEach(key => {
                 expenses.push({
                     item: key,
-                    amount: expenseGroups[key].amount,
-                    transaction_index: expenseGroups[key].transaction_index
+                    amount: groups.income.Expense[key].amount,
+                    transaction_index: groups.income.Expense[key].transaction_index
                 });
             });
-            
+            Object.keys(groups.balance.Asset).forEach(key => {
+                assets.push({
+                    item: key,
+                    amount: groups.balance.Asset[key].amount,
+                    transaction_index: groups.balance.Asset[key].transaction_index
+                });
+            });
+            Object.keys(groups.balance.Liability).forEach(key => {
+                liabilities.push({
+                    item: key,
+                    amount: groups.balance.Liability[key].amount,
+                    transaction_index: groups.balance.Liability[key].transaction_index
+                });
+            });
+            Object.keys(groups.balance.Equity).forEach(key => {
+                equity.push({
+                    item: key,
+                    amount: groups.balance.Equity[key].amount,
+                    transaction_index: groups.balance.Equity[key].transaction_index
+                });
+            });
+            Object.keys(groups.cashflow.Operating).forEach(key => {
+                operating.push({
+                    item: key,
+                    amount: groups.cashflow.Operating[key].amount,
+                    transaction_index: groups.cashflow.Operating[key].transaction_index
+                });
+            });
+            Object.keys(groups.cashflow.Investing).forEach(key => {
+                investing.push({
+                    item: key,
+                    amount: groups.cashflow.Investing[key].amount,
+                    transaction_index: groups.cashflow.Investing[key].transaction_index
+                });
+            });
+            Object.keys(groups.cashflow.Financing).forEach(key => {
+                financing.push({
+                    item: key,
+                    amount: groups.cashflow.Financing[key].amount,
+                    transaction_index: groups.cashflow.Financing[key].transaction_index
+                });
+            });
+
             const totalRevenue = revenue.reduce((sum, item) => sum + item.amount, 0);
             const totalExpenses = expenses.reduce((sum, item) => sum + item.amount, 0);
             const netIncome = totalRevenue - totalExpenses;
-            
-            // Return new financial statements structure
+
+            const operatingTotal = operating.reduce((sum, item) => sum + item.amount, 0);
+            const investingTotal = investing.reduce((sum, item) => sum + item.amount, 0);
+            const financingTotal = financing.reduce((sum, item) => sum + item.amount, 0);
+            const netChange = operatingTotal + investingTotal + financingTotal;
+
+            const beginningBalance = (window.originalFinancialStatements.cashFlow &&
+                window.originalFinancialStatements.cashFlow.beginningBalance) || 0;
+            const endingBalance = beginningBalance + netChange;
+
             return {
                 incomeStatement: { revenue, expenses, netIncome },
-                balanceSheet: window.originalFinancialStatements.balanceSheet, // Keep original
-                cashFlow: window.originalFinancialStatements.cashFlow // Keep original
+                balanceSheet: { assets, liabilities, equity },
+                cashFlow: {
+                    beginningBalance,
+                    operating,
+                    investing,
+                    financing,
+                    netChangeInCash: netChange,
+                    endingBalance
+                }
             };
         }
         
