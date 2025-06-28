@@ -3239,6 +3239,202 @@
             pointer-events: none;
             opacity: 0.8;
         }
+
+        /* Enhanced Account Dropdown Styles */
+        .account-dropdown {
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(20px);
+            overflow: hidden;
+            animation: dropdownSlideIn 0.2s ease-out;
+        }
+        
+        @keyframes dropdownSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .dropdown-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .dropdown-header h4 {
+            color: #F8FAFC;
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        .dropdown-close {
+            background: none;
+            border: none;
+            color: #94A3B8;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+        
+        .dropdown-close:hover {
+            background: rgba(239, 68, 68, 0.2);
+            color: #EF4444;
+        }
+        
+        .dropdown-search {
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(59, 130, 246, 0.1);
+        }
+        
+        .search-input {
+            width: 100%;
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 8px;
+            padding: 10px 12px;
+            color: #F8FAFC;
+            font-size: 0.9rem;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+        
+        .search-input:focus {
+            border-color: #60A5FA;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .search-input::placeholder {
+            color: #64748B;
+        }
+        
+        .dropdown-options {
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 8px 0;
+        }
+        
+        .dropdown-option {
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-left: 3px solid transparent;
+        }
+        
+        .dropdown-option:hover {
+            background: rgba(59, 130, 246, 0.1);
+            border-left-color: #60A5FA;
+        }
+        
+        .dropdown-option.selected {
+            background: rgba(16, 185, 129, 0.2);
+            border-left-color: #10B981;
+        }
+        
+        .account-name {
+            color: #E2E8F0;
+            font-size: 0.9rem;
+        }
+        
+        .dropdown-footer {
+            padding: 12px 20px;
+            border-top: 1px solid rgba(59, 130, 246, 0.1);
+        }
+        
+        .btn-custom-account {
+            width: 100%;
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid rgba(59, 130, 246, 0.4);
+            color: #60A5FA;
+            padding: 10px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-custom-account:hover {
+            background: rgba(59, 130, 246, 0.3);
+            border-color: #60A5FA;
+        }
+        
+        .custom-account-input {
+            padding: 20px;
+        }
+        
+        .custom-input-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .custom-input {
+            width: 100%;
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            color: #F8FAFC;
+            font-size: 0.9rem;
+            outline: none;
+        }
+        
+        .custom-input:focus {
+            border-color: #60A5FA;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .custom-input-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn-confirm, .btn-cancel {
+            flex: 1;
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-confirm {
+            background: #10B981;
+            border: 1px solid #10B981;
+            color: white;
+        }
+        
+        .btn-confirm:hover {
+            background: #059669;
+        }
+        
+        .btn-cancel {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            color: #EF4444;
+        }
+        
+        .btn-cancel:hover {
+            background: rgba(239, 68, 68, 0.3);
+        }
         
     </style>
 </head>
@@ -6978,11 +7174,10 @@
                             animation: 150,
                             ghostClass: 'sortable-ghost',
                             chosenClass: 'sortable-chosen',
-                            handle: '.transaction-card', // Only allow dragging by the card itself
+                            handle: '.transaction-card',
                             preventOnFilter: false,
-                            filter: '.gl-account-section', // Prevent dragging the section containers
+                            filter: '.gl-account-section',
                             onAdd: (evt) => {
-                                // Prevent event bubbling
                                 evt.preventDefault();
                                 evt.stopPropagation();
                                 
@@ -7017,8 +7212,8 @@
                                     console.log('Updated transaction:', tx);
                                 }
                                 
+                                // Only update totals, don't clean up containers during drag
                                 updateStatementTotals();
-                                cleanupEmptyContainers();
                             }
                         });
                         
@@ -7074,52 +7269,219 @@
         }
         
         function showAddAccountInput(statement, category, button) {
-            const column = button.parentElement;
-            if (column.querySelector('.add-account-input')) return;
-        
-            const listId = `${statement}-${category}-options`;
-            const datalist = document.createElement('datalist');
-            datalist.id = listId;
+            // Remove any existing dropdowns first
+            document.querySelectorAll('.account-dropdown').forEach(dropdown => dropdown.remove());
             
-            const existing = Array.from(column.querySelectorAll('.gl-account-section')).map(s => s.dataset.glAccount);
-            const options = (masterGLAccounts[statement] && masterGLAccounts[statement][category]) ?
-                masterGLAccounts[statement][category].filter(opt => !existing.includes(opt)) : [];
+            const accountOptions = getAccountOptions(statement, category);
+            
+            // Create styled dropdown
+            const dropdown = document.createElement('div');
+            dropdown.className = 'account-dropdown';
+            dropdown.innerHTML = `
+                <div class="dropdown-header">
+                    <h4>Add ${category} Account</h4>
+                    <button class="dropdown-close" onclick="closeAccountDropdown()">×</button>
+                </div>
+                <div class="dropdown-search">
+                    <input type="text" id="accountSearch" placeholder="Search accounts..." class="search-input">
+                </div>
+                <div class="dropdown-options" id="dropdownOptions">
+                    ${accountOptions.map(account => `
+                        <div class="dropdown-option" onclick="selectAccount('${statement}', '${category}', '${account}', this)">
+                            <span class="account-name">${account}</span>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="dropdown-footer">
+                    <button class="btn-custom-account" onclick="showCustomAccountInput('${statement}', '${category}')">
+                        + Add Custom Account
+                    </button>
+                </div>
+            `;
+            
+            // Position the dropdown near the button
+            const buttonRect = button.getBoundingClientRect();
+            dropdown.style.cssText = `
+                position: fixed;
+                top: ${buttonRect.bottom + 10}px;
+                left: ${buttonRect.left}px;
+                z-index: 1000;
+                min-width: 300px;
+                max-width: 400px;
+            `;
+            
+            document.body.appendChild(dropdown);
+            
+            // Add search functionality
+            const searchInput = dropdown.querySelector('#accountSearch');
+            searchInput.addEventListener('input', (e) => {
+                filterAccountOptions(e.target.value);
+            });
+            
+            // Focus on search input
+            searchInput.focus();
+            
+            // Close dropdown when clicking outside
+            setTimeout(() => {
+                document.addEventListener('click', closeDropdownOnOutsideClick);
+            }, 100);
+        }
+        
+        function filterAccountOptions(searchTerm) {
+            const options = document.querySelectorAll('.dropdown-option');
+            const term = searchTerm.toLowerCase();
             
             options.forEach(option => {
-                const optionElement = document.createElement('option');
-                optionElement.value = option;
-                datalist.appendChild(optionElement);
+                const accountName = option.querySelector('.account-name').textContent.toLowerCase();
+                if (accountName.includes(term)) {
+                    option.style.display = 'block';
+                } else {
+                    option.style.display = 'none';
+                }
             });
+        }
         
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.className = 'add-account-input';
-            input.placeholder = `Select ${category.toLowerCase()} account...`;
-            input.setAttribute('list', listId);
+        function selectAccount(statement, category, accountName, optionElement) {
+            console.log('Creating account:', { statement, category, accountName });
             
-            input.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter' && this.value.trim()) {
-                    const accountName = this.value.trim();
-                    if (options.includes(accountName)) {
-                        createGLEmptySection(statement, category, accountName, column.querySelector('.account-groups') || column);
-                        this.remove();
-                        datalist.remove();
-                    }
-                }
-            });
+            // Visual feedback
+            optionElement.classList.add('selected');
             
-            input.addEventListener('blur', function() {
-                const accountName = this.value.trim();
-                if (accountName && options.includes(accountName)) {
-                    createGLEmptySection(statement, category, accountName, column.querySelector('.account-groups') || column);
-                }
-                this.remove();
-                datalist.remove();
-            });
+            // Create the GL account section immediately
+            createGLAccountSection(statement, category, accountName);
             
-            column.insertBefore(datalist, button);
-            column.insertBefore(input, button);
+            // Close dropdown
+            closeAccountDropdown();
+            
+            // Show success notification
+            showUpdateNotification(`✅ Created "${accountName}" account`, 'success');
+            
+            // Re-initialize drag and drop for new container
+            setTimeout(() => {
+                initDragAndDrop();
+            }, 100);
+        }
+        
+        function showCustomAccountInput(statement, category) {
+            const customInput = document.createElement('div');
+            customInput.className = 'custom-account-input';
+            customInput.innerHTML = `
+                <div class="custom-input-container">
+                    <input type="text" id="customAccountName" placeholder="Enter custom account name..." class="custom-input">
+                    <div class="custom-input-buttons">
+                        <button class="btn-confirm" onclick="createCustomAccount('${statement}', '${category}')">Create</button>
+                        <button class="btn-cancel" onclick="closeAccountDropdown()">Cancel</button>
+                    </div>
+                </div>
+            `;
+            
+            // Replace dropdown options with custom input
+            const dropdownOptions = document.querySelector('.dropdown-options');
+            const dropdownFooter = document.querySelector('.dropdown-footer');
+            if (dropdownOptions) dropdownOptions.style.display = 'none';
+            if (dropdownFooter) dropdownFooter.style.display = 'none';
+            
+            document.querySelector('.account-dropdown').appendChild(customInput);
+            
+            // Focus on input
+            const input = customInput.querySelector('#customAccountName');
             input.focus();
+            
+            // Handle Enter key
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    createCustomAccount(statement, category);
+                }
+            });
+        }
+        
+        function createCustomAccount(statement, category) {
+            const input = document.getElementById('customAccountName');
+            const accountName = input.value.trim();
+            
+            if (!accountName) {
+                showUpdateNotification('Please enter an account name', 'error');
+                return;
+            }
+            
+            console.log('Creating custom account:', { statement, category, accountName });
+            
+            // Create the GL account section
+            createGLAccountSection(statement, category, accountName);
+            
+            // Close dropdown
+            closeAccountDropdown();
+            
+            // Show success notification
+            showUpdateNotification(`✅ Created custom account "${accountName}"`, 'success');
+            
+            // Re-initialize drag and drop for new container
+            setTimeout(() => {
+                initDragAndDrop();
+            }, 100);
+        }
+        
+        function createGLAccountSection(statement, category, accountName) {
+            // Find the appropriate container
+            let containerId;
+            if (statement === 'balance') {
+                if (category === 'Asset') containerId = 'balance-asset-lists';
+                else if (category === 'Liability') containerId = 'balance-liability-lists';
+                else if (category === 'Equity') containerId = 'balance-equity-lists';
+            } else if (statement === 'income') {
+                if (category === 'Revenue') containerId = 'income-revenue-lists';
+                else if (category === 'Expense') containerId = 'income-expense-lists';
+            } else if (statement === 'cashflow') {
+                if (category === 'Operating') containerId = 'cashflow-operating-lists';
+                else if (category === 'Investing') containerId = 'cashflow-investing-lists';
+                else if (category === 'Financing') containerId = 'cashflow-financing-lists';
+            }
+            
+            const container = document.getElementById(containerId);
+            if (!container) {
+                console.error('Container not found:', containerId);
+                return;
+            }
+            
+            // Check if section already exists
+            const existingSection = container.querySelector(`.gl-account-section[data-gl-account="${accountName}"]`);
+            if (existingSection) {
+                showUpdateNotification('Account already exists', 'error');
+                return;
+            }
+            
+            // Create the section
+            const section = document.createElement('div');
+            section.className = 'gl-account-section';
+            section.dataset.glAccount = accountName;
+            
+            const title = document.createElement('h3');
+            title.className = 'gl-account-title';
+            title.textContent = accountName;
+            section.appendChild(title);
+            
+            const transactionList = document.createElement('div');
+            transactionList.className = 'transaction-list';
+            transactionList.dataset.statement = statement;
+            transactionList.dataset.category = category;
+            transactionList.dataset.glAccount = accountName;
+            section.appendChild(transactionList);
+            
+            container.appendChild(section);
+            
+            console.log('Created GL account section:', accountName);
+        }
+        
+        function closeAccountDropdown() {
+            document.querySelectorAll('.account-dropdown').forEach(dropdown => dropdown.remove());
+            document.removeEventListener('click', closeDropdownOnOutsideClick);
+        }
+        
+        function closeDropdownOnOutsideClick(event) {
+            const dropdown = document.querySelector('.account-dropdown');
+            if (dropdown && !dropdown.contains(event.target)) {
+                closeAccountDropdown();
+            }
         }
         
         function createNewAccountSection(statement, category, accountName, container) {
@@ -7489,9 +7851,6 @@
                 console.log('=== APPLYING TRANSACTION CHANGES ===');
                 
                 try {
-                    // Clean up empty containers first
-                    cleanupEmptyContainers();
-                    
                     // Ensure no duplicate transactions
                     currentTransactions = deduplicateTransactions(currentTransactions);
                     console.log('Processing transactions:', currentTransactions.length);
@@ -7503,21 +7862,19 @@
                     // Update the main reports
                     window.currentFinancialData = newStatements;
                     
-                    // Repopulate all reports with new data - FIX: Use correct property names
+                    // Repopulate all reports with new data
                     populateIncomeStatement(newStatements.incomeStatement);
                     populateBalanceSheet(newStatements.balanceSheet);
-                    populateCashFlowStatement(newStatements.cashFlow); // This is the correct property name
+                    populateCashFlowStatement(newStatements.cashFlow);
                     
                     // Update stored data
                     window.editableTransactions = JSON.parse(JSON.stringify(currentTransactions));
                     
+                    // Clean up empty containers AFTER applying changes
+                    cleanupEmptyContainers();
+                    
                     // Show success message
                     showUpdateNotification('✅ Financial statements updated successfully!', 'success');
-                    
-                    // Re-render transactions to reflect changes
-                    setTimeout(() => {
-                        renderTransactions();
-                    }, 500);
                     
                     // Switch back to Income Statement to show changes
                     setTimeout(() => {
@@ -9101,22 +9458,21 @@
                 }
             });
             
-            // Remove empty transaction-items containers that have no children
+            // Remove empty transaction-items containers that have no GL sections
             document.querySelectorAll('.transaction-items').forEach(container => {
-                if (container.children.length === 0) {
-                    // Check if this container has any GL sections
-                    const parentSection = container.closest('.category-section');
-                    if (parentSection) {
-                        const allSections = parentSection.querySelectorAll('.gl-account-section');
-                        if (allSections.length === 0) {
-                            // Only clear the "Drop transactions here" message, don't remove the container
-                            container.innerHTML = '';
-                        }
-                    }
+                const glSections = container.querySelectorAll('.gl-account-section');
+                if (glSections.length === 0) {
+                    container.innerHTML = '';
+                    console.log('Cleared empty transaction-items container');
                 }
             });
+            
+            // Force re-render to clean up any remaining issues
+            setTimeout(() => {
+                renderTransactions();
+            }, 100);
         }
-
+        
         document.addEventListener('DOMContentLoaded', () => {
             const searchInput = document.getElementById('historySearch');
             const monthFilter = document.getElementById('monthFilter');
