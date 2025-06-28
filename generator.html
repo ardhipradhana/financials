@@ -5842,33 +5842,6 @@
             updatePhase();
         }
 
-        function showReport(reportType) {
-            // Hide all reports
-            document.querySelectorAll('.report-container').forEach(container => {
-                container.classList.remove('active');
-            });
-            
-            // Remove active class from all tabs
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            // Show selected report
-            const reportMap = {
-                'income': 'incomeReport',
-                'balance': 'balanceReport', 
-                'cashflow': 'cashflowReport',
-                'ratios': 'ratiosReport',
-                'insights': 'insightsReport'
-            };
-            
-            document.getElementById(reportMap[reportType]).classList.add('active');
-            
-            // Activate clicked tab
-            event.target.classList.add('active');
-            
-            // No auto-generation - user clicks button manually
-        }
 
         // Storage Management System
         const STORAGE_KEY = 'montpro_analyses';
