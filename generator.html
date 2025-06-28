@@ -2607,13 +2607,20 @@
         }
 
         .add-account-input {
-            margin-top: 4px;
+            margin-top: 8px;
             width: 100%;
-            padding: 4px 6px;
-            border-radius: 4px;
+            padding: 8px 12px;
+            border-radius: 6px;
             border: 1px solid rgba(59, 130, 246, 0.5);
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(15, 23, 42, 0.8);
             color: #F8FAFC;
+            font-size: 0.9rem;
+        }
+
+        .add-account-input:focus {
+            outline: none;
+            border-color: #60A5FA;
+            box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2);
         }
 
         .gl-account-lists {
@@ -6732,7 +6739,7 @@
 
         function renderTransactions() {
             document.querySelectorAll('.gl-account-lists .transaction-list').forEach(list => list.innerHTML = '');
-            const buffer = document.getElementById('buffer-list');
+            const buffer = document.getElementById('buffer-transactions');
             if (buffer) buffer.innerHTML = '';
 
             currentTransactions.forEach(tx => {
@@ -6741,7 +6748,10 @@
                     container = buffer;
                 } else {
                     const listContainer = document.getElementById(`${tx.statement}-${tx.category.toLowerCase()}-lists`);
-                    if (!listContainer) return;
+                    if (!listContainer) {
+                        console.log(`Missing container: ${tx.statement}-${tx.category.toLowerCase()}-lists`);
+                        return;
+                    }
                     const account = tx.glAccount || 'Other';
                     let section = listContainer.querySelector(`.gl-account-section[data-gl-account="${account}"]`);
                     if (!section) {
@@ -6821,7 +6831,9 @@
         }
         
         function createGLEmptySection(statement, category, account, container) {
-            if (!container.querySelector(`.gl-account-section[data-gl-account="${account}"]`)) {
+            const accountGroupsContainer = container.querySelector('.account-groups') || container;
+            
+            if (!accountGroupsContainer.querySelector(`.gl-account-section[data-gl-account="${account}"]`)) {
                 const section = document.createElement('div');
                 section.className = 'gl-account-section';
                 section.dataset.glAccount = account;
@@ -6838,36 +6850,65 @@
                 list.dataset.glAccount = account;
                 section.appendChild(list);
         
-                container.appendChild(section);
+                // Insert before the add button
+                const addButton = container.querySelector('.add-account-btn');
+                if (addButton) {
+                    container.insertBefore(section, addButton);
+                } else {
+                    accountGroupsContainer.appendChild(section);
+                }
+                
                 initDragAndDrop();
                 applyCollapsedState();
             }
         }
         
         function showAddAccountInput(statement, category, button) {
-            const existingInput = button.parentElement.querySelector('.add-account-input');
-            if (existingInput) return;
+            const column = button.parentElement;
+            if (column.querySelector('.add-account-input')) return;
+        
+            const listId = `${statement}-${category}-options`;
+            const datalist = document.createElement('datalist');
+            datalist.id = listId;
+            
+            const existing = Array.from(column.querySelectorAll('.gl-account-section')).map(s => s.dataset.glAccount);
+            const options = (masterGLAccounts[statement] && masterGLAccounts[statement][category]) ?
+                masterGLAccounts[statement][category].filter(opt => !existing.includes(opt)) : [];
+            
+            options.forEach(option => {
+                const optionElement = document.createElement('option');
+                optionElement.value = option;
+                datalist.appendChild(optionElement);
+            });
         
             const input = document.createElement('input');
             input.type = 'text';
             input.className = 'add-account-input';
-            input.placeholder = `Enter ${category.toLowerCase()} account name...`;
+            input.placeholder = `Select ${category.toLowerCase()} account...`;
+            input.setAttribute('list', listId);
             
             input.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter' && this.value.trim()) {
-                    createNewAccountSection(statement, category, this.value.trim(), button.parentElement);
-                    this.remove();
+                    const accountName = this.value.trim();
+                    if (options.includes(accountName)) {
+                        createGLEmptySection(statement, category, accountName, column.querySelector('.account-groups') || column);
+                        this.remove();
+                        datalist.remove();
+                    }
                 }
             });
             
             input.addEventListener('blur', function() {
-                if (this.value.trim()) {
-                    createNewAccountSection(statement, category, this.value.trim(), button.parentElement);
+                const accountName = this.value.trim();
+                if (accountName && options.includes(accountName)) {
+                    createGLEmptySection(statement, category, accountName, column.querySelector('.account-groups') || column);
                 }
                 this.remove();
+                datalist.remove();
             });
             
-            button.parentElement.insertBefore(input, button);
+            column.insertBefore(datalist, button);
+            column.insertBefore(input, button);
             input.focus();
         }
         
