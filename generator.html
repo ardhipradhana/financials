@@ -3164,9 +3164,10 @@
         .transaction-list.sortable-target,
         .transaction-items.sortable-target,
         .buffer-transaction-list.sortable-target {
-            background: rgba(59, 130, 246, 0.1) !important;
-            border: 1px dashed #60A5FA !important;
+            background: rgba(59, 130, 246, 0.15) !important;
+            border: 2px dashed #60A5FA !important;
             border-radius: 6px;
+            transition: all 0.2s ease;
         }
         
         /* Remove transform animations from outer containers */
@@ -3249,7 +3250,6 @@
         }
         
         .sortable-target::before {
-            content: "Drop here";
             position: absolute;
             top: 50%;
             left: 50%;
@@ -3260,6 +3260,21 @@
             z-index: 10;
             pointer-events: none;
             opacity: 0.8;
+        }
+
+        /* Ensure outer containers don't become drop targets */
+        .gl-account-section.sortable-target,
+        .category-section.sortable-target,
+        .account-group.sortable-target {
+            background: none !important;
+            border: none !important;
+            transform: none !important;
+        }
+        
+        .gl-account-section.sortable-target::before,
+        .category-section.sortable-target::before,
+        .account-group.sortable-target::before {
+            display: none !important;
         }
 
         /* Enhanced Account Dropdown Styles */
@@ -7194,11 +7209,11 @@
             setTimeout(() => {
                 // Only get the actual droppable containers (not the outer sections)
                 const allLists = [
-                    ...document.querySelectorAll('.transaction-list'),
-                    ...document.querySelectorAll('.transaction-items'),
-                    document.getElementById('buffer-transactions'),
-                    document.querySelector('.buffer-transaction-list')
-                ].filter(Boolean);
+                    ...document.querySelectorAll('.transaction-list'),  // GL account containers
+                    ...document.querySelectorAll('.transaction-items'), // Category containers  
+                    document.getElementById('buffer-transactions'),      // Buffer zone
+                    document.querySelector('.buffer-transaction-list')  // Alternative buffer
+                ].filter(el => el && !el.dataset.sortableBound); // Only unbound elements
         
                 console.log('Found droppable containers:', allLists.length);
         
@@ -7217,20 +7232,17 @@
                     try {
                         list.sortable = Sortable.create(list, {
                             group: 'transactions',
-                            animation: 100, // Reduced from 150
+                            animation: 100,
                             ghostClass: 'sortable-ghost',
                             chosenClass: 'sortable-chosen',
                             dragClass: 'sortable-drag',
                             handle: '.transaction-card',
                             preventOnFilter: false,
-                            filter: '.gl-account-section, .gl-account-title, .account-dropdown', // Prevent dragging these elements
-                            forceFallback: false, // Use native HTML5 drag and drop
+                            filter: '.gl-account-section, .gl-account-title, .account-dropdown, .category-section, .account-group', // Prevent dragging these elements
+                            forceFallback: false,
                             fallbackTolerance: 0,
                             onStart: (evt) => {
-                                // Close any open dropdowns during drag
-                                closeAccountDropdown();
-                                
-                                // Add target class only to actual drop zones
+                                // Only add target class to actual droppable containers
                                 document.querySelectorAll('.transaction-list, .transaction-items, .buffer-transaction-list').forEach(zone => {
                                     if (zone !== evt.from && zone.dataset.sortableBound) {
                                         zone.classList.add('sortable-target');
