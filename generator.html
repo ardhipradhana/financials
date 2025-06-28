@@ -6754,7 +6754,13 @@
                 if (tx.statement === 'buffer') {
                     container = buffer;
                 } else {
-                    const listContainer = document.getElementById(`${tx.statement}-${tx.category.toLowerCase()}-lists`);
+                    let categoryName = tx.category.toLowerCase();
+                    if (tx.statement === 'balance') {
+                        if (categoryName === 'asset') categoryName = 'asset';
+                        if (categoryName === 'liability') categoryName = 'liability';
+                        if (categoryName === 'equity') categoryName = 'equity';
+                    }
+                    const listContainer = document.getElementById(`${tx.statement}-${categoryName}-lists`);
                     if (!listContainer) {
                         console.log(`Missing container: ${tx.statement}-${tx.category.toLowerCase()}-lists`);
                         return;
@@ -6982,17 +6988,130 @@
         
         // Initialize transaction editor when transactions tab is shown
         function showTransactionsEditor() {
-            if (!window.editableTransactions) return;
-
-            // Clone the original transactions for editing
-            currentTransactions = JSON.parse(JSON.stringify(window.editableTransactions));
-
+            if (!window.editableTransactions && !window.currentFinancialData) return;
+        
+            // Start with Income Statement transactions if they exist
+            currentTransactions = window.editableTransactions ? 
+                JSON.parse(JSON.stringify(window.editableTransactions)) : [];
+        
+            // Add Balance Sheet transactions from financial data if available
+            if (window.currentFinancialData && window.currentFinancialData.balanceSheet) {
+                const balanceSheet = window.currentFinancialData.balanceSheet;
+                
+                // Convert Balance Sheet assets to transactions
+                balanceSheet.assets.forEach((asset, index) => {
+                    if (asset.amount !== 0) {
+                        currentTransactions.push({
+                            id: `balance-asset-${index}`,
+                            baseId: `balance-asset-${index}`,
+                            description: asset.item,
+                            amount: asset.amount,
+                            statement: 'balance',
+                            category: 'Asset',
+                            glAccount: asset.item,
+                            subcategory: 'Current Assets',
+                            date: new Date().toISOString().split('T')[0]
+                        });
+                    }
+                });
+        
+                // Convert Balance Sheet liabilities to transactions
+                balanceSheet.liabilities.forEach((liability, index) => {
+                    if (liability.amount !== 0) {
+                        currentTransactions.push({
+                            id: `balance-liability-${index}`,
+                            baseId: `balance-liability-${index}`,
+                            description: liability.item,
+                            amount: -Math.abs(liability.amount), // Liabilities are negative
+                            statement: 'balance',
+                            category: 'Liability',
+                            glAccount: liability.item,
+                            subcategory: 'Current Liabilities',
+                            date: new Date().toISOString().split('T')[0]
+                        });
+                    }
+                });
+        
+                // Convert Balance Sheet equity to transactions
+                balanceSheet.equity.forEach((equity, index) => {
+                    if (equity.amount !== 0) {
+                        currentTransactions.push({
+                            id: `balance-equity-${index}`,
+                            baseId: `balance-equity-${index}`,
+                            description: equity.item,
+                            amount: equity.amount,
+                            statement: 'balance',
+                            category: 'Equity',
+                            glAccount: equity.item,
+                            subcategory: 'Owner\'s Equity',
+                            date: new Date().toISOString().split('T')[0]
+                        });
+                    }
+                });
+            }
+        
+            // Add Cash Flow transactions if available
+            if (window.currentFinancialData && window.currentFinancialData.cashFlow) {
+                const cashFlow = window.currentFinancialData.cashFlow;
+                
+                // Convert Cash Flow operating to transactions
+                cashFlow.operating.forEach((item, index) => {
+                    if (item.amount !== 0) {
+                        currentTransactions.push({
+                            id: `cashflow-operating-${index}`,
+                            baseId: `cashflow-operating-${index}`,
+                            description: item.item,
+                            amount: item.amount,
+                            statement: 'cashflow',
+                            category: 'Operating',
+                            glAccount: item.item,
+                            subcategory: 'Operating Activities',
+                            date: new Date().toISOString().split('T')[0]
+                        });
+                    }
+                });
+        
+                // Similar for investing and financing...
+                cashFlow.investing.forEach((item, index) => {
+                    if (item.amount !== 0) {
+                        currentTransactions.push({
+                            id: `cashflow-investing-${index}`,
+                            baseId: `cashflow-investing-${index}`,
+                            description: item.item,
+                            amount: item.amount,
+                            statement: 'cashflow',
+                            category: 'Investing',
+                            glAccount: item.item,
+                            subcategory: 'Investing Activities',
+                            date: new Date().toISOString().split('T')[0]
+                        });
+                    }
+                });
+        
+                cashFlow.financing.forEach((item, index) => {
+                    if (item.amount !== 0) {
+                        currentTransactions.push({
+                            id: `cashflow-financing-${index}`,
+                            baseId: `cashflow-financing-${index}`,
+                            description: item.item,
+                            amount: item.amount,
+                            statement: 'cashflow',
+                            category: 'Financing',
+                            glAccount: item.item,
+                            subcategory: 'Financing Activities',
+                            date: new Date().toISOString().split('T')[0]
+                        });
+                    }
+                });
+            }
+        
+            console.log('Loaded transactions:', currentTransactions);
+            console.log('Balance Sheet transactions:', currentTransactions.filter(tx => tx.statement === 'balance'));
+        
             renderTransactions();
             initDragAndDrop();
             updateStatementTotals();
         }
-        
-        
 
         function updateStatementTotals() {
             const totals = {
