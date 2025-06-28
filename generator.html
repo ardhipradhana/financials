@@ -8804,7 +8804,13 @@
             });
             
             // Show selected statement content
-            const targetContent = document.getElementById(statementType + 'StatementEditor');
+            const statementEditorMap = {
+                'income': 'incomeStatementEditor',
+                'balance': 'balanceSheetEditor',
+                'cashflow': 'cashflowStatementEditor'
+            };
+
+            const targetContent = document.getElementById(statementEditorMap[statementType]);
             console.log('Target content:', targetContent);
             if (targetContent) {
                 targetContent.classList.add('active');
