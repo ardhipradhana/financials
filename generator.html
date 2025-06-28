@@ -6955,6 +6955,7 @@
                             },
                             onEnd: (evt) => {
                                 console.log('Drag operation completed');
+                                syncTransactionOrder();
                             }
                         });
                         
@@ -6965,7 +6966,17 @@
                 });
             }, 200);
         }
-        
+
+        function syncTransactionOrder() {
+            const ordered = [];
+            document.querySelectorAll('.transaction-card').forEach(card => {
+                const tx = currentTransactions.find(t => String(t.id) === String(card.dataset.id));
+                if (tx) ordered.push(tx);
+            });
+            currentTransactions = ordered;
+            window.editableTransactions = JSON.parse(JSON.stringify(currentTransactions));
+        }
+
         function createGLEmptySection(statement, category, account, container) {
             const accountGroupsContainer = container.querySelector('.account-groups') || container;
             
