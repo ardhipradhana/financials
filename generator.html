@@ -2909,7 +2909,13 @@
             border: 1px solid rgba(59, 130, 246, 0.2);
             border-radius: 12px;
             padding: 24px;
-            overflow-y: auto; /* Allow scrolling in left panel */
+            overflow-y: auto;
+            scroll-behavior: smooth; /* Smooth scrolling */
+        }
+
+        .statement-editor.drag-active {
+            overflow-y: auto !important;
+            pointer-events: auto !important;
         }
         
         .statement-content {
@@ -7247,15 +7253,19 @@
                             handle: '.transaction-card',
                             preventOnFilter: false,
                             filter: '.gl-account-section, .gl-account-title, .account-dropdown, .category-section, .account-group, .buffer-placeholder',
-
+                            
+                            // Disable auto-scroll but allow manual
                             scroll: false,
                             forceFallback: false,
-                            fallbackTolerance: 0,
-                            dragoverBubble: true,
                             
                             onStart: (evt) => {
-                                document.body.style.overflow = 'auto';
-                                document.documentElement.style.overflow = 'auto';
+                                const editor = document.querySelector('.statement-editor');
+                                if (editor) {
+                                    editor.classList.add('drag-active');
+                                }
+                                
+                                // Enable wheel events during drag
+                                document.addEventListener('wheel', handleWheelDuringDrag, { passive: false });
                                 // Only highlight the exact containers that can accept drops
                                 exactContainers.forEach(zone => {
                                     if (zone !== evt.from) {
@@ -7264,6 +7274,13 @@
                                 });
                             },
                             onEnd: (evt) => {
+                                const editor = document.querySelector('.statement-editor');
+                                if (editor) {
+                                    editor.classList.remove('drag-active');
+                                }
+                                
+                                // Remove wheel event listener
+                                document.removeEventListener('wheel', handleWheelDuringDrag);
                                 // Remove target class from all zones
                                 document.querySelectorAll('.sortable-target').forEach(zone => {
                                     zone.classList.remove('sortable-target');
@@ -9626,6 +9643,17 @@
                 } else {
                     placeholder.classList.remove('hidden');
                 }
+            }
+        }
+        
+        // Add this function right after updateBufferPlaceholder
+        function handleWheelDuringDrag(e) {
+            const editor = document.querySelector('.statement-editor');
+            if (editor && editor.classList.contains('drag-active')) {
+                // Allow scrolling in the statement editor
+                e.stopPropagation();
+                editor.scrollTop += e.deltaY;
+                return false;
             }
         }
         
