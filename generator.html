@@ -7247,7 +7247,15 @@
                             handle: '.transaction-card',
                             preventOnFilter: false,
                             filter: '.gl-account-section, .gl-account-title, .account-dropdown, .category-section, .account-group, .buffer-placeholder',
+
+                            scroll: false,
+                            forceFallback: false,
+                            fallbackTolerance: 0,
+                            dragoverBubble: true,
+                            
                             onStart: (evt) => {
+                                document.body.style.overflow = 'auto';
+                                document.documentElement.style.overflow = 'auto';
                                 // Only highlight the exact containers that can accept drops
                                 exactContainers.forEach(zone => {
                                     if (zone !== evt.from) {
