@@ -3025,10 +3025,8 @@
             z-index: 2;
         }
 
-        .buffer-transaction-list:not(:empty) + .buffer-placeholder,
-        .buffer-transaction-list:not(:empty) ~ .buffer-placeholder {
-            opacity: 0;
-            pointer-events: none;
+        .buffer-placeholder.hidden {
+            display: none !important;
         }
 
         .buffer-transaction-list:empty:before {
@@ -7199,6 +7197,7 @@
                 applyCollapsedState();
                 updateStatementTotals();
                 checkBalanceSheetTransactions();
+                updateBufferPlaceholder();
             }, 100);
         }
 
@@ -7218,23 +7217,22 @@
             });
         
             setTimeout(() => {
-                // Only get the actual droppable containers (not the outer sections)
-                const allLists = [
-                    ...document.querySelectorAll('.transaction-list'),     // Individual GL account lists
-                    ...document.querySelectorAll('#balance-asset-lists, #balance-liability-lists, #balance-equity-lists, #income-revenue-lists, #income-expense-lists, #cashflow-operating-lists, #cashflow-investing-lists, #cashflow-financing-lists'), // Category containers
-                    document.getElementById('buffer-transactions')         // Buffer zone only
+                // ONLY initialize on these specific containers - nothing else
+                const exactContainers = [
+                    document.getElementById('buffer-transactions'), // Buffer only
+                    ...document.querySelectorAll('.transaction-list') // Individual GL accounts only
                 ].filter(Boolean);
         
-                console.log('Found droppable containers:', allLists.length);
+                console.log('Found droppable containers:', exactContainers.length);
         
-                allLists.forEach((list, index) => {
+                exactContainers.forEach((list) => {
                     if (list.dataset.sortableBound) {
                         return;
                     }
                     
                     list.dataset.sortableBound = 'true';
                     
-                    if (list.id === 'buffer-transactions' || list.classList.contains('buffer-transaction-list')) {
+                    if (list.id === 'buffer-transactions') {
                         list.dataset.statement = 'buffer';
                         list.dataset.category = 'Buffer';
                     }
@@ -7248,21 +7246,11 @@
                             dragClass: 'sortable-drag',
                             handle: '.transaction-card',
                             preventOnFilter: false,
-                            filter: '.gl-account-section, .gl-account-title, .account-dropdown, .category-section, .account-group, .buffer-placeholder', 
-                            forceFallback: false,
-                            fallbackTolerance: 0,
-                            // Add strict validation
-                            onMove: function(evt, originalEvent) {
-                                // Only allow drops on exact sortable containers
-                                const target = evt.to;
-                                return target.classList.contains('transaction-list') || 
-                                       target.classList.contains('transaction-items') || 
-                                       target.id === 'buffer-transactions';
-                            },
+                            filter: '.gl-account-section, .gl-account-title, .account-dropdown, .category-section, .account-group, .buffer-placeholder',
                             onStart: (evt) => {
-                                // Only add target class to actual droppable containers
-                                document.querySelectorAll('.transaction-list, .transaction-items, #buffer-transactions').forEach(zone => {
-                                    if (zone !== evt.from && zone.dataset.sortableBound) {
+                                // Only highlight the exact containers that can accept drops
+                                exactContainers.forEach(zone => {
+                                    if (zone !== evt.from) {
                                         zone.classList.add('sortable-target');
                                     }
                                 });
@@ -7283,42 +7271,48 @@
                                 const category = evt.to.dataset.category || 'Buffer';
                                 const glAccount = evt.to.dataset.glAccount || null;
                                 
-                                console.log('Moving transaction:', { txId, statement, category, glAccount });
+                                console.log('Moving transaction:', { txId, baseId, statement, category, glAccount });
                                 
-                                const tx = currentTransactions.find(t => String(t.id) === String(txId));
-                                if (tx) {
-                                    if (statement !== 'buffer') {
-                                        const duplicate = currentTransactions.find(t => 
-                                            t.baseId === baseId && 
-                                            t.statement === statement && 
-                                            t.glAccount === glAccount && 
-                                            t.id !== tx.id
-                                        );
-                                        if (duplicate) {
-                                            evt.from.appendChild(evt.item);
-                                            showUpdateNotification("This transaction already exists in this account", "error");
-                                            return;
-                                        }
-                                    }
+                                // Update transaction data
+                                const transaction = currentTransactions.find(tx => tx.id === txId || tx.baseId === baseId);
+                                if (transaction) {
+                                    transaction.statement = statement;
+                                    transaction.category = category;
+                                    transaction.glAccount = glAccount;
                                     
-                                    tx.statement = statement;
-                                    tx.category = category;
-                                    tx.glAccount = glAccount;
+                                    // Update the data attribute
+                                    evt.item.dataset.statement = statement;
+                                    evt.item.dataset.category = category;
+                                    if (glAccount) evt.item.dataset.glAccount = glAccount;
                                     
-                                    console.log('Updated transaction:', tx);
+                                    console.log('Updated transaction:', transaction);
+                                    
+                                    // Update totals and check balance
+                                    updateStatementTotals();
+                                    checkBalanceSheetTransactions();
+                                    
+                                    // Update buffer placeholder
+                                    updateBufferPlaceholder();
+                                    
+                                    // Show success notification
+                                    const targetName = glAccount || category;
+                                    showUpdateNotification(`✅ Moved to ${targetName}`, 'success');
                                 }
-                                
-                                updateStatementTotals();
                             }
+                            // Remove the onMove function - we'll control it by only initializing specific containers
                         });
                         
-                        console.log(`✓ Initialized sortable for container ${index}:`, list.id || list.className);
-                    } catch (error) {
-                        console.error(`✗ Error initializing sortable for container ${index}:`, error);
+                        console.log(`Initialized sortable on:`, list.id || list.className);
+                    } catch (e) {
+                        console.error('Error creating sortable:', e);
                     }
                 });
-            }, 200);
+                
+                // Update buffer placeholder after initialization
+                updateBufferPlaceholder();
+            }, 50);
         }
+        
         function syncTransactionOrder() {
             const ordered = [];
             document.querySelectorAll('.transaction-card').forEach(card => {
@@ -9612,6 +9606,19 @@
             setTimeout(() => {
                 renderTransactions();
             }, 100);
+        }
+
+        function updateBufferPlaceholder() {
+            const buffer = document.getElementById('buffer-transactions');
+            const placeholder = document.querySelector('.buffer-placeholder');
+            
+            if (buffer && placeholder) {
+                if (buffer.children.length > 0) {
+                    placeholder.classList.add('hidden');
+                } else {
+                    placeholder.classList.remove('hidden');
+                }
+            }
         }
         
         document.addEventListener('DOMContentLoaded', () => {
