@@ -2966,17 +2966,24 @@
         .placeholder-icon {
             margin-bottom: 16px;
         }
+
+        .placeholder-text {
+            text-align: center;
+            width: 100%;
+        }
         
         .placeholder-text h3 {
             color: #F8FAFC;
             font-size: 1.2rem;
             margin-bottom: 8px;
+            text-align: center;
         }
         
         .placeholder-text p {
             color: #94A3B8;
             text-align: center;
             line-height: 1.5;
+            margin: 0;
         }
 
         .placeholder-icon svg {
@@ -6738,7 +6745,7 @@
         };
 
         function renderTransactions() {
-            document.querySelectorAll('.gl-account-lists .transaction-list').forEach(list => list.innerHTML = '');
+            document.querySelectorAll('.transaction-list').forEach(list => list.innerHTML = '');
             const buffer = document.getElementById('buffer-transactions');
             if (buffer) buffer.innerHTML = '';
 
@@ -8449,6 +8456,9 @@
             }
 
             if (statementType === 'balance') {
+                console.log('Switching to Balance Sheet');
+                console.log('Current transactions:', currentTransactions);
+                console.log('Balance transactions:', currentTransactions.filter(tx => tx.statement === 'balance'));
                 checkBalanceSheetTransactions();
             }
         }
@@ -8458,6 +8468,10 @@
             const liabilityLists = document.getElementById('balance-liability-lists');
             const equityLists = document.getElementById('balance-equity-lists');
             
+            console.log('Asset lists:', assetLists); // Debug
+            console.log('Liability lists:', liabilityLists); // Debug
+            console.log('Equity lists:', equityLists); // Debug
+            
             const hasTransactions = (assetLists && assetLists.children.length > 0) ||
                                    (liabilityLists && liabilityLists.children.length > 0) ||
                                    (equityLists && equityLists.children.length > 0);
@@ -8465,14 +8479,16 @@
             const transactionSection = document.querySelector('#balanceSheetEditor .statement-categories');
             const noticeSection = document.getElementById('balanceSheetNotice');
             
+            console.log('Has transactions:', hasTransactions); // Debug
+            
             if (hasTransactions) {
                 // Show transaction editing interface
-                transactionSection.style.display = 'block';
-                noticeSection.style.display = 'none';
+                if (transactionSection) transactionSection.style.display = 'block';
+                if (noticeSection) noticeSection.style.display = 'none';
             } else {
                 // Show auto-calculated notice
-                transactionSection.style.display = 'none';
-                noticeSection.style.display = 'flex';
+                if (transactionSection) transactionSection.style.display = 'none';
+                if (noticeSection) noticeSection.style.display = 'flex';
             }
         }
 
