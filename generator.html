@@ -2596,14 +2596,29 @@
         }
 
         .add-account-btn {
-            margin-top: 4px;
-            padding: 4px 8px;
-            font-size: 0.75rem;
-            background: transparent;
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid rgba(59, 130, 246, 0.4);
             color: #60A5FA;
-            border: 1px dashed rgba(59, 130, 246, 0.5);
-            border-radius: 4px;
+            padding: 12px 16px;
+            border-radius: 8px;
             cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            margin-bottom: 32px; /* Add more space below the button */
+            margin-top: 16px; /* Add space above the button */
+            width: 100%;
+            text-align: center;
+        }
+
+        .add-account-btn:hover {
+            background: rgba(59, 130, 246, 0.3);
+            border-color: #60A5FA;
+            transform: translateY(-1px);
+        }
+
+        .category-section {
+            margin-bottom: 40px; /* Increase space between sections */
         }
 
         .add-account-input {
@@ -2664,6 +2679,8 @@
             pointer-events: all;
             user-select: none;
             cursor: grab;
+            z-index: 1;
+            position: relative;
             transition: none; /* Remove transitions for cleaner feel */
         }
         
@@ -2914,7 +2931,8 @@
         .category-title {
             font-size: 1.3rem;
             color: #60A5FA;
-            margin-bottom: 16px;
+            margin-bottom: 20px; /* More space below category titles */
+            margin-top: 0;
         }
 
         /* Enhanced Buffer Zone */
@@ -3040,46 +3058,46 @@
         }
 
         .transaction-items {
+            pointer-events: all;
             display: flex;
             flex-direction: column;
             gap: 8px;
             margin-bottom: 16px;
         }
         
-        /* Account group styling */
+        /* Account groups spacing */
         .account-group {
             background: rgba(30, 41, 59, 0.3);
             border: 1px solid rgba(59, 130, 246, 0.2);
             border-radius: 8px;
             padding: 16px;
-            margin-bottom: 16px;
+            margin-bottom: 20px; /* More space between account groups */
         }
         
         .account-group-title {
             font-size: 1.1rem;
             color: #94A3B8;
-            margin-bottom: 12px;
+            margin-bottom: 16px; /* More space below group titles */
             padding-bottom: 8px;
             border-bottom: 1px solid rgba(59, 130, 246, 0.2);
         }
         
-        /* Dynamic account sections */
+        /* GL account sections spacing */
         .gl-account-section {
             background: rgba(15, 23, 42, 0.4);
             border: 1px solid rgba(59, 130, 246, 0.15);
             border-radius: 6px;
             padding: 12px;
-            margin-bottom: 8px;
-            pointer-events: none;
+            margin-bottom: 12px; /* Space between GL sections */
         }
         
         .gl-account-title {
-            pointer-events: all;
-            cursor: pointer;
             font-size: 0.9rem;
             color: #F8FAFC;
-            margin-bottom: 8px;
+            margin-bottom: 12px; /* Space below GL titles */
             font-weight: 600;
+            padding-bottom: 4px;
+            border-bottom: 1px solid rgba(59, 130, 246, 0.1);
         }
 
         .auto-calculated-notice {
@@ -3147,11 +3165,17 @@
         .transaction-list.sortable-target,
         .transaction-items.sortable-target,
         .buffer-transaction-list.sortable-target {
-            background: rgba(59, 130, 246, 0.1);
-            border: 2px dashed #60A5FA;
-            border-radius: 8px;
+            background: rgba(59, 130, 246, 0.1) !important;
+            border: 1px dashed #60A5FA !important;
+            border-radius: 6px;
             transform: scale(1.02);
             transition: all 0.2s ease;
+        }
+
+        .gl-account-section.sortable-target {
+            background: none !important;
+            border: none !important;
+            transform: none !important;
         }
         
         /* Notification animations */
@@ -7147,6 +7171,7 @@
             });
         
             setTimeout(() => {
+                // Only get the actual droppable containers (not the outer sections)
                 const allLists = [
                     ...document.querySelectorAll('.transaction-list'),
                     ...document.querySelectorAll('.transaction-items'),
@@ -7176,7 +7201,21 @@
                             chosenClass: 'sortable-chosen',
                             handle: '.transaction-card',
                             preventOnFilter: false,
-                            filter: '.gl-account-section',
+                            filter: '.gl-account-section, .gl-account-title', // Prevent dragging these elements
+                            onStart: (evt) => {
+                                // Add target class only to actual drop zones
+                                document.querySelectorAll('.transaction-list, .transaction-items, .buffer-transaction-list').forEach(zone => {
+                                    if (zone !== evt.from && zone.dataset.sortableBound) {
+                                        zone.classList.add('sortable-target');
+                                    }
+                                });
+                            },
+                            onEnd: (evt) => {
+                                // Remove target class from all zones
+                                document.querySelectorAll('.sortable-target').forEach(zone => {
+                                    zone.classList.remove('sortable-target');
+                                });
+                            },
                             onAdd: (evt) => {
                                 evt.preventDefault();
                                 evt.stopPropagation();
@@ -7212,7 +7251,6 @@
                                     console.log('Updated transaction:', tx);
                                 }
                                 
-                                // Only update totals, don't clean up containers during drag
                                 updateStatementTotals();
                             }
                         });
@@ -7224,7 +7262,6 @@
                 });
             }, 200);
         }
-
         function syncTransactionOrder() {
             const ordered = [];
             document.querySelectorAll('.transaction-card').forEach(card => {
