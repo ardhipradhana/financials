@@ -8560,8 +8560,11 @@
                 btn.classList.remove('active');
             });
             
-            // Add active class to clicked button
-            event.target.classList.add('active');
+            // Add active class to clicked button - Fix: Find the button by statement type
+            const activeButton = document.querySelector(`.statement-tab-btn[onclick*="${statementType}"]`);
+            if (activeButton) {
+                activeButton.classList.add('active');
+            }
             
             // Hide all statement contents
             document.querySelectorAll('.statement-content').forEach(content => {
@@ -8573,7 +8576,10 @@
             if (targetContent) {
                 targetContent.classList.add('active');
             }
-
+        
+            // Always render transactions when switching tabs
+            renderTransactions();
+        
             if (statementType === 'balance') {
                 console.log('Switching to Balance Sheet');
                 console.log('Current transactions:', currentTransactions);
