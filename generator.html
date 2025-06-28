@@ -2946,7 +2946,8 @@
             display: flex;
             flex-direction: column;
             transition: all 0.3s ease;
-            min-height: 350px; /* Ensure minimum height */
+            min-height: 350px;
+            position: relative;
         }
         
         .buffer-drop-area:hover {
@@ -2959,11 +2960,14 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            flex: 1;
-            opacity: 0.7;
-            min-height: 200px;
             text-align: center;
-            margin-bottom: 20px; /* Add space between placeholder and transactions */
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0.7;
+            pointer-events: none; /* Allow clicks to go through to the droppable area */
+            z-index: 1;
         }
         
         .placeholder-icon {
@@ -2980,6 +2984,7 @@
             font-size: 1.2rem;
             margin-bottom: 8px;
             text-align: center;
+            font-weight: 600;
         }
         
         .placeholder-text p {
@@ -2987,6 +2992,7 @@
             text-align: center;
             line-height: 1.5;
             margin: 0;
+            font-size: 0.9rem;
         }
 
         .placeholder-icon svg {
@@ -2997,7 +3003,15 @@
         }
         
         .buffer-transaction-list {
-            flex-shrink: 0; /* Don't shrink */
+            flex: 1;
+            min-height: 100px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .buffer-transaction-list:not(:empty) + .buffer-placeholder,
+        .buffer-transaction-list:not(:empty) ~ .buffer-placeholder {
+            display: none;
         }
 
         [data-sortable-bound="true"] {
@@ -6778,51 +6792,77 @@
         };
 
         function renderTransactions() {
+            console.log('=== RENDERING TRANSACTIONS ===');
+            console.log('Current transactions:', currentTransactions.length);
+            
+            // Clear all existing transaction containers
             document.querySelectorAll('.transaction-list').forEach(list => list.innerHTML = '');
+            document.querySelectorAll('.transaction-items').forEach(list => list.innerHTML = '');
             const buffer = document.getElementById('buffer-transactions') || document.querySelector('.buffer-transaction-list');
             if (buffer) buffer.innerHTML = '';
-
-            currentTransactions.forEach(tx => {
+        
+            currentTransactions.forEach((tx, index) => {
+                console.log(`Processing transaction ${index}:`, tx);
+                
                 let container;
                 if (tx.statement === 'buffer') {
                     container = buffer;
                 } else {
-                    let categoryName = tx.category.toLowerCase();
+                    // Fix the container ID mapping for balance sheet
+                    let containerId;
                     if (tx.statement === 'balance') {
-                        if (categoryName === 'asset') categoryName = 'asset';
-                        if (categoryName === 'liability') categoryName = 'liability';
-                        if (categoryName === 'equity') categoryName = 'equity';
+                        if (tx.category === 'Asset') containerId = 'balance-asset-lists';
+                        else if (tx.category === 'Liability') containerId = 'balance-liability-lists';
+                        else if (tx.category === 'Equity') containerId = 'balance-equity-lists';
+                    } else if (tx.statement === 'income') {
+                        if (tx.category === 'Revenue') containerId = 'income-revenue-lists';
+                        else if (tx.category === 'Expense') containerId = 'income-expense-lists';
+                    } else if (tx.statement === 'cashflow') {
+                        if (tx.category === 'Operating') containerId = 'cashflow-operating-lists';
+                        else if (tx.category === 'Investing') containerId = 'cashflow-investing-lists';
+                        else if (tx.category === 'Financing') containerId = 'cashflow-financing-lists';
                     }
-                    const listContainer = document.getElementById(`${tx.statement}-${categoryName}-lists`);
+                    
+                    console.log(`Looking for container: ${containerId}`);
+                    const listContainer = document.getElementById(containerId);
+                    
                     if (!listContainer) {
-                        console.log(`Missing container: ${tx.statement}-${tx.category.toLowerCase()}-lists`);
+                        console.error(`Missing container: ${containerId} for transaction:`, tx);
                         return;
                     }
+                    
+                    // Check if we need to create a GL account section
                     const account = tx.glAccount || 'Other';
                     let section = listContainer.querySelector(`.gl-account-section[data-gl-account="${account}"]`);
                     if (!section) {
+                        console.log(`Creating new GL section for: ${account}`);
                         section = document.createElement('div');
                         section.className = 'gl-account-section';
                         section.dataset.glAccount = account;
-
+        
                         const title = document.createElement('h3');
                         title.className = 'gl-account-title';
                         title.textContent = account;
                         section.appendChild(title);
-
+        
                         const list = document.createElement('div');
                         list.className = 'transaction-list';
                         list.dataset.statement = tx.statement;
                         list.dataset.category = tx.category;
                         list.dataset.glAccount = account;
                         section.appendChild(list);
-
+        
                         listContainer.appendChild(section);
                     }
                     container = section.querySelector('.transaction-list');
                 }
-                if (!container) return;
-
+                
+                if (!container) {
+                    console.error('No container found for transaction:', tx);
+                    return;
+                }
+        
+                // Create transaction card
                 const card = document.createElement('div');
                 card.className = 'transaction-card';
                 card.draggable = true;
@@ -6834,18 +6874,24 @@
                     <span class="transaction-amount ${tx.amount >= 0 ? 'positive' : 'negative'}">${formatCurrency(tx.amount)}</span>
                 `;
                 container.appendChild(card);
+                console.log(`Added transaction card to container:`, container.id || container.className);
             });
-
-            initDragAndDrop();
-            applyCollapsedState();
-            updateStatementTotals();
-            checkBalanceSheetTransactions();
+        
+            console.log('Finished rendering transactions');
+            
+            // Initialize drag and drop after rendering
+            setTimeout(() => {
+                initDragAndDrop();
+                applyCollapsedState();
+                updateStatementTotals();
+                checkBalanceSheetTransactions();
+            }, 100);
         }
 
         function initDragAndDrop() {
             console.log('=== INITIALIZING DRAG AND DROP ===');
             
-            // Clear existing sortable instances with better cleanup
+            // Clear existing sortable instances
             document.querySelectorAll('[data-sortable-bound]').forEach(el => {
                 if (el.sortable) {
                     try {
@@ -6855,12 +6901,11 @@
                     }
                 }
                 el.removeAttribute('data-sortable-bound');
-                el.removeAttribute('data-sortable-bound');
             });
         
-            // Wait for DOM to be fully ready
+            // Wait for DOM to be ready
             setTimeout(() => {
-                // Get all droppable containers
+                // Get all droppable containers including the buffer
                 const allLists = [
                     ...document.querySelectorAll('.transaction-list'),
                     ...document.querySelectorAll('.transaction-items'),
@@ -6869,6 +6914,7 @@
                 ].filter(Boolean);
         
                 console.log('Found droppable containers:', allLists.length);
+                allLists.forEach(list => console.log('Container:', list.id || list.className, 'Datasets:', list.dataset));
         
                 allLists.forEach((list, index) => {
                     if (list.dataset.sortableBound) {
@@ -6877,6 +6923,13 @@
                     }
                     
                     list.dataset.sortableBound = 'true';
+                    
+                    // Make sure buffer has proper data attributes
+                    if (list.id === 'buffer-transactions' || list.classList.contains('buffer-transaction-list')) {
+                        list.dataset.statement = 'buffer';
+                        list.dataset.category = 'Buffer';
+                        console.log('Set buffer attributes:', list.dataset);
+                    }
                     
                     try {
                         list.sortable = Sortable.create(list, {
@@ -6890,12 +6943,15 @@
                             dragClass: 'sortable-drag',
                             onAdd: (evt) => {
                                 console.log('Transaction moved to new container');
+                                console.log('Target container:', evt.to.id || evt.to.className);
                                 
                                 const txId = evt.item.dataset.id;
                                 const baseId = evt.item.dataset.baseId;
                                 const statement = evt.to.dataset.statement || 'buffer';
                                 const category = evt.to.dataset.category || 'Buffer';
                                 const glAccount = evt.to.dataset.glAccount || null;
+                                
+                                console.log('Moving transaction:', { txId, statement, category, glAccount });
                                 
                                 const tx = currentTransactions.find(t => String(t.id) === String(txId));
                                 if (tx) {
@@ -6927,12 +6983,12 @@
                             }
                         });
                         
-                        console.log(`Initialized sortable for container ${index}:`, list.id || list.className);
+                        console.log(`✓ Initialized sortable for container ${index}:`, list.id || list.className);
                     } catch (error) {
-                        console.error(`Error initializing sortable for container ${index}:`, error);
+                        console.error(`✗ Error initializing sortable for container ${index}:`, error);
                     }
                 });
-            }, 100);
+            }, 200);
         }
         
         function createGLEmptySection(statement, category, account, container) {
@@ -7125,9 +7181,9 @@
                 console.log('Adding income statement transactions');
                 
                 // Revenue transactions
-                if (data.incomeStatement.revenue) {
+                if (data.incomeStatement.revenue && Array.isArray(data.incomeStatement.revenue)) {
                     data.incomeStatement.revenue.forEach((item, index) => {
-                        if (item.amount !== 0) {
+                        if (item.amount && item.amount !== 0) {
                             currentTransactions.push({
                                 id: `income-revenue-${index}`,
                                 baseId: `income-revenue-${index}`,
@@ -7139,14 +7195,15 @@
                                 subcategory: 'Revenue',
                                 date: new Date().toISOString().split('T')[0]
                             });
+                            console.log('Added revenue transaction:', item.item, item.amount);
                         }
                     });
                 }
                 
                 // Expense transactions  
-                if (data.incomeStatement.expenses) {
+                if (data.incomeStatement.expenses && Array.isArray(data.incomeStatement.expenses)) {
                     data.incomeStatement.expenses.forEach((item, index) => {
-                        if (item.amount !== 0) {
+                        if (item.amount && item.amount !== 0) {
                             currentTransactions.push({
                                 id: `income-expense-${index}`,
                                 baseId: `income-expense-${index}`,
@@ -7158,6 +7215,7 @@
                                 subcategory: 'Expenses',
                                 date: new Date().toISOString().split('T')[0]
                             });
+                            console.log('Added expense transaction:', item.item, item.amount);
                         }
                     });
                 }
@@ -7167,53 +7225,62 @@
             if (data.balanceSheet) {
                 console.log('Adding balance sheet transactions');
                 
-                data.balanceSheet.assets.forEach((asset, index) => {
-                    if (asset.amount !== 0) {
-                        currentTransactions.push({
-                            id: `balance-asset-${index}`,
-                            baseId: `balance-asset-${index}`,
-                            description: asset.item,
-                            amount: asset.amount,
-                            statement: 'balance',
-                            category: 'Asset',
-                            glAccount: asset.item,
-                            subcategory: 'Assets',
-                            date: new Date().toISOString().split('T')[0]
-                        });
-                    }
-                });
+                if (data.balanceSheet.assets && Array.isArray(data.balanceSheet.assets)) {
+                    data.balanceSheet.assets.forEach((asset, index) => {
+                        if (asset.amount && asset.amount !== 0) {
+                            currentTransactions.push({
+                                id: `balance-asset-${index}`,
+                                baseId: `balance-asset-${index}`,
+                                description: asset.item,
+                                amount: asset.amount,
+                                statement: 'balance',
+                                category: 'Asset',
+                                glAccount: asset.item,
+                                subcategory: 'Assets',
+                                date: new Date().toISOString().split('T')[0]
+                            });
+                            console.log('Added asset transaction:', asset.item, asset.amount);
+                        }
+                    });
+                }
         
-                data.balanceSheet.liabilities.forEach((liability, index) => {
-                    if (liability.amount !== 0) {
-                        currentTransactions.push({
-                            id: `balance-liability-${index}`,
-                            baseId: `balance-liability-${index}`,
-                            description: liability.item,
-                            amount: liability.amount,
-                            statement: 'balance',
-                            category: 'Liability',
-                            glAccount: liability.item,
-                            subcategory: 'Liabilities',
-                            date: new Date().toISOString().split('T')[0]
-                        });
-                    }
-                });
+                if (data.balanceSheet.liabilities && Array.isArray(data.balanceSheet.liabilities)) {
+                    data.balanceSheet.liabilities.forEach((liability, index) => {
+                        if (liability.amount && liability.amount !== 0) {
+                            currentTransactions.push({
+                                id: `balance-liability-${index}`,
+                                baseId: `balance-liability-${index}`,
+                                description: liability.item,
+                                amount: liability.amount,
+                                statement: 'balance',
+                                category: 'Liability',
+                                glAccount: liability.item,
+                                subcategory: 'Liabilities',
+                                date: new Date().toISOString().split('T')[0]
+                            });
+                            console.log('Added liability transaction:', liability.item, liability.amount);
+                        }
+                    });
+                }
         
-                data.balanceSheet.equity.forEach((equity, index) => {
-                    if (equity.amount !== 0) {
-                        currentTransactions.push({
-                            id: `balance-equity-${index}`,
-                            baseId: `balance-equity-${index}`,
-                            description: equity.item,
-                            amount: equity.amount,
-                            statement: 'balance',
-                            category: 'Equity',
-                            glAccount: equity.item,
-                            subcategory: 'Equity',
-                            date: new Date().toISOString().split('T')[0]
-                        });
-                    }
-                });
+                if (data.balanceSheet.equity && Array.isArray(data.balanceSheet.equity)) {
+                    data.balanceSheet.equity.forEach((equity, index) => {
+                        if (equity.amount && equity.amount !== 0) {
+                            currentTransactions.push({
+                                id: `balance-equity-${index}`,
+                                baseId: `balance-equity-${index}`,
+                                description: equity.item,
+                                amount: equity.amount,
+                                statement: 'balance',
+                                category: 'Equity',
+                                glAccount: equity.item,
+                                subcategory: 'Equity',
+                                date: new Date().toISOString().split('T')[0]
+                            });
+                            console.log('Added equity transaction:', equity.item, equity.amount);
+                        }
+                    });
+                }
             }
         
             // Add Cash Flow transactions
@@ -7221,9 +7288,9 @@
                 console.log('Adding cash flow transactions');
                 
                 ['operating', 'investing', 'financing'].forEach(category => {
-                    if (data.cashFlow[category]) {
+                    if (data.cashFlow[category] && Array.isArray(data.cashFlow[category])) {
                         data.cashFlow[category].forEach((item, index) => {
-                            if (item.amount !== 0) {
+                            if (item.amount && item.amount !== 0) {
                                 currentTransactions.push({
                                     id: `cashflow-${category}-${index}`,
                                     baseId: `cashflow-${category}-${index}`,
@@ -7235,6 +7302,7 @@
                                     subcategory: category,
                                     date: new Date().toISOString().split('T')[0]
                                 });
+                                console.log(`Added ${category} transaction:`, item.item, item.amount);
                             }
                         });
                     }
