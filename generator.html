@@ -2573,11 +2573,15 @@
         }
 
         .buffer-area {
-            min-height: 600px;
+            min-height: 800px; /* Increase from current value */
             background: linear-gradient(145deg, rgba(15, 23, 42, 0.4), rgba(30, 41, 59, 0.2));
             border: 2px dashed rgba(59, 130, 246, 0.3);
             border-radius: 12px;
             padding: 16px;
+        }
+
+        .buffer-area .statement-section {
+            min-height: 700px; /* Make the inner section bigger */
         }
 
         .statement-section {
