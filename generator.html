@@ -2780,7 +2780,7 @@
             gap: 16px;
         }
         
-        /* Enhanced Executive Summary Styles */
+        /* Simplified Executive Summary Styles */
         .executive-summary-header {
             text-align: center;
             margin-bottom: 40px;
@@ -2788,31 +2788,15 @@
             border-bottom: 1px solid rgba(59, 130, 246, 0.2);
         }
         
-        .summary-icon {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, #1E40AF, #60A5FA);
-            border-radius: 20px;
+        .executive-summary-header h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #F8FAFC;
+            margin-bottom: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            margin: 0 auto 24px;
-            box-shadow: 0 12px 40px rgba(59, 130, 246, 0.3);
-            animation: pulse 2s ease-in-out infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-        
-        .executive-summary-header h3 {
-            font-size: 2.2rem;
-            font-weight: 800;
-            color: #F8FAFC;
-            margin-bottom: 12px;
-            letter-spacing: -1px;
+            gap: 12px;
         }
         
         .summary-subtitle {
@@ -2835,15 +2819,6 @@
             .executive-form-grid {
                 grid-template-columns: 1fr;
                 gap: 24px;
-            }
-            
-            .executive-summary-header h3 {
-                font-size: 1.8rem;
-            }
-            
-            .summary-icon {
-                width: 60px;
-                height: 60px;
             }
         }
         
@@ -2905,18 +2880,9 @@
         <!-- Workspace Container -->
         <div class="workspace-container">
             
-            <!-- Executive Summary Card - Enhanced and Centered -->
+            <!-- Executive Summary Card - Simplified and Centered -->
             <div class="workspace-card active" id="companyCard" data-aos="fade-up" data-aos-delay="200">
                 <div class="executive-summary-header">
-                    <div class="summary-icon">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                            <polyline points="14,2 14,8 20,8"/>
-                            <line x1="16" y1="13" x2="8" y2="13"/>
-                            <line x1="16" y1="17" x2="8" y2="17"/>
-                            <polyline points="10,9 9,9 8,9"/>
-                        </svg>
-                    </div>
                     <h3>Executive Summary</h3>
                     <p class="summary-subtitle">Provide your company's key information for financial analysis</p>
                 </div>
@@ -2928,7 +2894,7 @@
                     </div>
                     <div class="form-group">
                         <label class="form-label" for="industry">Industry</label>
-                        <select id="industry" class="form-select">
+                        <select id="industry" class="form-select" onchange="toggleCustomIndustry()">
                             <option value="">Select industry</option>
                             <option value="manufacturing">Manufacturing</option>
                             <option value="retail">Retail & Trade</option>
@@ -2937,6 +2903,7 @@
                             <option value="construction">Construction</option>
                             <option value="other">Other</option>
                         </select>
+                        <input type="text" id="customIndustry" class="form-input" placeholder="Please specify your industry" style="display: none; margin-top: 8px;">
                     </div>
                     <div class="form-group">
                         <label class="form-label" for="businessSize">Business Size</label>
@@ -8051,6 +8018,19 @@ function applyCollapsedState() {
                 generateSelectedPDF(selectedReports, companyName, timestamp);
             } else if (currentExportFormat === 'csv') {
                 generateSelectedCSV(selectedReports, companyName, timestamp);
+            }
+        }
+
+        function toggleCustomIndustry() {
+            const industrySelect = document.getElementById('industry');
+            const customIndustryInput = document.getElementById('customIndustry');
+            
+            if (industrySelect.value === 'other') {
+                customIndustryInput.style.display = 'block';
+                customIndustryInput.focus();
+            } else {
+                customIndustryInput.style.display = 'none';
+                customIndustryInput.value = '';
             }
         }
 
