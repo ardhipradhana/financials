@@ -2785,6 +2785,9 @@
             display: flex;
             justify-content: center;
             gap: 16px;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid rgba(59, 130, 246, 0.1);
         }
         
         /* Simplified Executive Summary Styles */
@@ -2942,12 +2945,15 @@
         
         .buffer-drop-area {
             min-height: 500px;
+            height: calc(100vh - 400px); /* Flexible height */
             background: linear-gradient(145deg, rgba(15, 23, 42, 0.4), rgba(30, 41, 59, 0.2));
             border: 3px dashed rgba(59, 130, 246, 0.4);
             border-radius: 12px;
             padding: 24px;
             position: relative;
             transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
         }
         
         .buffer-drop-area:hover {
@@ -2960,12 +2966,12 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 200px;
+            flex: 1;
             opacity: 0.7;
+            min-height: 200px;
         }
         
         .placeholder-icon {
-            font-size: 3rem;
             margin-bottom: 16px;
         }
         
@@ -2980,9 +2986,40 @@
             text-align: center;
             line-height: 1.5;
         }
+
+        .placeholder-icon svg {
+            width: 64px;
+            height: 64px;
+            color: #60A5FA;
+            opacity: 0.8;
+        }
         
         .buffer-transaction-list {
             min-height: 100px;
+        }
+
+        /* Fix spacing and layout */
+        .statement-summary {
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 2px solid rgba(59, 130, 246, 0.2);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .summary-line {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 8px;
+        }
+        
+        .summary-line.highlight {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(30, 41, 59, 0.8));
+            border: 1px solid rgba(59, 130, 246, 0.4);
         }
         
     </style>
@@ -3608,39 +3645,69 @@
                                 <div class="statement-categories">
                                     <div class="category-section">
                                         <h2 class="category-title">Assets</h2>
-                                        <div id="balance-asset-lists" class="transaction-items"></div>
+                                        <div class="account-groups">
+                                            <div class="account-group">
+                                                <h3 class="account-group-title">Current Assets</h3>
+                                                <div id="balance-asset-lists" class="transaction-items"></div>
+                                            </div>
+                                        </div>
                                         <button class="add-account-btn" onclick="showAddAccountInput('balance', 'Asset', this)">+ Add Asset Account</button>
                                     </div>
                                     <div class="category-section">
                                         <h2 class="category-title">Liabilities</h2>
-                                        <div id="balance-liability-lists" class="transaction-items"></div>
+                                        <div class="account-groups">
+                                            <div class="account-group">
+                                                <h3 class="account-group-title">Current Liabilities</h3>
+                                                <div id="balance-liability-lists" class="transaction-items"></div>
+                                            </div>
+                                        </div>
                                         <button class="add-account-btn" onclick="showAddAccountInput('balance', 'Liability', this)">+ Add Liability Account</button>
                                     </div>
                                     <div class="category-section">
                                         <h2 class="category-title">Equity</h2>
-                                        <div id="balance-equity-lists" class="transaction-items"></div>
+                                        <div class="account-groups">
+                                            <div class="account-group">
+                                                <h3 class="account-group-title">Owner's Equity</h3>
+                                                <div id="balance-equity-lists" class="transaction-items"></div>
+                                            </div>
+                                        </div>
                                         <button class="add-account-btn" onclick="showAddAccountInput('balance', 'Equity', this)">+ Add Equity Account</button>
                                     </div>
                                 </div>
                             </div>
                             
                             <!-- Cash Flow Tab -->
-                            <div class="statement-content" id="cashFlowEditor">
+                            <div class="statement-content" id="cashflowStatementEditor">
                                 <h1 class="statement-title">Cash Flow Statement</h1>
                                 <div class="statement-categories">
                                     <div class="category-section">
-                                        <h2 class="category-title">Operating</h2>
-                                        <div id="cashflow-operating-lists" class="transaction-items"></div>
+                                        <h2 class="category-title">Operating Activities</h2>
+                                        <div class="account-groups">
+                                            <div class="account-group">
+                                                <h3 class="account-group-title">Operating Cash Flow</h3>
+                                                <div id="cashflow-operating-lists" class="transaction-items"></div>
+                                            </div>
+                                        </div>
                                         <button class="add-account-btn" onclick="showAddAccountInput('cashflow', 'Operating', this)">+ Add Operating Account</button>
                                     </div>
                                     <div class="category-section">
-                                        <h2 class="category-title">Investing</h2>
-                                        <div id="cashflow-investing-lists" class="transaction-items"></div>
+                                        <h2 class="category-title">Investing Activities</h2>
+                                        <div class="account-groups">
+                                            <div class="account-group">
+                                                <h3 class="account-group-title">Investment Cash Flow</h3>
+                                                <div id="cashflow-investing-lists" class="transaction-items"></div>
+                                            </div>
+                                        </div>
                                         <button class="add-account-btn" onclick="showAddAccountInput('cashflow', 'Investing', this)">+ Add Investing Account</button>
                                     </div>
                                     <div class="category-section">
-                                        <h2 class="category-title">Financing</h2>
-                                        <div id="cashflow-financing-lists" class="transaction-items"></div>
+                                        <h2 class="category-title">Financing Activities</h2>
+                                        <div class="account-groups">
+                                            <div class="account-group">
+                                                <h3 class="account-group-title">Financing Cash Flow</h3>
+                                                <div id="cashflow-financing-lists" class="transaction-items"></div>
+                                            </div>
+                                        </div>
                                         <button class="add-account-btn" onclick="showAddAccountInput('cashflow', 'Financing', this)">+ Add Financing Account</button>
                                     </div>
                                 </div>
@@ -3652,7 +3719,16 @@
                             <h2 class="buffer-title">Unassigned Transactions</h2>
                             <div class="buffer-drop-area" id="bufferDropArea">
                                 <div class="buffer-placeholder">
-                                    <div class="placeholder-icon">📋</div>
+                                    <div class="placeholder-icon">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                            <polyline points="14,2 14,8 20,8"/>
+                                            <path d="M16 13H8"/>
+                                            <path d="M16 17H8"/>
+                                            <path d="M10 9H8"/>
+                                            <circle cx="12" cy="12" r="1" fill="currentColor"/>
+                                        </svg>
+                                    </div>
                                     <div class="placeholder-text">
                                         <h3>Drop Zone</h3>
                                         <p>Drag transactions here to review and categorize them later</p>
