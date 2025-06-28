@@ -7327,6 +7327,52 @@
             }, 100);
         }
         
+        // Make sure getAccountOptions function exists
+        function getAccountOptions(statement, category) {
+            const accountTemplates = {
+                income: {
+                    Revenue: [
+                        'Sales Revenue', 'Service Revenue', 'Other Revenue', 'Interest Income', 
+                        'Rental Income', 'Commission Income', 'Consulting Revenue'
+                    ],
+                    Expense: [
+                        'Cost of Goods Sold', 'Salaries & Wages', 'Rent Expense', 'Utilities Expense',
+                        'Insurance Expense', 'Marketing Expense', 'Office Supplies', 'Travel Expense',
+                        'Professional Fees', 'Depreciation Expense', 'Interest Expense'
+                    ]
+                },
+                balance: {
+                    Asset: [
+                        'Cash', 'Accounts Receivable', 'Inventory', 'Prepaid Expenses',
+                        'Equipment', 'Vehicles', 'Buildings', 'Land', 'Investments'
+                    ],
+                    Liability: [
+                        'Accounts Payable', 'Notes Payable', 'Accrued Liabilities', 'Bank Loans',
+                        'Mortgage Payable', 'Income Tax Payable', 'Unearned Revenue'
+                    ],
+                    Equity: [
+                        'Owner\'s Equity', 'Retained Earnings', 'Capital Stock', 'Additional Paid-in Capital'
+                    ]
+                },
+                cashflow: {
+                    Operating: [
+                        'Net Income', 'Depreciation & Amortization', 'Changes in Accounts Receivable',
+                        'Changes in Inventory', 'Changes in Accounts Payable', 'Other Operating Cash Flow'
+                    ],
+                    Investing: [
+                        'Purchase of Equipment', 'Sale of Equipment', 'Purchase of Investments',
+                        'Sale of Investments', 'Other Investing Cash Flow'
+                    ],
+                    Financing: [
+                        'Proceeds from Loans', 'Repayment of Loans', 'Owner\'s Investment',
+                        'Owner\'s Drawings', 'Dividends Paid', 'Other Financing Cash Flow'
+                    ]
+                }
+            };
+            
+            return accountTemplates[statement]?.[category] || [];
+        }
+        
         function filterAccountOptions(searchTerm) {
             const options = document.querySelectorAll('.dropdown-option');
             const term = searchTerm.toLowerCase();
@@ -7508,14 +7554,6 @@
             
             // Initialize drag and drop for the new section
             initDragAndDrop();
-        }
-        
-        function initAddAccountButtons() {
-            document.querySelectorAll('.add-account-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    showAddAccountInput(btn.dataset.statement, btn.dataset.category, btn);
-                });
-            });
         }
         
         function initCollapseToggle() {
@@ -8128,7 +8166,6 @@
         });
 
         document.addEventListener('DOMContentLoaded', () => {
-            initAddAccountButtons();
             initCollapseToggle();
             applyCollapsedState();
             
