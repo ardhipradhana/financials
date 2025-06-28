@@ -3677,9 +3677,9 @@
                     
                     <!-- Statement Sub-Tabs -->
                     <div class="statement-tabs">
-                        <button class="statement-tab-btn active" onclick="showStatement('income')">Income Statement</button>
-                        <button class="statement-tab-btn" onclick="showStatement('balance')">Balance Sheet</button>
-                        <button class="statement-tab-btn" onclick="showStatement('cashflow')">Cash Flow Statement</button>
+                        <button class="statement-tab-btn active">Income Statement</button>
+                        <button class="statement-tab-btn">Balance Sheet</button>
+                        <button class="statement-tab-btn">Cash Flow Statement</button>
                     </div>
                     
                     <div class="statement-editor-container">
@@ -6746,7 +6746,7 @@
 
         function renderTransactions() {
             document.querySelectorAll('.transaction-list').forEach(list => list.innerHTML = '');
-            const buffer = document.getElementById('buffer-transactions');
+            const buffer = document.getElementById('buffer-transactions') || document.querySelector('.buffer-transaction-list');
             if (buffer) buffer.innerHTML = '';
 
             currentTransactions.forEach(tx => {
@@ -8554,16 +8554,17 @@
             }
         }
 
-        function showStatement(statementType) {
+        function showStatement(statementType, buttonElement) {
+            console.log('showStatement called with:', statementType);
+            
             // Remove active class from all tab buttons
             document.querySelectorAll('.statement-tab-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
             
-            // Add active class to clicked button - Fix: Find the button by statement type
-            const activeButton = document.querySelector(`.statement-tab-btn[onclick*="${statementType}"]`);
-            if (activeButton) {
-                activeButton.classList.add('active');
+            // Add active class to clicked button
+            if (buttonElement) {
+                buttonElement.classList.add('active');
             }
             
             // Hide all statement contents
@@ -8573,17 +8574,16 @@
             
             // Show selected statement content
             const targetContent = document.getElementById(statementType + 'StatementEditor');
+            console.log('Target content:', targetContent);
             if (targetContent) {
                 targetContent.classList.add('active');
+                console.log('Added active class to:', targetContent.id);
             }
         
             // Always render transactions when switching tabs
             renderTransactions();
         
             if (statementType === 'balance') {
-                console.log('Switching to Balance Sheet');
-                console.log('Current transactions:', currentTransactions);
-                console.log('Balance transactions:', currentTransactions.filter(tx => tx.statement === 'balance'));
                 checkBalanceSheetTransactions();
             }
         }
@@ -8650,6 +8650,24 @@
                         updateProgress(2);
                         setTimeout(() => showCard(uploadCard), 500);
                     }
+                }
+            });
+        });
+
+        // Add statement tab event listeners
+        document.querySelectorAll('.statement-tab-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                // Determine statement type from button text
+                const buttonText = btn.textContent.toLowerCase();
+                let statementType;
+                if (buttonText.includes('income')) statementType = 'income';
+                else if (buttonText.includes('balance')) statementType = 'balance';
+                else if (buttonText.includes('cash')) statementType = 'cashflow';
+                
+                if (statementType) {
+                    showStatement(statementType, btn);
                 }
             });
         });
