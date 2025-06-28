@@ -3393,12 +3393,12 @@
                 
                 <!-- Report Navigation Tabs -->
                 <div class="report-tabs">
-                    <button class="tab-btn active" onclick="showReport('income')">Income Statement</button>
-                    <button class="tab-btn" onclick="showReport('balance')">Balance Sheet</button>
-                    <button class="tab-btn" onclick="showReport('cashflow')">Cash Flow Statement</button>
-                    <button class="tab-btn" onclick="showReport('ratios')">Financial Ratios</button>
-                    <button class="tab-btn" onclick="showReport('transactions')">Review Transactions</button>
-                    <button class="tab-btn" onclick="showReport('insights')">Insights Generator</button>
+                    <button class="tab-btn active" onclick="showReport('income', event)">Income Statement</button>
+                    <button class="tab-btn" onclick="showReport('balance', event)">Balance Sheet</button>
+                    <button class="tab-btn" onclick="showReport('cashflow', event)">Cash Flow Statement</button>
+                    <button class="tab-btn" onclick="showReport('ratios', event)">Financial Ratios</button>
+                    <button class="tab-btn" onclick="showReport('transactions', event)">Review Transactions</button>
+                    <button class="tab-btn" onclick="showReport('insights', event)">Insights Generator</button>
                 </div>
             
                 <!-- Income Statement Report -->
@@ -6912,6 +6912,8 @@
                             scrollSpeed: 15,
                             bubbleScroll: true,
                             forceFallback: true,
+                            fallbackOnBody: true,
+                            fallbackTolerance: 3,
                             ghostClass: 'sortable-ghost',
                             chosenClass: 'sortable-chosen',
                             dragClass: 'sortable-drag',
@@ -7122,7 +7124,7 @@
         // Initialize transaction editor when transactions tab is shown
         function showTransactionsEditor() {
             console.log('=== INITIALIZING TRANSACTIONS EDITOR ===');
-            
+
             // Initialize from current data or empty array
             if (window.editableTransactions) {
                 currentTransactions = JSON.parse(JSON.stringify(window.editableTransactions));
@@ -7131,15 +7133,17 @@
                 currentTransactions = [];
                 console.log('No editableTransactions found, starting empty');
             }
-        
-            // Add financial statement data as transactions
-            if (window.currentFinancialData) {
+
+            // Only add financial data when we have nothing loaded already
+            if (currentTransactions.length === 0 && window.currentFinancialData) {
                 console.log('Adding financial data as transactions');
                 addFinancialDataAsTransactions();
-            } else {
+            } else if (!window.currentFinancialData) {
                 console.log('No currentFinancialData available');
             }
-        
+
+            // Remove any accidental duplicates
+            currentTransactions = deduplicateTransactions(currentTransactions);
             console.log('Final transactions count:', currentTransactions.length);
             
             // Render with delay to ensure DOM is ready
@@ -7297,6 +7301,16 @@
             console.log('Total transactions after adding financial data:', currentTransactions.length);
         }
 
+        function deduplicateTransactions(list) {
+            const seen = new Set();
+            return list.filter(tx => {
+                const key = `${tx.baseId}-${tx.statement}-${tx.glAccount}`;
+                if (seen.has(key)) return false;
+                seen.add(key);
+                return true;
+            });
+        }
+
         function loadHistoryItem(analysisId) {
             const savedAnalyses = getSavedAnalyses();
             const analysis = savedAnalyses.find(a => a.id === analysisId);
@@ -7402,12 +7416,16 @@
         
         function applyTransactionChanges() {
             if (confirm('Apply these changes and regenerate financial statements?')) {
+                // Ensure no duplicate transactions are processed
+                currentTransactions = deduplicateTransactions(currentTransactions);
+
                 // Regenerate financial statements with new categorization
                 const newStatements = regenerateFinancialStatements(currentTransactions);
                 
                 // Update the main reports
                 window.currentFinancialData = newStatements;
                 populateResults(newStatements);
+                updateStatementTotals();
                 
                 // Update stored data
                 window.editableTransactions = JSON.parse(JSON.stringify(currentTransactions));
@@ -7576,7 +7594,7 @@
         }
         
         // Update the showReport function to handle transactions tab
-        function showReport(reportType) {
+        function showReport(reportType, evt) {
             // Hide all reports
             document.querySelectorAll('.report-container').forEach(container => {
                 container.classList.remove('active');
@@ -7598,9 +7616,12 @@
             };
             
             document.getElementById(reportMap[reportType]).classList.add('active');
-            
-            // Activate clicked tab
-            event.target.classList.add('active');
+
+            // Activate clicked tab if available
+            const target = evt && evt.target ? evt.target : (typeof event !== 'undefined' ? event.target : null);
+            if (target) {
+                target.classList.add('active');
+            }
             
             // Special handling for transactions tab
             if (reportType === 'transactions') {
