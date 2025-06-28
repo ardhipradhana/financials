@@ -2622,10 +2622,6 @@
             gap: 8px;
         }
 
-        .gl-account-section {
-            margin-bottom: 8px;
-        }
-
         .gl-account-section.collapsed .transaction-list {
             display: none;
         }
@@ -2641,18 +2637,12 @@
             margin-bottom: 4px;
         }
 
-        .gl-account-title {
-            font-size: 1rem;
-            margin-bottom: 4px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
         .transaction-list {
             min-height: 40px;
             padding: 8px;
             border: 1px dashed rgba(59, 130, 246, 0.3);
-            border-radius: 6px;
+            border-radius: 4px;
+            background: rgba(15, 23, 42, 0.2);
         }
 
         /* Buffer list mirrors default transaction list styling */
@@ -2890,7 +2880,7 @@
             display: grid;
             grid-template-columns: 3fr 1fr;
             gap: 32px;
-            min-height: 600px;
+            height: calc(100vh - 300px); /* Fixed container height */
         }
         
         .statement-editor {
@@ -2898,6 +2888,7 @@
             border: 1px solid rgba(59, 130, 246, 0.2);
             border-radius: 12px;
             padding: 24px;
+            overflow-y: auto; /* Allow scrolling in left panel */
         }
         
         .statement-content {
@@ -2921,12 +2912,6 @@
             color: #60A5FA;
             margin-bottom: 16px;
         }
-        
-        .account-group-title {
-            font-size: 1.1rem;
-            color: #94A3B8;
-            margin-bottom: 12px;
-        }
 
         /* Enhanced Buffer Zone */
         .buffer-zone {
@@ -2934,6 +2919,8 @@
             border: 1px solid rgba(59, 130, 246, 0.2);
             border-radius: 12px;
             padding: 20px;
+            display: flex;
+            flex-direction: column;
         }
         
         .buffer-title {
@@ -2944,16 +2931,14 @@
         }
         
         .buffer-drop-area {
-            min-height: 500px;
-            height: calc(100vh - 400px); /* Flexible height */
             background: linear-gradient(145deg, rgba(15, 23, 42, 0.4), rgba(30, 41, 59, 0.2));
             border: 3px dashed rgba(59, 130, 246, 0.4);
             border-radius: 12px;
             padding: 24px;
-            position: relative;
-            transition: all 0.3s ease;
+            flex: 1; /* Take remaining height */
             display: flex;
             flex-direction: column;
+            transition: all 0.3s ease;
         }
         
         .buffer-drop-area:hover {
@@ -2995,7 +2980,7 @@
         }
         
         .buffer-transaction-list {
-            min-height: 100px;
+            flex: 1; /* Take remaining space after placeholder */
         }
 
         /* Fix spacing and layout */
@@ -3021,6 +3006,97 @@
             background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(30, 41, 59, 0.8));
             border: 1px solid rgba(59, 130, 246, 0.4);
         }
+
+        .transaction-items {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        
+        /* Account group styling */
+        .account-group {
+            background: rgba(30, 41, 59, 0.3);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .account-group-title {
+            font-size: 1.1rem;
+            color: #94A3B8;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+        }
+        
+        /* Dynamic account sections */
+        .gl-account-section {
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px solid rgba(59, 130, 246, 0.15);
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 8px;
+        }
+        
+        .gl-account-title {
+            font-size: 0.9rem;
+            color: #F8FAFC;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .auto-calculated-notice {
+            display: flex;
+            gap: 20px;
+            background: rgba(59, 130, 246, 0.1);
+            border: 2px solid rgba(59, 130, 246, 0.3);
+            border-radius: 12px;
+            padding: 32px;
+            margin-top: 40px;
+        }
+        
+        .notice-icon {
+            flex-shrink: 0;
+            color: #60A5FA;
+        }
+        
+        .notice-content h3 {
+            color: #F8FAFC;
+            font-size: 1.3rem;
+            margin-bottom: 16px;
+        }
+        
+        .notice-content p {
+            color: #94A3B8;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+        
+        .notice-content ul {
+            color: #94A3B8;
+            margin: 16px 0;
+            padding-left: 20px;
+        }
+        
+        .notice-content li {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+        
+        .notice-content strong {
+            color: #60A5FA;
+        }
+
+.notice-tip {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-radius: 8px;
+    padding: 16px;
+    color: #10B981 !important;
+    font-weight: 500;
+}
         
     </style>
 </head>
@@ -3602,23 +3678,13 @@
                                 <div class="statement-categories">
                                     <div class="category-section">
                                         <h2 class="category-title">Revenue</h2>
-                                        <div class="account-groups">
-                                            <div class="account-group">
-                                                <h3 class="account-group-title">Other Revenue</h3>
-                                                <div id="income-revenue-lists" class="transaction-items"></div>
-                                            </div>
-                                        </div>
+                                        <div id="income-revenue-lists" class="transaction-items"></div>
                                         <button class="add-account-btn" onclick="showAddAccountInput('income', 'Revenue', this)">+ Add Revenue Account</button>
                                     </div>
                                     
                                     <div class="category-section">
                                         <h2 class="category-title">Expenses</h2>
-                                        <div class="account-groups">
-                                            <div class="account-group">
-                                                <h3 class="account-group-title">Operating Expenses</h3>
-                                                <div id="income-expense-lists" class="transaction-items"></div>
-                                            </div>
-                                        </div>
+                                        <div id="income-expense-lists" class="transaction-items"></div>
                                         <button class="add-account-btn" onclick="showAddAccountInput('income', 'Expense', this)">+ Add Expense Account</button>
                                     </div>
                                 </div>
@@ -3626,15 +3692,15 @@
                                 <div class="statement-summary">
                                     <div class="summary-line">
                                         <span>Total Revenue:</span>
-                                        <span class="amount positive">Rp 25.8B</span>
+                                        <span id="totalRevenue" class="amount positive">Rp 25.800.000.000</span>
                                     </div>
                                     <div class="summary-line">
                                         <span>Total Expenses:</span>
-                                        <span class="amount negative">Rp 18.2B</span>
+                                        <span id="totalExpenses" class="amount negative">Rp 18.200.000.000</span>
                                     </div>
                                     <div class="summary-line highlight">
                                         <span>Net Income:</span>
-                                        <span class="amount positive">Rp 7.6B</span>
+                                        <span id="netIncome" class="amount positive">Rp 7.600.000.000</span>
                                     </div>
                                 </div>
                             </div>
@@ -3672,6 +3738,25 @@
                                             </div>
                                         </div>
                                         <button class="add-account-btn" onclick="showAddAccountInput('balance', 'Equity', this)">+ Add Equity Account</button>
+                                    </div>
+                                </div>
+
+                                <div class="auto-calculated-notice" id="balanceSheetNotice" style="display: none;">
+                                    <div class="notice-icon">
+                                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <circle cx="12" cy="12" r="10"/>
+                                            <path d="M12 6v6l4 2"/>
+                                        </svg>
+                                    </div>
+                                    <div class="notice-content">
+                                        <h3>Automatically Generated</h3>
+                                        <p>Balance Sheet items are automatically calculated from your Income Statement and cash flow data. These cannot be manually edited as they are derived from:</p>
+                                        <ul>
+                                            <li><strong>Net Income</strong> - From your Income Statement</li>
+                                            <li><strong>Cash Balance</strong> - From ending cash position</li>
+                                            <li><strong>Balancing Adjustments</strong> - Automatic equity adjustments to balance the sheet</li>
+                                        </ul>
+                                        <p class="notice-tip">To modify Balance Sheet values, adjust the underlying transactions in your Income Statement or upload additional supporting documents.</p>
                                     </div>
                                 </div>
                             </div>
@@ -6698,132 +6783,154 @@
             initDragAndDrop();
             applyCollapsedState();
             updateStatementTotals();
+            checkBalanceSheetTransactions();
         }
 
-function initDragAndDrop() {
-    document.querySelectorAll('.transaction-list, #buffer-list').forEach(list => {
-        if (list.dataset.sortableBound) return;
-        list.dataset.sortableBound = 'true';
-        Sortable.create(list, {
-            group: 'transactions',
-            animation: 150,
-            scroll: true,
-            scrollSensitivity: 60,
-            scrollSpeed: 15,
-            onAdd: (evt) => {
-                const txId = evt.item.dataset.id;
-                const baseId = evt.item.dataset.baseId;
-                const statement = evt.to.dataset.statement;
-                const category = evt.to.dataset.category;
-                const glAccount = evt.to.dataset.glAccount || null;
-                const tx = currentTransactions.find(t => String(t.id) === String(txId));
-                if (tx) {
-                    const duplicate = currentTransactions.find(t => t.baseId === baseId && t.statement === statement && t.glAccount === glAccount && t.id !== tx.id);
-                    if (duplicate) {
-                        evt.from.appendChild(evt.item);
-                        showUpdateNotification("This transaction already exists in this account");
-                        return;
+        function initDragAndDrop() {
+            document.querySelectorAll('.transaction-list, #buffer-list').forEach(list => {
+                if (list.dataset.sortableBound) return;
+                list.dataset.sortableBound = 'true';
+                Sortable.create(list, {
+                    group: 'transactions',
+                    animation: 150,
+                    scroll: true,
+                    scrollSensitivity: 60,
+                    scrollSpeed: 15,
+                    onAdd: (evt) => {
+                        const txId = evt.item.dataset.id;
+                        const baseId = evt.item.dataset.baseId;
+                        const statement = evt.to.dataset.statement;
+                        const category = evt.to.dataset.category;
+                        const glAccount = evt.to.dataset.glAccount || null;
+                        const tx = currentTransactions.find(t => String(t.id) === String(txId));
+                        if (tx) {
+                            const duplicate = currentTransactions.find(t => t.baseId === baseId && t.statement === statement && t.glAccount === glAccount && t.id !== tx.id);
+                            if (duplicate) {
+                                evt.from.appendChild(evt.item);
+                                showUpdateNotification("This transaction already exists in this account");
+                                return;
+                            }
+                            tx.statement = statement;
+                            tx.category = category;
+                            tx.glAccount = glAccount;
+                        }
+                        updateStatementTotals();
                     }
-                    tx.statement = statement;
-                    tx.category = category;
-                    tx.glAccount = glAccount;
+                });
+            });
+        }
+        
+        function createGLEmptySection(statement, category, account, container) {
+            if (!container.querySelector(`.gl-account-section[data-gl-account="${account}"]`)) {
+                const section = document.createElement('div');
+                section.className = 'gl-account-section';
+                section.dataset.glAccount = account;
+        
+                const title = document.createElement('h3');
+                title.className = 'gl-account-title';
+                title.textContent = account;
+                section.appendChild(title);
+        
+                const list = document.createElement('div');
+                list.className = 'transaction-list';
+                list.dataset.statement = statement;
+                list.dataset.category = category;
+                list.dataset.glAccount = account;
+                section.appendChild(list);
+        
+                container.appendChild(section);
+                initDragAndDrop();
+                applyCollapsedState();
+            }
+        }
+        
+        function showAddAccountInput(statement, category, button) {
+            const existingInput = button.parentElement.querySelector('.add-account-input');
+            if (existingInput) return;
+        
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'add-account-input';
+            input.placeholder = `Enter ${category.toLowerCase()} account name...`;
+            
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && this.value.trim()) {
+                    createNewAccountSection(statement, category, this.value.trim(), button.parentElement);
+                    this.remove();
                 }
-                updateStatementTotals();
-            }
-        });
-    });
-}
-
-function createGLEmptySection(statement, category, account, container) {
-    if (!container.querySelector(`.gl-account-section[data-gl-account="${account}"]`)) {
-        const section = document.createElement('div');
-        section.className = 'gl-account-section';
-        section.dataset.glAccount = account;
-
-        const title = document.createElement('h3');
-        title.className = 'gl-account-title';
-        title.textContent = account;
-        section.appendChild(title);
-
-        const list = document.createElement('div');
-        list.className = 'transaction-list';
-        list.dataset.statement = statement;
-        list.dataset.category = category;
-        list.dataset.glAccount = account;
-        section.appendChild(list);
-
-        container.appendChild(section);
-        initDragAndDrop();
-        applyCollapsedState();
-    }
-}
-
-function showAddAccountInput(statement, category, button) {
-    const column = button.parentElement;
-    if (column.querySelector('.add-account-input')) return;
-
-    const listId = `${statement}-${category}-options`;
-    const datalist = document.createElement('datalist');
-    datalist.id = listId;
-    const existing = Array.from(column.querySelectorAll('.gl-account-section')).map(s => s.dataset.glAccount);
-    const options = (masterGLAccounts[statement] && masterGLAccounts[statement][category]) ? masterGLAccounts[statement][category] : [];
-    datalist.innerHTML = options.filter(o => !existing.includes(o)).map(o => `<option value="${o}"></option>`).join('');
-    document.body.appendChild(datalist);
-
-    const input = document.createElement('input');
-    input.className = 'add-account-input';
-    input.setAttribute('list', listId);
-    input.placeholder = 'Account name...';
-    column.appendChild(input);
-    input.focus();
-
-    const finalize = () => {
-        const value = input.value.trim();
-        if (value) {
-            createGLEmptySection(statement, category, value, column.querySelector('.gl-account-lists'));
+            });
+            
+            input.addEventListener('blur', function() {
+                if (this.value.trim()) {
+                    createNewAccountSection(statement, category, this.value.trim(), button.parentElement);
+                }
+                this.remove();
+            });
+            
+            button.parentElement.insertBefore(input, button);
+            input.focus();
         }
-        input.remove();
-        datalist.remove();
-    };
-
-    input.addEventListener('change', finalize);
-    input.addEventListener('blur', finalize);
-}
-
-function initAddAccountButtons() {
-    document.querySelectorAll('.add-account-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            showAddAccountInput(btn.dataset.statement, btn.dataset.category, btn);
-        });
-    });
-}
-
-function initCollapseToggle() {
-    document.addEventListener('click', (e) => {
-        if (e.target.classList.contains('gl-account-title')) {
-            const section = e.target.closest('.gl-account-section');
-            if (!section) return;
-            const key = section.dataset.glAccount;
-            const collapsed = section.classList.toggle('collapsed');
-            if (collapsed) {
-                localStorage.setItem('gl-collapsed-' + key, '1');
-            } else {
-                localStorage.removeItem('gl-collapsed-' + key);
-            }
+        
+        function createNewAccountSection(statement, category, accountName, container) {
+            const accountGroup = document.createElement('div');
+            accountGroup.className = 'gl-account-section';
+            accountGroup.dataset.glAccount = accountName;
+            
+            const title = document.createElement('h3');
+            title.className = 'gl-account-title';
+            title.textContent = accountName;
+            
+            const transactionList = document.createElement('div');
+            transactionList.className = 'transaction-list';
+            transactionList.dataset.statement = statement;
+            transactionList.dataset.category = category;
+            transactionList.dataset.glAccount = accountName;
+            
+            accountGroup.appendChild(title);
+            accountGroup.appendChild(transactionList);
+            
+            // Insert before the add button
+            const addButton = container.querySelector('.add-account-btn');
+            container.insertBefore(accountGroup, addButton);
+            
+            // Initialize drag and drop for the new section
+            initDragAndDrop();
         }
-    });
-}
-
-function applyCollapsedState() {
-    document.querySelectorAll('.gl-account-section').forEach(section => {
-        const key = section.dataset.glAccount;
-        if (localStorage.getItem('gl-collapsed-' + key)) {
-            section.classList.add('collapsed');
-        } else {
-            section.classList.remove('collapsed');
+        
+        function initAddAccountButtons() {
+            document.querySelectorAll('.add-account-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    showAddAccountInput(btn.dataset.statement, btn.dataset.category, btn);
+                });
+            });
         }
-    });
-}
+        
+        function initCollapseToggle() {
+            document.addEventListener('click', (e) => {
+                if (e.target.classList.contains('gl-account-title')) {
+                    const section = e.target.closest('.gl-account-section');
+                    if (!section) return;
+                    const key = section.dataset.glAccount;
+                    const collapsed = section.classList.toggle('collapsed');
+                    if (collapsed) {
+                        localStorage.setItem('gl-collapsed-' + key, '1');
+                    } else {
+                        localStorage.removeItem('gl-collapsed-' + key);
+                    }
+                }
+            });
+        }
+        
+        function applyCollapsedState() {
+            document.querySelectorAll('.gl-account-section').forEach(section => {
+                const key = section.dataset.glAccount;
+                if (localStorage.getItem('gl-collapsed-' + key)) {
+                    section.classList.add('collapsed');
+                } else {
+                    section.classList.remove('collapsed');
+                }
+            });
+        }
         
         // Initialize transaction editor when transactions tab is shown
         function showTransactionsEditor() {
@@ -8298,6 +8405,33 @@ function applyCollapsedState() {
             const targetContent = document.getElementById(statementType + 'StatementEditor');
             if (targetContent) {
                 targetContent.classList.add('active');
+            }
+
+            if (statementType === 'balance') {
+                checkBalanceSheetTransactions();
+            }
+        }
+
+        function checkBalanceSheetTransactions() {
+            const assetLists = document.getElementById('balance-asset-lists');
+            const liabilityLists = document.getElementById('balance-liability-lists');
+            const equityLists = document.getElementById('balance-equity-lists');
+            
+            const hasTransactions = (assetLists && assetLists.children.length > 0) ||
+                                   (liabilityLists && liabilityLists.children.length > 0) ||
+                                   (equityLists && equityLists.children.length > 0);
+            
+            const transactionSection = document.querySelector('#balanceSheetEditor .statement-categories');
+            const noticeSection = document.getElementById('balanceSheetNotice');
+            
+            if (hasTransactions) {
+                // Show transaction editing interface
+                transactionSection.style.display = 'block';
+                noticeSection.style.display = 'none';
+            } else {
+                // Show auto-calculated notice
+                transactionSection.style.display = 'none';
+                noticeSection.style.display = 'flex';
             }
         }
 
