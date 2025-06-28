@@ -7265,7 +7265,7 @@
                                 }
                                 
                                 // Enable wheel events during drag
-                                document.addEventListener('wheel', handleWheelDuringDrag, { passive: false });
+                                document.addEventListener('wheel', handleWheelDuringDrag, { passive: false, capture: true });
                                 // Only highlight the exact containers that can accept drops
                                 exactContainers.forEach(zone => {
                                     if (zone !== evt.from) {
@@ -7280,7 +7280,7 @@
                                 }
                                 
                                 // Remove wheel event listener
-                                document.removeEventListener('wheel', handleWheelDuringDrag);
+                                document.removeEventListener('wheel', handleWheelDuringDrag, true);
                                 // Remove target class from all zones
                                 document.querySelectorAll('.sortable-target').forEach(zone => {
                                     zone.classList.remove('sortable-target');
@@ -9650,10 +9650,9 @@
         function handleWheelDuringDrag(e) {
             const editor = document.querySelector('.statement-editor');
             if (editor && editor.classList.contains('drag-active')) {
-                // Allow scrolling in the statement editor
+                e.preventDefault();
                 e.stopPropagation();
                 editor.scrollTop += e.deltaY;
-                return false;
             }
         }
         
