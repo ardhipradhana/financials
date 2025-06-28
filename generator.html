@@ -2679,6 +2679,10 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
         }
+
+        .transaction-card:active {
+            cursor: grabbing;
+        }
         
         .transaction-card.dragging {
             opacity: 0.8;
@@ -3125,16 +3129,61 @@
         }
 
         .sortable-ghost {
-            opacity: 0.4;
-            background: rgba(59, 130, 246, 0.2);
+            opacity: 0.3;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.3), rgba(99, 102, 241, 0.2));
+            border: 2px dashed #60A5FA;
+            transform: rotate(2deg);
+            transition: all 0.2s ease;
         }
         
         .sortable-chosen {
-            cursor: grabbing;
+            cursor: grabbing !important;
+            transform: scale(1.05);
+            box-shadow: 0 8px 32px rgba(59, 130, 246, 0.4);
+            z-index: 999;
+            transition: all 0.2s ease;
         }
         
         .sortable-drag {
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transform: rotate(3deg) scale(1.1);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            border: 2px solid #60A5FA;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(30, 41, 59, 0.9));
+            transition: all 0.2s ease;
+        }
+
+        /* Drop zone feedback */
+        .transaction-list.sortable-target,
+        .transaction-items.sortable-target,
+        .buffer-transaction-list.sortable-target {
+            background: rgba(59, 130, 246, 0.1);
+            border: 2px dashed #60A5FA;
+            border-radius: 8px;
+            transform: scale(1.02);
+            transition: all 0.2s ease;
+        }
+        
+        /* Notification animations */
+        @keyframes slideInNotification {
+            0% {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            100% {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOutNotification {
+            0% {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(400px);
+                opacity: 0;
+            }
         }
 
         /* Ensure all droppable areas have minimum height */
@@ -3156,14 +3205,49 @@
             opacity: 0.5;
         }
 
-.notice-tip {
-    background: rgba(16, 185, 129, 0.1);
-    border: 1px solid rgba(16, 185, 129, 0.3);
-    border-radius: 8px;
-    padding: 16px;
-    color: #10B981 !important;
-    font-weight: 500;
-}
+        .notice-tip {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 8px;
+            padding: 16px;
+            color: #10B981 !important;
+            font-weight: 500;
+        }
+
+        /* Enhanced drag and drop visual feedback */
+        .dragging-active .transaction-card:not(.sortable-chosen) {
+            opacity: 0.7;
+            transition: opacity 0.2s ease;
+        }
+        
+        .sortable-hover {
+            background: rgba(59, 130, 246, 0.15) !important;
+            border-color: #60A5FA !important;
+            transform: scale(1.02);
+            transition: all 0.2s ease;
+        }
+        
+        .sortable-target {
+            background: rgba(59, 130, 246, 0.1) !important;
+            border: 2px dashed #60A5FA !important;
+            border-radius: 8px;
+            transform: scale(1.02);
+            transition: all 0.2s ease;
+        }
+        
+        .sortable-target::before {
+            content: "Drop here";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #60A5FA;
+            font-size: 0.9rem;
+            font-weight: 600;
+            z-index: 10;
+            pointer-events: none;
+            opacity: 0.8;
+        }
         
     </style>
 </head>
@@ -6906,7 +6990,7 @@
                     try {
                         list.sortable = Sortable.create(list, {
                             group: 'transactions',
-                            animation: 150,
+                            animation: 300,
                             scroll: true,
                             scrollSensitivity: 60,
                             scrollSpeed: 15,
@@ -6917,6 +7001,20 @@
                             ghostClass: 'sortable-ghost',
                             chosenClass: 'sortable-chosen',
                             dragClass: 'sortable-drag',
+                            onStart: (evt) => {
+                                console.log('Drag started');
+                                document.body.style.cursor = 'grabbing';
+                                
+                                // Add visual feedback to all drop zones
+                                document.querySelectorAll('.transaction-list, .transaction-items, .buffer-transaction-list').forEach(zone => {
+                                    if (zone !== evt.from) {
+                                        zone.classList.add('sortable-target');
+                                    }
+                                });
+                                
+                                // Add dragging class to body for global styles
+                                document.body.classList.add('dragging-active');
+                            },
                             onAdd: (evt) => {
                                 console.log('Transaction moved to new container');
                                 console.log('Target container:', evt.to.id || evt.to.className);
@@ -6941,22 +7039,55 @@
                                         );
                                         if (duplicate) {
                                             evt.from.appendChild(evt.item);
-                                            showUpdateNotification("This transaction already exists in this account");
+                                            showUpdateNotification("This transaction already exists in this account", "error");
                                             return;
                                         }
                                     }
                                     
+                                    // Update transaction properties
                                     tx.statement = statement;
                                     tx.category = category;
                                     tx.glAccount = glAccount;
                                     
                                     console.log('Updated transaction:', tx);
+                                    
+                                    // Show success feedback for successful move
+                                    showUpdateNotification(`Moved "${tx.description}" to ${statement === 'buffer' ? 'Drop Zone' : glAccount || category}`, "info");
                                 }
+                                
+                                // Update totals immediately
                                 updateStatementTotals();
                             },
                             onEnd: (evt) => {
                                 console.log('Drag operation completed');
+                                
+                                // Reset cursor and visual states
+                                document.body.style.cursor = '';
+                                document.body.classList.remove('dragging-active');
+                                
+                                // Remove visual feedback from all drop zones
+                                document.querySelectorAll('.sortable-target').forEach(zone => {
+                                    zone.classList.remove('sortable-target');
+                                });
+                                
+                                // Sync transaction order and clean up
                                 syncTransactionOrder();
+                                
+                                // Clean up empty containers after a brief delay
+                                setTimeout(() => {
+                                    cleanupEmptyContainers();
+                                }, 100);
+                            },
+                            onMove: (evt) => {
+                                // Add hover effect to target container
+                                const target = evt.to;
+                                if (target && !target.classList.contains('sortable-hover')) {
+                                    target.classList.add('sortable-hover');
+                                    setTimeout(() => {
+                                        target.classList.remove('sortable-hover');
+                                    }, 200);
+                                }
+                                return true; // Allow the move
                             }
                         });
                         
@@ -7416,27 +7547,38 @@
         
         function applyTransactionChanges() {
             if (confirm('Apply these changes and regenerate financial statements?')) {
+                console.log('=== APPLYING TRANSACTION CHANGES ===');
+                
+                // Show processing notification
+                showUpdateNotification('Processing changes...', 'info');
+                
                 // Ensure no duplicate transactions are processed
                 currentTransactions = deduplicateTransactions(currentTransactions);
-
+                console.log('Deduplicated transactions:', currentTransactions.length);
+        
                 // Regenerate financial statements with new categorization
                 const newStatements = regenerateFinancialStatements(currentTransactions);
+                console.log('Generated new statements:', newStatements);
                 
                 // Update the main reports
                 window.currentFinancialData = newStatements;
                 populateResults(newStatements);
-                updateStatementTotals();
                 
                 // Update stored data
                 window.editableTransactions = JSON.parse(JSON.stringify(currentTransactions));
                 
+                // Clean up empty containers
+                cleanupEmptyContainers();
+                
                 // Show success message
-                showUpdateNotification('Financial statements updated successfully!');
+                setTimeout(() => {
+                    showUpdateNotification('✅ Financial statements updated successfully!', 'success');
+                }, 500);
                 
                 // Switch back to Income Statement to show changes
                 setTimeout(() => {
                     showReport('income');
-                }, 1000);
+                }, 1500);
             }
         }
         
@@ -7568,29 +7710,48 @@
             };
         }
         
-        function showUpdateNotification(message) {
+        function showUpdateNotification(message, type = 'success') {
+            // Remove any existing notifications
+            document.querySelectorAll('.custom-notification').forEach(n => n.remove());
+            
             const notification = document.createElement('div');
+            notification.className = 'custom-notification';
+            
+            const colors = {
+                success: { bg: 'linear-gradient(135deg, #10B981, #059669)', border: '1px solid #10B981' },
+                info: { bg: 'linear-gradient(135deg, #3B82F6, #1D4ED8)', border: '1px solid #3B82F6' },
+                error: { bg: 'linear-gradient(135deg, #EF4444, #DC2626)', border: '1px solid #EF4444' }
+            };
+            
             notification.style.cssText = `
                 position: fixed;
                 top: 20px;
                 right: 20px;
-                background: linear-gradient(135deg, #10B981, #059669);
+                background: ${colors[type].bg};
+                border: ${colors[type].border};
                 color: white;
                 padding: 16px 24px;
-                border-radius: 8px;
-                box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+                border-radius: 12px;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 0 20px rgba(16, 185, 129, 0.3);
                 z-index: 10000;
                 font-weight: 600;
-                animation: slideInRight 0.3s ease;
+                font-size: 14px;
+                max-width: 350px;
+                animation: slideInNotification 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+                backdrop-filter: blur(10px);
             `;
             notification.textContent = message;
             
             document.body.appendChild(notification);
             
             setTimeout(() => {
-                notification.style.animation = 'slideOutRight 0.3s ease';
-                setTimeout(() => document.body.removeChild(notification), 300);
-            }, 3000);
+                notification.style.animation = 'slideOutNotification 0.4s ease-in-out';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.remove();
+                    }
+                }, 400);
+            }, type === 'info' ? 2000 : 4000);
         }
         
         // Update the showReport function to handle transactions tab
@@ -8956,6 +9117,22 @@
                 if (transactionSection) transactionSection.style.display = 'none';
                 if (noticeSection) noticeSection.style.display = 'flex';
             }
+        }
+
+        function cleanupEmptyContainers() {
+            console.log('=== CLEANING UP EMPTY CONTAINERS ===');
+            
+            // Remove empty GL account sections
+            document.querySelectorAll('.gl-account-section').forEach(section => {
+                const transactionList = section.querySelector('.transaction-list');
+                if (transactionList && transactionList.children.length === 0) {
+                    console.log('Removing empty section:', section.dataset.glAccount);
+                    section.remove();
+                }
+            });
+            
+            // Update statement totals after cleanup
+            updateStatementTotals();
         }
 
         document.addEventListener('DOMContentLoaded', () => {
