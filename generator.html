@@ -2828,6 +2828,28 @@
                 gap: 24px;
             }
         }
+
+        .buffer-drop-zone {
+            min-height: 400px;
+            min-width: 300px;
+            background: linear-gradient(145deg, rgba(15, 23, 42, 0.4), rgba(30, 41, 59, 0.2));
+            border: 2px dashed rgba(59, 130, 246, 0.3);
+            border-radius: 12px;
+            padding: 24px;
+            margin-top: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .buffer-drop-zone:hover {
+            border-color: #60A5FA;
+            background: rgba(59, 130, 246, 0.05);
+        }
+        
+        .buffer-drop-zone.drag-over {
+            border-color: #60A5FA;
+            background: rgba(59, 130, 246, 0.1);
+            transform: scale(1.02);
+        }
         
     </style>
 </head>
@@ -3492,10 +3514,8 @@
                                 </div>
                             </div>
                             <div class="buffer-area">
-                                <div class="statement-section">
-                                    <h1 class="statement-header">Buffer</h1>
-                                    <div id="buffer-list" class="transaction-list" data-statement="buffer" data-category="Buffer"></div>
-                                </div>
+                                <h1 class="statement-header">Buffer</h1>
+                                <div id="buffer-list" class="transaction-list buffer-drop-zone" data-statement="buffer" data-category="Buffer"></div>
                             </div>
                         </div>
                         
