@@ -1648,20 +1648,6 @@
             document.getElementById('transactionCurrency').value = currency;
         }
         
-        // Payment terms handling
-        document.getElementById('transactionPaymentTerms').addEventListener('change', function() {
-            const customInput = document.getElementById('customPaymentTerms');
-            if (this.value === 'custom') {
-                customInput.style.display = 'block';
-                customInput.required = true;
-            } else {
-                customInput.style.display = 'none';
-                customInput.required = false;
-                // Auto-calculate due date
-                updateDueDateFromTerms();
-            }
-        });
-        
         function updateDueDateFromTerms() {
             const invoiceDate = document.getElementById('transactionInvoiceDate').value;
             const terms = document.getElementById('transactionPaymentTerms').value;
