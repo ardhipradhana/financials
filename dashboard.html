@@ -1430,8 +1430,23 @@
             const totalAPAll = allUnpaidAP.reduce((sum, t) => sum + t.amount, 0);
             
             // Calculate overdue only
-            const overdueAR = allUnpaidAR.filter(t => /* overdue logic */);
-            const overdueAP = allUnpaidAP.filter(t => /* overdue logic */);
+            const overdueAR = allUnpaidAR.filter(t => {
+                let dueDate = t.due_date;
+                if (!dueDate && t.payment_terms && t.invoice_date) {
+                    const invoiceDate = new Date(t.invoice_date);
+                    dueDate = new Date(invoiceDate.getTime() + (parseInt(t.payment_terms) * 24 * 60 * 60 * 1000)).toISOString().split('T')[0];
+                }
+                return dueDate && new Date(dueDate) < new Date();
+            });
+            
+            const overdueAP = allUnpaidAP.filter(t => {
+                let dueDate = t.due_date;
+                if (!dueDate && t.payment_terms && t.invoice_date) {
+                    const invoiceDate = new Date(t.invoice_date);
+                    dueDate = new Date(invoiceDate.getTime() + (parseInt(t.payment_terms) * 24 * 60 * 60 * 1000)).toISOString().split('T')[0];
+                }
+                return dueDate && new Date(dueDate) < new Date();
+            });
             
             const totalAROverdue = overdueAR.reduce((sum, t) => sum + t.amount, 0);
             const totalAPOverdue = overdueAP.reduce((sum, t) => sum + t.amount, 0);
@@ -1441,15 +1456,44 @@
             // Calculate CCC
             const cccData = calculateCCC();
             
-            // Update display
-            document.getElementById('totalARAll').textContent = formatCurrency(totalARAll, 'IDR');
-            document.getElementById('totalAPAll').textContent = formatCurrency(totalAPAll, 'IDR');
-            document.getElementById('totalAR').textContent = formatCurrency(totalAROverdue, 'IDR');
-            document.getElementById('totalAP').textContent = formatCurrency(totalAPOverdue, 'IDR');
-            document.getElementById('netCashImpact').textContent = formatCurrency(netCash, 'IDR');
+            // Update display - only if elements exist
+            if (document.getElementById('totalARAll')) {
+                document.getElementById('totalARAll').textContent = formatCurrency(totalARAll, 'IDR');
+            }
+            if (document.getElementById('totalAPAll')) {
+                document.getElementById('totalAPAll').textContent = formatCurrency(totalAPAll, 'IDR');
+            }
+            if (document.getElementById('totalAR')) {
+                document.getElementById('totalAR').textContent = formatCurrency(totalAROverdue, 'IDR');
+            }
+            if (document.getElementById('totalAP')) {
+                document.getElementById('totalAP').textContent = formatCurrency(totalAPOverdue, 'IDR');
+            }
+            if (document.getElementById('netCashImpact')) {
+                document.getElementById('netCashImpact').textContent = formatCurrency(netCash, 'IDR');
+            }
+            
+            // Update badges
+            if (document.getElementById('arAging')) {
+                const arBadge = document.getElementById('arAging');
+                arBadge.textContent = `${overdueAR.length} overdue`;
+                arBadge.className = `summary-badge ${overdueAR.length > 0 ? 'badge-overdue' : 'badge-neutral'}`;
+            }
+            
+            if (document.getElementById('apAging')) {
+                const apBadge = document.getElementById('apAging');
+                apBadge.textContent = `${overdueAP.length} overdue`;
+                apBadge.className = `summary-badge ${overdueAP.length > 0 ? 'badge-overdue' : 'badge-neutral'}`;
+            }
+            
+            if (document.getElementById('cashImpactChange')) {
+                const cashBadge = document.getElementById('cashImpactChange');
+                cashBadge.textContent = netCash >= 0 ? 'Positive cash position' : 'Negative cash position';
+                cashBadge.className = netCash >= 0 ? 'positive' : 'negative';
+            }
             
             // Update CCC display
-            if (cccData) {
+            if (document.getElementById('cccDisplay') && cccData) {
                 document.getElementById('cccDisplay').textContent = `CCC: ${cccData.ccc} days`;
                 document.getElementById('cccDisplay').title = `DSO: ${cccData.dso} days, DPO: ${cccData.dpo} days`;
             }
