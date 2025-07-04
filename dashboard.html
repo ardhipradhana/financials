@@ -1639,10 +1639,7 @@
                 }
                 
                 // Determine actual status - if not paid and past due, it's overdue
-                let actualStatus = transaction.status;
-                if (transaction.status !== 'Paid' && dueDate && new Date(dueDate) < new Date()) {
-                    actualStatus = 'Overdue';
-                }
+                const actualStatus = transaction.status;
                 
                 const days = dueDate ? calculateDaysDifference(dueDate) : null;
                 const daysClass = days === null ? 'days-current' : (days < 0 ? 'days-overdue' : days <= 7 ? 'days-due-soon' : 'days-current');
@@ -1893,6 +1890,58 @@
             };
         }
 
+        async function updateOverdueStatuses() {
+            try {
+                console.log('Checking for overdue transactions...');
+                
+                // Get all unpaid transactions
+                const { data: unpaidTransactions, error } = await supabase
+                    .from('ap_ar_transactions_meridash')
+                    .select('*')
+                    .eq('status', 'Unpaid');
+                
+                if (error) throw error;
+                
+                const today = new Date();
+                const overdueTransactions = [];
+                
+                // Check which transactions are past due
+                unpaidTransactions.forEach(transaction => {
+                    let dueDate = transaction.due_date;
+                    
+                    // Calculate due date if not explicitly set
+                    if (!dueDate && transaction.payment_terms && transaction.invoice_date) {
+                        const invoiceDate = new Date(transaction.invoice_date);
+                        const calculatedDueDate = new Date(invoiceDate.getTime() + (parseInt(transaction.payment_terms) * 24 * 60 * 60 * 1000));
+                        dueDate = calculatedDueDate.toISOString().split('T')[0];
+                    }
+                    
+                    // If past due, mark for update
+                    if (dueDate && new Date(dueDate) < today) {
+                        overdueTransactions.push(transaction.id);
+                    }
+                });
+                
+                // Update overdue transactions in database
+                if (overdueTransactions.length > 0) {
+                    const { error: updateError } = await supabase
+                        .from('ap_ar_transactions_meridash')
+                        .update({ status: 'Overdue' })
+                        .in('id', overdueTransactions);
+                    
+                    if (updateError) throw updateError;
+                    
+                    console.log(`Updated ${overdueTransactions.length} transactions to Overdue status`);
+                    
+                    // Refresh local data
+                    await loadAPARData();
+                }
+                
+            } catch (error) {
+                console.error('Error updating overdue statuses:', error);
+            }
+        }
+
         // Close AI chat when clicking outside
         document.addEventListener('click', function(e) {
             const sidebar = document.getElementById('aiChatSidebar');
@@ -1908,17 +1957,33 @@
         // Initialize with mock data
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Meridash Dashboard Loaded');
-
-            loadAPARData();
             
-            // Initialize AP/AR data if not exists
+            // Initialize AP/AR data if not exists (keep this localStorage logic)
             if (!localStorage.getItem('aparTransactions')) {
                 initializeSampleData();
             }
             
-            // Just load the data into memory, don't render UI yet
-            const data = localStorage.getItem('aparTransactions');
-            aparTransactions = data ? JSON.parse(data) : [];
+            // Load data from Supabase and check for overdue transactions
+            loadAPARData().then(() => {
+                updateOverdueStatuses();
+            });
+            
+            // Set up automatic check every 24 hours
+            setInterval(updateOverdueStatuses, 24 * 60 * 60 * 1000);
+            
+            // Also check when user returns to the page/tab
+            document.addEventListener('visibilitychange', function() {
+                if (!document.hidden) {
+                    // Check if it's been more than 1 hour since last check
+                    const lastCheck = localStorage.getItem('lastOverdueCheck');
+                    const now = Date.now();
+                    
+                    if (!lastCheck || (now - parseInt(lastCheck)) > (60 * 60 * 1000)) {
+                        updateOverdueStatuses();
+                        localStorage.setItem('lastOverdueCheck', now.toString());
+                    }
+                }
+            });
         });
 
         // Navigation handling
@@ -1961,6 +2026,7 @@
                 // Add event listeners for AP/AR filters when that section is shown
                 if (this.dataset.section === 'ap-ar') {
                     setTimeout(() => {
+                        updateOverdueStatuses();
                         // Refresh AP/AR data when section becomes visible
                         updateAPARSummary();
                         renderAPARTable();
