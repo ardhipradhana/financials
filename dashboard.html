@@ -455,26 +455,44 @@
         
         .sidebar.collapsed {
             width: 60px;
-            overflow: hidden;
+            overflow: visible;
         }
         
         .sidebar.collapsed .logo,
         .sidebar.collapsed .tagline {
-            opacity: 0;
-            transform: scale(0);
+            display: none;
         }
         
         .sidebar.collapsed .nav-link {
             justify-content: center;
-            padding: 0.875rem 0.5rem;
+            padding: 0.875rem 0;
+            position: relative;
         }
         
         .sidebar.collapsed .nav-link .nav-icon {
             margin-right: 0;
+            width: 20px;
+            text-align: center;
         }
         
         .sidebar.collapsed .nav-link span {
             display: none;
+        }
+
+        .sidebar.collapsed .nav-link:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            left: 70px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #1e293b;
+            color: white;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            white-space: nowrap;
+            z-index: 1002;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
     </style>
 </head>
@@ -490,45 +508,45 @@
         </button>
         <div class="nav-menu">
             <div class="nav-item">
-                <a href="#dashboard" class="nav-link active" data-section="dashboard">
+                <a href="#dashboard" class="nav-link active" data-section="dashboard" data-tooltip="Dashboard Overview">
                     <i class="nav-icon fas fa-tachometer-alt"></i>
-                    Dashboard Overview
+                    <span>Dashboard Overview</span>
                 </a>
             </div>
             <div class="nav-item">
-                <a href="#ap-ar" class="nav-link" data-section="ap-ar">
+                <a href="#ap-ar" class="nav-link" data-section="ap-ar" data-tooltip="AP/AR Tracking">
                     <i class="nav-icon fas fa-exchange-alt"></i>
                     <span>AP/AR Tracking</span>
                 </a>
             </div>
             <div class="nav-item">
-                <a href="#statements" class="nav-link" data-section="statements">
+                <a href="#statements" class="nav-link" data-section="statements" data-tooltip="Financial Statements">
                     <i class="nav-icon fas fa-chart-line"></i>
-                    Financial Statements
+                    <span>Financial Statements</span>
                 </a>
             </div>
             <div class="nav-item">
-                <a href="#forecasting" class="nav-link" data-section="forecasting">
+                <a href="#forecasting" class="nav-link" data-section="forecasting" data-tooltip="Forecasting & Analytics">
                     <i class="nav-icon fas fa-chart-area"></i>
-                    Forecasting & Analytics
+                    <span>Forecasting & Analytics</span>
                 </a>
             </div>
             <div class="nav-item">
-                <a href="#benchmarking" class="nav-link" data-section="benchmarking">
+                <a href="#benchmarking" class="nav-link" data-section="benchmarking" data-tooltip="Industry Benchmarking">
                     <i class="nav-icon fas fa-balance-scale"></i>
-                    Industry Benchmarking
+                    <span>Industry Benchmarking</span>
                 </a>
             </div>
             <div class="nav-item">
-                <a href="#reports" class="nav-link" data-section="reports">
+                <a href="#reports" class="nav-link" data-section="reports" data-tooltip="Reports & Analytics">
                     <i class="nav-icon fas fa-chart-bar"></i>
-                    Reports & Analytics
+                    <span>Reports & Analytics</span>
                 </a>
             </div>
             <div class="nav-item">
-                <a href="#scenarios" class="nav-link" data-section="scenarios">
+                <a href="#scenarios" class="nav-link" data-section="scenarios" data-tooltip="Scenario Analysis">
                     <i class="nav-icon fas fa-sitemap"></i>
-                    Scenario Analysis
+                    <span>Scenario Analysis</span>
                 </a>
             </div>
         </div>
