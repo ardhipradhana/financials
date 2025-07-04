@@ -639,15 +639,15 @@
             border-radius: 8px;
             border: 1px solid #e2e8f0;
             max-width: 100%;
-            white-space: nowrap; /* Prevent text wrapping */
+            background: white;
         }
         
         .financial-table {
             width: 100%;
-            min-width: 1200px; /* Minimum width to ensure horizontal scroll */
+            min-width: 1200px; /* Force horizontal scroll on smaller screens */
             border-collapse: collapse;
             background: white;
-            table-layout: fixed;
+            table-layout: fixed; /* This is crucial for fixed widths */
         }
 
         .financial-table th {
@@ -661,18 +661,19 @@
             position: sticky;
             top: 0;
             z-index: 1;
+            white-space: nowrap;
         }
         
-        .financial-table th:nth-child(1) { width: 60px; }   /* Type */
-        .financial-table th:nth-child(2) { width: 100px; }  /* Reference */
-        .financial-table th:nth-child(3) { width: 150px; }  /* Company */
-        .financial-table th:nth-child(4) { width: 200px; }  /* Description */
-        .financial-table th:nth-child(5) { width: 120px; }  /* Amount */
-        .financial-table th:nth-child(6) { width: 100px; }  /* Invoice Date */
-        .financial-table th:nth-child(7) { width: 100px; }  /* Due Date */
-        .financial-table th:nth-child(8) { width: 80px; }   /* Days */
-        .financial-table th:nth-child(9) { width: 80px; }   /* Status */
-        .financial-table th:nth-child(10) { width: 80px; }  /* Actions */
+        .financial-table col:nth-child(1) { width: 60px; }   /* Type */
+        .financial-table col:nth-child(2) { width: 100px; }  /* Reference */
+        .financial-table col:nth-child(3) { width: 150px; }  /* Company */
+        .financial-table col:nth-child(4) { width: 250px; }  /* Description */
+        .financial-table col:nth-child(5) { width: 120px; }  /* Amount */
+        .financial-table col:nth-child(6) { width: 110px; }  /* Invoice Date */
+        .financial-table col:nth-child(7) { width: 110px; }  /* Due Date */
+        .financial-table col:nth-child(8) { width: 90px; }   /* Days */
+        .financial-table col:nth-child(9) { width: 80px; }   /* Status */
+        .financial-table col:nth-child(10) { width: 90px; }  /* Actions */
         /* Center align only the Actions column */
         .financial-table th:nth-child(10),
         .financial-table td:nth-child(10) {
@@ -700,6 +701,7 @@
             text-align: left;
             overflow: hidden;
             text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .action-btn {
@@ -1046,6 +1048,18 @@
                     <!-- AP/AR Table -->
                     <div class="table-container">
                         <table id="aparTable" class="financial-table">
+                            <colgroup>
+                                <col style="width: 60px;">   <!-- Type -->
+                                <col style="width: 100px;">  <!-- Reference -->
+                                <col style="width: 150px;">  <!-- Company -->
+                                <col style="width: 250px;">  <!-- Description -->
+                                <col style="width: 120px;">  <!-- Amount -->
+                                <col style="width: 110px;">  <!-- Invoice Date -->
+                                <col style="width: 110px;">  <!-- Due Date -->
+                                <col style="width: 90px;">   <!-- Days -->
+                                <col style="width: 80px;">   <!-- Status -->
+                                <col style="width: 90px;">   <!-- Actions -->
+                            </colgroup>
                             <thead>
                                 <tr>
                                     <th>Type</th>
@@ -1380,28 +1394,30 @@
         function openAddModal() {
             document.getElementById('addModal').classList.add('show');
             
-            // Set default dates - only invoice date, leave due date blank
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('transactionInvoiceDate').value = today;
-            document.getElementById('transactionDueDate').value = ''; // Leave blank
+            // Only set defaults if not editing (no editId exists)
+            const isEditing = document.getElementById('addTransactionForm').dataset.editId;
             
-            // Reset form state
-            delete document.getElementById('addTransactionForm').dataset.editId;
-            document.querySelector('.modal-title').textContent = 'Add Transaction';
-            document.querySelector('#addTransactionForm button[type="submit"]').textContent = 'Add Transaction';
+            if (!isEditing) {
+                // Set default dates - only invoice date, leave due date blank
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('transactionInvoiceDate').value = today;
+                document.getElementById('transactionDueDate').value = '';
+                
+                // Reset form state for new transaction
+                document.querySelector('.modal-title').textContent = 'Add Transaction';
+                document.querySelector('#addTransactionForm button[type="submit"]').textContent = 'Add Transaction';
+            }
             
             // Add event listeners (only once per modal open)
             const invoiceDateInput = document.getElementById('transactionInvoiceDate');
             const paymentTermsSelect = document.getElementById('transactionPaymentTerms');
             
             if (invoiceDateInput) {
-                // Remove existing listener and add new one
                 invoiceDateInput.removeEventListener('change', updateDueDateFromTerms);
                 invoiceDateInput.addEventListener('change', updateDueDateFromTerms);
             }
             
             if (paymentTermsSelect) {
-                // Remove existing listener and add new one
                 paymentTermsSelect.removeEventListener('change', handlePaymentTermsChange);
                 paymentTermsSelect.addEventListener('change', handlePaymentTermsChange);
             }
