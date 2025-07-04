@@ -634,6 +634,7 @@
             color: #1e293b;
         }
 
+        /* AP/AR Table Specific Styles */
         .table-container {
             overflow-x: auto;
             border-radius: 8px;
@@ -642,66 +643,82 @@
             background: white;
         }
         
-        .financial-table {
+        .table-container .financial-table {
             width: 100%;
             min-width: 1200px; /* Force horizontal scroll on smaller screens */
             border-collapse: collapse;
             background: white;
             table-layout: fixed; /* This is crucial for fixed widths */
         }
-
-        .financial-table th {
-            background: #f8fafc;
-            padding: 0.75rem 0.5rem;
-            text-align: left;
-            font-weight: 600;
-            color: #475569;
-            border-bottom: 1px solid #e2e8f0;
-            font-size: 0.875rem;
+        
+        /* Force specific column widths */
+        .table-container .financial-table colgroup col:nth-child(1) { width: 60px !important; }   /* Type */
+        .table-container .financial-table colgroup col:nth-child(2) { width: 100px !important; }  /* Reference */
+        .table-container .financial-table colgroup col:nth-child(3) { width: 150px !important; }  /* Company */
+        .table-container .financial-table colgroup col:nth-child(4) { width: 250px !important; }  /* Description */
+        .table-container .financial-table colgroup col:nth-child(5) { width: 120px !important; }  /* Amount */
+        .table-container .financial-table colgroup col:nth-child(6) { width: 110px !important; }  /* Invoice Date */
+        .table-container .financial-table colgroup col:nth-child(7) { width: 110px !important; }  /* Due Date */
+        .table-container .financial-table colgroup col:nth-child(8) { width: 90px !important; }   /* Days */
+        .table-container .financial-table colgroup col:nth-child(9) { width: 80px !important; }   /* Status */
+        .table-container .financial-table colgroup col:nth-child(10) { width: 90px !important; }  /* Actions */
+        
+        .table-container .financial-table th {
+            background: #f8fafc !important;
+            padding: 0.75rem 0.5rem !important;
+            text-align: left !important;
+            font-weight: 600 !important;
+            color: #475569 !important;
+            border-bottom: 1px solid #e2e8f0 !important;
+            font-size: 0.875rem !important;
             position: sticky;
             top: 0;
             z-index: 1;
             white-space: nowrap;
         }
         
-        .financial-table col:nth-child(1) { width: 60px; }   /* Type */
-        .financial-table col:nth-child(2) { width: 100px; }  /* Reference */
-        .financial-table col:nth-child(3) { width: 150px; }  /* Company */
-        .financial-table col:nth-child(4) { width: 250px; }  /* Description */
-        .financial-table col:nth-child(5) { width: 120px; }  /* Amount */
-        .financial-table col:nth-child(6) { width: 110px; }  /* Invoice Date */
-        .financial-table col:nth-child(7) { width: 110px; }  /* Due Date */
-        .financial-table col:nth-child(8) { width: 90px; }   /* Days */
-        .financial-table col:nth-child(9) { width: 80px; }   /* Status */
-        .financial-table col:nth-child(10) { width: 90px; }  /* Actions */
-        /* Center align only the Actions column */
-        .financial-table th:nth-child(10),
-        .financial-table td:nth-child(10) {
-            text-align: center;
+        .table-container .financial-table td {
+            padding: 0.75rem 0.5rem !important;
+            border-bottom: 1px solid #f1f5f9 !important;
+            font-size: 0.875rem !important;
+            text-align: left !important;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: #334155 !important;
         }
-
+        
+        /* Center align only the Actions column */
+        .table-container .financial-table th:nth-child(10),
+        .table-container .financial-table td:nth-child(10) {
+            text-align: center !important;
+        }
+        
         /* Make description column expandable on hover */
-        .financial-table td:nth-child(4) {
+        .table-container .financial-table td:nth-child(4) {
             position: relative;
             cursor: pointer;
         }
         
-        .financial-table td:nth-child(4):hover {
+        .table-container .financial-table td:nth-child(4):hover {
             overflow: visible;
             white-space: normal;
             background: #f8fafc;
             z-index: 2;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
+
+        /* Debugging - Remove after testing */
+        .table-container .financial-table {
+            border: 3px solid red !important;
+        }
         
-        .financial-table td {
-            padding: 0.75rem 0.5rem;
-            border-bottom: 1px solid #f1f5f9;
-            font-size: 0.875rem;
-            text-align: left;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+        .table-container .financial-table th {
+            border: 1px solid blue !important;
+        }
+        
+        .table-container .financial-table td {
+            border: 1px solid green !important;
         }
 
         .action-btn {
