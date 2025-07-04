@@ -600,6 +600,64 @@
             border-color: #fbbf24;
             background: #fffbeb;
         }
+
+        .currency-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .currency-toggle {
+            display: flex;
+            background: #f1f5f9;
+            border-radius: 6px;
+            padding: 2px;
+        }
+        
+        .currency-option {
+            padding: 0.5rem 1rem;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #64748b;
+            transition: all 0.2s ease;
+        }
+        
+        .currency-option.active {
+            background: #fbbf24;
+            color: #1e293b;
+        }
+
+        .financial-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            table-layout: fixed; /* This ensures consistent column widths */
+        }
+        
+        .financial-table th:nth-child(1) { width: 8%; }  /* Type */
+        .financial-table th:nth-child(2) { width: 10%; } /* Reference */
+        .financial-table th:nth-child(3) { width: 15%; } /* Company */
+        .financial-table th:nth-child(4) { width: 20%; } /* Description */
+        .financial-table th:nth-child(5) { width: 12%; } /* Amount */
+        .financial-table th:nth-child(6) { width: 10%; } /* Invoice Date */
+        .financial-table th:nth-child(7) { width: 10%; } /* Due Date */
+        .financial-table th:nth-child(8) { width: 8%; }  /* Days */
+        .financial-table th:nth-child(9) { width: 8%; }  /* Status */
+        .financial-table th:nth-child(10) { width: 9%; } /* Actions */
+        
+        .financial-table td {
+            padding: 0.75rem 0.5rem;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 0.875rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
     </style>
 </head>
 <body>
@@ -811,6 +869,10 @@
                                 <i class="fas fa-file-upload"></i>
                                 Upload CSV/Excel
                             </button>
+                            <button class="btn btn-secondary" onclick="openImageUploadModal()">
+                                <i class="fas fa-camera"></i>
+                                Upload Invoice Image
+                            </button>
                             <button class="btn btn-primary" onclick="openAddModal()">
                                 <i class="fas fa-plus"></i>
                                 Add Transaction
@@ -819,7 +881,7 @@
                     </div>
             
                     <!-- Filters -->
-                    <div class="filters-section" style="margin-bottom: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+                    <div class="filters-section" style="margin-bottom: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
                         <select id="typeFilter" class="filter-select">
                             <option value="">All Types</option>
                             <option value="AR">Accounts Receivable</option>
@@ -833,6 +895,7 @@
                             <option value="Partial">Partial</option>
                         </select>
                         <input type="date" id="dateFromFilter" class="filter-input" placeholder="From Date">
+                        <span style="color: #64748b; font-size: 0.875rem;">to</span>
                         <input type="date" id="dateToFilter" class="filter-input" placeholder="To Date">
                         <button class="btn btn-secondary" onclick="clearFilters()">
                             <i class="fas fa-times"></i>
@@ -1177,8 +1240,8 @@
                         <td>${transaction.company}</td>
                         <td>${transaction.description}</td>
                         <td>${formatCurrency(transaction.amount)}</td>
-                        <td>${formatDate(transaction.invoice_date)}</td>
-                        <td>${formatDate(transaction.due_date)}</td>
+                        <td>${formatDateIndonesian(transaction.invoice_date)}</td>
+                        <td>${formatDateIndonesian(transaction.due_date)}</td>
                         <td><span class="days-badge ${daysClass}">${daysText}</span></td>
                         <td><span class="status-badge status-${transaction.status.toLowerCase()}">${transaction.status}</span></td>
                         <td>
@@ -1284,6 +1347,68 @@
             // Will implement this later
         }
 
+        // Currency selection
+        function selectCurrency(currency) {
+            document.querySelectorAll('.currency-option').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`[data-currency="${currency}"]`).classList.add('active');
+            document.getElementById('transactionCurrency').value = currency;
+        }
+        
+        // Payment terms handling
+        document.getElementById('transactionPaymentTerms').addEventListener('change', function() {
+            const customInput = document.getElementById('customPaymentTerms');
+            if (this.value === 'custom') {
+                customInput.style.display = 'block';
+                customInput.required = true;
+            } else {
+                customInput.style.display = 'none';
+                customInput.required = false;
+                // Auto-calculate due date
+                updateDueDateFromTerms();
+            }
+        });
+        
+        function updateDueDateFromTerms() {
+            const invoiceDate = document.getElementById('transactionInvoiceDate').value;
+            const terms = document.getElementById('transactionPaymentTerms').value;
+            
+            if (invoiceDate && terms !== 'custom') {
+                const invoice = new Date(invoiceDate);
+                const due = new Date(invoice.getTime() + (parseInt(terms) * 24 * 60 * 60 * 1000));
+                document.getElementById('transactionDueDate').value = due.toISOString().split('T')[0];
+            }
+        }
+        
+        // Indonesian date format
+        function formatDateIndonesian(dateString) {
+            const date = new Date(dateString);
+            const day = date.getDate().toString().padStart(2, '0');
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const year = date.getFullYear().toString().slice(-2);
+            return `${day}/${month}/${year}`;
+        }
+        
+        // Update currency formatting
+        function formatCurrency(amount, currency = 'IDR') {
+            if (currency === 'IDR') {
+                return new Intl.NumberFormat('id-ID', {
+                    style: 'currency',
+                    currency: 'IDR',
+                    minimumFractionDigits: 0
+                }).format(amount);
+            } else {
+                return new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'USD'
+                }).format(amount);
+            }
+        }
+        
+        // Image upload modal
+        function openImageUploadModal() {
+            alert('Image upload feature coming soon! This will use OCR to extract invoice data from images.');
+        }
+
         // Close AI chat when clicking outside
         document.addEventListener('click', function(e) {
             const sidebar = document.getElementById('aiChatSidebar');
@@ -1387,6 +1512,14 @@
                     </select>
                 </div>
                 <div class="form-group">
+                    <label class="form-label">Currency</label>
+                    <div class="currency-toggle">
+                        <button type="button" class="currency-option active" data-currency="IDR" onclick="selectCurrency('IDR')">IDR (Rp)</button>
+                        <button type="button" class="currency-option" data-currency="USD" onclick="selectCurrency('USD')">USD ($)</button>
+                    </div>
+                    <input type="hidden" id="transactionCurrency" value="IDR">
+                </div>
+                <div class="form-group">
                     <label class="form-label">Reference</label>
                     <input type="text" class="form-input" id="transactionReference" placeholder="INV-001 or BILL-001" required>
                 </div>
@@ -1409,6 +1542,19 @@
                 <div class="form-group">
                     <label class="form-label">Due Date</label>
                     <input type="date" class="form-input" id="transactionDueDate" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Payment Terms (Days)</label>
+                    <select class="form-select" id="transactionPaymentTerms">
+                        <option value="0">Due on Receipt</option>
+                        <option value="7">Net 7</option>
+                        <option value="14">Net 14</option>
+                        <option value="30" selected>Net 30</option>
+                        <option value="60">Net 60</option>
+                        <option value="90">Net 90</option>
+                        <option value="custom">Custom</option>
+                    </select>
+                    <input type="number" class="form-input" id="customPaymentTerms" placeholder="Enter days" style="display: none; margin-top: 0.5rem;" min="1">
                 </div>
                 <div class="form-group">
                     <label class="form-label">Status</label>
