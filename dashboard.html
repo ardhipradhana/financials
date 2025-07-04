@@ -638,6 +638,16 @@
             background: white;
             table-layout: fixed; /* This ensures consistent column widths */
         }
+
+        .financial-table th {
+            background: #f8fafc;
+            padding: 0.75rem;
+            text-align: left; /* Changed from default */
+            font-weight: 600;
+            color: #475569;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 0.875rem;
+        }
         
         .financial-table th:nth-child(1) { width: 8%; }  /* Type */
         .financial-table th:nth-child(2) { width: 10%; } /* Reference */
@@ -649,6 +659,9 @@
         .financial-table th:nth-child(8) { width: 8%; }  /* Days */
         .financial-table th:nth-child(9) { width: 8%; }  /* Status */
         .financial-table th:nth-child(10) { width: 9%; } /* Actions */
+        .financial-table td:nth-child(10) {
+            text-align: center;
+        }
         
         .financial-table td {
             padding: 0.75rem 0.5rem;
@@ -657,6 +670,7 @@
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+            text-align: left; /* Ensure left alignment */
         }
     </style>
 </head>
@@ -664,8 +678,8 @@
     <!-- Sidebar Navigation -->
     <nav class="sidebar">
         <div class="sidebar-header">
-            <div class="logo">Fintelligence</div>
-            <div class="tagline">Complete Financial Intelligence</div>
+            <div class="logo">MeriDash</div>
+            <div class="tagline">Financial Intelligence Hub</div>
         </div>
         <button class="sidebar-toggle" onclick="toggleSidebar()">
             <i class="fas fa-chevron-left"></i>
@@ -1162,10 +1176,15 @@
         // Modal Functions
         function openAddModal() {
             document.getElementById('addModal').classList.add('show');
+            // Set default dates - only invoice date, leave due date blank
             const today = new Date().toISOString().split('T')[0];
-            const futureDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
             document.getElementById('transactionInvoiceDate').value = today;
-            document.getElementById('transactionDueDate').value = futureDate;
+            document.getElementById('transactionDueDate').value = ''; // Leave blank
+            
+            // Reset form state
+            delete document.getElementById('addTransactionForm').dataset.editId;
+            document.querySelector('.modal-title').textContent = 'Add Transaction';
+            document.querySelector('#addTransactionForm button[type="submit"]').textContent = 'Add Transaction';
         }
         
         function closeAddModal() {
@@ -1184,8 +1203,12 @@
         function addTransaction(event) {
             event.preventDefault();
             
-            const newTransaction = {
-                id: Date.now(),
+            const editId = document.getElementById('addTransactionForm').dataset.editId;
+            const paymentTerms = document.getElementById('transactionPaymentTerms').value;
+            const customTerms = document.getElementById('customPaymentTerms').value;
+            const finalTerms = paymentTerms === 'custom' ? customTerms : paymentTerms;
+            
+            const transactionData = {
                 type: document.getElementById('transactionType').value,
                 reference: document.getElementById('transactionReference').value,
                 company: document.getElementById('transactionCompany').value,
@@ -1193,10 +1216,30 @@
                 amount: parseFloat(document.getElementById('transactionAmount').value),
                 invoice_date: document.getElementById('transactionInvoiceDate').value,
                 due_date: document.getElementById('transactionDueDate').value,
-                status: document.getElementById('transactionStatus').value
+                status: document.getElementById('transactionStatus').value,
+                currency: document.getElementById('transactionCurrency').value,
+                payment_terms: finalTerms
             };
             
-            aparTransactions.push(newTransaction);
+            if (editId) {
+                // Update existing transaction
+                const index = aparTransactions.findIndex(t => t.id == editId);
+                if (index !== -1) {
+                    aparTransactions[index] = { ...aparTransactions[index], ...transactionData };
+                }
+                // Reset form
+                delete document.getElementById('addTransactionForm').dataset.editId;
+                document.querySelector('.modal-title').textContent = 'Add Transaction';
+                document.querySelector('#addTransactionForm button[type="submit"]').textContent = 'Add Transaction';
+            } else {
+                // Add new transaction
+                const newTransaction = {
+                    id: Date.now(),
+                    ...transactionData
+                };
+                aparTransactions.push(newTransaction);
+            }
+            
             saveAPARData();
             closeAddModal();
         }
@@ -1223,15 +1266,23 @@
         function renderAPARTable() {
             const tbody = document.getElementById('aparTableBody');
             
-            // Only proceed if the table body exists (AP/AR section is visible)
             if (!tbody) return;
             
             const filteredData = getFilteredTransactions();
             
             tbody.innerHTML = filteredData.map(transaction => {
-                const days = calculateDaysDifference(transaction.due_date);
-                const daysClass = days < 0 ? 'days-overdue' : days <= 7 ? 'days-due-soon' : 'days-current';
-                const daysText = days < 0 ? `${Math.abs(days)} overdue` : days === 0 ? 'Due today' : `${days} days`;
+                let dueDate = transaction.due_date;
+                
+                // Calculate due date if blank but have payment terms
+                if (!dueDate && transaction.payment_terms && transaction.invoice_date) {
+                    const invoiceDate = new Date(transaction.invoice_date);
+                    const dueDateCalc = new Date(invoiceDate.getTime() + (parseInt(transaction.payment_terms) * 24 * 60 * 60 * 1000));
+                    dueDate = dueDateCalc.toISOString().split('T')[0];
+                }
+                
+                const days = dueDate ? calculateDaysDifference(dueDate) : null;
+                const daysClass = days === null ? 'days-current' : (days < 0 ? 'days-overdue' : days <= 7 ? 'days-due-soon' : 'days-current');
+                const daysText = days === null ? 'No due date' : (days < 0 ? `${Math.abs(days)} overdue` : days === 0 ? 'Due today' : `${days} days`);
                 
                 return `
                     <tr>
@@ -1239,9 +1290,9 @@
                         <td>${transaction.reference}</td>
                         <td>${transaction.company}</td>
                         <td>${transaction.description}</td>
-                        <td>${formatCurrency(transaction.amount)}</td>
+                        <td>${formatCurrency(transaction.amount, transaction.currency || 'IDR')}</td>
                         <td>${formatDateIndonesian(transaction.invoice_date)}</td>
-                        <td>${formatDateIndonesian(transaction.due_date)}</td>
+                        <td>${dueDate ? formatDateIndonesian(dueDate) : '-'}</td>
                         <td><span class="days-badge ${daysClass}">${daysText}</span></td>
                         <td><span class="status-badge status-${transaction.status.toLowerCase()}">${transaction.status}</span></td>
                         <td>
@@ -1343,8 +1394,38 @@
         }
         
         function editTransaction(id) {
-            console.log('Edit transaction:', id);
-            // Will implement this later
+            const transaction = aparTransactions.find(t => t.id === id);
+            if (!transaction) return;
+            
+            // Populate the form with existing data
+            document.getElementById('transactionType').value = transaction.type;
+            document.getElementById('transactionReference').value = transaction.reference;
+            document.getElementById('transactionCompany').value = transaction.company;
+            document.getElementById('transactionDescription').value = transaction.description;
+            document.getElementById('transactionAmount').value = transaction.amount;
+            document.getElementById('transactionInvoiceDate').value = transaction.invoice_date;
+            document.getElementById('transactionDueDate').value = transaction.due_date || '';
+            document.getElementById('transactionStatus').value = transaction.status;
+            
+            // Set currency if exists
+            if (transaction.currency) {
+                selectCurrency(transaction.currency);
+            }
+            
+            // Set payment terms if exists
+            if (transaction.payment_terms) {
+                document.getElementById('transactionPaymentTerms').value = transaction.payment_terms;
+            }
+            
+            // Change modal title and button
+            document.querySelector('.modal-title').textContent = 'Edit Transaction';
+            document.querySelector('#addTransactionForm button[type="submit"]').textContent = 'Update Transaction';
+            
+            // Store the ID for updating
+            document.getElementById('addTransactionForm').dataset.editId = id;
+            
+            // Open modal
+            openAddModal();
         }
 
         // Currency selection
@@ -1488,6 +1569,28 @@
                         if (statusFilter) statusFilter.addEventListener('change', renderAPARTable);
                         if (dateFromFilter) dateFromFilter.addEventListener('change', renderAPARTable);
                         if (dateToFilter) dateToFilter.addEventListener('change', renderAPARTable);
+                        
+                        // Add event listener for invoice date auto-calculation
+                        const invoiceDateInput = document.getElementById('transactionInvoiceDate');
+                        if (invoiceDateInput) {
+                            invoiceDateInput.addEventListener('change', updateDueDateFromTerms);
+                        }
+                        
+                        // Add event listener for payment terms
+                        const paymentTermsSelect = document.getElementById('transactionPaymentTerms');
+                        if (paymentTermsSelect) {
+                            paymentTermsSelect.addEventListener('change', function() {
+                                const customInput = document.getElementById('customPaymentTerms');
+                                if (this.value === 'custom') {
+                                    customInput.style.display = 'block';
+                                    customInput.required = true;
+                                } else {
+                                    customInput.style.display = 'none';
+                                    customInput.required = false;
+                                    updateDueDateFromTerms();
+                                }
+                            });
+                        }
                     }, 100);
                 }
             });
