@@ -1422,14 +1422,14 @@
         }
         
         function updateAPARSummary() {
-            // Calculate totals (all unpaid)
+            // Calculate ALL unpaid transactions (total AR/AP)
             const allUnpaidAR = aparTransactions.filter(t => t.type === 'AR' && t.status !== 'Paid');
             const allUnpaidAP = aparTransactions.filter(t => t.type === 'AP' && t.status !== 'Paid');
             
             const totalARAll = allUnpaidAR.reduce((sum, t) => sum + t.amount, 0);
             const totalAPAll = allUnpaidAP.reduce((sum, t) => sum + t.amount, 0);
             
-            // Calculate overdue only
+            // Calculate ONLY overdue transactions (past due date)
             const overdueAR = allUnpaidAR.filter(t => {
                 let dueDate = t.due_date;
                 if (!dueDate && t.payment_terms && t.invoice_date) {
@@ -1456,7 +1456,7 @@
             // Calculate CCC
             const cccData = calculateCCC();
             
-            // Update display - only if elements exist
+            // Update display - check if elements exist
             if (document.getElementById('totalARAll')) {
                 document.getElementById('totalARAll').textContent = formatCurrency(totalARAll, 'IDR');
             }
