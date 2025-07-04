@@ -500,7 +500,7 @@
     <!-- Sidebar Navigation -->
     <nav class="sidebar">
         <div class="sidebar-header">
-            <div class="logo">Fintelligance</div>
+            <div class="logo">Fintelligence</div>
             <div class="tagline">Complete Financial Intelligence</div>
         </div>
         <button class="sidebar-toggle" onclick="toggleSidebar()">
@@ -687,7 +687,7 @@
 
             <div id="forecasting-section" class="section-content" style="display: none;">
                 <div class="feature-placeholder">
-                    <i class="placeholder-icon fas fa-crystal-ball"></i>
+                    <i class="nav-icon fas fa-chart-area"></i>
                     <div class="placeholder-text">Forecasting & Analytics</div>
                     <div class="placeholder-subtext">3-statement forecasts • Revenue & expense projections</div>
                 </div>
@@ -703,7 +703,7 @@
 
             <div id="reports-section" class="section-content" style="display: none;">
                 <div class="feature-placeholder">
-                    <i class="placeholder-icon fas fa-file-chart"></i>
+                    <i class="nav-icon fas fa-chart-bar"></i>
                     <div class="placeholder-text">Reports & Analytics</div>
                     <div class="placeholder-subtext">Financial ratios • Operational metrics • Unit economics</div>
                 </div>
@@ -882,14 +882,25 @@
             const overdueAR = ar.filter(t => new Date(t.due_date) < new Date()).length;
             const overdueAP = ap.filter(t => new Date(t.due_date) < new Date()).length;
         
-            document.getElementById('totalAR').textContent = formatCurrency(totalAR);
-            document.getElementById('totalAP').textContent = formatCurrency(totalAP);
-            document.getElementById('netCashImpact').textContent = formatCurrency(netCash);
+            // Only update if elements exist (AP/AR section is visible)
+            const totalARElement = document.getElementById('totalAR');
+            const totalAPElement = document.getElementById('totalAP');
+            const netCashImpactElement = document.getElementById('netCashImpact');
+            const arAgingElement = document.getElementById('arAging');
+            const apAgingElement = document.getElementById('apAging');
+            const cashImpactChangeElement = document.getElementById('cashImpactChange');
+        
+            if (totalARElement) totalARElement.textContent = formatCurrency(totalAR);
+            if (totalAPElement) totalAPElement.textContent = formatCurrency(totalAP);
+            if (netCashImpactElement) netCashImpactElement.textContent = formatCurrency(netCash);
             
-            document.getElementById('arAging').textContent = `${overdueAR} overdue invoices`;
-            document.getElementById('apAging').textContent = `${overdueAP} overdue bills`;
-            document.getElementById('cashImpactChange').textContent = netCash >= 0 ? 'Positive cash position' : 'Negative cash position';
-            document.getElementById('cashImpactChange').className = `metric-change ${netCash >= 0 ? 'positive' : 'negative'}`;
+            if (arAgingElement) arAgingElement.textContent = `${overdueAR} overdue invoices`;
+            if (apAgingElement) apAgingElement.textContent = `${overdueAP} overdue bills`;
+            
+            if (cashImpactChangeElement) {
+                cashImpactChangeElement.textContent = netCash >= 0 ? 'Positive cash position' : 'Negative cash position';
+                cashImpactChangeElement.className = `metric-change ${netCash >= 0 ? 'positive' : 'negative'}`;
+            }
         }
         
         // Modal Functions
@@ -1141,6 +1152,10 @@
                 // Add event listeners for AP/AR filters when that section is shown
                 if (this.dataset.section === 'ap-ar') {
                     setTimeout(() => {
+                        // Refresh AP/AR data when section becomes visible
+                        updateAPARSummary();
+                        renderAPARTable();
+                        
                         const typeFilter = document.getElementById('typeFilter');
                         const statusFilter = document.getElementById('statusFilter');
                         const dateFromFilter = document.getElementById('dateFromFilter');
