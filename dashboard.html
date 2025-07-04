@@ -634,34 +634,35 @@
             color: #1e293b;
         }
 
-        /* AP/AR Table Specific Styles */
+        /* AP/AR Table Specific Styles - Fixed Version */
         .table-container {
             overflow-x: auto;
             border-radius: 8px;
             border: 1px solid #e2e8f0;
             max-width: 100%;
             background: white;
+            position: relative;
         }
         
         .table-container .financial-table {
             width: 100%;
-            min-width: 1200px; /* Force horizontal scroll on smaller screens */
+            min-width: 1200px;
             border-collapse: collapse;
             background: white;
-            table-layout: fixed; /* This is crucial for fixed widths */
+            table-layout: auto; /* Changed from fixed to auto for better flexibility */
         }
         
-        /* Force specific column widths */
-        .table-container .financial-table colgroup col:nth-child(1) { width: 60px !important; }   /* Type */
-        .table-container .financial-table colgroup col:nth-child(2) { width: 100px !important; }  /* Reference */
-        .table-container .financial-table colgroup col:nth-child(3) { width: 150px !important; }  /* Company */
-        .table-container .financial-table colgroup col:nth-child(4) { width: 250px !important; }  /* Description */
-        .table-container .financial-table colgroup col:nth-child(5) { width: 120px !important; }  /* Amount */
-        .table-container .financial-table colgroup col:nth-child(6) { width: 110px !important; }  /* Invoice Date */
-        .table-container .financial-table colgroup col:nth-child(7) { width: 110px !important; }  /* Due Date */
-        .table-container .financial-table colgroup col:nth-child(8) { width: 90px !important; }   /* Days */
-        .table-container .financial-table colgroup col:nth-child(9) { width: 80px !important; }   /* Status */
-        .table-container .financial-table colgroup col:nth-child(10) { width: 90px !important; }  /* Actions */
+        /* Set minimum widths instead of fixed widths */
+        .table-container .financial-table th:nth-child(1) { min-width: 60px; width: 60px; }   /* Type */
+        .table-container .financial-table th:nth-child(2) { min-width: 100px; width: 100px; } /* Reference */
+        .table-container .financial-table th:nth-child(3) { min-width: 150px; width: 150px; } /* Company */
+        .table-container .financial-table th:nth-child(4) { min-width: 250px; width: 250px; } /* Description */
+        .table-container .financial-table th:nth-child(5) { min-width: 120px; width: 120px; } /* Amount */
+        .table-container .financial-table th:nth-child(6) { min-width: 110px; width: 110px; } /* Invoice Date */
+        .table-container .financial-table th:nth-child(7) { min-width: 110px; width: 110px; } /* Due Date */
+        .table-container .financial-table th:nth-child(8) { min-width: 90px; width: 90px; }   /* Days */
+        .table-container .financial-table th:nth-child(9) { min-width: 80px; width: 80px; }   /* Status */
+        .table-container .financial-table th:nth-child(10) { min-width: 90px; width: 90px; }  /* Actions */
         
         .table-container .financial-table th {
             background: #f8fafc !important;
@@ -675,6 +676,8 @@
             top: 0;
             z-index: 1;
             white-space: nowrap;
+            resize: horizontal; /* Allow column resizing */
+            overflow: hidden;
         }
         
         .table-container .financial-table td {
@@ -694,31 +697,17 @@
             text-align: center !important;
         }
         
-        /* Make description column expandable on hover */
-        .table-container .financial-table td:nth-child(4) {
-            position: relative;
-            cursor: pointer;
-        }
-        
-        .table-container .financial-table td:nth-child(4):hover {
-            overflow: visible;
-            white-space: normal;
-            background: #f8fafc;
-            z-index: 2;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        /* Debugging - Remove after testing */
+        /* Remove the debugging borders */
         .table-container .financial-table {
-            border: 3px solid red !important;
+            border: 1px solid #e2e8f0 !important; /* Back to normal border */
         }
         
         .table-container .financial-table th {
-            border: 1px solid blue !important;
+            border-right: 1px solid #e2e8f0 !important; /* Add column separators */
         }
         
         .table-container .financial-table td {
-            border: 1px solid green !important;
+            border-right: 1px solid #f1f5f9 !important; /* Add column separators */
         }
 
         .action-btn {
@@ -1065,18 +1054,6 @@
                     <!-- AP/AR Table -->
                     <div class="table-container">
                         <table id="aparTable" class="financial-table">
-                            <colgroup>
-                                <col style="width: 60px;">   <!-- Type -->
-                                <col style="width: 100px;">  <!-- Reference -->
-                                <col style="width: 150px;">  <!-- Company -->
-                                <col style="width: 250px;">  <!-- Description -->
-                                <col style="width: 120px;">  <!-- Amount -->
-                                <col style="width: 110px;">  <!-- Invoice Date -->
-                                <col style="width: 110px;">  <!-- Due Date -->
-                                <col style="width: 90px;">   <!-- Days -->
-                                <col style="width: 80px;">   <!-- Status -->
-                                <col style="width: 90px;">   <!-- Actions -->
-                            </colgroup>
                             <thead>
                                 <tr>
                                     <th>Type</th>
