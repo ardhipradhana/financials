@@ -1347,6 +1347,7 @@
         // Modal Functions
         function openAddModal() {
             document.getElementById('addModal').classList.add('show');
+            
             // Set default dates - only invoice date, leave due date blank
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('transactionInvoiceDate').value = today;
@@ -1356,6 +1357,22 @@
             delete document.getElementById('addTransactionForm').dataset.editId;
             document.querySelector('.modal-title').textContent = 'Add Transaction';
             document.querySelector('#addTransactionForm button[type="submit"]').textContent = 'Add Transaction';
+            
+            // Add event listeners (only once per modal open)
+            const invoiceDateInput = document.getElementById('transactionInvoiceDate');
+            const paymentTermsSelect = document.getElementById('transactionPaymentTerms');
+            
+            if (invoiceDateInput) {
+                // Remove existing listener and add new one
+                invoiceDateInput.removeEventListener('change', updateDueDateFromTerms);
+                invoiceDateInput.addEventListener('change', updateDueDateFromTerms);
+            }
+            
+            if (paymentTermsSelect) {
+                // Remove existing listener and add new one
+                paymentTermsSelect.removeEventListener('change', handlePaymentTermsChange);
+                paymentTermsSelect.addEventListener('change', handlePaymentTermsChange);
+            }
         }
         
         function closeAddModal() {
@@ -1409,6 +1426,20 @@
                 closeAddModal();
             } catch (error) {
                 // Error already handled in the save/update functions
+            }
+        }
+
+        function handlePaymentTermsChange() {
+            const customInput = document.getElementById('customPaymentTerms');
+            const paymentTermsSelect = document.getElementById('transactionPaymentTerms');
+            
+            if (paymentTermsSelect.value === 'custom') {
+                customInput.style.display = 'block';
+                customInput.required = true;
+            } else {
+                customInput.style.display = 'none';
+                customInput.required = false;
+                updateDueDateFromTerms();
             }
         }
         
@@ -1755,28 +1786,6 @@
                         if (statusFilter) statusFilter.addEventListener('change', renderAPARTable);
                         if (dateFromFilter) dateFromFilter.addEventListener('change', renderAPARTable);
                         if (dateToFilter) dateToFilter.addEventListener('change', renderAPARTable);
-                        
-                        // Add event listener for invoice date auto-calculation
-                        const invoiceDateInput = document.getElementById('transactionInvoiceDate');
-                        if (invoiceDateInput) {
-                            invoiceDateInput.addEventListener('change', updateDueDateFromTerms);
-                        }
-                        
-                        // Add event listener for payment terms
-                        const paymentTermsSelect = document.getElementById('transactionPaymentTerms');
-                        if (paymentTermsSelect) {
-                            paymentTermsSelect.addEventListener('change', function() {
-                                const customInput = document.getElementById('customPaymentTerms');
-                                if (this.value === 'custom') {
-                                    customInput.style.display = 'block';
-                                    customInput.required = true;
-                                } else {
-                                    customInput.style.display = 'none';
-                                    customInput.required = false;
-                                    updateDueDateFromTerms();
-                                }
-                            });
-                        }
                     }, 100);
                 }
             });
