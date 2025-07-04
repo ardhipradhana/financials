@@ -812,6 +812,36 @@
             background: #fef3c7;
             color: #92400e;
         }
+
+        .summary-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-top: 0.25rem;
+        }
+        
+        .badge-overdue {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .badge-positive {
+            background: #dcfce7;
+            color: #166534;
+        }
+        
+        .badge-negative {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .badge-neutral {
+            background: #f1f5f9;
+            color: #475569;
+        }
     </style>
 </head>
 <body>
@@ -880,14 +910,6 @@
 
         <!-- Content Area -->
         <div class="content-area">
-            <!-- Time Period Selector -->
-            <div class="time-selector">
-                <button class="time-btn" data-period="week">Weekly</button>
-                <button class="time-btn active" data-period="month">Monthly</button>
-                <button class="time-btn" data-period="quarter">Quarterly</button>
-                <button class="time-btn" data-period="custom">Custom Range</button>
-            </div>
-
             <!-- Dashboard Section -->
             <div id="dashboard-section" class="section-content">
                 <!-- Key Metrics Cards -->
@@ -979,27 +1001,27 @@
                             <div>
                                 <div class="metric-title">Total AR Overdue</div>
                                 <div class="metric-value" id="totalAR">Rp 0</div>
-                                <div class="metric-change" id="arAging">0 overdue invoices</div>
+                                <div class="summary-badge badge-overdue" id="arAging">0 overdue invoices</div>
                             </div>
                         </div>
                     </div>
-            
+                
                     <div class="metric-card">
                         <div class="metric-header">
                             <div>
                                 <div class="metric-title">Total AP Overdue</div>
                                 <div class="metric-value" id="totalAP">Rp 0</div>
-                                <div class="metric-change" id="apAging">0 overdue bills</div>
+                                <div class="summary-badge badge-overdue" id="apAging">0 overdue bills</div>
                             </div>
                         </div>
                     </div>
-            
+                
                     <div class="metric-card">
                         <div class="metric-header">
                             <div>
                                 <div class="metric-title">Net Cash Impact</div>
                                 <div class="metric-value" id="netCashImpact">Rp 0</div>
-                                <div class="metric-change" id="cashImpactChange">AR - AP</div>
+                                <div class="summary-badge badge-positive" id="cashImpactChange">AR - AP</div>
                             </div>
                         </div>
                     </div>
@@ -1377,10 +1399,18 @@
                 document.getElementById('totalAP').textContent = formatCurrency(totalAP, 'IDR');
                 document.getElementById('netCashImpact').textContent = formatCurrency(netCash, 'IDR');
                 
-                document.getElementById('arAging').textContent = `${overdueAR} overdue invoices`;
-                document.getElementById('apAging').textContent = `${overdueAP} overdue bills`;
-                document.getElementById('cashImpactChange').textContent = netCash >= 0 ? 'Positive cash position' : 'Negative cash position';
-                document.getElementById('cashImpactChange').className = `metric-change ${netCash >= 0 ? 'positive' : 'negative'}`;
+                // Update badges with proper classes
+                const arBadge = document.getElementById('arAging');
+                arBadge.textContent = `${overdueAR} overdue invoices`;
+                arBadge.className = `summary-badge ${overdueAR > 0 ? 'badge-overdue' : 'badge-neutral'}`;
+                
+                const apBadge = document.getElementById('apAging');
+                apBadge.textContent = `${overdueAP} overdue bills`;
+                apBadge.className = `summary-badge ${overdueAP > 0 ? 'badge-overdue' : 'badge-neutral'}`;
+                
+                const cashBadge = document.getElementById('cashImpactChange');
+                cashBadge.textContent = netCash >= 0 ? 'Positive cash position' : 'Negative cash position';
+                cashBadge.className = `summary-badge ${netCash >= 0 ? 'badge-positive' : 'badge-negative'}`;
             }
         }
         
@@ -1721,12 +1751,12 @@
         // Update currency formatting
         function formatCurrency(amount, currency = 'IDR') {
             if (currency === 'IDR') {
-                return new Intl.NumberFormat('id-ID', {
-                    style: 'currency',
-                    currency: 'IDR',
+                // Custom formatting for Indonesian Rupiah with proper thousands separator
+                const formatted = new Intl.NumberFormat('id-ID', {
                     minimumFractionDigits: 0,
                     maximumFractionDigits: 0
                 }).format(amount);
+                return `Rp ${formatted}`;
             } else {
                 return new Intl.NumberFormat('en-US', {
                     style: 'currency',
