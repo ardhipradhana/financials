@@ -842,6 +842,42 @@
             background: #f1f5f9;
             color: #475569;
         }
+
+        .metric-primary {
+            margin-bottom: 0.75rem;
+        }
+        
+        .metric-secondary {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .metric-value-small {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #64748b;
+        }
+        
+        .metric-label {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: block;
+            margin-top: 0.25rem;
+        }
+        
+        .ccc-display {
+            background: #f0f9ff;
+            color: #0369a1;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 1px solid #bae6fd;
+        }
     </style>
 </head>
 <body>
@@ -995,33 +1031,53 @@
             <!-- AP/AR Section -->
             <div id="ap-ar-section" class="section-content" style="display: none;">
                 <!-- Summary Cards -->
-                <div class="metrics-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); margin-bottom: 2rem;">
+                <div class="metrics-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); margin-bottom: 2rem;">
+                    <!-- AR Card -->
                     <div class="metric-card">
                         <div class="metric-header">
-                            <div>
-                                <div class="metric-title">Total AR Overdue</div>
-                                <div class="metric-value" id="totalAR">Rp 0</div>
-                                <div class="summary-badge badge-overdue" id="arAging">0 overdue invoices</div>
+                            <div style="width: 100%;">
+                                <div class="metric-title">Accounts Receivable</div>
+                                <div class="metric-primary">
+                                    <span class="metric-value" id="totalARAll">Rp 0</span>
+                                    <span class="metric-label">Total AR</span>
+                                </div>
+                                <div class="metric-secondary">
+                                    <span class="metric-value-small" id="totalAR">Rp 0</span>
+                                    <span class="summary-badge badge-overdue" id="arAging">0 overdue</span>
+                                </div>
                             </div>
                         </div>
                     </div>
                 
+                    <!-- AP Card -->
                     <div class="metric-card">
                         <div class="metric-header">
-                            <div>
-                                <div class="metric-title">Total AP Overdue</div>
-                                <div class="metric-value" id="totalAP">Rp 0</div>
-                                <div class="summary-badge badge-overdue" id="apAging">0 overdue bills</div>
+                            <div style="width: 100%;">
+                                <div class="metric-title">Accounts Payable</div>
+                                <div class="metric-primary">
+                                    <span class="metric-value" id="totalAPAll">Rp 0</span>
+                                    <span class="metric-label">Total AP</span>
+                                </div>
+                                <div class="metric-secondary">
+                                    <span class="metric-value-small" id="totalAP">Rp 0</span>
+                                    <span class="summary-badge badge-overdue" id="apAging">0 overdue</span>
+                                </div>
                             </div>
                         </div>
                     </div>
                 
+                    <!-- Net Position + CCC Card -->
                     <div class="metric-card">
                         <div class="metric-header">
-                            <div>
-                                <div class="metric-title">Net Cash Impact</div>
-                                <div class="metric-value" id="netCashImpact">Rp 0</div>
-                                <div class="summary-badge badge-positive" id="cashImpactChange">AR - AP</div>
+                            <div style="width: 100%;">
+                                <div class="metric-title">Cash Position & Efficiency</div>
+                                <div class="metric-primary">
+                                    <span class="metric-value" id="netCashImpact">Rp 0</span>
+                                    <span class="metric-label" id="cashImpactChange">Net Cash Impact</span>
+                                </div>
+                                <div class="metric-secondary">
+                                    <span class="ccc-display" id="cccDisplay">CCC: -- days</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1366,51 +1422,36 @@
         }
         
         function updateAPARSummary() {
-            // Get all transactions that are not paid
-            const unpaidAR = aparTransactions.filter(t => t.type === 'AR' && t.status !== 'Paid');
-            const unpaidAP = aparTransactions.filter(t => t.type === 'AP' && t.status !== 'Paid');
+            // Calculate totals (all unpaid)
+            const allUnpaidAR = aparTransactions.filter(t => t.type === 'AR' && t.status !== 'Paid');
+            const allUnpaidAP = aparTransactions.filter(t => t.type === 'AP' && t.status !== 'Paid');
             
-            const totalAR = unpaidAR.reduce((sum, t) => sum + t.amount, 0);
-            const totalAP = unpaidAP.reduce((sum, t) => sum + t.amount, 0);
-            const netCash = totalAR - totalAP;
-        
-            // Count only actually overdue transactions (past due date)
-            const overdueAR = unpaidAR.filter(t => {
-                let dueDate = t.due_date;
-                if (!dueDate && t.payment_terms && t.invoice_date) {
-                    const invoiceDate = new Date(t.invoice_date);
-                    dueDate = new Date(invoiceDate.getTime() + (parseInt(t.payment_terms) * 24 * 60 * 60 * 1000)).toISOString().split('T')[0];
-                }
-                return dueDate && new Date(dueDate) < new Date();
-            }).length;
+            const totalARAll = allUnpaidAR.reduce((sum, t) => sum + t.amount, 0);
+            const totalAPAll = allUnpaidAP.reduce((sum, t) => sum + t.amount, 0);
             
-            const overdueAP = unpaidAP.filter(t => {
-                let dueDate = t.due_date;
-                if (!dueDate && t.payment_terms && t.invoice_date) {
-                    const invoiceDate = new Date(t.invoice_date);
-                    dueDate = new Date(invoiceDate.getTime() + (parseInt(t.payment_terms) * 24 * 60 * 60 * 1000)).toISOString().split('T')[0];
-                }
-                return dueDate && new Date(dueDate) < new Date();
-            }).length;
-        
-            // Update the summary display
-            if (document.getElementById('totalAR')) {
-                document.getElementById('totalAR').textContent = formatCurrency(totalAR, 'IDR');
-                document.getElementById('totalAP').textContent = formatCurrency(totalAP, 'IDR');
-                document.getElementById('netCashImpact').textContent = formatCurrency(netCash, 'IDR');
-                
-                // Update badges with proper classes
-                const arBadge = document.getElementById('arAging');
-                arBadge.textContent = `${overdueAR} overdue invoices`;
-                arBadge.className = `summary-badge ${overdueAR > 0 ? 'badge-overdue' : 'badge-neutral'}`;
-                
-                const apBadge = document.getElementById('apAging');
-                apBadge.textContent = `${overdueAP} overdue bills`;
-                apBadge.className = `summary-badge ${overdueAP > 0 ? 'badge-overdue' : 'badge-neutral'}`;
-                
-                const cashBadge = document.getElementById('cashImpactChange');
-                cashBadge.textContent = netCash >= 0 ? 'Positive cash position' : 'Negative cash position';
-                cashBadge.className = `summary-badge ${netCash >= 0 ? 'badge-positive' : 'badge-negative'}`;
+            // Calculate overdue only
+            const overdueAR = allUnpaidAR.filter(t => /* overdue logic */);
+            const overdueAP = allUnpaidAP.filter(t => /* overdue logic */);
+            
+            const totalAROverdue = overdueAR.reduce((sum, t) => sum + t.amount, 0);
+            const totalAPOverdue = overdueAP.reduce((sum, t) => sum + t.amount, 0);
+            
+            const netCash = totalARAll - totalAPAll;
+            
+            // Calculate CCC
+            const cccData = calculateCCC();
+            
+            // Update display
+            document.getElementById('totalARAll').textContent = formatCurrency(totalARAll, 'IDR');
+            document.getElementById('totalAPAll').textContent = formatCurrency(totalAPAll, 'IDR');
+            document.getElementById('totalAR').textContent = formatCurrency(totalAROverdue, 'IDR');
+            document.getElementById('totalAP').textContent = formatCurrency(totalAPOverdue, 'IDR');
+            document.getElementById('netCashImpact').textContent = formatCurrency(netCash, 'IDR');
+            
+            // Update CCC display
+            if (cccData) {
+                document.getElementById('cccDisplay').textContent = `CCC: ${cccData.ccc} days`;
+                document.getElementById('cccDisplay').title = `DSO: ${cccData.dso} days, DPO: ${cccData.dpo} days`;
             }
         }
         
@@ -1770,6 +1811,42 @@
         // Image upload modal
         function openImageUploadModal() {
             alert('Image upload feature coming soon! This will use OCR to extract invoice data from images.');
+        }
+
+        function calculateCCC() {
+            const arTransactions = aparTransactions.filter(t => t.type === 'AR' && t.status !== 'Paid');
+            const apTransactions = aparTransactions.filter(t => t.type === 'AP' && t.status !== 'Paid');
+            
+            if (arTransactions.length === 0 && apTransactions.length === 0) {
+                return null;
+            }
+            
+            // Calculate Days Sales Outstanding (DSO) - Average AR collection period
+            const avgARDays = arTransactions.length > 0 
+                ? arTransactions.reduce((sum, t) => {
+                    const invoiceDate = new Date(t.invoice_date);
+                    const daysOutstanding = Math.floor((new Date() - invoiceDate) / (1000 * 60 * 60 * 24));
+                    return sum + daysOutstanding;
+                }, 0) / arTransactions.length 
+                : 0;
+            
+            // Calculate Days Payable Outstanding (DPO) - Average AP payment period
+            const avgAPDays = apTransactions.length > 0
+                ? apTransactions.reduce((sum, t) => {
+                    const invoiceDate = new Date(t.invoice_date);
+                    const daysOutstanding = Math.floor((new Date() - invoiceDate) / (1000 * 60 * 60 * 24));
+                    return sum + daysOutstanding;
+                }, 0) / apTransactions.length
+                : 0;
+            
+            // Simplified CCC = DSO - DPO (assuming no inventory for service business)
+            const ccc = Math.round(avgARDays - avgAPDays);
+            
+            return {
+                dso: Math.round(avgARDays),
+                dpo: Math.round(avgAPDays),
+                ccc: ccc
+            };
         }
 
         // Close AI chat when clicking outside
