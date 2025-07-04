@@ -1101,11 +1101,59 @@
             loadAPARData();
         });
 
-        // Add these after DOMContentLoaded
-        document.getElementById('typeFilter').addEventListener('change', renderAPARTable);
-        document.getElementById('statusFilter').addEventListener('change', renderAPARTable);
-        document.getElementById('dateFromFilter').addEventListener('change', renderAPARTable);
-        document.getElementById('dateToFilter').addEventListener('change', renderAPARTable);
+        // Navigation handling
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Remove active class from all links
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                
+                // Add active class to clicked link
+                this.classList.add('active');
+                
+                // Hide all sections
+                document.querySelectorAll('.section-content').forEach(section => {
+                    section.style.display = 'none';
+                });
+                
+                // Show selected section
+                const sectionId = this.dataset.section + '-section';
+                const section = document.getElementById(sectionId);
+                if (section) {
+                    section.style.display = 'block';
+                }
+                
+                // Update page title
+                const titles = {
+                    'dashboard': 'Dashboard Overview',
+                    'ap-ar': 'AP/AR Tracking',
+                    'statements': 'Financial Statements',
+                    'forecasting': 'Forecasting & Analytics',
+                    'benchmarking': 'Industry Benchmarking',
+                    'reports': 'Reports & Analytics',
+                    'scenarios': 'Scenario Analysis'
+                };
+                
+                const pageTitle = document.querySelector('.page-title');
+                pageTitle.textContent = titles[this.dataset.section] || 'Dashboard';
+                
+                // Add event listeners for AP/AR filters when that section is shown
+                if (this.dataset.section === 'ap-ar') {
+                    setTimeout(() => {
+                        const typeFilter = document.getElementById('typeFilter');
+                        const statusFilter = document.getElementById('statusFilter');
+                        const dateFromFilter = document.getElementById('dateFromFilter');
+                        const dateToFilter = document.getElementById('dateToFilter');
+                        
+                        if (typeFilter) typeFilter.addEventListener('change', renderAPARTable);
+                        if (statusFilter) statusFilter.addEventListener('change', renderAPARTable);
+                        if (dateFromFilter) dateFromFilter.addEventListener('change', renderAPARTable);
+                        if (dateToFilter) dateToFilter.addEventListener('change', renderAPARTable);
+                    }, 100);
+                }
+            });
+        });
         
     </script>
 </body>
