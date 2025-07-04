@@ -760,24 +760,107 @@
 
             <!-- AP/AR Section -->
             <div id="ap-ar-section" class="section-content" style="display: none;">
+                <!-- Summary Cards -->
+                <div class="metrics-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); margin-bottom: 2rem;">
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div>
+                                <div class="metric-title">Total AR Outstanding</div>
+                                <div class="metric-value" id="totalAR">$0</div>
+                                <div class="metric-change" id="arAging">0 overdue invoices</div>
+                            </div>
+                            <div class="metric-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                                <i class="fas fa-arrow-down"></i>
+                            </div>
+                        </div>
+                    </div>
+            
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div>
+                                <div class="metric-title">Total AP Outstanding</div>
+                                <div class="metric-value" id="totalAP">$0</div>
+                                <div class="metric-change" id="apAging">0 overdue bills</div>
+                            </div>
+                            <div class="metric-icon" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+                                <i class="fas fa-arrow-up"></i>
+                            </div>
+                        </div>
+                    </div>
+            
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div>
+                                <div class="metric-title">Net Cash Impact</div>
+                                <div class="metric-value" id="netCashImpact">$0</div>
+                                <div class="metric-change" id="cashImpactChange">AR - AP</div>
+                            </div>
+                            <div class="metric-icon icon-cash">
+                                <i class="fas fa-balance-scale"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            
+                <!-- Actions and Filters -->
                 <div class="dashboard-section">
                     <div class="section-header">
-                        <h3 class="section-title">Accounts Payable & Receivable</h3>
+                        <h3 class="section-title">AP/AR Transactions</h3>
                         <div class="section-actions">
-                            <button class="btn btn-secondary">
-                                <i class="fas fa-file-import"></i>
-                                Import Email Data
+                            <button class="btn btn-secondary" onclick="openUploadModal()">
+                                <i class="fas fa-file-upload"></i>
+                                Upload CSV/Excel
                             </button>
-                            <button class="btn btn-primary">
+                            <button class="btn btn-primary" onclick="openAddModal()">
                                 <i class="fas fa-plus"></i>
-                                Add Invoice
+                                Add Transaction
                             </button>
                         </div>
                     </div>
-                    <div class="feature-placeholder">
-                        <i class="placeholder-icon fas fa-exchange-alt"></i>
-                        <div class="placeholder-text">AP/AR Tracking Module</div>
-                        <div class="placeholder-subtext">Invoice management • Payment tracking • Aging reports</div>
+            
+                    <!-- Filters -->
+                    <div class="filters-section" style="margin-bottom: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+                        <select id="typeFilter" class="filter-select">
+                            <option value="">All Types</option>
+                            <option value="AR">Accounts Receivable</option>
+                            <option value="AP">Accounts Payable</option>
+                        </select>
+                        <select id="statusFilter" class="filter-select">
+                            <option value="">All Status</option>
+                            <option value="Outstanding">Outstanding</option>
+                            <option value="Paid">Paid</option>
+                            <option value="Overdue">Overdue</option>
+                            <option value="Partial">Partial</option>
+                        </select>
+                        <input type="date" id="dateFromFilter" class="filter-input" placeholder="From Date">
+                        <input type="date" id="dateToFilter" class="filter-input" placeholder="To Date">
+                        <button class="btn btn-secondary" onclick="clearFilters()">
+                            <i class="fas fa-times"></i>
+                            Clear
+                        </button>
+                    </div>
+            
+                    <!-- AP/AR Table -->
+                    <div class="table-container">
+                        <table id="aparTable" class="financial-table">
+                            <thead>
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Reference</th>
+                                    <th>Company</th>
+                                    <th>Description</th>
+                                    <th>Amount</th>
+                                    <th>Invoice Date</th>
+                                    <th>Due Date</th>
+                                    <th>Days</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="aparTableBody">
+                                <!-- Transactions will be populated here -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
