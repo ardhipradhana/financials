@@ -3434,67 +3434,6 @@
                 largestCollectionRef
             };
         }
-        
-        // Updated updateForecastSummary function
-        function updateForecastSummary(totalInflows, totalOutflows) {
-            const weeklyBurn = (totalOutflows - totalInflows) / 13;
-            const dailyBurn = weeklyBurn / 7;
-            const monthlyBurn = weeklyBurn * 4.33;
-            
-            // Calculate runway by finding when cash goes negative
-            let runwayDays = null;
-            
-            for (let i = 0; i < forecastData.length; i++) {
-                if (forecastData[i].cashPosition <= 0) {
-                    runwayDays = i * 7;
-                    break;
-                }
-            }
-            
-            let runwayWeeks, runwayMonths;
-            
-            if (runwayDays !== null) {
-                runwayWeeks = Math.round(runwayDays / 7);
-                runwayMonths = Math.round(runwayWeeks / 4.33);
-            } else {
-                runwayDays = runwayWeeks = runwayMonths = '∞';
-            }
-            
-            // Update runway displays
-            document.getElementById('cashRunwayDays').textContent = runwayDays === '∞' ? 'Indefinite' : `${runwayDays}`;
-            document.getElementById('cashRunwayWeeks').textContent = runwayWeeks === '∞' ? 'Indefinite' : `${runwayWeeks}`;
-            document.getElementById('cashRunwayMonths').textContent = runwayMonths === '∞' ? 'Indefinite' : `~${runwayMonths}`;
-            
-            // Update burn rate displays
-            document.getElementById('dailyBurn').textContent = formatCurrency(Math.abs(dailyBurn), 'IDR');
-            document.getElementById('weeklyBurn').textContent = formatCurrency(Math.abs(weeklyBurn), 'IDR');
-            document.getElementById('monthlyBurn').textContent = formatCurrency(Math.abs(monthlyBurn), 'IDR');
-            
-            // Update cash flow health indicators
-            const health = calculateCashFlowHealth();
-            
-            const trendElement = document.getElementById('cashFlowTrend');
-            trendElement.className = `trend-indicator-large ${health.trend}`;
-            
-            let trendIcon = 'fas fa-arrow-right';
-            let trendText = 'Stable';
-            
-            if (health.trend === 'improving') {
-                trendIcon = 'fas fa-arrow-up';
-                trendText = 'Improving';
-            } else if (health.trend === 'declining') {
-                trendIcon = 'fas fa-arrow-down';
-                trendText = 'Declining';
-            }
-            
-            trendElement.innerHTML = `<i class="${trendIcon}"></i> ${trendText}`;
-            
-            document.getElementById('biggestPayment').textContent = 
-                health.biggestPayment > 0 ? `${formatCurrency(health.biggestPayment, 'IDR')}` : 'No payments due';
-            
-            document.getElementById('largestCollection').textContent = 
-                health.largestCollection > 0 ? `${formatCurrency(health.largestCollection, 'IDR')}` : 'No collections due';
-        }
 
         // Starting Cash Supabase Functions
         async function loadStartingCash() {
