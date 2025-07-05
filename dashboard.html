@@ -3435,14 +3435,14 @@
             }
             
             // Update runway displays
-            document.getElementById('cashRunwayDays').textContent = runwayDays === '∞' ? 'Indefinite' : `${runwayDays} days`;
-            document.getElementById('cashRunwayWeeks').textContent = runwayWeeks === '∞' ? 'Indefinite' : `${runwayWeeks} weeks`;
-            document.getElementById('cashRunwayMonths').textContent = runwayMonths === '∞' ? 'Indefinite' : `~${runwayMonths} months`;
+            document.getElementById('cashRunwayDays').textContent = runwayDays === '∞' ? 'Indefinite' : `${runwayDays}`;
+            document.getElementById('cashRunwayWeeks').textContent = runwayWeeks === '∞' ? 'Indefinite' : `${runwayWeeks}`;
+            document.getElementById('cashRunwayMonths').textContent = runwayMonths === '∞' ? 'Indefinite' : `~${runwayMonths}`;
             
             // Update burn rate displays
-            document.getElementById('dailyBurn').textContent = formatCurrency(Math.abs(dailyBurn), 'IDR') + '/day';
-            document.getElementById('weeklyBurn').textContent = formatCurrency(Math.abs(weeklyBurn), 'IDR') + '/week';
-            document.getElementById('monthlyBurn').textContent = formatCurrency(Math.abs(monthlyBurn), 'IDR') + '/month';
+            document.getElementById('dailyBurn').textContent = formatCurrency(Math.abs(dailyBurn), 'IDR');
+            document.getElementById('weeklyBurn').textContent = formatCurrency(Math.abs(weeklyBurn), 'IDR');
+            document.getElementById('monthlyBurn').textContent = formatCurrency(Math.abs(monthlyBurn), 'IDR');
             
             // Update cash flow health indicators
             const health = calculateCashFlowHealth();
@@ -3464,10 +3464,10 @@
             trendElement.innerHTML = `<i class="${trendIcon}"></i> ${trendText}`;
             
             document.getElementById('biggestPayment').textContent = 
-                health.biggestPayment > 0 ? `${formatCurrency(health.biggestPayment, 'IDR')} largest payment` : 'No payments due';
+                health.biggestPayment > 0 ? `${formatCurrency(health.biggestPayment, 'IDR')}` : 'No payments due';
             
             document.getElementById('largestCollection').textContent = 
-                health.largestCollection > 0 ? `${formatCurrency(health.largestCollection, 'IDR')} largest collection` : 'No collections due';
+                health.largestCollection > 0 ? `${formatCurrency(health.largestCollection, 'IDR')}` : 'No collections due';
         }
 
         // Starting Cash Supabase Functions
