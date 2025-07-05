@@ -1131,16 +1131,15 @@
         }
         
         .aging-indicator {
-            display: inline-flex;
-            align-items: center;
-            padding: 0.25rem 0.5rem;
+            display: inline-block;
+            padding: 0.2rem 0.4rem;
             background: #fef3c7;
             color: #92400e;
-            border-radius: 6px;
-            font-size: 0.75rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
             font-weight: 500;
             border: 1px solid #fbbf24;
-            align-self: flex-start;
+            width: fit-content;
         }
         
         .efficiency-indicator {
@@ -1334,7 +1333,7 @@
                                     <span class="metric-value-large" id="totalARAll">Rp 0</span>
                                     <div class="metric-breakdown">
                                         <span class="breakdown-item">
-                                            <span class="breakdown-label">Unpaid:</span>
+                                            <span class="breakdown-label">Overdue:</span>
                                             <span class="breakdown-value" id="totalAR">Rp 0</span>
                                         </span>
                                         <span class="aging-indicator" id="arAging">0 overdue</span>
@@ -1357,7 +1356,7 @@
                                     <span class="metric-value-large" id="totalAPAll">Rp 0</span>
                                     <div class="metric-breakdown">
                                         <span class="breakdown-item">
-                                            <span class="breakdown-label">Unpaid:</span>
+                                            <span class="breakdown-label">Overdue:</span>
                                             <span class="breakdown-value" id="totalAP">Rp 0</span>
                                         </span>
                                         <span class="aging-indicator" id="apAging">0 overdue</span>
