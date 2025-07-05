@@ -4745,7 +4745,7 @@
                     layout: {
                         padding: {
                             top: 10,
-                            bottom: 60, // Space for legend below
+                            bottom: 100, // Space for legend below
                             left: 10,
                             right: 10
                         }
@@ -4788,6 +4788,9 @@
                             // Force single line
                             maxLines: 1,
                             onClick: null // Disable click events to prevent toggling
+                            margin: {
+                                bottom: -20 // Adjust this value for more/less space
+                            }
                         },
                         tooltip: {
                             callbacks: {
