@@ -4756,14 +4756,14 @@
                             position: 'bottom',
                             align: 'center',
                             labels: {
-                                padding: 5,
+                                padding: 20,
                                 usePointStyle: true,
                                 pointStyle: 'rect',
                                 font: {
                                     size: 11
                                 },
                                 boxWidth: 12,
-                                boxHeight: 12,
+                                boxHeight: 10,
                                 generateLabels: function(chart) {
                                     const data = chart.data;
                                     const total = data.datasets[0].data.reduce((sum, val) => sum + val, 0);
