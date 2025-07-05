@@ -1267,54 +1267,247 @@
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
         
-        .forecast-summary {
-            display: flex;
-            gap: 2rem;
-            align-items: flex-start;
+        .enhanced-forecast-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1rem;
         }
         
-        .summary-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
+        .summary-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            border: 1px solid #f1f5f9;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
         }
         
-        .summary-title {
+        .summary-card:hover {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            transform: translateY(-2px);
+        }
+        
+        .summary-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #3b82f6, #1e40af);
+        }
+        
+        .runway-card::before {
+            background: linear-gradient(90deg, #3b82f6, #1e40af);
+        }
+        
+        .burn-card::before {
+            background: linear-gradient(90deg, #f59e0b, #d97706);
+        }
+        
+        .health-card::before {
+            background: linear-gradient(90deg, #10b981, #059669);
+        }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.25rem;
+        }
+        
+        .card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+        
+        .runway-icon {
+            background: rgba(59, 130, 246, 0.1);
+            color: #1e40af;
+        }
+        
+        .burn-icon {
+            background: rgba(245, 158, 11, 0.1);
+            color: #d97706;
+        }
+        
+        .health-icon {
+            background: rgba(16, 185, 129, 0.1);
+            color: #059669;
+        }
+        
+        .card-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin: 0;
+        }
+        
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+        
+        .metric-item {
+            text-align: center;
+            padding: 0.75rem 0.5rem;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .metric-number {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 0.25rem;
+            line-height: 1.2;
+        }
+        
+        .metric-label {
             font-size: 0.75rem;
             color: #6b7280;
-            font-weight: 600;
+            font-weight: 500;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
         
-        .summary-values {
+        /* Health Card Specific Styles */
+        .health-content {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .trend-display {
+            text-align: center;
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .trend-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            font-size: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            background: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .trend-indicator i {
+            font-size: 0.875rem;
+        }
+        
+        .trend-indicator.improving {
+            color: #059669;
+            border: 1px solid #d1fae5;
+        }
+        
+        .trend-indicator.declining {
+            color: #dc2626;
+            border: 1px solid #fee2e2;
+        }
+        
+        .trend-indicator.stable {
+            color: #6b7280;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .trend-indicator.stable i {
+            transform: rotate(90deg);
+        }
+        
+        .payment-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        
+        .info-item {
             display: flex;
             flex-direction: column;
             gap: 0.25rem;
+            padding: 0.75rem;
+            background: #f8fafc;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
         }
         
-        .summary-value {
+        .info-label {
+            font-size: 0.75rem;
+            color: #6b7280;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .info-value {
             font-size: 0.875rem;
             font-weight: 600;
             color: #111827;
-            white-space: nowrap;
         }
         
-        /* Responsive adjustments */
+        /* Responsive Design */
         @media (max-width: 768px) {
-            .forecast-summary {
-                flex-direction: column;
+            .enhanced-forecast-summary {
+                grid-template-columns: 1fr;
                 gap: 1rem;
             }
             
-            .summary-values {
-                flex-direction: row;
-                gap: 1rem;
-                flex-wrap: wrap;
+            .summary-card {
+                padding: 1.25rem;
             }
             
-            .summary-value {
-                font-size: 0.8rem;
+            .metric-grid {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+            }
+            
+            .metric-item {
+                padding: 0.5rem;
+            }
+            
+            .metric-number {
+                font-size: 0.875rem;
+            }
+            
+            .health-content {
+                gap: 0.75rem;
+            }
+            
+            .payment-info {
+                gap: 0.5rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .card-header {
+                gap: 0.5rem;
+                margin-bottom: 1rem;
+            }
+            
+            .card-icon {
+                width: 32px;
+                height: 32px;
+                font-size: 0.875rem;
+            }
+            
+            .card-title {
+                font-size: 0.875rem;
             }
         }
         
@@ -1600,33 +1793,79 @@
                                     Refresh Forecast
                                 </button>
                             </div>
-                            <div class="forecast-summary">
-                                <div class="summary-group">
-                                    <div class="summary-title">Cash Runway</div>
-                                    <div class="summary-values">
-                                        <span class="summary-value" id="cashRunwayDays">-- days</span>
-                                        <span class="summary-value" id="cashRunwayWeeks">-- weeks</span>
-                                        <span class="summary-value" id="cashRunwayMonths">~-- months</span>
+                            <div class="enhanced-forecast-summary">
+                                <!-- Runway Metrics -->
+                                <div class="summary-card runway-card">
+                                    <div class="card-header">
+                                        <div class="card-icon runway-icon">
+                                            <i class="fas fa-hourglass-half"></i>
+                                        </div>
+                                        <div class="card-title">Cash Runway</div>
+                                    </div>
+                                    <div class="metric-grid">
+                                        <div class="metric-item">
+                                            <div class="metric-number" id="cashRunwayDays">-- days</div>
+                                            <div class="metric-label">Days</div>
+                                        </div>
+                                        <div class="metric-item">
+                                            <div class="metric-number" id="cashRunwayWeeks">-- weeks</div>
+                                            <div class="metric-label">Weeks</div>
+                                        </div>
+                                        <div class="metric-item">
+                                            <div class="metric-number" id="cashRunwayMonths">~-- months</div>
+                                            <div class="metric-label">Months</div>
+                                        </div>
                                     </div>
                                 </div>
-                                
-                                <div class="summary-group">
-                                    <div class="summary-title">Cash Burn Rate</div>
-                                    <div class="summary-values">
-                                        <span class="summary-value" id="dailyBurn">Rp -- /day</span>
-                                        <span class="summary-value" id="weeklyBurn">Rp -- /week</span>
-                                        <span class="summary-value" id="monthlyBurn">Rp -- /month</span>
+                            
+                                <!-- Burn Rate Metrics -->
+                                <div class="summary-card burn-card">
+                                    <div class="card-header">
+                                        <div class="card-icon burn-icon">
+                                            <i class="fas fa-fire"></i>
+                                        </div>
+                                        <div class="card-title">Cash Burn Rate</div>
+                                    </div>
+                                    <div class="metric-grid">
+                                        <div class="metric-item">
+                                            <div class="metric-number" id="dailyBurn">Rp -- /day</div>
+                                            <div class="metric-label">Daily</div>
+                                        </div>
+                                        <div class="metric-item">
+                                            <div class="metric-number" id="weeklyBurn">Rp -- /week</div>
+                                            <div class="metric-label">Weekly</div>
+                                        </div>
+                                        <div class="metric-item">
+                                            <div class="metric-number" id="monthlyBurn">Rp -- /month</div>
+                                            <div class="metric-label">Monthly</div>
+                                        </div>
                                     </div>
                                 </div>
-                                
-                                <div class="summary-group">
-                                    <div class="summary-title">Cash Flow Health</div>
-                                    <div class="summary-values">
-                                        <span class="summary-value trend-indicator" id="cashFlowTrend">
-                                            <i class="fas fa-arrow-up"></i> Improving
-                                        </span>
-                                        <span class="summary-value" id="biggestPayment">Rp -- largest payment</span>
-                                        <span class="summary-value" id="largestCollection">Rp -- largest collection</span>
+                            
+                                <!-- Health Metrics -->
+                                <div class="summary-card health-card">
+                                    <div class="card-header">
+                                        <div class="card-icon health-icon">
+                                            <i class="fas fa-chart-line"></i>
+                                        </div>
+                                        <div class="card-title">Cash Flow Health</div>
+                                    </div>
+                                    <div class="health-content">
+                                        <div class="trend-display">
+                                            <span class="trend-indicator" id="cashFlowTrend">
+                                                <i class="fas fa-arrow-up"></i> Improving
+                                            </span>
+                                        </div>
+                                        <div class="payment-info">
+                                            <div class="info-item">
+                                                <span class="info-label">Largest Payment:</span>
+                                                <span class="info-value" id="biggestPayment">Rp -- largest payment</span>
+                                            </div>
+                                            <div class="info-item">
+                                                <span class="info-label">Largest Collection:</span>
+                                                <span class="info-value" id="largestCollection">Rp -- largest collection</span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
