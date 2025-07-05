@@ -2849,12 +2849,20 @@
         let cashflowChart = null;
         let forecastData = [];
         
-        function initializeCashFlowForecast() {
+        async function initializeCashFlowForecast() {
+            // Load starting cash from Supabase first
+            await loadStartingCash();
+            
             // Format the starting cash input with thousand separators
             const startingCashInput = document.getElementById('startingCash');
             if (startingCashInput) {
                 startingCashInput.addEventListener('input', formatCurrencyInput);
-                startingCashInput.addEventListener('blur', refreshForecast);
+                startingCashInput.addEventListener('blur', async function() {
+                    // Save to Supabase when user finishes editing
+                    const amount = getStartingCash();
+                    await saveStartingCash(amount);
+                    refreshForecast();
+                });
             }
             
             generateForecastData();
@@ -3250,6 +3258,76 @@
             
             document.getElementById('largestCollection').textContent = 
                 health.largestCollection > 0 ? `${formatCurrency(health.largestCollection, 'IDR')} largest collection` : 'No collections due';
+        }
+
+        // Starting Cash Supabase Functions
+        async function loadStartingCash() {
+            try {
+                const { data, error } = await supabase
+                    .from('starting_cash_meridash')
+                    .select('*')
+                    .order('id', { ascending: false })
+                    .limit(1);
+                
+                if (error) throw error;
+                
+                if (data && data.length > 0) {
+                    const startingCash = data[0].amount;
+                    const input = document.getElementById('startingCash');
+                    if (input) {
+                        // Format with thousand separators for display
+                        input.value = startingCash.toLocaleString('en-US');
+                    }
+                    console.log('Loaded starting cash:', startingCash);
+                    return startingCash;
+                } else {
+                    // No record exists, create default
+                    await saveStartingCash(100000000);
+                    return 100000000;
+                }
+            } catch (error) {
+                console.error('Error loading starting cash:', error);
+                return 100000000; // Fallback to default
+            }
+        }
+        
+        async function saveStartingCash(amount) {
+            try {
+                // Check if record exists
+                const { data: existing, error: selectError } = await supabase
+                    .from('starting_cash_meridash')
+                    .select('id')
+                    .limit(1);
+                
+                if (selectError) throw selectError;
+                
+                if (existing && existing.length > 0) {
+                    // Update existing record
+                    const { error: updateError } = await supabase
+                        .from('starting_cash_meridash')
+                        .update({ 
+                            amount: amount,
+                            updated_at: new Date().toISOString()
+                        })
+                        .eq('id', existing[0].id);
+                    
+                    if (updateError) throw updateError;
+                } else {
+                    // Insert new record
+                    const { error: insertError } = await supabase
+                        .from('starting_cash_meridash')
+                        .insert([{ 
+                            amount: amount,
+                            currency: 'IDR'
+                        }]);
+                    
+                    if (insertError) throw insertError;
+                }
+                
+                console.log('Saved starting cash:', amount);
+            } catch (error) {
+                console.error('Error saving starting cash:', error);
+            }
         }
         
     </script>
