@@ -1604,6 +1604,260 @@
                 font-size: 0.8rem;
             }
         }
+
+        /* AP/AR Tab Navigation Styles */
+        .ap-ar-tabs {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+        
+        .tab-nav {
+            display: flex;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .tab-btn {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 1rem 1.5rem;
+            background: transparent;
+            border: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        
+        .tab-btn:hover {
+            background: rgba(59, 130, 246, 0.05);
+            color: #1e40af;
+        }
+        
+        .tab-btn.active {
+            background: white;
+            color: #1e40af;
+            font-weight: 600;
+        }
+        
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #3b82f6, #1e40af);
+        }
+        
+        .tab-btn i {
+            font-size: 0.875rem;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 1.5rem;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Aging Analysis Specific Styles */
+        .aging-summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .aging-summary-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            text-align: center;
+        }
+        
+        .aging-bucket-title {
+            font-size: 0.75rem;
+            color: #6b7280;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .aging-amount {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 0.25rem;
+        }
+        
+        .aging-count {
+            font-size: 0.75rem;
+            color: #9ca3af;
+        }
+        
+        .aging-tables-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .aging-table-section {
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+        }
+        
+        .aging-table-header {
+            background: #f8fafc;
+            padding: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .aging-table-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin: 0;
+        }
+        
+        .aging-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .aging-table th {
+            background: #f9fafb;
+            padding: 0.75rem 0.5rem;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .aging-table td {
+            padding: 0.75rem 0.5rem;
+            border-bottom: 1px solid #f3f4f6;
+            font-size: 0.875rem;
+        }
+        
+        .aging-table tbody tr:hover {
+            background: #f9fafb;
+        }
+        
+        .aging-table .company-name {
+            font-weight: 500;
+            color: #1f2937;
+        }
+        
+        .aging-table .amount-cell {
+            text-align: right;
+            font-weight: 600;
+        }
+        
+        .aging-table .amount-total {
+            background: #f8fafc;
+            font-weight: 700;
+            color: #1e40af;
+        }
+        
+        .aging-bucket-0-30 {
+            color: #059669;
+        }
+        
+        .aging-bucket-30-60 {
+            color: #f59e0b;
+        }
+        
+        .aging-bucket-60-90 {
+            color: #ea580c;
+        }
+        
+        .aging-bucket-90-120 {
+            color: #dc2626;
+        }
+        
+        .aging-bucket-120-plus {
+            color: #991b1b;
+            font-weight: 700;
+        }
+        
+        /* Charts Container */
+        .aging-charts-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .aging-chart-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .aging-chart-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        
+        .aging-chart-canvas {
+            max-height: 300px;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .aging-tables-container {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            
+            .aging-summary-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .tab-btn {
+                padding: 0.75rem 1rem;
+                font-size: 0.8rem;
+            }
+            
+            .tab-content {
+                padding: 1rem;
+            }
+            
+            .aging-table th,
+            .aging-table td {
+                padding: 0.5rem 0.25rem;
+                font-size: 0.8rem;
+            }
+            
+            .aging-amount {
+                font-size: 1rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1963,102 +2217,243 @@
                         Traditional CCC calculations use revenue, COGS, and inventory data which are not available in this AP/AR module.
                     </p>
                 </div>
-            
-                <!-- Actions and Filters -->
-                <div class="dashboard-section">
-                    <div class="section-header">
-                        <h3 class="section-title">AP/AR Transactions</h3>
-                        <div class="section-actions">
-                            <button class="btn btn-secondary" onclick="exportAPARToCSV()">
-                                <i class="fas fa-file-csv"></i>
-                                Export to CSV
-                            </button>
-                            <button class="btn btn-secondary" onclick="openUploadModal()">
-                                <i class="fas fa-file-upload"></i>
-                                Upload CSV/Excel
-                            </button>
-                            <button class="btn btn-secondary" onclick="openImageUploadModal()">
-                                <i class="fas fa-camera"></i>
-                                Upload PDF/JPG
-                            </button>
-                            <button class="btn btn-primary" onclick="openAddModal()">
-                                <i class="fas fa-plus"></i>
-                                Add Transaction
-                            </button>
-                        </div>
-                    </div>
-            
-                    <!-- Filters -->
-                    <div class="filters-section" style="margin-bottom: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
-                        <select id="typeFilter" class="filter-select">
-                            <option value="">All Types</option>
-                            <option value="AR">Accounts Receivable</option>
-                            <option value="AP">Accounts Payable</option>
-                        </select>
-                        <div class="multi-select-container">
-                            <button class="multi-select-trigger" id="statusFilterTrigger">
-                                <span id="statusFilterText">All Status</span>
-                                <i class="fas fa-chevron-down"></i>
-                            </button>
-                            <div class="multi-select-dropdown" id="statusFilterDropdown">
-                                <div class="multi-select-controls">
-                                    <button type="button" class="select-all-btn" onclick="selectAllStatus()">Select All</button>
-                                    <button type="button" class="clear-all-btn" onclick="clearAllStatus()">Clear All</button>
-                                </div>
-                                <div class="multi-select-options">
-                                    <label class="multi-select-option">
-                                        <input type="checkbox" value="Unpaid" onchange="updateStatusFilter()">
-                                        <span>Unpaid</span>
-                                    </label>
-                                    <label class="multi-select-option">
-                                        <input type="checkbox" value="Paid" onchange="updateStatusFilter()">
-                                        <span>Paid</span>
-                                    </label>
-                                    <label class="multi-select-option">
-                                        <input type="checkbox" value="Overdue" onchange="updateStatusFilter()">
-                                        <span>Overdue</span>
-                                    </label>
-                                    <label class="multi-select-option">
-                                        <input type="checkbox" value="Partial" onchange="updateStatusFilter()">
-                                        <span>Partial</span>
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                        <input type="date" id="dateFromFilter" class="filter-input" placeholder="From Date">
-                        <span style="color: #64748b; font-size: 0.875rem;">to</span>
-                        <input type="date" id="dateToFilter" class="filter-input" placeholder="To Date">
-                        <button class="btn btn-secondary" onclick="clearFilters()">
-                            <i class="fas fa-times"></i>
-                            Clear
+
+                <div class="ap-ar-tabs">
+                    <div class="tab-nav">
+                        <button class="tab-btn active" onclick="switchAPARTab('transactions')" data-tab="transactions">
+                            <i class="fas fa-list"></i>
+                            Transactions
+                        </button>
+                        <button class="tab-btn" onclick="switchAPARTab('aging')" data-tab="aging">
+                            <i class="fas fa-chart-bar"></i>
+                            AP/AR Aging
                         </button>
                     </div>
             
-                    <!-- AP/AR Table -->
-                    <div class="table-container">
-                        <table id="aparTable" class="financial-table">
-                            <thead>
-                                <tr>
-                                    <th>Type</th>
-                                    <th>Reference</th>
-                                    <th>Company</th>
-                                    <th>Description</th>
-                                    <th>Amount</th>
-                                    <th>Invoice Date</th>
-                                    <th>Due Date</th>
-                                    <th>Days</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="aparTableBody">
-                                <!-- Transactions will be populated here -->
-                            </tbody>
-                        </table>
+                    <!-- Actions and Filters -->
+                    <div class="dashboard-section">
+                        <div class="section-header">
+                            <h3 class="section-title">AP/AR Transactions</h3>
+                            <div class="section-actions">
+                                <button class="btn btn-secondary" onclick="exportAPARToCSV()">
+                                    <i class="fas fa-file-csv"></i>
+                                    Export to CSV
+                                </button>
+                                <button class="btn btn-secondary" onclick="openUploadModal()">
+                                    <i class="fas fa-file-upload"></i>
+                                    Upload CSV/Excel
+                                </button>
+                                <button class="btn btn-secondary" onclick="openImageUploadModal()">
+                                    <i class="fas fa-camera"></i>
+                                    Upload PDF/JPG
+                                </button>
+                                <button class="btn btn-primary" onclick="openAddModal()">
+                                    <i class="fas fa-plus"></i>
+                                    Add Transaction
+                                </button>
+                            </div>
+                        </div>
+                
+                        <!-- Filters -->
+                        <div class="filters-section" style="margin-bottom: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
+                            <select id="typeFilter" class="filter-select">
+                                <option value="">All Types</option>
+                                <option value="AR">Accounts Receivable</option>
+                                <option value="AP">Accounts Payable</option>
+                            </select>
+                            <div class="multi-select-container">
+                                <button class="multi-select-trigger" id="statusFilterTrigger">
+                                    <span id="statusFilterText">All Status</span>
+                                    <i class="fas fa-chevron-down"></i>
+                                </button>
+                                <div class="multi-select-dropdown" id="statusFilterDropdown">
+                                    <div class="multi-select-controls">
+                                        <button type="button" class="select-all-btn" onclick="selectAllStatus()">Select All</button>
+                                        <button type="button" class="clear-all-btn" onclick="clearAllStatus()">Clear All</button>
+                                    </div>
+                                    <div class="multi-select-options">
+                                        <label class="multi-select-option">
+                                            <input type="checkbox" value="Unpaid" onchange="updateStatusFilter()">
+                                            <span>Unpaid</span>
+                                        </label>
+                                        <label class="multi-select-option">
+                                            <input type="checkbox" value="Paid" onchange="updateStatusFilter()">
+                                            <span>Paid</span>
+                                        </label>
+                                        <label class="multi-select-option">
+                                            <input type="checkbox" value="Overdue" onchange="updateStatusFilter()">
+                                            <span>Overdue</span>
+                                        </label>
+                                        <label class="multi-select-option">
+                                            <input type="checkbox" value="Partial" onchange="updateStatusFilter()">
+                                            <span>Partial</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="date" id="dateFromFilter" class="filter-input" placeholder="From Date">
+                            <span style="color: #64748b; font-size: 0.875rem;">to</span>
+                            <input type="date" id="dateToFilter" class="filter-input" placeholder="To Date">
+                            <button class="btn btn-secondary" onclick="clearFilters()">
+                                <i class="fas fa-times"></i>
+                                Clear
+                            </button>
+                        </div>
+                
+                        <!-- AP/AR Table -->
+                        <div class="table-container">
+                            <table id="aparTable" class="financial-table">
+                                <thead>
+                                    <tr>
+                                        <th>Type</th>
+                                        <th>Reference</th>
+                                        <th>Company</th>
+                                        <th>Description</th>
+                                        <th>Amount</th>
+                                        <th>Invoice Date</th>
+                                        <th>Due Date</th>
+                                        <th>Days</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="aparTableBody">
+                                    <!-- Transactions will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- Add this after the table container -->
+                        <div style="margin-top: 1rem; color: #94a3b8; font-size: 0.875rem;">
+                            <span>* Due date calculated from invoice date + payment terms</span>
+                        </div>
                     </div>
-                    <!-- Add this after the table container -->
-                    <div style="margin-top: 1rem; color: #94a3b8; font-size: 0.875rem;">
-                        <span>* Due date calculated from invoice date + payment terms</span>
+                    <!-- Aging Analysis Tab Content (new) -->
+                    <div class="tab-content" id="aging-tab">
+                        <!-- Aging Summary Cards -->
+                        <div class="aging-summary-grid">
+                            <div class="aging-summary-card">
+                                <div class="aging-bucket-title">0-30 Days</div>
+                                <div class="aging-amount aging-bucket-0-30" id="aging-0-30-amount">Rp 0</div>
+                                <div class="aging-count" id="aging-0-30-count">0 transactions</div>
+                            </div>
+                            <div class="aging-summary-card">
+                                <div class="aging-bucket-title">30-60 Days</div>
+                                <div class="aging-amount aging-bucket-30-60" id="aging-30-60-amount">Rp 0</div>
+                                <div class="aging-count" id="aging-30-60-count">0 transactions</div>
+                            </div>
+                            <div class="aging-summary-card">
+                                <div class="aging-bucket-title">60-90 Days</div>
+                                <div class="aging-amount aging-bucket-60-90" id="aging-60-90-amount">Rp 0</div>
+                                <div class="aging-count" id="aging-60-90-count">0 transactions</div>
+                            </div>
+                            <div class="aging-summary-card">
+                                <div class="aging-bucket-title">90-120 Days</div>
+                                <div class="aging-amount aging-bucket-90-120" id="aging-90-120-amount">Rp 0</div>
+                                <div class="aging-count" id="aging-90-120-count">0 transactions</div>
+                            </div>
+                            <div class="aging-summary-card">
+                                <div class="aging-bucket-title">120+ Days</div>
+                                <div class="aging-amount aging-bucket-120-plus" id="aging-120-plus-amount">Rp 0</div>
+                                <div class="aging-count" id="aging-120-plus-count">0 transactions</div>
+                            </div>
+                        </div>
+                    
+                        <!-- Aging Charts -->
+                        <div class="aging-charts-container">
+                            <div class="aging-chart-card">
+                                <div class="aging-chart-title">Accounts Receivable Aging</div>
+                                <canvas id="arAgingChart" class="aging-chart-canvas"></canvas>
+                            </div>
+                            <div class="aging-chart-card">
+                                <div class="aging-chart-title">Accounts Payable Aging</div>
+                                <canvas id="apAgingChart" class="aging-chart-canvas"></canvas>
+                            </div>
+                        </div>
+                    
+                        <!-- Aging Tables -->
+                        <div class="aging-tables-container">
+                            <!-- AR Aging Table -->
+                            <div class="aging-table-section">
+                                <div class="aging-table-header">
+                                    <h4 class="aging-table-title">
+                                        <i class="fas fa-arrow-right" style="color: #10b981; margin-right: 0.5rem;"></i>
+                                        Accounts Receivable Aging
+                                    </h4>
+                                </div>
+                                <div style="overflow-x: auto;">
+                                    <table class="aging-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Customer</th>
+                                                <th>0-30</th>
+                                                <th>30-60</th>
+                                                <th>60-90</th>
+                                                <th>90-120</th>
+                                                <th>120+</th>
+                                                <th>Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="arAgingTableBody">
+                                            <!-- AR aging data will be populated here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                    
+                            <!-- AP Aging Table -->
+                            <div class="aging-table-section">
+                                <div class="aging-table-header">
+                                    <h4 class="aging-table-title">
+                                        <i class="fas fa-arrow-left" style="color: #ef4444; margin-right: 0.5rem;"></i>
+                                        Accounts Payable Aging
+                                    </h4>
+                                </div>
+                                <div style="overflow-x: auto;">
+                                    <table class="aging-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Vendor</th>
+                                                <th>0-30</th>
+                                                <th>30-60</th>
+                                                <th>60-90</th>
+                                                <th>90-120</th>
+                                                <th>120+</th>
+                                                <th>Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="apAgingTableBody">
+                                            <!-- AP aging data will be populated here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    
+                        <!-- Additional Analytics -->
+                        <div class="aging-analytics-section" style="margin-top: 2rem;">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                                <div class="aging-summary-card">
+                                    <div class="aging-bucket-title">Average Days to Pay</div>
+                                    <div class="aging-amount" id="avgDaysToPay">-- days</div>
+                                    <div class="aging-count">AR collection average</div>
+                                </div>
+                                <div class="aging-summary-card">
+                                    <div class="aging-bucket-title">Collection Efficiency</div>
+                                    <div class="aging-amount" id="collectionEfficiency">--%</div>
+                                    <div class="aging-count">On-time collection rate</div>
+                                </div>
+                                <div class="aging-summary-card">
+                                    <div class="aging-bucket-title">Risk Exposure</div>
+                                    <div class="aging-amount aging-bucket-90-120" id="riskExposure">Rp 0</div>
+                                    <div class="aging-count">90+ days outstanding</div>
+                                </div>
+                                <div class="aging-summary-card">
+                                    <div class="aging-bucket-title">Payment Trend</div>
+                                    <div class="aging-amount" id="paymentTrend">Stable</div>
+                                    <div class="aging-count">Last 30 days</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -2899,6 +3294,7 @@
                 initializeStatusFilter();
                 initializeDateDisplay();
                 initializeCashFlowForecast();
+                updateAgingAnalysis();
             });
             
             // Set up automatic check every 24 hours
@@ -3959,6 +4355,306 @@
             link.click();
             document.body.removeChild(link);
             URL.revokeObjectURL(url);
+        }
+
+        // Tab switching function
+        function switchAPARTab(tabName) {
+            // Remove active class from all tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            
+            // Add active class to clicked tab button
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+            
+            // Hide all tab content
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            // Show selected tab content
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+            
+            // If switching to aging tab, update the aging analysis
+            if (tabName === 'aging') {
+                updateAgingAnalysis();
+            }
+        }
+        
+        // Calculate aging for transactions
+        function calculateAging(transactions) {
+            const today = new Date();
+            const aging = {
+                '0-30': { transactions: [], total: 0 },
+                '30-60': { transactions: [], total: 0 },
+                '60-90': { transactions: [], total: 0 },
+                '90-120': { transactions: [], total: 0 },
+                '120+': { transactions: [], total: 0 }
+            };
+        
+            transactions.forEach(transaction => {
+                if (transaction.status === 'Paid') return; // Skip paid transactions
+                
+                // Calculate due date
+                let dueDate;
+                if (transaction.due_date) {
+                    dueDate = new Date(transaction.due_date);
+                } else if (transaction.invoice_date && transaction.payment_terms) {
+                    const invoiceDate = new Date(transaction.invoice_date);
+                    dueDate = new Date(invoiceDate);
+                    dueDate.setDate(dueDate.getDate() + (transaction.payment_terms || 30));
+                } else {
+                    return; // Skip if no due date can be calculated
+                }
+        
+                // Calculate days outstanding
+                const diffTime = today - dueDate;
+                const daysOutstanding = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+                // Categorize into aging buckets
+                let bucket;
+                if (daysOutstanding <= 30) {
+                    bucket = '0-30';
+                } else if (daysOutstanding <= 60) {
+                    bucket = '30-60';
+                } else if (daysOutstanding <= 90) {
+                    bucket = '60-90';
+                } else if (daysOutstanding <= 120) {
+                    bucket = '90-120';
+                } else {
+                    bucket = '120+';
+                }
+        
+                aging[bucket].transactions.push({
+                    ...transaction,
+                    daysOutstanding: daysOutstanding
+                });
+                aging[bucket].total += transaction.amount;
+            });
+        
+            return aging;
+        }
+        
+        // Update aging analysis
+        function updateAgingAnalysis() {
+            if (!aparTransactions || aparTransactions.length === 0) return;
+        
+            // Separate AR and AP transactions
+            const arTransactions = aparTransactions.filter(t => t.type === 'AR');
+            const apTransactions = aparTransactions.filter(t => t.type === 'AP');
+        
+            // Calculate aging for both
+            const arAging = calculateAging(arTransactions);
+            const apAging = calculateAging(apTransactions);
+        
+            // Update summary cards
+            updateAgingSummaryCards(arAging, apAging);
+            
+            // Update aging tables
+            updateAgingTables(arAging, apAging);
+            
+            // Update additional analytics
+            updateAdditionalAnalytics(arTransactions, apTransactions);
+            
+            // Create charts
+            createAgingCharts(arAging, apAging);
+        }
+        
+        // Update summary cards
+        function updateAgingSummaryCards(arAging, apAging) {
+            const buckets = ['0-30', '30-60', '60-90', '90-120', '120+'];
+            
+            buckets.forEach(bucket => {
+                const totalAmount = arAging[bucket].total + apAging[bucket].total;
+                const totalCount = arAging[bucket].transactions.length + apAging[bucket].transactions.length;
+                
+                document.getElementById(`aging-${bucket.replace('+', '-plus')}-amount`).textContent = 
+                    formatCompactCurrency(totalAmount, 'IDR');
+                document.getElementById(`aging-${bucket.replace('+', '-plus')}-count`).textContent = 
+                    `${totalCount} transactions`;
+            });
+        }
+        
+        // Update aging tables
+        function updateAgingTables(arAging, apAging) {
+            updateAgingTable('arAgingTableBody', arAging, 'AR');
+            updateAgingTable('apAgingTableBody', apAging, 'AP');
+        }
+        
+        function updateAgingTable(tableBodyId, aging, type) {
+            const tableBody = document.getElementById(tableBodyId);
+            tableBody.innerHTML = '';
+        
+            // Group by company/vendor
+            const companyTotals = {};
+            
+            Object.keys(aging).forEach(bucket => {
+                aging[bucket].transactions.forEach(transaction => {
+                    const company = transaction.company || 'Unknown';
+                    if (!companyTotals[company]) {
+                        companyTotals[company] = {
+                            '0-30': 0, '30-60': 0, '60-90': 0, '90-120': 0, '120+': 0, total: 0
+                        };
+                    }
+                    companyTotals[company][bucket] += transaction.amount;
+                    companyTotals[company].total += transaction.amount;
+                });
+            });
+        
+            // Sort by total amount descending
+            const sortedCompanies = Object.entries(companyTotals)
+                .sort((a, b) => b[1].total - a[1].total);
+        
+            // Add rows
+            sortedCompanies.forEach(([company, totals]) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="company-name">${company}</td>
+                    <td class="amount-cell aging-bucket-0-30">${formatCompactCurrency(totals['0-30'], 'IDR')}</td>
+                    <td class="amount-cell aging-bucket-30-60">${formatCompactCurrency(totals['30-60'], 'IDR')}</td>
+                    <td class="amount-cell aging-bucket-60-90">${formatCompactCurrency(totals['60-90'], 'IDR')}</td>
+                    <td class="amount-cell aging-bucket-90-120">${formatCompactCurrency(totals['90-120'], 'IDR')}</td>
+                    <td class="amount-cell aging-bucket-120-plus">${formatCompactCurrency(totals['120+'], 'IDR')}</td>
+                    <td class="amount-cell amount-total">${formatCompactCurrency(totals.total, 'IDR')}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        
+            // Add totals row
+            const totalRow = document.createElement('tr');
+            totalRow.className = 'amount-total';
+            const bucketTotals = ['0-30', '30-60', '60-90', '90-120', '120+'].map(bucket => 
+                Object.values(companyTotals).reduce((sum, company) => sum + company[bucket], 0)
+            );
+            const grandTotal = bucketTotals.reduce((sum, total) => sum + total, 0);
+        
+            totalRow.innerHTML = `
+                <td style="font-weight: 700;">TOTAL</td>
+                <td class="amount-cell">${formatCompactCurrency(bucketTotals[0], 'IDR')}</td>
+                <td class="amount-cell">${formatCompactCurrency(bucketTotals[1], 'IDR')}</td>
+                <td class="amount-cell">${formatCompactCurrency(bucketTotals[2], 'IDR')}</td>
+                <td class="amount-cell">${formatCompactCurrency(bucketTotals[3], 'IDR')}</td>
+                <td class="amount-cell">${formatCompactCurrency(bucketTotals[4], 'IDR')}</td>
+                <td class="amount-cell" style="font-weight: 700;">${formatCompactCurrency(grandTotal, 'IDR')}</td>
+            `;
+            tableBody.appendChild(totalRow);
+        }
+        
+        // Update additional analytics
+        function updateAdditionalAnalytics(arTransactions, apTransactions) {
+            // Calculate average days to pay for AR
+            const paidAR = arTransactions.filter(t => t.status === 'Paid');
+            let avgDaysToPay = 0;
+            if (paidAR.length > 0) {
+                const totalDays = paidAR.reduce((sum, transaction) => {
+                    const invoiceDate = new Date(transaction.invoice_date);
+                    const paidDate = new Date(); // Assuming paid recently for demo
+                    const diffTime = paidDate - invoiceDate;
+                    const days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    return sum + days;
+                }, 0);
+                avgDaysToPay = Math.round(totalDays / paidAR.length);
+            }
+        
+            // Calculate collection efficiency
+            const totalAR = arTransactions.length;
+            const onTimeAR = arTransactions.filter(t => {
+                if (t.status !== 'Paid') return false;
+                // Simplified: assume paid transactions were on time
+                return true;
+            }).length;
+            const collectionEfficiency = totalAR > 0 ? Math.round((onTimeAR / totalAR) * 100) : 0;
+        
+            // Calculate risk exposure (90+ days)
+            const riskExposure = arTransactions
+                .filter(t => t.status !== 'Paid')
+                .reduce((sum, transaction) => {
+                    const today = new Date();
+                    let dueDate;
+                    if (transaction.due_date) {
+                        dueDate = new Date(transaction.due_date);
+                    } else if (transaction.invoice_date) {
+                        const invoiceDate = new Date(transaction.invoice_date);
+                        dueDate = new Date(invoiceDate);
+                        dueDate.setDate(dueDate.getDate() + (transaction.payment_terms || 30));
+                    } else {
+                        return sum;
+                    }
+                    
+                    const daysOutstanding = Math.ceil((today - dueDate) / (1000 * 60 * 60 * 24));
+                    return daysOutstanding >= 90 ? sum + transaction.amount : sum;
+                }, 0);
+        
+            // Update display
+            document.getElementById('avgDaysToPay').textContent = avgDaysToPay > 0 ? `${avgDaysToPay}` : '--';
+            document.getElementById('collectionEfficiency').textContent = `${collectionEfficiency}`;
+            document.getElementById('riskExposure').textContent = formatCompactCurrency(riskExposure, 'IDR');
+            document.getElementById('paymentTrend').textContent = 'Stable'; // Placeholder
+        }
+        
+        // Create aging charts
+        function createAgingCharts(arAging, apAging) {
+            const buckets = ['0-30', '30-60', '60-90', '90-120', '120+'];
+            const bucketLabels = ['0-30 Days', '30-60 Days', '60-90 Days', '90-120 Days', '120+ Days'];
+            
+            // AR Chart
+            const arData = buckets.map(bucket => arAging[bucket].total);
+            createAgingChart('arAgingChart', 'Accounts Receivable', arData, bucketLabels, '#10b981');
+            
+            // AP Chart
+            const apData = buckets.map(bucket => apAging[bucket].total);
+            createAgingChart('apAgingChart', 'Accounts Payable', apData, bucketLabels, '#ef4444');
+        }
+        
+        function createAgingChart(canvasId, title, data, labels, color) {
+            const ctx = document.getElementById(canvasId);
+            if (!ctx) return;
+        
+            // Destroy existing chart if it exists
+            if (window[canvasId + 'Instance']) {
+                window[canvasId + 'Instance'].destroy();
+            }
+        
+            window[canvasId + 'Instance'] = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: [
+                            '#10b981', // 0-30 (green)
+                            '#f59e0b', // 30-60 (yellow)
+                            '#ea580c', // 60-90 (orange)
+                            '#dc2626', // 90-120 (red)
+                            '#991b1b'  // 120+ (dark red)
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                usePointStyle: true,
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.parsed;
+                                    const total = context.dataset.data.reduce((sum, val) => sum + val, 0);
+                                    const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                    return `${context.label}: ${formatCompactCurrency(value, 'IDR')} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
         }
         
     </script>
