@@ -2970,7 +2970,7 @@
             
             if (runwayDays !== null) {
                 runwayWeeks = Math.floor(runwayDays / 7);
-                runwayMonths = Math.floor(runwayDays / 30);
+                runwayMonths = Math.floor(runwayWeeks / 4.33);
             } else {
                 runwayDays = runwayWeeks = runwayMonths = '∞';
             }
@@ -3129,18 +3129,29 @@
                 };
             }
             
-            // Calculate cash flow trend (compare first 4 weeks vs last 4 weeks)
-            const firstQuarter = forecastData.slice(0, 4);
-            const lastQuarter = forecastData.slice(-4);
-            
-            const firstQuarterAvg = firstQuarter.reduce((sum, week) => sum + (week.inflows - week.outflows), 0) / 4;
-            const lastQuarterAvg = lastQuarter.reduce((sum, week) => sum + (week.inflows - week.outflows), 0) / 4;
+            // Calculate cash flow trend based on actual cash position trajectory
+            const firstWeekCash = forecastData[0]?.cashPosition || 0;
+            const lastWeekCash = forecastData[forecastData.length - 1]?.cashPosition || 0;
+            const midPointCash = forecastData[Math.floor(forecastData.length / 2)]?.cashPosition || 0;
             
             let trend = 'stable';
-            if (lastQuarterAvg > firstQuarterAvg * 1.1) {
-                trend = 'improving';
-            } else if (lastQuarterAvg < firstQuarterAvg * 0.9) {
+            
+            // Check if cash goes negative (immediate declining trend)
+            const goesNegative = forecastData.some(week => week.cashPosition < 0);
+            
+            if (goesNegative) {
                 trend = 'declining';
+            } else {
+                // Compare overall trajectory
+                const overallChange = (lastWeekCash - firstWeekCash) / firstWeekCash;
+                
+                if (overallChange > 0.1) { // More than 10% improvement
+                    trend = 'improving';
+                } else if (overallChange < -0.1) { // More than 10% decline
+                    trend = 'declining';
+                } else {
+                    trend = 'stable';
+                }
             }
             
             // Find biggest upcoming payment and largest expected collection
