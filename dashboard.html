@@ -4722,24 +4722,317 @@
 
         // Tab switching function
         function switchAPARTab(tabName) {
-            // Remove active class from all tab buttons
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
             
-            // Add active class to clicked tab button
-            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
-            
-            // Hide all tab content
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
             
             // Show selected tab content
-            document.getElementById(`${tabName}-tab`).classList.add('active');
+            document.getElementById(tabName + '-tab').classList.add('active');
             
-            // Load appropriate content
-            if (tabName === 'aging') {
-                updateAgingAnalysis();
-            } else if (tabName === 'scenarios') {
-                initializeScenarios();
+            // Add active class to clicked button
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+            
+            // Initialize scenario analysis if scenarios tab is selected
+            if (tabName === 'scenarios') {
+                setTimeout(() => {
+                    initializeScenarioAnalysis();
+                }, 100);
             }
+        }
+        // Scenario Analysis - Drag & Drop Functionality
+        let scenarioData = [];
+        let originalData = [];
+        let isDragging = false;
+        
+        // Initialize scenario analysis when tab is switched
+        function initializeScenarioAnalysis() {
+            // Load sample data (in real app, this would come from your AP/AR data)
+            loadScenarioTransactions();
+            setupDragAndDrop();
+            updateScenarioChart();
+        }
+        
+        function loadScenarioTransactions() {
+            // Sample data - replace with real AP/AR data
+            originalData = [
+                {
+                    id: 'ap1',
+                    type: 'AP',
+                    vendor: 'Vendor ABC Corp',
+                    amount: 50000,
+                    description: 'Office Equipment Purchase',
+                    originalWeek: 2,
+                    currentWeek: 2,
+                    category: 'Equipment'
+                },
+                {
+                    id: 'ap2',
+                    type: 'AP',
+                    vendor: 'Vendor XYZ Ltd',
+                    amount: 30000,
+                    description: 'Marketing Services',
+                    originalWeek: 3,
+                    currentWeek: 3,
+                    category: 'Services'
+                },
+                {
+                    id: 'ar1',
+                    type: 'AR',
+                    vendor: 'Customer A Inc',
+                    amount: 80000,
+                    description: 'Consulting Project',
+                    originalWeek: 1,
+                    currentWeek: 1,
+                    category: 'Revenue'
+                },
+                {
+                    id: 'ar2',
+                    type: 'AR',
+                    vendor: 'Customer B Ltd',
+                    amount: 45000,
+                    description: 'Software License',
+                    originalWeek: 4,
+                    currentWeek: 4,
+                    category: 'Revenue'
+                }
+            ];
+            
+            scenarioData = [...originalData];
+            renderScenarioTransactions();
+        }
+        
+        function renderScenarioTransactions() {
+            const apContainer = document.getElementById('apTransactionsContainer');
+            const arContainer = document.getElementById('arTransactionsContainer');
+            
+            if (!apContainer || !arContainer) return;
+            
+            // Clear containers
+            apContainer.innerHTML = '';
+            arContainer.innerHTML = '';
+            
+            // Render AP transactions
+            const apTransactions = scenarioData.filter(t => t.type === 'AP');
+            apTransactions.forEach(transaction => {
+                const card = createTransactionCard(transaction);
+                apContainer.appendChild(card);
+            });
+            
+            // Render AR transactions
+            const arTransactions = scenarioData.filter(t => t.type === 'AR');
+            arTransactions.forEach(transaction => {
+                const card = createTransactionCard(transaction);
+                arContainer.appendChild(card);
+            });
+            
+            // Create week drop zones if they don't exist
+            createWeekDropZones();
+        }
+        
+        function createTransactionCard(transaction) {
+            const card = document.createElement('div');
+            card.className = 'transaction-card';
+            card.draggable = true;
+            card.dataset.transactionId = transaction.id;
+            
+            const changeIndicator = transaction.currentWeek !== transaction.originalWeek 
+                ? `<span class="week-change">→ Week ${transaction.currentWeek}</span>` 
+                : '';
+            
+            card.innerHTML = `
+                <div class="card-header">
+                    <div class="vendor-name">${transaction.vendor}</div>
+                    <div class="amount">$${transaction.amount.toLocaleString()}</div>
+                </div>
+                <div class="card-body">
+                    <div class="description">${transaction.description}</div>
+                    <div class="timing">
+                        <span class="week-info">Week ${transaction.currentWeek}</span>
+                        ${changeIndicator}
+                    </div>
+                </div>
+                <div class="drag-handle">⋮⋮</div>
+            `;
+            
+            return card;
+        }
+        
+        function createWeekDropZones() {
+            const rightPanel = document.querySelector('.scenarios-right');
+            if (!rightPanel) return;
+            
+            let dropZonesContainer = document.getElementById('weekDropZones');
+            if (!dropZonesContainer) {
+                dropZonesContainer = document.createElement('div');
+                dropZonesContainer.id = 'weekDropZones';
+                dropZonesContainer.className = 'week-drop-zones';
+                
+                // Insert after the forecast chart
+                const forecastChart = document.querySelector('.scenario-forecast');
+                forecastChart.after(dropZonesContainer);
+            }
+            
+            dropZonesContainer.innerHTML = `
+                <div class="drop-zones-header">
+                    <h5>Drop to Reschedule</h5>
+                </div>
+                <div class="drop-zones-grid">
+                    ${Array.from({length: 8}, (_, i) => `
+                        <div class="week-dropzone" data-week="${i + 1}">
+                            <div class="week-label">Week ${i + 1}</div>
+                            <div class="drop-indicator">Drop here</div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+        
+        function setupDragAndDrop() {
+            document.addEventListener('dragstart', handleDragStart);
+            document.addEventListener('dragover', handleDragOver);
+            document.addEventListener('drop', handleDrop);
+            document.addEventListener('dragend', handleDragEnd);
+        }
+        
+        function handleDragStart(e) {
+            if (!e.target.classList.contains('transaction-card')) return;
+            
+            isDragging = true;
+            e.target.style.opacity = '0.6';
+            e.target.style.transform = 'scale(1.02)';
+            e.dataTransfer.setData('text/plain', e.target.dataset.transactionId);
+            
+            // Highlight drop zones
+            document.querySelectorAll('.week-dropzone').forEach(zone => {
+                zone.classList.add('highlight');
+            });
+        }
+        
+        function handleDragOver(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+            
+            if (e.target.closest('.week-dropzone')) {
+                e.target.closest('.week-dropzone').classList.add('drag-over');
+            }
+        }
+        
+        function handleDrop(e) {
+            e.preventDefault();
+            
+            const dropZone = e.target.closest('.week-dropzone');
+            if (!dropZone) return;
+            
+            const transactionId = e.dataTransfer.getData('text/plain');
+            const newWeek = parseInt(dropZone.dataset.week);
+            
+            // Update scenario data
+            const transaction = scenarioData.find(t => t.id === transactionId);
+            if (transaction) {
+                transaction.currentWeek = newWeek;
+                
+                // Visual feedback
+                dropZone.style.background = '#10b981';
+                dropZone.style.color = 'white';
+                setTimeout(() => {
+                    dropZone.style.background = '';
+                    dropZone.style.color = '';
+                }, 200);
+                
+                // Re-render and update
+                renderScenarioTransactions();
+                updateScenarioChart();
+                updateImpactAnalysis();
+            }
+        }
+        
+        function handleDragEnd(e) {
+            if (!e.target.classList.contains('transaction-card')) return;
+            
+            isDragging = false;
+            e.target.style.opacity = '';
+            e.target.style.transform = '';
+            
+            // Remove highlights
+            document.querySelectorAll('.week-dropzone').forEach(zone => {
+                zone.classList.remove('highlight', 'drag-over');
+            });
+        }
+        
+        function updateImpactAnalysis() {
+            const impactList = document.getElementById('scenarioImpactList');
+            if (!impactList) return;
+            
+            const changes = scenarioData.filter(t => t.currentWeek !== t.originalWeek);
+            
+            if (changes.length === 0) {
+                impactList.innerHTML = `
+                    <div class="impact-item neutral">
+                        <span class="impact-icon">ℹ️</span>
+                        <span>Move transactions to see impact analysis</span>
+                    </div>
+                `;
+                return;
+            }
+            
+            let impacts = [];
+            
+            changes.forEach(change => {
+                if (change.type === 'AP') {
+                    if (change.currentWeek > change.originalWeek) {
+                        impacts.push({
+                            type: 'risk',
+                            icon: '⚠️',
+                            text: `Late payment risk: ${change.vendor} - Check contract for penalties`
+                        });
+                    } else {
+                        impacts.push({
+                            type: 'benefit',
+                            icon: '✓',
+                            text: `Early payment opportunity: ${change.vendor} - Check for discounts`
+                        });
+                    }
+                } else {
+                    if (change.currentWeek > change.originalWeek) {
+                        impacts.push({
+                            type: 'risk',
+                            icon: '!',
+                            text: `Collection delay: ${change.vendor} - Monitor cash flow impact`
+                        });
+                    } else {
+                        impacts.push({
+                            type: 'benefit',
+                            icon: '✓',
+                            text: `Early collection: ${change.vendor} - Improved cash position`
+                        });
+                    }
+                }
+            });
+            
+            impactList.innerHTML = impacts.map(impact => `
+                <div class="impact-item ${impact.type}">
+                    <span class="impact-icon">${impact.icon}</span>
+                    <span>${impact.text}</span>
+                </div>
+            `).join('');
+        }
+        
+        function resetScenario() {
+            scenarioData = [...originalData];
+            renderScenarioTransactions();
+            updateScenarioChart();
+            updateImpactAnalysis();
+        }
+        
+        function updateScenarioChart() {
+            // This will integrate with your existing chart when ready
+            console.log('Chart updated with scenario data');
         }
         
         // Calculate aging for transactions
