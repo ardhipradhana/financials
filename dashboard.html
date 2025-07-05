@@ -1808,7 +1808,7 @@
         
         .aging-chart-card {
             background: white;
-            padding: 1rem;
+            padding: 1rem 1rem 0.25rem 1rem;
             border-radius: 8px;
             border: 1px solid #e2e8f0;
         }
@@ -4785,12 +4785,8 @@
                                     });
                                 }
                             },
-                            // Force single line
                             maxLines: 1,
-                            onClick: null // Disable click events to prevent toggling
-                            margin: {
-                                bottom: -20 // Adjust this value for more/less space
-                            }
+                            onClick: null
                         },
                         tooltip: {
                             callbacks: {
