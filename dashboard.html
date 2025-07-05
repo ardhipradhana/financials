@@ -4664,14 +4664,42 @@
                     layout: {
                         padding: {
                             top: 50,
-                            bottom: 50,
+                            bottom: 80, // Increase bottom padding for legend
                             left: 80,
                             right: 80
                         }
                     },
                     plugins: {
                         legend: {
-                            display: false
+                            display: true, // Show legend
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                usePointStyle: true,
+                                font: {
+                                    size: 11
+                                },
+                                generateLabels: function(chart) {
+                                    const data = chart.data;
+                                    const total = data.datasets[0].data.reduce((sum, val) => sum + val, 0);
+                                    
+                                    return data.labels.map((label, index) => {
+                                        const value = data.datasets[0].data[index];
+                                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                        const compactValue = formatCompactCurrency(value, 'IDR');
+                                        
+                                        return {
+                                            text: `${label}: ${compactValue} (${percentage}%)`,
+                                            fillStyle: data.datasets[0].backgroundColor[index],
+                                            strokeStyle: '#ffffff',
+                                            lineWidth: 2,
+                                            pointStyle: 'circle',
+                                            hidden: false,
+                                            index: index
+                                        };
+                                    });
+                                }
+                            }
                         },
                         tooltip: {
                             callbacks: {
