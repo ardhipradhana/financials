@@ -3176,12 +3176,10 @@
             
             // Calculate runway by finding when cash goes negative
             let runwayDays = null;
-            const today = new Date();
             
             for (let i = 0; i < forecastData.length; i++) {
                 if (forecastData[i].cashPosition <= 0) {
-                    // Calculate exact days until cash runs out
-                    runwayDays = i * 7; // Week number * 7 days
+                    runwayDays = i * 7;
                     break;
                 }
             }
@@ -3189,21 +3187,47 @@
             let runwayWeeks, runwayMonths;
             
             if (runwayDays !== null) {
-                runwayWeeks = Math.round(runwayDays / 7);
-                runwayMonths = Math.round(runwayWeeks / 4.33);
+                runwayWeeks = Math.floor(runwayDays / 7);
+                runwayMonths = Math.ceil(runwayWeeks / 4);
             } else {
                 runwayDays = runwayWeeks = runwayMonths = '∞';
             }
             
-            // Update runway displays
-            document.getElementById('cashRunwayDays').textContent = runwayDays === '∞' ? 'Indefinite' : `${runwayDays}`;
-            document.getElementById('cashRunwayWeeks').textContent = runwayWeeks === '∞' ? 'Indefinite' : `${runwayWeeks}`;
-            document.getElementById('cashRunwayMonths').textContent = runwayMonths === '∞' ? 'Indefinite' : `~${runwayMonths}`;
+            // Update runway displays (using compact format)
+            document.getElementById('cashRunwayDays').textContent = runwayDays === '∞' ? 'Indefinite' : formatCompactNumber(runwayDays);
+            document.getElementById('cashRunwayWeeks').textContent = runwayWeeks === '∞' ? 'Indefinite' : formatCompactNumber(runwayWeeks);
+            document.getElementById('cashRunwayMonths').textContent = runwayMonths === '∞' ? 'Indefinite' : formatCompactNumber(runwayMonths);
             
-            // Update burn rate displays
-            document.getElementById('dailyBurn').textContent = formatCurrency(Math.abs(dailyBurn), 'IDR');
-            document.getElementById('weeklyBurn').textContent = formatCurrency(Math.abs(weeklyBurn), 'IDR');
-            document.getElementById('monthlyBurn').textContent = formatCurrency(Math.abs(monthlyBurn), 'IDR');
+            // Update burn rate displays (using compact currency format)
+            document.getElementById('dailyBurn').textContent = formatCompactCurrency(Math.abs(dailyBurn), 'IDR');
+            document.getElementById('weeklyBurn').textContent = formatCompactCurrency(Math.abs(weeklyBurn), 'IDR');
+            document.getElementById('monthlyBurn').textContent = formatCompactCurrency(Math.abs(monthlyBurn), 'IDR');
+            
+            // Update cash flow health indicators
+            const health = calculateCashFlowHealth();
+            
+            const trendElement = document.getElementById('cashFlowTrend');
+            trendElement.className = `trend-indicator-large ${health.trend}`;
+            
+            let trendIcon = 'fas fa-arrow-right';
+            let trendText = 'Stable';
+            
+            if (health.trend === 'improving') {
+                trendIcon = 'fas fa-arrow-up';
+                trendText = 'Improving';
+            } else if (health.trend === 'declining') {
+                trendIcon = 'fas fa-arrow-down';
+                trendText = 'Declining';
+            }
+            
+            trendElement.innerHTML = `<i class="${trendIcon}"></i> ${trendText}`;
+            
+            // Update payment info (using compact currency format)
+            document.getElementById('biggestPayment').textContent = 
+                health.biggestPayment > 0 ? formatCompactCurrency(health.biggestPayment, 'IDR') : 'No payments due';
+            
+            document.getElementById('largestCollection').textContent = 
+                health.largestCollection > 0 ? formatCompactCurrency(health.largestCollection, 'IDR') : 'No collections due';
         }
         
         function createCashFlowChart() {
@@ -3539,6 +3563,59 @@
                 console.log('Saved starting cash:', amount);
             } catch (error) {
                 console.error('Error saving starting cash:', error);
+            }
+        }
+
+        // Compact number formatting function
+        function formatCompactNumber(number) {
+            if (number === 0) return '0';
+            if (number === '∞' || number === 'Indefinite') return number;
+            
+            const absNumber = Math.abs(number);
+            const sign = number < 0 ? '-' : '';
+            
+            if (absNumber >= 1000000000) {
+                // Billions
+                const billions = absNumber / 1000000000;
+                return sign + billions.toFixed(1) + ' Bn';
+            } else if (absNumber >= 1000000) {
+                // Millions
+                const millions = absNumber / 1000000;
+                return sign + millions.toFixed(1) + ' Mn';
+            } else if (absNumber >= 1000) {
+                // Thousands
+                const thousands = absNumber / 1000;
+                return sign + thousands.toFixed(0) + ' K';
+            } else {
+                // Less than 1000
+                return sign + absNumber.toString();
+            }
+        }
+        
+        // Compact currency formatting function
+        function formatCompactCurrency(amount, currency = 'IDR') {
+            if (amount === 0) return 'Rp 0';
+            if (amount === '∞' || amount === 'Indefinite') return amount;
+            
+            const absAmount = Math.abs(amount);
+            const sign = amount < 0 ? '-' : '';
+            const prefix = currency === 'IDR' ? 'Rp ' : '$';
+            
+            if (absAmount >= 1000000000) {
+                // Billions
+                const billions = absAmount / 1000000000;
+                return sign + prefix + billions.toFixed(1) + ' Bn';
+            } else if (absAmount >= 1000000) {
+                // Millions
+                const millions = absAmount / 1000000;
+                return sign + prefix + millions.toFixed(1) + ' Mn';
+            } else if (absAmount >= 1000) {
+                // Thousands
+                const thousands = absAmount / 1000;
+                return sign + prefix + thousands.toFixed(0) + ' K';
+            } else {
+                // Less than 1000
+                return sign + prefix + absAmount.toLocaleString('en-US');
             }
         }
         
