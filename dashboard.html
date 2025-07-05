@@ -867,6 +867,16 @@
             margin-top: 0.25rem;
         }
         
+        .ccc-disclaimer {
+            font-size: 0.75rem;
+            color: #64748b;
+            background: #f8fafc;
+            padding: 0.75rem;
+            border-radius: 6px;
+            border-left: 3px solid #fbbf24;
+            margin-bottom: 1rem;
+        }
+        
         .ccc-display {
             background: #f0f9ff;
             color: #0369a1;
@@ -875,6 +885,7 @@
             font-size: 0.75rem;
             font-weight: 600;
             border: 1px solid #bae6fd;
+            cursor: help; /* Shows it has tooltip info */
         }
     </style>
 </head>
@@ -1883,11 +1894,11 @@
                 }, 0) / arTransactions.length 
                 : 0;
             
-            // Calculate DPO - Average days AP has been outstanding
+            // Calculate DPO - Average days AP has been outstanding (FIXED)
             const avgAPDays = apTransactions.length > 0
                 ? apTransactions.reduce((sum, t) => {
                     const invoiceDate = new Date(t.invoice_date);
-                    const daysOutstanding = Math.floor((new Date() - invoiceDate) / (1000 * 60 * 60 * 1000));
+                    const daysOutstanding = Math.floor((new Date() - invoiceDate) / (1000 * 60 * 60 * 24)); // FIXED: Added * 24
                     return sum + daysOutstanding;
                 }, 0) / apTransactions.length
                 : 0;
