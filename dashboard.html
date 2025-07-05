@@ -2229,135 +2229,108 @@
                             AP/AR Aging
                         </button>
                     </div>
-            
-                    <!-- Actions and Filters -->
-                    <div class="dashboard-section">
-                        <div class="section-header">
-                            <h3 class="section-title">AP/AR Transactions</h3>
-                            <div class="section-actions">
-                                <button class="btn btn-secondary" onclick="exportAPARToCSV()">
-                                    <i class="fas fa-file-csv"></i>
-                                    Export to CSV
-                                </button>
-                                <button class="btn btn-secondary" onclick="openUploadModal()">
-                                    <i class="fas fa-file-upload"></i>
-                                    Upload CSV/Excel
-                                </button>
-                                <button class="btn btn-secondary" onclick="openImageUploadModal()">
-                                    <i class="fas fa-camera"></i>
-                                    Upload PDF/JPG
-                                </button>
-                                <button class="btn btn-primary" onclick="openAddModal()">
-                                    <i class="fas fa-plus"></i>
-                                    Add Transaction
-                                </button>
-                            </div>
-                        </div>
-                
-                        <!-- Filters -->
-                        <div class="filters-section" style="margin-bottom: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
-                            <select id="typeFilter" class="filter-select">
-                                <option value="">All Types</option>
-                                <option value="AR">Accounts Receivable</option>
-                                <option value="AP">Accounts Payable</option>
-                            </select>
-                            <div class="multi-select-container">
-                                <button class="multi-select-trigger" id="statusFilterTrigger">
-                                    <span id="statusFilterText">All Status</span>
-                                    <i class="fas fa-chevron-down"></i>
-                                </button>
-                                <div class="multi-select-dropdown" id="statusFilterDropdown">
-                                    <div class="multi-select-controls">
-                                        <button type="button" class="select-all-btn" onclick="selectAllStatus()">Select All</button>
-                                        <button type="button" class="clear-all-btn" onclick="clearAllStatus()">Clear All</button>
-                                    </div>
-                                    <div class="multi-select-options">
-                                        <label class="multi-select-option">
-                                            <input type="checkbox" value="Unpaid" onchange="updateStatusFilter()">
-                                            <span>Unpaid</span>
-                                        </label>
-                                        <label class="multi-select-option">
-                                            <input type="checkbox" value="Paid" onchange="updateStatusFilter()">
-                                            <span>Paid</span>
-                                        </label>
-                                        <label class="multi-select-option">
-                                            <input type="checkbox" value="Overdue" onchange="updateStatusFilter()">
-                                            <span>Overdue</span>
-                                        </label>
-                                        <label class="multi-select-option">
-                                            <input type="checkbox" value="Partial" onchange="updateStatusFilter()">
-                                            <span>Partial</span>
-                                        </label>
-                                    </div>
+
+                    <div class="tab-content active" id="transactions-tab">
+                        <!-- Actions and Filters -->
+                        <div class="dashboard-section">
+                            <div class="section-header">
+                                <h3 class="section-title">AP/AR Transactions</h3>
+                                <div class="section-actions">
+                                    <button class="btn btn-secondary" onclick="exportAPARToCSV()">
+                                        <i class="fas fa-file-csv"></i>
+                                        Export to CSV
+                                    </button>
+                                    <button class="btn btn-secondary" onclick="openUploadModal()">
+                                        <i class="fas fa-file-upload"></i>
+                                        Upload CSV/Excel
+                                    </button>
+                                    <button class="btn btn-secondary" onclick="openImageUploadModal()">
+                                        <i class="fas fa-camera"></i>
+                                        Upload PDF/JPG
+                                    </button>
+                                    <button class="btn btn-primary" onclick="openAddModal()">
+                                        <i class="fas fa-plus"></i>
+                                        Add Transaction
+                                    </button>
                                 </div>
                             </div>
-                            <input type="date" id="dateFromFilter" class="filter-input" placeholder="From Date">
-                            <span style="color: #64748b; font-size: 0.875rem;">to</span>
-                            <input type="date" id="dateToFilter" class="filter-input" placeholder="To Date">
-                            <button class="btn btn-secondary" onclick="clearFilters()">
-                                <i class="fas fa-times"></i>
-                                Clear
-                            </button>
-                        </div>
-                
-                        <!-- AP/AR Table -->
-                        <div class="table-container">
-                            <table id="aparTable" class="financial-table">
-                                <thead>
-                                    <tr>
-                                        <th>Type</th>
-                                        <th>Reference</th>
-                                        <th>Company</th>
-                                        <th>Description</th>
-                                        <th>Amount</th>
-                                        <th>Invoice Date</th>
-                                        <th>Due Date</th>
-                                        <th>Days</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="aparTableBody">
-                                    <!-- Transactions will be populated here -->
-                                </tbody>
-                            </table>
-                        </div>
-                        <!-- Add this after the table container -->
-                        <div style="margin-top: 1rem; color: #94a3b8; font-size: 0.875rem;">
-                            <span>* Due date calculated from invoice date + payment terms</span>
+                    
+                            <!-- Filters -->
+                            <div class="filters-section" style="margin-bottom: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
+                                <select id="typeFilter" class="filter-select">
+                                    <option value="">All Types</option>
+                                    <option value="AR">Accounts Receivable</option>
+                                    <option value="AP">Accounts Payable</option>
+                                </select>
+                                <div class="multi-select-container">
+                                    <button class="multi-select-trigger" id="statusFilterTrigger">
+                                        <span id="statusFilterText">All Status</span>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </button>
+                                    <div class="multi-select-dropdown" id="statusFilterDropdown">
+                                        <div class="multi-select-controls">
+                                            <button type="button" class="select-all-btn" onclick="selectAllStatus()">Select All</button>
+                                            <button type="button" class="clear-all-btn" onclick="clearAllStatus()">Clear All</button>
+                                        </div>
+                                        <div class="multi-select-options">
+                                            <label class="multi-select-option">
+                                                <input type="checkbox" value="Unpaid" onchange="updateStatusFilter()">
+                                                <span>Unpaid</span>
+                                            </label>
+                                            <label class="multi-select-option">
+                                                <input type="checkbox" value="Paid" onchange="updateStatusFilter()">
+                                                <span>Paid</span>
+                                            </label>
+                                            <label class="multi-select-option">
+                                                <input type="checkbox" value="Overdue" onchange="updateStatusFilter()">
+                                                <span>Overdue</span>
+                                            </label>
+                                            <label class="multi-select-option">
+                                                <input type="checkbox" value="Partial" onchange="updateStatusFilter()">
+                                                <span>Partial</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <input type="date" id="dateFromFilter" class="filter-input" placeholder="From Date">
+                                <span style="color: #64748b; font-size: 0.875rem;">to</span>
+                                <input type="date" id="dateToFilter" class="filter-input" placeholder="To Date">
+                                <button class="btn btn-secondary" onclick="clearFilters()">
+                                    <i class="fas fa-times"></i>
+                                    Clear
+                                </button>
+                            </div>
+                    
+                            <!-- AP/AR Table -->
+                            <div class="table-container">
+                                <table id="aparTable" class="financial-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Type</th>
+                                            <th>Reference</th>
+                                            <th>Company</th>
+                                            <th>Description</th>
+                                            <th>Amount</th>
+                                            <th>Invoice Date</th>
+                                            <th>Due Date</th>
+                                            <th>Days</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="aparTableBody">
+                                        <!-- Transactions will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- Add this after the table container -->
+                            <div style="margin-top: 1rem; color: #94a3b8; font-size: 0.875rem;">
+                                <span>* Due date calculated from invoice date + payment terms</span>
+                            </div>
                         </div>
                     </div>
                     <!-- Aging Analysis Tab Content (new) -->
                     <div class="tab-content" id="aging-tab">
-                        <!-- Aging Summary Cards -->
-                        <div class="aging-summary-grid">
-                            <div class="aging-summary-card">
-                                <div class="aging-bucket-title">0-30 Days</div>
-                                <div class="aging-amount aging-bucket-0-30" id="aging-0-30-amount">Rp 0</div>
-                                <div class="aging-count" id="aging-0-30-count">0 transactions</div>
-                            </div>
-                            <div class="aging-summary-card">
-                                <div class="aging-bucket-title">30-60 Days</div>
-                                <div class="aging-amount aging-bucket-30-60" id="aging-30-60-amount">Rp 0</div>
-                                <div class="aging-count" id="aging-30-60-count">0 transactions</div>
-                            </div>
-                            <div class="aging-summary-card">
-                                <div class="aging-bucket-title">60-90 Days</div>
-                                <div class="aging-amount aging-bucket-60-90" id="aging-60-90-amount">Rp 0</div>
-                                <div class="aging-count" id="aging-60-90-count">0 transactions</div>
-                            </div>
-                            <div class="aging-summary-card">
-                                <div class="aging-bucket-title">90-120 Days</div>
-                                <div class="aging-amount aging-bucket-90-120" id="aging-90-120-amount">Rp 0</div>
-                                <div class="aging-count" id="aging-90-120-count">0 transactions</div>
-                            </div>
-                            <div class="aging-summary-card">
-                                <div class="aging-bucket-title">120+ Days</div>
-                                <div class="aging-amount aging-bucket-120-plus" id="aging-120-plus-amount">Rp 0</div>
-                                <div class="aging-count" id="aging-120-plus-count">0 transactions</div>
-                            </div>
-                        </div>
-                    
                         <!-- Aging Charts -->
                         <div class="aging-charts-container">
                             <div class="aging-chart-card">
@@ -2384,13 +2357,13 @@
                                     <table class="aging-table">
                                         <thead>
                                             <tr>
-                                                <th>Customer</th>
-                                                <th>0-30</th>
-                                                <th>30-60</th>
-                                                <th>60-90</th>
-                                                <th>90-120</th>
-                                                <th>120+</th>
-                                                <th>Total</th>
+                                                <th style="text-align: left;">Customer</th>
+                                                <th style="text-align: center;">0-30</th>
+                                                <th style="text-align: center;">30-60</th>
+                                                <th style="text-align: center;">60-90</th>
+                                                <th style="text-align: center;">90-120</th>
+                                                <th style="text-align: center;">120+</th>
+                                                <th style="text-align: center;">Total</th>
                                             </tr>
                                         </thead>
                                         <tbody id="arAgingTableBody">
@@ -2412,13 +2385,13 @@
                                     <table class="aging-table">
                                         <thead>
                                             <tr>
-                                                <th>Vendor</th>
-                                                <th>0-30</th>
-                                                <th>30-60</th>
-                                                <th>60-90</th>
-                                                <th>90-120</th>
-                                                <th>120+</th>
-                                                <th>Total</th>
+                                                <th style="text-align: left;">Vendor</th>
+                                                <th style="text-align: center;">0-30</th>
+                                                <th style="text-align: center;">30-60</th>
+                                                <th style="text-align: center;">60-90</th>
+                                                <th style="text-align: center;">90-120</th>
+                                                <th style="text-align: center;">120+</th>
+                                                <th style="text-align: center;">Total</th>
                                             </tr>
                                         </thead>
                                         <tbody id="apAgingTableBody">
@@ -4443,8 +4416,7 @@
             const arAging = calculateAging(arTransactions);
             const apAging = calculateAging(apTransactions);
         
-            // Update summary cards
-            updateAgingSummaryCards(arAging, apAging);
+            // Remove this line: updateAgingSummaryCards(arAging, apAging);
             
             // Update aging tables
             updateAgingTables(arAging, apAging);
@@ -4538,28 +4510,52 @@
         
         // Update additional analytics
         function updateAdditionalAnalytics(arTransactions, apTransactions) {
-            // Calculate average days to pay for AR
-            const paidAR = arTransactions.filter(t => t.status === 'Paid');
+            // Calculate actual average days to pay for AR (based on current outstanding)
+            const unpaidAR = arTransactions.filter(t => t.status !== 'Paid');
             let avgDaysToPay = 0;
-            if (paidAR.length > 0) {
-                const totalDays = paidAR.reduce((sum, transaction) => {
-                    const invoiceDate = new Date(transaction.invoice_date);
-                    const paidDate = new Date(); // Assuming paid recently for demo
-                    const diffTime = paidDate - invoiceDate;
-                    const days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                    return sum + days;
+            if (unpaidAR.length > 0) {
+                const totalDays = unpaidAR.reduce((sum, transaction) => {
+                    const today = new Date();
+                    let dueDate;
+                    if (transaction.due_date) {
+                        dueDate = new Date(transaction.due_date);
+                    } else if (transaction.invoice_date) {
+                        const invoiceDate = new Date(transaction.invoice_date);
+                        dueDate = new Date(invoiceDate);
+                        dueDate.setDate(dueDate.getDate() + (transaction.payment_terms || 30));
+                    } else {
+                        return sum;
+                    }
+                    
+                    const daysOutstanding = Math.ceil((today - dueDate) / (1000 * 60 * 60 * 24));
+                    return sum + Math.max(0, daysOutstanding); // Only count positive days
                 }, 0);
-                avgDaysToPay = Math.round(totalDays / paidAR.length);
+                avgDaysToPay = Math.round(totalDays / unpaidAR.length);
             }
         
-            // Calculate collection efficiency
-            const totalAR = arTransactions.length;
-            const onTimeAR = arTransactions.filter(t => {
-                if (t.status !== 'Paid') return false;
-                // Simplified: assume paid transactions were on time
-                return true;
+            // Calculate collection efficiency (paid on time vs total)
+            const totalARTransactions = arTransactions.length;
+            const onTimeTransactions = arTransactions.filter(t => {
+                if (t.status === 'Paid') return true; // Assume paid transactions were eventually collected
+                if (t.status === 'Unpaid' || t.status === 'Overdue') {
+                    // Check if still within terms
+                    const today = new Date();
+                    let dueDate;
+                    if (t.due_date) {
+                        dueDate = new Date(t.due_date);
+                    } else if (t.invoice_date) {
+                        const invoiceDate = new Date(t.invoice_date);
+                        dueDate = new Date(invoiceDate);
+                        dueDate.setDate(dueDate.getDate() + (t.payment_terms || 30));
+                    } else {
+                        return false;
+                    }
+                    return today <= dueDate; // Still on time
+                }
+                return false;
             }).length;
-            const collectionEfficiency = totalAR > 0 ? Math.round((onTimeAR / totalAR) * 100) : 0;
+            
+            const collectionEfficiency = totalARTransactions > 0 ? Math.round((onTimeTransactions / totalARTransactions) * 100) : 0;
         
             // Calculate risk exposure (90+ days)
             const riskExposure = arTransactions
@@ -4581,11 +4577,24 @@
                     return daysOutstanding >= 90 ? sum + transaction.amount : sum;
                 }, 0);
         
+            // Calculate payment trend based on aging distribution
+            const aging = calculateAging(arTransactions);
+            const totalOutstanding = Object.values(aging).reduce((sum, bucket) => sum + bucket.total, 0);
+            const highRiskAmount = aging['90-120'].total + aging['120+'].total;
+            const riskPercentage = totalOutstanding > 0 ? (highRiskAmount / totalOutstanding) * 100 : 0;
+            
+            let paymentTrend = 'Stable';
+            if (riskPercentage > 30) {
+                paymentTrend = 'Declining';
+            } else if (riskPercentage < 10) {
+                paymentTrend = 'Improving';
+            }
+        
             // Update display
             document.getElementById('avgDaysToPay').textContent = avgDaysToPay > 0 ? `${avgDaysToPay}` : '--';
             document.getElementById('collectionEfficiency').textContent = `${collectionEfficiency}`;
             document.getElementById('riskExposure').textContent = formatCompactCurrency(riskExposure, 'IDR');
-            document.getElementById('paymentTrend').textContent = 'Stable'; // Placeholder
+            document.getElementById('paymentTrend').textContent = paymentTrend;
         }
         
         // Create aging charts
