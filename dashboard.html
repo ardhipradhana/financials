@@ -1080,6 +1080,15 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Add this after the summary cards -->
+                <div style="margin-bottom: 1rem; padding: 0.75rem; background: #f8fafc; border-radius: 6px; border-left: 3px solid #fbbf24;">
+                    <p style="font-size: 0.75rem; color: #64748b; margin: 0;">
+                        <strong>CCC Calculation Note:</strong> This is a simplified Cash Conversion Cycle calculation. 
+                        DSO and DPO are based on average days outstanding for unpaid/overdue transactions only. 
+                        Traditional CCC calculations use revenue, COGS, and inventory data which are not available in this AP/AR module.
+                    </p>
+                </div>
             
                 <!-- Actions and Filters -->
                 <div class="dashboard-section">
@@ -1492,8 +1501,8 @@
             
             // Update CCC display
             if (document.getElementById('cccDisplay') && cccData) {
-                document.getElementById('cccDisplay').textContent = `CCC: ${cccData.ccc} days`;
-                document.getElementById('cccDisplay').title = `DSO: ${cccData.dso} days, DPO: ${cccData.dpo} days`;
+                document.getElementById('cccDisplay').textContent = `CCC: ${cccData.ccc} days*`;
+                document.getElementById('cccDisplay').title = `Simplified calculation: DSO (${cccData.dso} days) - DPO (${cccData.dpo} days). Based on average days outstanding for unpaid/overdue transactions. Does not include inventory days or revenue/COGS ratios.`;
             }
         }
         
@@ -1853,14 +1862,19 @@
         }
 
         function calculateCCC() {
-            const arTransactions = aparTransactions.filter(t => t.type === 'AR' && t.status !== 'Paid');
-            const apTransactions = aparTransactions.filter(t => t.type === 'AP' && t.status !== 'Paid');
+            // Include both Unpaid and Overdue transactions (not Paid or Partial)
+            const arTransactions = aparTransactions.filter(t => 
+                t.type === 'AR' && (t.status === 'Unpaid' || t.status === 'Overdue')
+            );
+            const apTransactions = aparTransactions.filter(t => 
+                t.type === 'AP' && (t.status === 'Unpaid' || t.status === 'Overdue')
+            );
             
             if (arTransactions.length === 0 && apTransactions.length === 0) {
                 return null;
             }
             
-            // Calculate Days Sales Outstanding (DSO) - Average AR collection period
+            // Calculate DSO - Average days AR has been outstanding
             const avgARDays = arTransactions.length > 0 
                 ? arTransactions.reduce((sum, t) => {
                     const invoiceDate = new Date(t.invoice_date);
@@ -1869,16 +1883,16 @@
                 }, 0) / arTransactions.length 
                 : 0;
             
-            // Calculate Days Payable Outstanding (DPO) - Average AP payment period
+            // Calculate DPO - Average days AP has been outstanding
             const avgAPDays = apTransactions.length > 0
                 ? apTransactions.reduce((sum, t) => {
                     const invoiceDate = new Date(t.invoice_date);
-                    const daysOutstanding = Math.floor((new Date() - invoiceDate) / (1000 * 60 * 60 * 24));
+                    const daysOutstanding = Math.floor((new Date() - invoiceDate) / (1000 * 60 * 60 * 1000));
                     return sum + daysOutstanding;
                 }, 0) / apTransactions.length
                 : 0;
             
-            // Simplified CCC = DSO - DPO (assuming no inventory for service business)
+            // Simplified CCC = DSO - DPO (no inventory component)
             const ccc = Math.round(avgARDays - avgAPDays);
             
             return {
