@@ -3069,10 +3069,6 @@
                     plugins: {
                         legend: {
                             display: false // We have custom legend
-                            filter: function(legendItem) {
-                                // Only show the first dataset in legend to avoid duplication
-                                return legendItem.datasetIndex === 0;
-                            }
                         },
                         tooltip: {
                             mode: 'index',
