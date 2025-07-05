@@ -887,6 +887,286 @@
             border: 1px solid #bae6fd;
             cursor: help; /* Shows it has tooltip info */
         }
+
+        /* Multi-Select Filter Styles */
+        .multi-select-container {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .multi-select-trigger {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            padding: 0.5rem 0.75rem;
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            color: #374151;
+            cursor: pointer;
+            min-width: 120px;
+            transition: all 0.2s ease;
+        }
+        
+        .multi-select-trigger:hover {
+            border-color: #9ca3af;
+        }
+        
+        .multi-select-trigger.active {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .multi-select-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            display: none;
+            margin-top: 2px;
+        }
+        
+        .multi-select-dropdown.show {
+            display: block;
+        }
+        
+        .multi-select-controls {
+            display: flex;
+            gap: 8px;
+            padding: 8px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .select-all-btn, .clear-all-btn {
+            flex: 1;
+            padding: 4px 8px;
+            font-size: 0.75rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        
+        .select-all-btn {
+            background: #eff6ff;
+            color: #1d4ed8;
+        }
+        
+        .select-all-btn:hover {
+            background: #dbeafe;
+        }
+        
+        .clear-all-btn {
+            background: #f3f4f6;
+            color: #374151;
+        }
+        
+        .clear-all-btn:hover {
+            background: #e5e7eb;
+        }
+        
+        .multi-select-options {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .multi-select-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        
+        .multi-select-option:hover {
+            background: #f9fafb;
+        }
+        
+        .multi-select-option input[type="checkbox"] {
+            margin: 0;
+            cursor: pointer;
+        }
+        
+        .multi-select-option span {
+            font-size: 0.875rem;
+            color: #374151;
+        }
+
+        /* Enhanced Status Badge Styles */
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-align: center;
+            min-width: 60px;
+        }
+        
+        .status-unpaid {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fbbf24;
+        }
+        
+        .status-paid {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+        
+        .status-overdue {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #ef4444;
+        }
+        
+        .status-partial {
+            background: #e0e7ff;
+            color: #3730a3;
+            border: 1px solid #6366f1;
+        }
+
+        /* Enhanced Summary Cards Styles */
+        .enhanced-summary .metric-card.enhanced-card {
+            position: relative;
+            padding: 1.5rem;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            transition: all 0.2s ease;
+            overflow: hidden;
+        }
+        
+        .enhanced-summary .metric-card.enhanced-card:hover {
+            border-color: #cbd5e1;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            transform: translateY(-1px);
+        }
+        
+        .card-accent {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+        }
+        
+        .accent-blue {
+            background: linear-gradient(180deg, #3b82f6, #1e40af);
+        }
+        
+        .accent-orange {
+            background: linear-gradient(180deg, #f59e0b, #d97706);
+        }
+        
+        .accent-green {
+            background: linear-gradient(180deg, #10b981, #059669);
+        }
+        
+        .card-main {
+            width: 100%;
+        }
+        
+        .metric-title-group {
+            margin-bottom: 1rem;
+        }
+        
+        .metric-title-group .metric-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.25rem;
+        }
+        
+        .metric-subtitle {
+            font-size: 0.75rem;
+            color: #9ca3af;
+            font-weight: 500;
+        }
+        
+        .metric-primary-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        
+        .metric-value-large {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #111827;
+            line-height: 1.2;
+        }
+        
+        .metric-breakdown {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .breakdown-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .breakdown-label {
+            font-size: 0.75rem;
+            color: #6b7280;
+            font-weight: 500;
+        }
+        
+        .breakdown-value {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .aging-indicator {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.5rem;
+            background: #fef3c7;
+            color: #92400e;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            border: 1px solid #fbbf24;
+            align-self: flex-start;
+        }
+        
+        .efficiency-indicator {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.5rem;
+            background: #e0f2fe;
+            color: #0c4a6e;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            border: 1px solid #0ea5e9;
+            align-self: flex-start;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .enhanced-summary {
+                grid-template-columns: 1fr !important;
+                gap: 1rem !important;
+            }
+            
+            .metric-value-large {
+                font-size: 1.25rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1039,53 +1319,71 @@
 
             <!-- AP/AR Section -->
             <div id="ap-ar-section" class="section-content" style="display: none;">
-                <!-- Summary Cards -->
-                <div class="metrics-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); margin-bottom: 2rem;">
+                <!-- Enhanced Summary Cards -->
+                <div class="metrics-grid enhanced-summary" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); margin-bottom: 2rem; gap: 1.5rem;">
                     <!-- AR Card -->
-                    <div class="metric-card">
+                    <div class="metric-card enhanced-card">
+                        <div class="card-accent accent-blue"></div>
                         <div class="metric-header">
-                            <div style="width: 100%;">
-                                <div class="metric-title">Accounts Receivable</div>
-                                <div class="metric-primary">
-                                    <span class="metric-value" id="totalARAll">Rp 0</span>
-                                    <span class="metric-label">Total AR</span>
+                            <div class="card-main">
+                                <div class="metric-title-group">
+                                    <div class="metric-title">Accounts Receivable</div>
+                                    <div class="metric-subtitle">Money Coming In</div>
                                 </div>
-                                <div class="metric-secondary">
-                                    <span class="metric-value-small" id="totalAR">Rp 0</span>
-                                    <span class="summary-badge badge-overdue" id="arAging">0 overdue</span>
+                                <div class="metric-primary-group">
+                                    <span class="metric-value-large" id="totalARAll">Rp 0</span>
+                                    <div class="metric-breakdown">
+                                        <span class="breakdown-item">
+                                            <span class="breakdown-label">Unpaid:</span>
+                                            <span class="breakdown-value" id="totalAR">Rp 0</span>
+                                        </span>
+                                        <span class="aging-indicator" id="arAging">0 overdue</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 
                     <!-- AP Card -->
-                    <div class="metric-card">
+                    <div class="metric-card enhanced-card">
+                        <div class="card-accent accent-orange"></div>
                         <div class="metric-header">
-                            <div style="width: 100%;">
-                                <div class="metric-title">Accounts Payable</div>
-                                <div class="metric-primary">
-                                    <span class="metric-value" id="totalAPAll">Rp 0</span>
-                                    <span class="metric-label">Total AP</span>
+                            <div class="card-main">
+                                <div class="metric-title-group">
+                                    <div class="metric-title">Accounts Payable</div>
+                                    <div class="metric-subtitle">Money Going Out</div>
                                 </div>
-                                <div class="metric-secondary">
-                                    <span class="metric-value-small" id="totalAP">Rp 0</span>
-                                    <span class="summary-badge badge-overdue" id="apAging">0 overdue</span>
+                                <div class="metric-primary-group">
+                                    <span class="metric-value-large" id="totalAPAll">Rp 0</span>
+                                    <div class="metric-breakdown">
+                                        <span class="breakdown-item">
+                                            <span class="breakdown-label">Unpaid:</span>
+                                            <span class="breakdown-value" id="totalAP">Rp 0</span>
+                                        </span>
+                                        <span class="aging-indicator" id="apAging">0 overdue</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 
-                    <!-- Net Position + CCC Card -->
-                    <div class="metric-card">
+                    <!-- Cash Position Card -->
+                    <div class="metric-card enhanced-card">
+                        <div class="card-accent accent-green"></div>
                         <div class="metric-header">
-                            <div style="width: 100%;">
-                                <div class="metric-title">Cash Position & Efficiency</div>
-                                <div class="metric-primary">
-                                    <span class="metric-value" id="netCashImpact">Rp 0</span>
-                                    <span class="metric-label" id="cashImpactChange">Net Cash Impact</span>
+                            <div class="card-main">
+                                <div class="metric-title-group">
+                                    <div class="metric-title">Cash Position & Efficiency</div>
+                                    <div class="metric-subtitle">Net Impact & Cycle</div>
                                 </div>
-                                <div class="metric-secondary">
-                                    <span class="ccc-display" id="cccDisplay">CCC: -- days</span>
+                                <div class="metric-primary-group">
+                                    <span class="metric-value-large" id="netCashImpact">Rp 0</span>
+                                    <div class="metric-breakdown">
+                                        <span class="breakdown-item">
+                                            <span class="breakdown-label" id="cashImpactChange">Net Cash Impact</span>
+                                        </span>
+                                        <span class="efficiency-indicator" id="cccDisplay">CCC: -- days</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1128,13 +1426,36 @@
                             <option value="AR">Accounts Receivable</option>
                             <option value="AP">Accounts Payable</option>
                         </select>
-                        <select id="statusFilter" class="filter-select">
-                            <option value="">All Status</option>
-                            <option value="Unpaid">Unpaid</option>
-                            <option value="Paid">Paid</option>
-                            <option value="Overdue">Overdue</option>
-                            <option value="Partial">Partial</option>
-                        </select>
+                        <div class="multi-select-container">
+                            <button class="multi-select-trigger" id="statusFilterTrigger">
+                                <span id="statusFilterText">All Status</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <div class="multi-select-dropdown" id="statusFilterDropdown">
+                                <div class="multi-select-controls">
+                                    <button type="button" class="select-all-btn" onclick="selectAllStatus()">Select All</button>
+                                    <button type="button" class="clear-all-btn" onclick="clearAllStatus()">Clear All</button>
+                                </div>
+                                <div class="multi-select-options">
+                                    <label class="multi-select-option">
+                                        <input type="checkbox" value="Unpaid" onchange="updateStatusFilter()">
+                                        <span>Unpaid</span>
+                                    </label>
+                                    <label class="multi-select-option">
+                                        <input type="checkbox" value="Paid" onchange="updateStatusFilter()">
+                                        <span>Paid</span>
+                                    </label>
+                                    <label class="multi-select-option">
+                                        <input type="checkbox" value="Overdue" onchange="updateStatusFilter()">
+                                        <span>Overdue</span>
+                                    </label>
+                                    <label class="multi-select-option">
+                                        <input type="checkbox" value="Partial" onchange="updateStatusFilter()">
+                                        <span>Partial</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
                         <input type="date" id="dateFromFilter" class="filter-input" placeholder="From Date">
                         <span style="color: #64748b; font-size: 0.875rem;">to</span>
                         <input type="date" id="dateToFilter" class="filter-input" placeholder="To Date">
@@ -1691,12 +2012,14 @@
             let filtered = [...aparTransactions];
             
             const typeFilter = document.getElementById('typeFilter')?.value;
-            const statusFilter = document.getElementById('statusFilter')?.value;
+            const statusFilterArray = getStatusFilterValue();
             const dateFrom = document.getElementById('dateFromFilter')?.value;
             const dateTo = document.getElementById('dateToFilter')?.value;
             
             if (typeFilter) filtered = filtered.filter(t => t.type === typeFilter);
-            if (statusFilter) filtered = filtered.filter(t => t.status === statusFilter);
+            if (statusFilterArray.length > 0 && !statusFilterArray.includes(transaction.status)) {
+                return false;
+            }
             if (dateFrom) filtered = filtered.filter(t => t.due_date >= dateFrom);
             if (dateTo) filtered = filtered.filter(t => t.due_date <= dateTo);
             
@@ -1775,6 +2098,11 @@
             document.getElementById('statusFilter').value = '';
             document.getElementById('dateFromFilter').value = '';
             document.getElementById('dateToFilter').value = '';
+            // Clear multi-select status filter
+            const checkboxes = document.querySelectorAll('#statusFilterDropdown input[type="checkbox"]');
+            checkboxes.forEach(cb => cb.checked = false);
+            selectedStatuses = [];
+            updateStatusFilterText();
             renderAPARTable();
         }
         
@@ -1989,6 +2317,7 @@
             // Load data from Supabase and check for overdue transactions
             loadAPARData().then(() => {
                 updateOverdueStatuses();
+                initializeStatusFilter();
             });
             
             // Set up automatic check every 24 hours
@@ -2067,6 +2396,70 @@
                 }
             });
         });
+
+        // Multi-Select Status Filter Functions
+        let selectedStatuses = [];
+        
+        function initializeStatusFilter() {
+            const trigger = document.getElementById('statusFilterTrigger');
+            const dropdown = document.getElementById('statusFilterDropdown');
+            
+            // Toggle dropdown on trigger click
+            trigger.addEventListener('click', function(e) {
+                e.stopPropagation();
+                dropdown.classList.toggle('show');
+                trigger.classList.toggle('active');
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.multi-select-container')) {
+                    dropdown.classList.remove('show');
+                    trigger.classList.remove('active');
+                }
+            });
+        }
+        
+        function updateStatusFilter() {
+            const checkboxes = document.querySelectorAll('#statusFilterDropdown input[type="checkbox"]');
+            selectedStatuses = Array.from(checkboxes)
+                .filter(cb => cb.checked)
+                .map(cb => cb.value);
+            
+            updateStatusFilterText();
+            renderAPARTable(); // Re-render table with new filters
+        }
+        
+        function updateStatusFilterText() {
+            const textElement = document.getElementById('statusFilterText');
+            
+            if (selectedStatuses.length === 0) {
+                textElement.textContent = 'All Status';
+            } else if (selectedStatuses.length === 1) {
+                textElement.textContent = selectedStatuses[0];
+            } else if (selectedStatuses.length === 4) { // All options selected
+                textElement.textContent = 'All Status';
+            } else {
+                textElement.textContent = `${selectedStatuses.length} Selected`;
+            }
+        }
+        
+        function selectAllStatus() {
+            const checkboxes = document.querySelectorAll('#statusFilterDropdown input[type="checkbox"]');
+            checkboxes.forEach(cb => cb.checked = true);
+            updateStatusFilter();
+        }
+        
+        function clearAllStatus() {
+            const checkboxes = document.querySelectorAll('#statusFilterDropdown input[type="checkbox"]');
+            checkboxes.forEach(cb => cb.checked = false);
+            updateStatusFilter();
+        }
+        
+        // Update the existing renderAPARTable function to use multi-select
+        function getStatusFilterValue() {
+            return selectedStatuses.length === 0 ? '' : selectedStatuses;
+        }
         
     </script>
 
