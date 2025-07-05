@@ -3008,21 +3008,8 @@
                         {
                             label: 'Cash Position',
                             data: cashPositions,
-                            borderColor: function(context) {
-                                const value = context.parsed?.y ?? context.raw;
-                                return value >= 0 ? '#3b82f6' : '#ef4444';
-                            },
-                            backgroundColor: function(context) {
-                                const value = context.parsed?.y ?? context.raw;
-                                return value >= 0 ? 'rgba(59, 130, 246, 0.1)' : 'rgba(239, 68, 68, 0.1)';
-                            },
-                            segment: {
-                                borderColor: function(context) {
-                                    const current = context.p1.parsed.y;
-                                    const previous = context.p0.parsed.y;
-                                    return current >= 0 && previous >= 0 ? '#3b82f6' : '#ef4444';
-                                }
-                            },
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
                             fill: true,
                             tension: 0.4,
                             pointRadius: 4,
@@ -3030,6 +3017,21 @@
                             pointBackgroundColor: function(context) {
                                 const value = context.parsed.y;
                                 return value >= 0 ? '#3b82f6' : '#ef4444';
+                            },
+                            pointBorderColor: function(context) {
+                                const value = context.parsed.y;
+                                return value >= 0 ? '#3b82f6' : '#ef4444';
+                            },
+                            segment: {
+                                borderColor: function(context) {
+                                    const current = context.p1.parsed.y;
+                                    const previous = context.p0.parsed.y;
+                                    // If either point is negative, make the line red
+                                    if (current < 0 || previous < 0) {
+                                        return '#ef4444';
+                                    }
+                                    return '#3b82f6';
+                                }
                             }
                         },
                         {
