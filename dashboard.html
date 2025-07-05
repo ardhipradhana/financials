@@ -4618,8 +4618,11 @@
             if (window[canvasId + 'Instance']) {
                 window[canvasId + 'Instance'].destroy();
             }
-
-            Chart.register(ChartDataLabels);
+        
+            // Check if ChartDataLabels is available, if not, skip registration
+            if (typeof ChartDataLabels !== 'undefined') {
+                Chart.register(ChartDataLabels);
+            }
         
             window[canvasId + 'Instance'] = new Chart(ctx, {
                 type: 'doughnut',
@@ -4682,28 +4685,30 @@
                                 }
                             }
                         },
-                        // Add data labels on the chart slices
-                        datalabels: {
-                            display: function(context) {
-                                const value = context.parsed;
-                                const total = context.dataset.data.reduce((sum, val) => sum + val, 0);
-                                const percentage = total > 0 ? (value / total) * 100 : 0;
-                                return percentage > 5; // Only show labels for slices > 5%
-                            },
-                            color: '#ffffff',
-                            font: {
-                                weight: 'bold',
-                                size: 11
-                            },
-                            formatter: function(value, context) {
-                                const total = context.dataset.data.reduce((sum, val) => sum + val, 0);
-                                const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-                                return `${percentage}%`;
+                        // Add data labels on the chart slices (only if plugin is available)
+                        ...(typeof ChartDataLabels !== 'undefined' && {
+                            datalabels: {
+                                display: function(context) {
+                                    const value = context.parsed;
+                                    const total = context.dataset.data.reduce((sum, val) => sum + val, 0);
+                                    const percentage = total > 0 ? (value / total) * 100 : 0;
+                                    return percentage > 5; // Only show labels for slices > 5%
+                                },
+                                color: '#ffffff',
+                                font: {
+                                    weight: 'bold',
+                                    size: 11
+                                },
+                                formatter: function(value, context) {
+                                    const total = context.dataset.data.reduce((sum, val) => sum + val, 0);
+                                    const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                    return `${percentage}%`;
+                                }
                             }
-                        }
+                        })
                     }
-                }
-                plugins: [ChartDataLabels]
+                }, // ADD THIS COMMA
+                plugins: typeof ChartDataLabels !== 'undefined' ? [ChartDataLabels] : []
             });
         }
         
