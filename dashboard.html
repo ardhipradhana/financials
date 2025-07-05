@@ -2016,9 +2016,7 @@
             const dateTo = document.getElementById('dateToFilter')?.value;
             
             if (typeFilter) filtered = filtered.filter(t => t.type === typeFilter);
-            if (statusFilterArray.length > 0 && !statusFilterArray.includes(transaction.status)) {
-                return false;
-            }
+            if (statusFilterArray.length > 0) filtered = filtered.filter(t => statusFilterArray.includes(t.status));
             if (dateFrom) filtered = filtered.filter(t => t.due_date >= dateFrom);
             if (dateTo) filtered = filtered.filter(t => t.due_date <= dateTo);
             
@@ -2093,15 +2091,27 @@
         }
         
         function clearFilters() {
-            document.getElementById('typeFilter').value = '';
-            document.getElementById('statusFilter').value = '';
-            document.getElementById('dateFromFilter').value = '';
-            document.getElementById('dateToFilter').value = '';
+            // Clear type filter
+            const typeFilter = document.getElementById('typeFilter');
+            if (typeFilter) typeFilter.value = '';
+            
+            // Clear old single status filter (if it exists)
+            const oldStatusFilter = document.getElementById('statusFilter');
+            if (oldStatusFilter) oldStatusFilter.value = '';
+            
             // Clear multi-select status filter
             const checkboxes = document.querySelectorAll('#statusFilterDropdown input[type="checkbox"]');
             checkboxes.forEach(cb => cb.checked = false);
             selectedStatuses = [];
             updateStatusFilterText();
+            
+            // Clear date filters
+            const dateFromFilter = document.getElementById('dateFromFilter');
+            const dateToFilter = document.getElementById('dateToFilter');
+            if (dateFromFilter) dateFromFilter.value = '';
+            if (dateToFilter) dateToFilter.value = '';
+            
+            // Re-render table
             renderAPARTable();
         }
         
