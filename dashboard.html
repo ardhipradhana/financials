@@ -2969,8 +2969,8 @@
             let runwayWeeks, runwayMonths;
             
             if (runwayDays !== null) {
-                runwayWeeks = Math.floor(runwayDays / 7);
-                runwayMonths = Math.floor(runwayWeeks / 4.33);
+                runwayWeeks = Math.round(runwayDays / 7);
+                runwayMonths = Math.round(runwayWeeks / 4.33);
             } else {
                 runwayDays = runwayWeeks = runwayMonths = '∞';
             }
@@ -3210,8 +3210,8 @@
             let runwayWeeks, runwayMonths;
             
             if (runwayDays !== null) {
-                runwayWeeks = Math.floor(runwayDays / 7);
-                runwayMonths = Math.floor(runwayWeeks / 4.33);
+                runwayWeeks = Math.round(runwayDays / 7);
+                runwayMonths = Math.round(runwayWeeks / 4.33);
             } else {
                 runwayDays = runwayWeeks = runwayMonths = '∞';
             }
