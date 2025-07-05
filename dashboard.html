@@ -4524,23 +4524,13 @@
             const unpaidAR = arTransactions.filter(t => t.status === 'Unpaid' || t.status === 'Overdue');
             let dso = 0;
             if (unpaidAR.length > 0) {
-                const totalOutstanding = unpaidAR.reduce((sum, t) => sum + t.amount, 0);
-                const weightedDays = unpaidAR.reduce((sum, t) => {
-                    const today = new Date();
-                    let dueDate;
-                    if (t.due_date) {
-                        dueDate = new Date(t.due_date);
-                    } else if (t.invoice_date && t.payment_terms) {
-                        const invoiceDate = new Date(t.invoice_date);
-                        dueDate = new Date(invoiceDate);
-                        dueDate.setDate(dueDate.getDate() + (t.payment_terms || 30));
-                    } else {
-                        return sum;
-                    }
-                    const daysOutstanding = Math.ceil((today - dueDate) / (1000 * 60 * 60 * 24));
-                    return sum + (Math.max(0, daysOutstanding) * t.amount);
+                // Use the SAME calculation as CCC - from invoice date, not due date
+                const totalDays = unpaidAR.reduce((sum, t) => {
+                    const invoiceDate = new Date(t.invoice_date);
+                    const daysOutstanding = Math.floor((new Date() - invoiceDate) / (1000 * 60 * 60 * 24));
+                    return sum + daysOutstanding;
                 }, 0);
-                dso = totalOutstanding > 0 ? Math.round(weightedDays / totalOutstanding) : 0;
+                dso = Math.round(totalDays / unpaidAR.length);
             }
         
             // Calculate collection efficiency (paid on time vs total)
@@ -4672,11 +4662,16 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     layout: {
-                        padding: 40 // Add padding for external labels
+                        padding: {
+                            top: 50,
+                            bottom: 50,
+                            left: 80,
+                            right: 80
+                        }
                     },
                     plugins: {
                         legend: {
-                            display: false // Hide legend since we'll show values on chart
+                            display: false
                         },
                         tooltip: {
                             callbacks: {
@@ -4689,68 +4684,55 @@
                             }
                         }
                     },
-                    onHover: (event, activeElements) => {
-                        if (activeElements.length > 0) {
-                            event.native.target.style.cursor = 'pointer';
-                        } else {
-                            event.native.target.style.cursor = 'default';
-                        }
-                    }
-                },
-                plugins: [{
-                    afterDraw: function(chart) {
-                        const ctx = chart.ctx;
-                        const chartArea = chart.chartArea;
-                        const meta = chart.getDatasetMeta(0);
-                        const total = chart.data.datasets[0].data.reduce((sum, val) => sum + val, 0);
-                        
-                        meta.data.forEach((element, index) => {
-                            const value = chart.data.datasets[0].data[index];
-                            if (value === 0) return; // Skip zero values
+                    plugins: [{
+                        afterDraw: function(chart) {
+                            const ctx = chart.ctx;
+                            const meta = chart.getDatasetMeta(0);
+                            const total = chart.data.datasets[0].data.reduce((sum, val) => sum + val, 0);
                             
-                            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-                            const label = chart.data.labels[index];
-                            const compactValue = formatCompactCurrency(value, 'IDR');
-                            
-                            // Get the position of the slice
-                            const angle = element.startAngle + (element.endAngle - element.startAngle) / 2;
-                            const outerRadius = element.outerRadius;
-                            const centerX = element.x;
-                            const centerY = element.y;
-                            
-                            // Calculate label position (outside the chart)
-                            const labelRadius = outerRadius + 30;
-                            const labelX = centerX + Math.cos(angle) * labelRadius;
-                            const labelY = centerY + Math.sin(angle) * labelRadius;
-                            
-                            // Calculate line end position (on the chart edge)
-                            const lineRadius = outerRadius + 5;
-                            const lineX = centerX + Math.cos(angle) * lineRadius;
-                            const lineY = centerY + Math.sin(angle) * lineRadius;
-                            
-                            // Draw line from chart to label
-                            ctx.strokeStyle = '#666';
-                            ctx.lineWidth = 1;
-                            ctx.beginPath();
-                            ctx.moveTo(lineX, lineY);
-                            ctx.lineTo(labelX, labelY);
-                            ctx.stroke();
-                            
-                            // Draw label text
-                            ctx.fillStyle = '#333';
-                            ctx.font = 'bold 11px Arial';
-                            ctx.textAlign = labelX > centerX ? 'left' : 'right';
-                            ctx.textBaseline = 'middle';
-                            
-                            const labelText = `${label}\n${compactValue}\n(${percentage}%)`;
-                            const lines = labelText.split('\n');
-                            
-                            lines.forEach((line, lineIndex) => {
-                                ctx.fillText(line, labelX + (labelX > centerX ? 5 : -5), labelY + (lineIndex - 1) * 12);
+                            meta.data.forEach((element, index) => {
+                                const value = chart.data.datasets[0].data[index];
+                                if (value === 0) return;
+                                
+                                const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                const label = chart.data.labels[index];
+                                const compactValue = formatCompactCurrency(value, 'IDR');
+                                
+                                const angle = element.startAngle + (element.endAngle - element.startAngle) / 2;
+                                const outerRadius = element.outerRadius;
+                                const centerX = element.x;
+                                const centerY = element.y;
+                                
+                                // Increase label distance
+                                const labelRadius = outerRadius + 50;
+                                const labelX = centerX + Math.cos(angle) * labelRadius;
+                                const labelY = centerY + Math.sin(angle) * labelRadius;
+                                
+                                const lineRadius = outerRadius + 5;
+                                const lineX = centerX + Math.cos(angle) * lineRadius;
+                                const lineY = centerY + Math.sin(angle) * lineRadius;
+                                
+                                // Draw line
+                                ctx.strokeStyle = '#666';
+                                ctx.lineWidth = 1;
+                                ctx.beginPath();
+                                ctx.moveTo(lineX, lineY);
+                                ctx.lineTo(labelX, labelY);
+                                ctx.stroke();
+                                
+                                // Draw text with better positioning
+                                ctx.fillStyle = '#333';
+                                ctx.font = 'bold 10px Arial';
+                                ctx.textAlign = labelX > centerX ? 'left' : 'right';
+                                
+                                const textOffset = labelX > centerX ? 8 : -8;
+                                ctx.fillText(label, labelX + textOffset, labelY - 10);
+                                ctx.fillText(compactValue, labelX + textOffset, labelY + 2);
+                                ctx.fillText(`(${percentage}%)`, labelX + textOffset, labelY + 14);
                             });
-                        });
-                    }
-                }]
+                        }
+                    }]
+                }
             });
         }
         
