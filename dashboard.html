@@ -1808,7 +1808,7 @@
         
         .aging-chart-card {
             background: white;
-            padding: 1.5rem;
+            padding: 1rem;
             border-radius: 8px;
             border: 1px solid #e2e8f0;
         }
@@ -1822,7 +1822,7 @@
         }
         
         .aging-chart-canvas {
-            max-height: 300px;
+            max-height: 350px;
         }
         
         /* Responsive Design */
@@ -4744,22 +4744,26 @@
                     maintainAspectRatio: false,
                     layout: {
                         padding: {
-                            top: 50,
-                            bottom: 80, // Increase bottom padding for legend
-                            left: 80,
-                            right: 80
+                            top: 10,
+                            bottom: 60, // Space for legend below
+                            left: 10,
+                            right: 10
                         }
                     },
                     plugins: {
                         legend: {
-                            display: true, // Show legend
+                            display: true,
                             position: 'bottom',
+                            align: 'center',
                             labels: {
-                                padding: 15,
+                                padding: 8,
                                 usePointStyle: true,
+                                pointStyle: 'rect',
                                 font: {
-                                    size: 11
+                                    size: 10
                                 },
+                                boxWidth: 12,
+                                boxHeight: 12,
                                 generateLabels: function(chart) {
                                     const data = chart.data;
                                     const total = data.datasets[0].data.reduce((sum, val) => sum + val, 0);
@@ -4774,13 +4778,16 @@
                                             fillStyle: data.datasets[0].backgroundColor[index],
                                             strokeStyle: '#ffffff',
                                             lineWidth: 2,
-                                            pointStyle: 'circle',
+                                            pointStyle: 'rect',
                                             hidden: false,
                                             index: index
                                         };
                                     });
                                 }
-                            }
+                            },
+                            // Force single line
+                            maxLines: 1,
+                            onClick: null // Disable click events to prevent toggling
                         },
                         tooltip: {
                             callbacks: {
@@ -4792,55 +4799,7 @@
                                 }
                             }
                         }
-                    },
-                    plugins: [{
-                        afterDraw: function(chart) {
-                            const ctx = chart.ctx;
-                            const meta = chart.getDatasetMeta(0);
-                            const total = chart.data.datasets[0].data.reduce((sum, val) => sum + val, 0);
-                            
-                            meta.data.forEach((element, index) => {
-                                const value = chart.data.datasets[0].data[index];
-                                if (value === 0) return;
-                                
-                                const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-                                const label = chart.data.labels[index];
-                                const compactValue = formatCompactCurrency(value, 'IDR');
-                                
-                                const angle = element.startAngle + (element.endAngle - element.startAngle) / 2;
-                                const outerRadius = element.outerRadius;
-                                const centerX = element.x;
-                                const centerY = element.y;
-                                
-                                // Increase label distance
-                                const labelRadius = outerRadius + 50;
-                                const labelX = centerX + Math.cos(angle) * labelRadius;
-                                const labelY = centerY + Math.sin(angle) * labelRadius;
-                                
-                                const lineRadius = outerRadius + 5;
-                                const lineX = centerX + Math.cos(angle) * lineRadius;
-                                const lineY = centerY + Math.sin(angle) * lineRadius;
-                                
-                                // Draw line
-                                ctx.strokeStyle = '#666';
-                                ctx.lineWidth = 1;
-                                ctx.beginPath();
-                                ctx.moveTo(lineX, lineY);
-                                ctx.lineTo(labelX, labelY);
-                                ctx.stroke();
-                                
-                                // Draw text with better positioning
-                                ctx.fillStyle = '#333';
-                                ctx.font = 'bold 10px Arial';
-                                ctx.textAlign = labelX > centerX ? 'left' : 'right';
-                                
-                                const textOffset = labelX > centerX ? 8 : -8;
-                                ctx.fillText(label, labelX + textOffset, labelY - 10);
-                                ctx.fillText(compactValue, labelX + textOffset, labelY + 2);
-                                ctx.fillText(`(${percentage}%)`, labelX + textOffset, labelY + 14);
-                            });
-                        }
-                    }]
+                    }
                 }
             });
         }
