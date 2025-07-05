@@ -10,6 +10,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -1692,7 +1693,6 @@
             color: #6b7280;
             font-weight: 500;
             margin-bottom: 0.5rem;
-            text-transform: uppercase;
             letter-spacing: 0.5px;
         }
         
@@ -1748,7 +1748,6 @@
             color: #374151;
             border-bottom: 1px solid #e5e7eb;
             font-size: 0.75rem;
-            text-transform: uppercase;
             letter-spacing: 0.5px;
         }
         
@@ -2406,9 +2405,9 @@
                         <div class="aging-analytics-section" style="margin-top: 2rem;">
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
                                 <div class="aging-summary-card">
-                                    <div class="aging-bucket-title">Average Days to Pay</div>
+                                    <div class="aging-bucket-title">DSO (Days Sales Outstanding)</div>
                                     <div class="aging-amount" id="avgDaysToPay">-- days</div>
-                                    <div class="aging-count">AR collection average</div>
+                                    <div class="aging-count">Average collection period</div>
                                 </div>
                                 <div class="aging-summary-card">
                                     <div class="aging-bucket-title">Collection Efficiency</div>
@@ -2416,12 +2415,12 @@
                                     <div class="aging-count">On-time collection rate</div>
                                 </div>
                                 <div class="aging-summary-card">
-                                    <div class="aging-bucket-title">Risk Exposure</div>
+                                    <div class="aging-bucket-title">AR Risk Exposure</div>
                                     <div class="aging-amount aging-bucket-90-120" id="riskExposure">Rp 0</div>
                                     <div class="aging-count">90+ days outstanding</div>
                                 </div>
                                 <div class="aging-summary-card">
-                                    <div class="aging-bucket-title">Payment Trend</div>
+                                    <div class="aging-bucket-title">Cash Flow Health</div>
                                     <div class="aging-amount" id="paymentTrend">Stable</div>
                                     <div class="aging-count">Last 30 days</div>
                                 </div>
@@ -4511,26 +4510,26 @@
         // Update additional analytics
         function updateAdditionalAnalytics(arTransactions, apTransactions) {
             // Calculate actual average days to pay for AR (based on current outstanding)
-            const unpaidAR = arTransactions.filter(t => t.status !== 'Paid');
-            let avgDaysToPay = 0;
+            const unpaidAR = arTransactions.filter(t => t.status === 'Unpaid' || t.status === 'Overdue');
+            let dso = 0;
             if (unpaidAR.length > 0) {
-                const totalDays = unpaidAR.reduce((sum, transaction) => {
+                const totalOutstanding = unpaidAR.reduce((sum, t) => sum + t.amount, 0);
+                const totalDays = unpaidAR.reduce((sum, t) => {
                     const today = new Date();
                     let dueDate;
-                    if (transaction.due_date) {
-                        dueDate = new Date(transaction.due_date);
-                    } else if (transaction.invoice_date) {
-                        const invoiceDate = new Date(transaction.invoice_date);
+                    if (t.due_date) {
+                        dueDate = new Date(t.due_date);
+                    } else if (t.invoice_date && t.payment_terms) {
+                        const invoiceDate = new Date(t.invoice_date);
                         dueDate = new Date(invoiceDate);
-                        dueDate.setDate(dueDate.getDate() + (transaction.payment_terms || 30));
+                        dueDate.setDate(dueDate.getDate() + (t.payment_terms || 30));
                     } else {
                         return sum;
                     }
-                    
                     const daysOutstanding = Math.ceil((today - dueDate) / (1000 * 60 * 60 * 24));
-                    return sum + Math.max(0, daysOutstanding); // Only count positive days
+                    return sum + (Math.max(0, daysOutstanding) * t.amount);
                 }, 0);
-                avgDaysToPay = Math.round(totalDays / unpaidAR.length);
+                dso = totalOutstanding > 0 ? Math.round(totalDays / totalOutstanding) : 0;
             }
         
             // Calculate collection efficiency (paid on time vs total)
@@ -4591,8 +4590,8 @@
             }
         
             // Update display
-            document.getElementById('avgDaysToPay').textContent = avgDaysToPay > 0 ? `${avgDaysToPay}` : '--';
-            document.getElementById('collectionEfficiency').textContent = `${collectionEfficiency}`;
+            document.getElementById('avgDaysToPay').textContent = dso > 0 ? `${dso}` : '--';
+            document.getElementById('collectionEfficiency').textContent = `${collectionEfficiency}%`;
             document.getElementById('riskExposure').textContent = formatCompactCurrency(riskExposure, 'IDR');
             document.getElementById('paymentTrend').textContent = paymentTrend;
         }
@@ -4619,6 +4618,8 @@
             if (window[canvasId + 'Instance']) {
                 window[canvasId + 'Instance'].destroy();
             }
+
+            Chart.register(ChartDataLabels);
         
             window[canvasId + 'Instance'] = new Chart(ctx, {
                 type: 'doughnut',
@@ -4648,6 +4649,26 @@
                                 usePointStyle: true,
                                 font: {
                                     size: 11
+                                },
+                                generateLabels: function(chart) {
+                                    const data = chart.data;
+                                    const total = data.datasets[0].data.reduce((sum, val) => sum + val, 0);
+                                    
+                                    return data.labels.map((label, index) => {
+                                        const value = data.datasets[0].data[index];
+                                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                        const compactValue = formatCompactCurrency(value, 'IDR');
+                                        
+                                        return {
+                                            text: `${label}: ${compactValue} (${percentage}%)`,
+                                            fillStyle: data.datasets[0].backgroundColor[index],
+                                            strokeStyle: data.datasets[0].borderColor || '#ffffff',
+                                            lineWidth: 2,
+                                            pointStyle: 'circle',
+                                            hidden: false,
+                                            index: index
+                                        };
+                                    });
                                 }
                             }
                         },
@@ -4660,9 +4681,29 @@
                                     return `${context.label}: ${formatCompactCurrency(value, 'IDR')} (${percentage}%)`;
                                 }
                             }
+                        },
+                        // Add data labels on the chart slices
+                        datalabels: {
+                            display: function(context) {
+                                const value = context.parsed;
+                                const total = context.dataset.data.reduce((sum, val) => sum + val, 0);
+                                const percentage = total > 0 ? (value / total) * 100 : 0;
+                                return percentage > 5; // Only show labels for slices > 5%
+                            },
+                            color: '#ffffff',
+                            font: {
+                                weight: 'bold',
+                                size: 11
+                            },
+                            formatter: function(value, context) {
+                                const total = context.dataset.data.reduce((sum, val) => sum + val, 0);
+                                const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                return `${percentage}%`;
+                            }
                         }
                     }
                 }
+                plugins: [ChartDataLabels]
             });
         }
         
