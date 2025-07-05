@@ -3211,7 +3211,7 @@
             
             if (runwayDays !== null) {
                 runwayWeeks = Math.floor(runwayDays / 7);
-                runwayMonths = Math.floor(runwayDays / 30);
+                runwayMonths = Math.floor(runwayWeeks / 4.33);
             } else {
                 runwayDays = runwayWeeks = runwayMonths = '∞';
             }
