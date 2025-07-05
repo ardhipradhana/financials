@@ -1857,6 +1857,17 @@
                 font-size: 1rem;
             }
         }
+
+        .collection-efficiency-excellent { color: #059669 !important; font-weight: 700; }
+        .collection-efficiency-good { color: #10b981 !important; font-weight: 600; }
+        .collection-efficiency-fair { color: #f59e0b !important; font-weight: 600; }
+        .collection-efficiency-poor { color: #ef4444 !important; font-weight: 600; }
+        .collection-efficiency-bad { color: #dc2626 !important; font-weight: 700; }
+
+        .payment-trend-improving { color: #059669 !important; }
+        .payment-trend-stable { color: #111827 !important; }
+        .payment-trend-declining { color: #dc2626 !important; }
+        
     </style>
 </head>
 <body>
@@ -4514,7 +4525,7 @@
             let dso = 0;
             if (unpaidAR.length > 0) {
                 const totalOutstanding = unpaidAR.reduce((sum, t) => sum + t.amount, 0);
-                const totalDays = unpaidAR.reduce((sum, t) => {
+                const weightedDays = unpaidAR.reduce((sum, t) => {
                     const today = new Date();
                     let dueDate;
                     if (t.due_date) {
@@ -4529,7 +4540,7 @@
                     const daysOutstanding = Math.ceil((today - dueDate) / (1000 * 60 * 60 * 24));
                     return sum + (Math.max(0, daysOutstanding) * t.amount);
                 }, 0);
-                dso = totalOutstanding > 0 ? Math.round(totalDays / totalOutstanding) : 0;
+                dso = totalOutstanding > 0 ? Math.round(weightedDays / totalOutstanding) : 0;
             }
         
             // Calculate collection efficiency (paid on time vs total)
@@ -4591,9 +4602,34 @@
         
             // Update display
             document.getElementById('avgDaysToPay').textContent = dso > 0 ? `${dso}` : '--';
-            document.getElementById('collectionEfficiency').textContent = `${collectionEfficiency}%`;
+            // Collection efficiency with color coding
+            let efficiencyClass = 'collection-efficiency-bad';
+            if (collectionEfficiency >= 80) {
+                efficiencyClass = 'collection-efficiency-excellent';
+            } else if (collectionEfficiency >= 60) {
+                efficiencyClass = 'collection-efficiency-good';
+            } else if (collectionEfficiency >= 40) {
+                efficiencyClass = 'collection-efficiency-fair';
+            } else if (collectionEfficiency >= 20) {
+                efficiencyClass = 'collection-efficiency-poor';
+            }
+            
+            const efficiencyElement = document.getElementById('collectionEfficiency');
+            efficiencyElement.textContent = `${collectionEfficiency}%`;
+            efficiencyElement.className = `aging-amount ${efficiencyClass}`;
+            
             document.getElementById('riskExposure').textContent = formatCompactCurrency(riskExposure, 'IDR');
-            document.getElementById('paymentTrend').textContent = paymentTrend;
+            // Payment trend with color coding
+            let trendClass = 'payment-trend-stable';
+            if (paymentTrend === 'Improving') {
+                trendClass = 'payment-trend-improving';
+            } else if (paymentTrend === 'Declining') {
+                trendClass = 'payment-trend-declining';
+            }
+            
+            const trendElement = document.getElementById('paymentTrend');
+            trendElement.textContent = paymentTrend;
+            trendElement.className = `aging-amount ${trendClass}`;
         }
         
         // Create aging charts
@@ -4619,11 +4655,6 @@
                 window[canvasId + 'Instance'].destroy();
             }
         
-            // Check if ChartDataLabels is available, if not, skip registration
-            if (typeof ChartDataLabels !== 'undefined') {
-                Chart.register(ChartDataLabels);
-            }
-        
             window[canvasId + 'Instance'] = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
@@ -4631,11 +4662,7 @@
                     datasets: [{
                         data: data,
                         backgroundColor: [
-                            '#10b981', // 0-30 (green)
-                            '#f59e0b', // 30-60 (yellow)
-                            '#ea580c', // 60-90 (orange)
-                            '#dc2626', // 90-120 (red)
-                            '#991b1b'  // 120+ (dark red)
+                            '#10b981', '#f59e0b', '#ea580c', '#dc2626', '#991b1b'
                         ],
                         borderWidth: 2,
                         borderColor: '#ffffff'
@@ -4644,36 +4671,12 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    layout: {
+                        padding: 40 // Add padding for external labels
+                    },
                     plugins: {
                         legend: {
-                            position: 'bottom',
-                            labels: {
-                                padding: 15,
-                                usePointStyle: true,
-                                font: {
-                                    size: 11
-                                },
-                                generateLabels: function(chart) {
-                                    const data = chart.data;
-                                    const total = data.datasets[0].data.reduce((sum, val) => sum + val, 0);
-                                    
-                                    return data.labels.map((label, index) => {
-                                        const value = data.datasets[0].data[index];
-                                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-                                        const compactValue = formatCompactCurrency(value, 'IDR');
-                                        
-                                        return {
-                                            text: `${label}: ${compactValue} (${percentage}%)`,
-                                            fillStyle: data.datasets[0].backgroundColor[index],
-                                            strokeStyle: data.datasets[0].borderColor || '#ffffff',
-                                            lineWidth: 2,
-                                            pointStyle: 'circle',
-                                            hidden: false,
-                                            index: index
-                                        };
-                                    });
-                                }
-                            }
+                            display: false // Hide legend since we'll show values on chart
                         },
                         tooltip: {
                             callbacks: {
@@ -4684,31 +4687,70 @@
                                     return `${context.label}: ${formatCompactCurrency(value, 'IDR')} (${percentage}%)`;
                                 }
                             }
-                        },
-                        // Add data labels on the chart slices (only if plugin is available)
-                        ...(typeof ChartDataLabels !== 'undefined' && {
-                            datalabels: {
-                                display: function(context) {
-                                    const value = context.parsed;
-                                    const total = context.dataset.data.reduce((sum, val) => sum + val, 0);
-                                    const percentage = total > 0 ? (value / total) * 100 : 0;
-                                    return percentage > 5; // Only show labels for slices > 5%
-                                },
-                                color: '#ffffff',
-                                font: {
-                                    weight: 'bold',
-                                    size: 11
-                                },
-                                formatter: function(value, context) {
-                                    const total = context.dataset.data.reduce((sum, val) => sum + val, 0);
-                                    const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-                                    return `${percentage}%`;
-                                }
-                            }
-                        })
+                        }
+                    },
+                    onHover: (event, activeElements) => {
+                        if (activeElements.length > 0) {
+                            event.native.target.style.cursor = 'pointer';
+                        } else {
+                            event.native.target.style.cursor = 'default';
+                        }
                     }
-                }, // ADD THIS COMMA
-                plugins: typeof ChartDataLabels !== 'undefined' ? [ChartDataLabels] : []
+                },
+                plugins: [{
+                    afterDraw: function(chart) {
+                        const ctx = chart.ctx;
+                        const chartArea = chart.chartArea;
+                        const meta = chart.getDatasetMeta(0);
+                        const total = chart.data.datasets[0].data.reduce((sum, val) => sum + val, 0);
+                        
+                        meta.data.forEach((element, index) => {
+                            const value = chart.data.datasets[0].data[index];
+                            if (value === 0) return; // Skip zero values
+                            
+                            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                            const label = chart.data.labels[index];
+                            const compactValue = formatCompactCurrency(value, 'IDR');
+                            
+                            // Get the position of the slice
+                            const angle = element.startAngle + (element.endAngle - element.startAngle) / 2;
+                            const outerRadius = element.outerRadius;
+                            const centerX = element.x;
+                            const centerY = element.y;
+                            
+                            // Calculate label position (outside the chart)
+                            const labelRadius = outerRadius + 30;
+                            const labelX = centerX + Math.cos(angle) * labelRadius;
+                            const labelY = centerY + Math.sin(angle) * labelRadius;
+                            
+                            // Calculate line end position (on the chart edge)
+                            const lineRadius = outerRadius + 5;
+                            const lineX = centerX + Math.cos(angle) * lineRadius;
+                            const lineY = centerY + Math.sin(angle) * lineRadius;
+                            
+                            // Draw line from chart to label
+                            ctx.strokeStyle = '#666';
+                            ctx.lineWidth = 1;
+                            ctx.beginPath();
+                            ctx.moveTo(lineX, lineY);
+                            ctx.lineTo(labelX, labelY);
+                            ctx.stroke();
+                            
+                            // Draw label text
+                            ctx.fillStyle = '#333';
+                            ctx.font = 'bold 11px Arial';
+                            ctx.textAlign = labelX > centerX ? 'left' : 'right';
+                            ctx.textBaseline = 'middle';
+                            
+                            const labelText = `${label}\n${compactValue}\n(${percentage}%)`;
+                            const lines = labelText.split('\n');
+                            
+                            lines.forEach((line, lineIndex) => {
+                                ctx.fillText(line, labelX + (labelX > centerX ? 5 : -5), labelY + (lineIndex - 1) * 12);
+                            });
+                        });
+                    }
+                }]
             });
         }
         
