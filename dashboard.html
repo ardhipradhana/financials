@@ -3710,12 +3710,8 @@
                 
                 downloadBtn.innerHTML = originalText;
                 downloadBtn.disabled = false;
-                
-                alert('PDF downloaded successfully!');
             } catch (error) {
                 console.error('Error downloading PDF:', error);
-                alert('Error generating PDF. Please try again.');
-                
                 const downloadBtn = document.querySelector('button[onclick="downloadDashboardPDF()"]');
                 if (downloadBtn) {
                     downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download PDF';
@@ -3740,16 +3736,13 @@
                     day: 'numeric' 
                 });
         
-                // Capture chart as image
+                // Capture chart as image with higher quality
                 const chartCanvas = document.getElementById('cashflowChart');
                 const chartImage = await html2canvas(chartCanvas, {
                     backgroundColor: '#ffffff',
-                    scale: 2
-                });
-        
-                // Convert chart to blob
-                const chartBlob = await new Promise(resolve => {
-                    chartImage.toBlob(resolve, 'image/png');
+                    scale: 3, // Higher scale for better quality
+                    useCORS: true,
+                    allowTaint: true
                 });
         
                 // Get all the data
@@ -3764,7 +3757,40 @@
                 const largestCollection = document.getElementById('largestCollection').textContent;
                 const startingCash = document.getElementById('startingCash').value;
         
-                // Create formatted text content
+                // Create HTML content with embedded chart image
+                const chartDataUrl = chartImage.toDataURL('image/png', 1.0);
+                
+                const htmlContent = `
+                <div style="font-family: Arial, sans-serif; max-width: 800px;">
+                    <div style="background: #1e293b; color: white; padding: 20px; text-align: center; margin-bottom: 20px;">
+                        <h1 style="color: #fbbf24; margin: 0; font-size: 24px;">MERIDASH</h1>
+                        <p style="margin: 5px 0 0 0; font-size: 12px;">Financial Intelligence Dashboard</p>
+                    </div>
+                    
+                    <div style="padding: 0 20px;">
+                        <h2 style="color: #1e293b; margin-bottom: 10px;">13-Week Cash Flow Forecast</h2>
+                        <p style="color: #666; margin-bottom: 20px;">Generated on ${currentDate}</p>
+                        
+                        <h3 style="color: #1e293b; margin-bottom: 15px;">Key Metrics</h3>
+                        <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
+                            <tr style="background: #f8fafc;"><td style="padding: 8px; border: 1px solid #e2e8f0; font-weight: bold;">Starting Cash Position</td><td style="padding: 8px; border: 1px solid #e2e8f0;">Rp ${parseInt(startingCash.replace(/,/g, '')).toLocaleString('en-US')}</td></tr>
+                            <tr><td style="padding: 8px; border: 1px solid #e2e8f0; font-weight: bold;">Cash Runway</td><td style="padding: 8px; border: 1px solid #e2e8f0;">${runwayDays} days | ${runwayWeeks} weeks | ${runwayMonths} months</td></tr>
+                            <tr style="background: #f8fafc;"><td style="padding: 8px; border: 1px solid #e2e8f0; font-weight: bold;">Daily Burn Rate</td><td style="padding: 8px; border: 1px solid #e2e8f0;">${dailyBurn}</td></tr>
+                            <tr><td style="padding: 8px; border: 1px solid #e2e8f0; font-weight: bold;">Weekly Burn Rate</td><td style="padding: 8px; border: 1px solid #e2e8f0;">${weeklyBurn}</td></tr>
+                            <tr style="background: #f8fafc;"><td style="padding: 8px; border: 1px solid #e2e8f0; font-weight: bold;">Monthly Burn Rate</td><td style="padding: 8px; border: 1px solid #e2e8f0;">${monthlyBurn}</td></tr>
+                            <tr><td style="padding: 8px; border: 1px solid #e2e8f0; font-weight: bold;">Cash Flow Trend</td><td style="padding: 8px; border: 1px solid #e2e8f0;">${trendText}</td></tr>
+                            <tr style="background: #f8fafc;"><td style="padding: 8px; border: 1px solid #e2e8f0; font-weight: bold;">Largest Upcoming Payment</td><td style="padding: 8px; border: 1px solid #e2e8f0;">${biggestPayment}</td></tr>
+                            <tr><td style="padding: 8px; border: 1px solid #e2e8f0; font-weight: bold;">Largest Expected Collection</td><td style="padding: 8px; border: 1px solid #e2e8f0;">${largestCollection}</td></tr>
+                        </table>
+                        
+                        <h3 style="color: #1e293b; margin-bottom: 15px;">Cash Flow Forecast Chart</h3>
+                        <img src="${chartDataUrl}" style="width: 100%; max-width: 600px; height: auto; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 20px;" alt="Cash Flow Forecast Chart">
+                        
+                        <p style="color: #666; font-size: 12px; margin-top: 20px;">Generated by Meridash Financial Intelligence Dashboard</p>
+                    </div>
+                </div>`;
+        
+                // Create plain text version
                 const textContent = `MeriDash - Financial Intelligence Dashboard
         13-Week Cash Flow Forecast
         Generated on ${currentDate}
@@ -3779,77 +3805,25 @@
         Largest Upcoming Payment: ${biggestPayment}
         Largest Expected Collection: ${largestCollection}
         
-        [Chart image copied separately - paste below this text]
-        
         Generated by MeriDash Financial Intelligence Dashboard`;
         
-                // Create HTML content for rich formatting
-                const htmlContent = `
-                <div style="font-family: Arial, sans-serif; max-width: 800px;">
-                    <div style="background: #1e293b; color: white; padding: 20px; text-align: center;">
-                        <h1 style="color: #fbbf24; margin: 0; font-size: 24px;">MERIDASH</h1>
-                        <p style="margin: 5px 0 0 0; font-size: 12px;">Financial Intelligence Dashboard</p>
-                    </div>
-                    
-                    <div style="padding: 20px;">
-                        <h2 style="color: #1e293b; margin-bottom: 10px;">13-Week Cash Flow Forecast</h2>
-                        <p style="color: #666; margin-bottom: 20px;">Generated on ${currentDate}</p>
-                        
-                        <h3 style="color: #1e293b; margin-bottom: 15px;">Key Metrics</h3>
-                        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
-                            <tr style="background: #f8fafc;"><td style="padding: 8px; border: 1px solid #e2e8f0; font-weight: bold;">Starting Cash Position</td><td style="padding: 8px; border: 1px solid #e2e8f0;">Rp ${parseInt(startingCash.replace(/,/g, '')).toLocaleString('en-US')}</td></tr>
-                            <tr><td style="padding: 8px; border: 1px solid #e2e8f0; font-weight: bold;">Cash Runway</td><td style="padding: 8px; border: 1px solid #e2e8f0;">${runwayDays} days | ${runwayWeeks} weeks | ${runwayMonths} months</td></tr>
-                            <tr style="background: #f8fafc;"><td style="padding: 8px; border: 1px solid #e2e8f0; font-weight: bold;">Daily Burn Rate</td><td style="padding: 8px; border: 1px solid #e2e8f0;">${dailyBurn}</td></tr>
-                            <tr><td style="padding: 8px; border: 1px solid #e2e8f0; font-weight: bold;">Weekly Burn Rate</td><td style="padding: 8px; border: 1px solid #e2e8f0;">${weeklyBurn}</td></tr>
-                            <tr style="background: #f8fafc;"><td style="padding: 8px; border: 1px solid #e2e8f0; font-weight: bold;">Monthly Burn Rate</td><td style="padding: 8px; border: 1px solid #e2e8f0;">${monthlyBurn}</td></tr>
-                            <tr><td style="padding: 8px; border: 1px solid #e2e8f0; font-weight: bold;">Cash Flow Trend</td><td style="padding: 8px; border: 1px solid #e2e8f0;">${trendText}</td></tr>
-                            <tr style="background: #f8fafc;"><td style="padding: 8px; border: 1px solid #e2e8f0; font-weight: bold;">Largest Upcoming Payment</td><td style="padding: 8px; border: 1px solid #e2e8f0;">${biggestPayment}</td></tr>
-                            <tr><td style="padding: 8px; border: 1px solid #e2e8f0; font-weight: bold;">Largest Expected Collection</td><td style="padding: 8px; border: 1px solid #e2e8f0;">${largestCollection}</td></tr>
-                        </table>
-                        
-                        <p style="color: #666; font-size: 12px; margin-top: 20px;">Generated by Meridash Financial Intelligence Dashboard</p>
-                    </div>
-                </div>`;
+                // Copy to clipboard with embedded image
+                const clipboardItem = new ClipboardItem({
+                    'text/html': new Blob([htmlContent], { type: 'text/html' }),
+                    'text/plain': new Blob([textContent], { type: 'text/plain' })
+                });
         
-                // Copy both text and image to clipboard
-                const clipboardItems = [
-                    new ClipboardItem({
-                        'text/html': new Blob([htmlContent], { type: 'text/html' }),
-                        'text/plain': new Blob([textContent], { type: 'text/plain' }),
-                        'image/png': chartBlob
-                    })
-                ];
-        
-                await navigator.clipboard.write(clipboardItems);
+                await navigator.clipboard.write([clipboardItem]);
                 
                 copyBtn.innerHTML = originalText;
                 copyBtn.disabled = false;
-                
-                alert('Dashboard content copied to clipboard! You can now paste it into Word, PowerPoint, or any document. The chart image and formatted text will be pasted together.');
         
             } catch (error) {
                 console.error('Error copying to clipboard:', error);
                 
-                // Fallback: copy just the text
-                try {
-                    const textContent = `MERIDASH - 13-Week Cash Flow Forecast
-        Generated on ${new Date().toLocaleDateString('en-US')}
-        
-        Starting Cash: Rp ${document.getElementById('startingCash').value}
-        Runway: ${document.getElementById('cashRunwayDays').textContent} days
-        Trend: ${document.getElementById('cashFlowTrend').textContent}
-        
-        (Chart image copy not supported - please use Download PDF instead)`;
-        
-                    await navigator.clipboard.writeText(textContent);
-                    alert('Basic text copied to clipboard! For full formatting and chart, please use Download PDF.');
-                } catch (textError) {
-                    alert('Copy to clipboard not supported in this browser. Please use Download PDF instead.');
-                }
-                
                 const copyBtn = document.querySelector('button[onclick="copyDashboardPDF()"]');
                 if (copyBtn) {
-                    copyBtn.innerHTML = originalText;
+                    copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy Content';
                     copyBtn.disabled = false;
                 }
             }
