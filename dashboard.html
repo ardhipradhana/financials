@@ -2388,9 +2388,15 @@
         .parked-bucket {
             background: #fef3c7;
             border-color: #f59e0b;
-            grid-column: span 3;
-            justify-self: center;
-            width: calc(75% - 0.75rem);
+            grid-column: span 3; /* Spans exactly 3 columns */
+            width: 100%; /* Full width of the 3 columns */
+        }
+
+        .parked-bucket .bucket-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr; /* Two columns for cards */
+            gap: 0.5rem; 
+            align-items: start;
         }
         
         .parked-bucket .bucket-header {
@@ -2484,7 +2490,7 @@
         
         .change-log-header {
             display: flex;
-            justify-content: flex-start;
+            justify-content: space-between;
             align-items: center;
             margin-bottom: 1rem;
         }
@@ -2534,7 +2540,7 @@
         
         .impact-header {
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-start;
             align-items: center;
             margin-bottom: 1rem;
         }
@@ -2567,7 +2573,10 @@
             .parked-bucket {
                 grid-column: span 3;
                 width: 100%;
-                justify-self: stretch;
+            }
+            
+            .parked-bucket .bucket-content {
+                grid-template-columns: 1fr 1fr; /* Keep 2 columns even on smaller screens */
             }
         }
         
@@ -2579,6 +2588,10 @@
             .parked-bucket {
                 grid-column: span 2;
                 width: 100%;
+            }
+            
+            .parked-bucket .bucket-content {
+                grid-template-columns: 1fr; /* Single column on mobile */
             }
         }
         
@@ -3258,6 +3271,9 @@
                             <div class="change-log-section">
                                 <div class="change-log-header">
                                     <h4 class="change-log-title">Change Log</h4>
+                                    <button class="btn btn-secondary btn-small" onclick="resetScenario()">
+                                        <i class="fas fa-undo"></i> Reset All
+                                    </button>
                                 </div>
                                 <div class="change-log-content" id="changeLogContent">
                                     <div class="log-item neutral">
@@ -3270,9 +3286,6 @@
                             <div class="impact-analysis-section">
                                 <div class="impact-header">
                                     <h4 class="impact-title">Impact Analysis</h4>
-                                    <button class="btn btn-secondary btn-small" onclick="resetScenario()">
-                                        <i class="fas fa-undo"></i> Reset All
-                                    </button>
                                 </div>
                                 <div class="impact-content" id="impactAnalysisContent">
                                     <div class="impact-item neutral">
@@ -5320,7 +5333,9 @@
                 
                 if (transaction.currentWeek === 'parked' || transaction.currentWeek > 13) {
                     const parkedBucket = document.getElementById('bucket-week-parked');
-                    if (parkedBucket) parkedBucket.appendChild(card);
+                    if (parkedBucket) {
+                        parkedBucket.appendChild(card);
+                    }
                 } else {
                     const bucket = document.getElementById(`bucket-week-${transaction.currentWeek}`);
                     if (bucket) bucket.appendChild(card);
