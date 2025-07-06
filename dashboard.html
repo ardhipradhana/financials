@@ -5270,135 +5270,66 @@
         function loadScenarioTransactions() {
             console.log('Loading scenario transactions...');
             
-            // Get real transaction data from the main AP/AR system
-            const realTransactions = getAPARTransactionData();
-            console.log('Real transactions found:', realTransactions);
-            
-            // Convert to scenario format and assign to weeks
-            originalData = realTransactions
-                .filter(transaction => transaction.status === 'pending' || transaction.status === 'overdue' || !transaction.status)
-                .map(transaction => {
-                    // Calculate which week this transaction falls into
-                    const daysFromNow = Math.ceil((new Date(transaction.dueDate) - new Date()) / (1000 * 60 * 60 * 24));
-                    const weekNumber = Math.max(1, Math.min(13, Math.ceil(daysFromNow / 7)));
-                    
-                    return {
-                        id: transaction.id || `trans_${Date.now()}_${Math.random()}`,
-                        type: transaction.type,
-                        vendor: transaction.company || transaction.vendor,
-                        amount: Math.abs(transaction.amount),
-                        description: transaction.description,
-                        originalWeek: weekNumber,
-                        currentWeek: weekNumber,
-                        category: transaction.category || 'General',
-                        dueDate: transaction.dueDate
-                    };
-                });
-            
-            // If no real transactions, fall back to sample data
-            if (originalData.length === 0) {
-                console.log('No real transactions found, using sample data');
-                originalData = [
-                    {
-                        id: 'ap1',
-                        type: 'AP',
-                        vendor: 'Vendor ABC Corp',
-                        amount: 50000,
-                        description: 'Office Equipment Purchase',
-                        originalWeek: 2,
-                        currentWeek: 2,
-                        category: 'Equipment'
-                    },
-                    {
-                        id: 'ap2',
-                        type: 'AP',
-                        vendor: 'Vendor XYZ Ltd',
-                        amount: 30000,
-                        description: 'Marketing Services',
-                        originalWeek: 3,
-                        currentWeek: 3,
-                        category: 'Services'
-                    },
-                    {
-                        id: 'ar1',
-                        type: 'AR',
-                        vendor: 'Customer A Inc',
-                        amount: 80000,
-                        description: 'Consulting Project',
-                        originalWeek: 1,
-                        currentWeek: 1,
-                        category: 'Revenue'
-                    },
-                    {
-                        id: 'ar2',
-                        type: 'AR',
-                        vendor: 'Customer B Ltd',
-                        amount: 45000,
-                        description: 'Software License',
-                        originalWeek: 4,
-                        currentWeek: 4,
-                        category: 'Revenue'
+            // Use the same data source as the working Transaction and Aging tabs
+            if (!aparTransactions || aparTransactions.length === 0) {
+                console.log('No aparTransactions found, trying to load from Supabase...');
+                // If no data loaded yet, trigger a load (but this should already be loaded)
+                loadAPARData().then(() => {
+                    if (aparTransactions.length > 0) {
+                        processTransactionsForScenario();
                     }
-                ];
+                });
+                return;
             }
             
+            processTransactionsForScenario();
+        }
+        
+        function processTransactionsForScenario() {
+            console.log('Processing', aparTransactions.length, 'transactions for scenario analysis');
+            
+            // Filter for unpaid transactions (same logic as other tabs)
+            const unpaidTransactions = aparTransactions.filter(transaction => 
+                transaction.status !== 'Paid'
+            );
+            
+            console.log('Found', unpaidTransactions.length, 'unpaid transactions');
+            
+            // Convert to scenario format and assign to weeks
+            originalData = unpaidTransactions.map(transaction => {
+                // Calculate which week this transaction falls into
+                let dueDate = transaction.due_date;
+                
+                // Calculate due date if not provided (same logic as Transaction tab)
+                if (!dueDate && transaction.payment_terms && transaction.invoice_date) {
+                    const invoiceDate = new Date(transaction.invoice_date);
+                    const calculatedDueDate = new Date(invoiceDate);
+                    calculatedDueDate.setDate(calculatedDueDate.getDate() + (transaction.payment_terms || 30));
+                    dueDate = calculatedDueDate.toISOString().split('T')[0];
+                }
+                
+                const daysFromNow = dueDate ? Math.ceil((new Date(dueDate) - new Date()) / (1000 * 60 * 60 * 24)) : 30;
+                const weekNumber = Math.max(1, Math.min(13, Math.ceil(daysFromNow / 7)));
+                
+                return {
+                    id: transaction.id,
+                    type: transaction.type,
+                    vendor: transaction.company,
+                    amount: Math.abs(transaction.amount),
+                    description: transaction.description,
+                    originalWeek: weekNumber,
+                    currentWeek: weekNumber,
+                    category: transaction.category || 'General',
+                    dueDate: dueDate
+                };
+            });
+            
+            // Copy to working scenario data
             scenarioData = [...originalData];
-            console.log('Final scenario data:', scenarioData);
+            console.log('Final scenario data:', scenarioData.length, 'transactions');
         }
         
         // Function to get real AP/AR data (connects to existing system)
-        function getAPARTransactionData() {
-            console.log('Looking for AP/AR data...');
-            
-            // FIRST: Check for the main aparTransactions variable (where Supabase data is loaded)
-            if (typeof aparTransactions !== 'undefined' && Array.isArray(aparTransactions)) {
-                console.log('Found aparTransactions:', aparTransactions.length, 'transactions');
-                return aparTransactions;
-            }
-            
-            // Try other variable names as fallback
-            if (typeof window.apArData !== 'undefined' && Array.isArray(window.apArData)) {
-                console.log('Found apArData:', window.apArData);
-                return window.apArData;
-            }
-            
-            if (typeof window.transactions !== 'undefined' && Array.isArray(window.transactions)) {
-                console.log('Found transactions:', window.transactions);
-                return window.transactions;
-            }
-            
-            // Try to get data from the table if it exists
-            const table = document.getElementById('apArTable');
-            if (table && table.querySelector('tbody')) {
-                console.log('Trying to extract from table...');
-                const rows = table.querySelectorAll('tbody tr');
-                const extractedData = [];
-                
-                rows.forEach(row => {
-                    const cells = row.querySelectorAll('td');
-                    if (cells.length >= 6) {
-                        extractedData.push({
-                            id: cells[0].textContent.trim(),
-                            type: cells[1].textContent.trim(),
-                            company: cells[2].textContent.trim(),
-                            description: cells[3].textContent.trim(),
-                            amount: parseFloat(cells[4].textContent.replace(/[^\d.-]/g, '')) || 0,
-                            due_date: cells[5].textContent.trim(), // Use due_date to match the Supabase field
-                            status: cells[6] ? cells[6].textContent.trim() : 'Pending'
-                        });
-                    }
-                });
-                
-                if (extractedData.length > 0) {
-                    console.log('Extracted from table:', extractedData);
-                    return extractedData;
-                }
-            }
-            
-            console.log('No real AP/AR data found');
-            return [];
-        }
-        
         function populateTransactionBuckets() {
             // Clear all buckets first
             for (let week = 1; week <= 13; week++) {
