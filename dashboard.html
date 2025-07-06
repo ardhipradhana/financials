@@ -1968,8 +1968,29 @@
         
         .scenarios-header {
             background: #f8fafc;
-            padding: 1rem;
+            padding: 1rem 1.5rem;
             border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .scenario-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 0.5rem;
+        }
+        
+        .scenario-actions .btn {
+            font-size: 0.875rem;
+            padding: 0.5rem 1rem;
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: #9ca3af;
+            border-color: #9ca3af;
         }
         
         .scenarios-title {
@@ -3185,6 +3206,11 @@
                                 <div class="scenarios-header">
                                     <h4 class="scenarios-title">13-Week Cash Flow Impact</h4>
                                     <p class="scenarios-subtitle">Real-time scenario analysis • Drag transactions between weeks</p>
+                                    <div class="scenario-actions">
+                                        <button class="btn btn-primary" onclick="applyScenarioChanges()" id="applyChangesBtn" disabled>
+                                            <i class="fas fa-check"></i> Apply Changes to Forecast
+                                        </button>
+                                    </div>
                                 </div>
                                 <div class="scenario-chart-full">
                                     <canvas id="scenarioForecastChart" width="800" height="300"></canvas>
@@ -5240,81 +5266,87 @@
         }
         
         function loadScenarioTransactions() {
-            // Sample data distributed across different weeks
-            originalData = [
-                {
-                    id: 'ap1',
-                    type: 'AP',
-                    vendor: 'Vendor ABC Corp',
-                    amount: 50000,
-                    description: 'Office Equipment Purchase',
-                    originalWeek: 2,
-                    currentWeek: 2,
-                    category: 'Equipment'
-                },
-                {
-                    id: 'ap2',
-                    type: 'AP',
-                    vendor: 'Vendor XYZ Ltd',
-                    amount: 30000,
-                    description: 'Marketing Services',
-                    originalWeek: 3,
-                    currentWeek: 3,
-                    category: 'Services'
-                },
-                {
-                    id: 'ap3',
-                    type: 'AP',
-                    vendor: 'Tech Solutions Inc',
-                    amount: 75000,
-                    description: 'Software License',
-                    originalWeek: 6,
-                    currentWeek: 6,
-                    category: 'Technology'
-                },
-                {
-                    id: 'ar1',
-                    type: 'AR',
-                    vendor: 'Customer A Inc',
-                    amount: 80000,
-                    description: 'Consulting Project',
-                    originalWeek: 1,
-                    currentWeek: 1,
-                    category: 'Revenue'
-                },
-                {
-                    id: 'ar2',
-                    type: 'AR',
-                    vendor: 'Customer B Ltd',
-                    amount: 45000,
-                    description: 'Software License',
-                    originalWeek: 4,
-                    currentWeek: 4,
-                    category: 'Revenue'
-                },
-                {
-                    id: 'ar3',
-                    type: 'AR',
-                    vendor: 'Customer C Corp',
-                    amount: 120000,
-                    description: 'Enterprise Contract',
-                    originalWeek: 8,
-                    currentWeek: 8,
-                    category: 'Revenue'
-                },
-                {
-                    id: 'ap4',
-                    type: 'AP',
-                    vendor: 'Supplier D Ltd',
-                    amount: 25000,
-                    description: 'Raw Materials',
-                    originalWeek: 10,
-                    currentWeek: 10,
-                    category: 'Materials'
-                }
-            ];
+            // Get real transaction data from the main AP/AR system
+            const realTransactions = getAPARTransactionData();
+            
+            // Convert to scenario format and assign to weeks
+            originalData = realTransactions
+                .filter(transaction => transaction.status === 'pending' || transaction.status === 'overdue')
+                .map(transaction => {
+                    // Calculate which week this transaction falls into
+                    const daysFromNow = Math.ceil((new Date(transaction.dueDate) - new Date()) / (1000 * 60 * 60 * 24));
+                    const weekNumber = Math.max(1, Math.min(13, Math.ceil(daysFromNow / 7)));
+                    
+                    return {
+                        id: transaction.id,
+                        type: transaction.type,
+                        vendor: transaction.company,
+                        amount: Math.abs(transaction.amount),
+                        description: transaction.description,
+                        originalWeek: weekNumber,
+                        currentWeek: weekNumber,
+                        category: transaction.category || 'General',
+                        dueDate: transaction.dueDate
+                    };
+                });
+            
+            // If no real transactions, fall back to sample data
+            if (originalData.length === 0) {
+                originalData = [
+                    {
+                        id: 'ap1',
+                        type: 'AP',
+                        vendor: 'Vendor ABC Corp',
+                        amount: 50000,
+                        description: 'Office Equipment Purchase',
+                        originalWeek: 2,
+                        currentWeek: 2,
+                        category: 'Equipment'
+                    },
+                    {
+                        id: 'ap2',
+                        type: 'AP',
+                        vendor: 'Vendor XYZ Ltd',
+                        amount: 30000,
+                        description: 'Marketing Services',
+                        originalWeek: 3,
+                        currentWeek: 3,
+                        category: 'Services'
+                    },
+                    {
+                        id: 'ar1',
+                        type: 'AR',
+                        vendor: 'Customer A Inc',
+                        amount: 80000,
+                        description: 'Consulting Project',
+                        originalWeek: 1,
+                        currentWeek: 1,
+                        category: 'Revenue'
+                    },
+                    {
+                        id: 'ar2',
+                        type: 'AR',
+                        vendor: 'Customer B Ltd',
+                        amount: 45000,
+                        description: 'Software License',
+                        originalWeek: 4,
+                        currentWeek: 4,
+                        category: 'Revenue'
+                    }
+                ];
+            }
             
             scenarioData = [...originalData];
+            console.log('Loaded scenario transactions:', scenarioData);
+        }
+        
+        // Function to get real AP/AR data (connects to existing system)
+        function getAPARTransactionData() {
+            // This connects to your existing AP/AR data
+            if (typeof apArData !== 'undefined' && Array.isArray(apArData)) {
+                return apArData;
+            }
+            return [];
         }
         
         function populateTransactionBuckets() {
@@ -5596,10 +5628,40 @@
         
         // Chart functions (reusing dashboard chart logic)
         function updateScenarioChart() {
-            const canvas = document.getElementById('scenarioForecastChart');
-            if (!canvas) return;
-            
+            // Use the same chart generation as dashboard overview
+            generateScenarioForecastData();
             createScenarioCashFlowChart();
+        }
+        
+        function generateScenarioForecastData() {
+            // Get starting cash from dashboard if available, otherwise use default
+            const startingCash = (typeof getStartingCash === 'function') ? getStartingCash() : 100000000;
+            const today = new Date();
+            
+            // Clear and rebuild scenario forecast data
+            window.scenarioForecastData = [];
+            
+            let currentCash = startingCash;
+            
+            for (let week = 0; week < 13; week++) {
+                const weekDate = new Date(today);
+                weekDate.setDate(today.getDate() + (week * 7));
+                
+                // Calculate weekly flows based on scenario data
+                const weeklyFlows = calculateScenarioWeeklyFlows(week + 1);
+                
+                currentCash += weeklyFlows.inflows - weeklyFlows.outflows;
+                
+                window.scenarioForecastData.push({
+                    week: week + 1,
+                    date: weekDate,
+                    cashPosition: currentCash,
+                    inflows: weeklyFlows.inflows,
+                    outflows: weeklyFlows.outflows
+                });
+            }
+            
+            return window.scenarioForecastData;
         }
         
         function createScenarioCashFlowChart() {
@@ -5611,8 +5673,9 @@
             // Clear canvas
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            // Generate scenario-adjusted forecast data
-            const scenarioForecastData = generateScenarioForecastData();
+            // Use scenario forecast data
+            const data = window.scenarioForecastData || [];
+            if (data.length === 0) return;
             
             // Chart dimensions
             const padding = 50;
@@ -5620,56 +5683,58 @@
             const chartHeight = canvas.height - (padding * 2);
             
             // Find min/max values for scaling
-            const allValues = scenarioForecastData.map(d => d.cashPosition);
-            const minValue = Math.min(...allValues) * 0.95; // Add 5% padding
+            const allValues = data.map(d => d.cashPosition);
+            const minValue = Math.min(...allValues) * 0.95;
             const maxValue = Math.max(...allValues) * 1.05;
             const valueRange = maxValue - minValue;
             
-            // Set up styles
+            // Draw grid and chart (same logic as dashboard)
+            drawChartGrid(ctx, canvas, padding, chartWidth, chartHeight, minValue, maxValue, valueRange);
+            drawCashFlowLine(ctx, padding, chartWidth, chartHeight, data, minValue, valueRange);
+            drawChartTitle(ctx, padding, 'Scenario: 13-Week Cash Flow Forecast');
+        }
+        
+        function drawChartGrid(ctx, canvas, padding, chartWidth, chartHeight, minValue, maxValue, valueRange) {
             ctx.font = '12px Arial';
             ctx.lineWidth = 1;
-            
-            // Draw grid lines and labels
             ctx.strokeStyle = '#e5e7eb';
             ctx.fillStyle = '#6b7280';
             
-            // Horizontal grid lines (5 lines)
+            // Horizontal grid lines
             for (let i = 0; i <= 5; i++) {
                 const y = padding + (chartHeight / 5) * i;
                 const value = maxValue - (valueRange / 5) * i;
                 
-                // Grid line
                 ctx.beginPath();
                 ctx.moveTo(padding, y);
                 ctx.lineTo(padding + chartWidth, y);
                 ctx.stroke();
                 
-                // Y-axis labels
                 ctx.fillText(formatCurrency(value), 5, y + 4);
             }
             
-            // Vertical grid lines (13 weeks)
+            // Vertical grid lines
             for (let i = 0; i <= 12; i++) {
                 const x = padding + (chartWidth / 12) * i;
                 
-                // Grid line
                 ctx.beginPath();
                 ctx.moveTo(x, padding);
                 ctx.lineTo(x, padding + chartHeight);
                 ctx.stroke();
                 
-                // X-axis labels (every 2 weeks)
                 if (i % 2 === 0) {
                     ctx.fillText(`W${i + 1}`, x - 8, canvas.height - 10);
                 }
             }
-            
+        }
+        
+        function drawCashFlowLine(ctx, padding, chartWidth, chartHeight, data, minValue, valueRange) {
             // Draw cash flow line
             ctx.strokeStyle = '#3b82f6';
             ctx.lineWidth = 3;
             ctx.beginPath();
             
-            scenarioForecastData.forEach((point, index) => {
+            data.forEach((point, index) => {
                 const x = padding + (chartWidth / 12) * index;
                 const y = padding + chartHeight - ((point.cashPosition - minValue) / valueRange) * chartHeight;
                 
@@ -5684,7 +5749,7 @@
             
             // Draw data points
             ctx.fillStyle = '#3b82f6';
-            scenarioForecastData.forEach((point, index) => {
+            data.forEach((point, index) => {
                 const x = padding + (chartWidth / 12) * index;
                 const y = padding + chartHeight - ((point.cashPosition - minValue) / valueRange) * chartHeight;
                 
@@ -5692,11 +5757,12 @@
                 ctx.arc(x, y, 4, 0, 2 * Math.PI);
                 ctx.fill();
             });
-            
-            // Add title
+        }
+        
+        function drawChartTitle(ctx, padding, title) {
             ctx.fillStyle = '#1f2937';
             ctx.font = 'bold 16px Arial';
-            ctx.fillText('13-Week Cash Flow Forecast', padding, 25);
+            ctx.fillText(title, padding, 25);
         }
         
         function generateScenarioForecastData() {
@@ -5752,6 +5818,107 @@
                 return `$${(value / 1000).toFixed(0)}K`;
             }
             return `$${Math.round(value).toLocaleString()}`;
+        }
+
+        // Track if changes have been made
+        let hasScenarioChanges = false;
+        
+        function addToChangeLog(transaction, oldWeek, newWeek) {
+            const timestamp = new Date().toLocaleTimeString('en-US', { 
+                hour12: false, 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+            
+            let logMessage = '';
+            const weekDisplay = (week) => week === 'parked' ? 'Parked' : `Week ${week}`;
+            
+            if (newWeek === 'parked') {
+                logMessage = `${timestamp} - ${transaction.vendor} moved to Parked (beyond 13 weeks)`;
+            } else if (oldWeek === 'parked') {
+                logMessage = `${timestamp} - ${transaction.vendor} moved from Parked to ${weekDisplay(newWeek)}`;
+            } else {
+                logMessage = `${timestamp} - ${transaction.vendor} moved from ${weekDisplay(oldWeek)} → ${weekDisplay(newWeek)}`;
+            }
+            
+            const logEntry = {
+                id: Date.now(),
+                timestamp,
+                message: logMessage,
+                transaction: transaction.vendor,
+                oldWeek,
+                newWeek,
+                type: transaction.type
+            };
+            
+            changeLog.unshift(logEntry);
+            hasScenarioChanges = true;
+            updateChangeLogDisplay();
+            updateApplyButton();
+        }
+        
+        function updateApplyButton() {
+            const applyBtn = document.getElementById('applyChangesBtn');
+            if (applyBtn) {
+                applyBtn.disabled = !hasScenarioChanges;
+            }
+        }
+        
+        function applyScenarioChanges() {
+            if (!hasScenarioChanges) return;
+            
+            // Apply scenario changes to the main forecast data (not dashboard overview)
+            console.log('Applying scenario changes to forecast...');
+            
+            // Update the main forecast data with scenario changes
+            window.appliedScenarioData = [...scenarioData];
+            
+            // Show confirmation
+            const applyBtn = document.getElementById('applyChangesBtn');
+            const originalText = applyBtn.innerHTML;
+            
+            applyBtn.innerHTML = '<i class="fas fa-check"></i> Changes Applied!';
+            applyBtn.style.background = '#10b981';
+            applyBtn.disabled = true;
+            
+            setTimeout(() => {
+                applyBtn.innerHTML = originalText;
+                applyBtn.style.background = '';
+                hasScenarioChanges = false;
+                updateApplyButton();
+            }, 2000);
+            
+            console.log('Scenario changes applied successfully');
+        }
+        
+        function resetScenario() {
+            console.log('Resetting scenario...');
+            
+            // Reset data to original state
+            scenarioData = originalData.map(transaction => ({
+                ...transaction,
+                currentWeek: transaction.originalWeek
+            }));
+            
+            // Clear change log and reset flags
+            changeLog = [];
+            hasScenarioChanges = false;
+            
+            // Update displays
+            populateTransactionBuckets();
+            updateChangeLogDisplay();
+            updateImpactAnalysis();
+            updateScenarioChart();
+            updateApplyButton();
+            
+            // Reset bucket colors
+            document.querySelectorAll('.week-bucket').forEach(bucket => {
+                bucket.style.background = '';
+                bucket.style.color = '';
+                bucket.classList.remove('drag-over', 'highlight');
+            });
+            
+            console.log('Scenario reset completed');
         }
         
         // Update the switchAPARTab function to initialize the new scenario analysis
