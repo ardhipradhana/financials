@@ -4846,24 +4846,8 @@
                 }
                 if (this.dataset.section === 'statements') {
                     setTimeout(() => {
-                        // Always re-initialize when coming back to this section
+                        console.log('Financial Statements tab clicked');
                         initializeFinancialStatements();
-                        
-                        // Ensure all Financial Statements elements are properly visible
-                        const financialSection = document.getElementById('statements-section');
-                        if (financialSection) {
-                            // Re-render the table if data exists
-                            if (financialTransactions && financialTransactions.length > 0) {
-                                renderFinancialTable();
-                                updateTrialBalance();
-                            }
-                            
-                            // Ensure the default tab (transactions) is active
-                            switchFinancialTab('transactions');
-                            
-                            // Re-populate dropdowns
-                            populateAccountDropdowns();
-                        }
                     }, 100);
                 }
             });
@@ -6970,26 +6954,52 @@
         
         // Initialize Financial Statements
         async function initializeFinancialStatements() {
-            console.log('Initializing Financial Statements...');
-            
-            // Reset any previous state
-            financialTransactions = [];
-            glAccounts = [];
-            selectedFinancialTransactions = [];
+            console.log('=== INITIALIZING FINANCIAL STATEMENTS ===');
             
             try {
+                // Check if we have the required elements
+                const statementsSection = document.getElementById('statements-section');
+                const financialTableBody = document.getElementById('financialTableBody');
+                
+                console.log('Statements section found:', !!statementsSection);
+                console.log('Table body found:', !!financialTableBody);
+                
+                if (!statementsSection || !financialTableBody) {
+                    console.error('Required elements not found!');
+                    return;
+                }
+                
+                // Reset state
+                financialTransactions = [];
+                glAccounts = [];
+                selectedFinancialTransactions = [];
+                
+                console.log('Loading GL accounts...');
                 await loadGLAccounts();
+                console.log('GL accounts loaded:', glAccounts.length);
+                
+                console.log('Loading financial transactions...');
                 await loadFinancialTransactions();
+                console.log('Financial transactions loaded:', financialTransactions.length);
+                
+                console.log('Updating trial balance...');
                 updateTrialBalance();
+                
+                console.log('Populating account filters...');
                 populateAccountFilters();
+                
+                console.log('Setting up period filters...');
                 checkPeriodFilter();
                 
-                // Ensure transactions tab is active by default
+                console.log('Switching to transactions tab...');
                 switchFinancialTab('transactions');
                 
-                console.log('Financial Statements initialized successfully');
+                console.log('=== FINANCIAL STATEMENTS INITIALIZATION COMPLETE ===');
+                
             } catch (error) {
-                console.error('Error initializing financial statements:', error);
+                console.error('=== ERROR INITIALIZING FINANCIAL STATEMENTS ===');
+                console.error('Error details:', error);
+                console.error('Stack trace:', error.stack);
             }
         }
         
