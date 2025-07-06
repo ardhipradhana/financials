@@ -8067,7 +8067,7 @@
             console.log('Opening financial upload modal...');
             const modal = document.getElementById('uploadFinancialModal');
             if (modal) {
-                modal.classList.add('active');
+                modal.classList.add('show'); // CHANGED TO 'show'
                 console.log('Modal opened successfully');
             } else {
                 console.error('Upload modal not found!');
@@ -8078,7 +8078,7 @@
         function closeFinancialUploadModal() {
             const modal = document.getElementById('uploadFinancialModal');
             if (modal) {
-                modal.classList.remove('active');
+                modal.classList.remove('show'); // CHANGED TO 'show'
                 document.getElementById('financialFileInput').value = '';
             }
         }
