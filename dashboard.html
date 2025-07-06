@@ -4845,46 +4845,8 @@
                     }, 100);
                 }
                 if (this.dataset.section === 'statements') {
-                    console.log('Financial Statements tab clicked - before timeout');
                     setTimeout(() => {
-                        console.log('Financial Statements tab clicked - inside timeout');
                         initializeFinancialStatements();
-                        
-                        // Force the tab to stay visible
-                        setTimeout(() => {
-                            console.log('=== VISUAL DEBUGGING ===');
-                            const statementsSection = document.getElementById('statements-section');
-                            const transactionsTab = document.getElementById('transactions-tab');
-                            const tableBody = document.getElementById('financialTableBody');
-                            const financialTabs = document.querySelector('.financial-tabs');
-                            
-                            console.log('Statements section:', {
-                                display: statementsSection?.style.display,
-                                visibility: statementsSection?.style.visibility,
-                                opacity: statementsSection?.style.opacity,
-                                height: statementsSection?.offsetHeight,
-                                width: statementsSection?.offsetWidth
-                            });
-                            
-                            console.log('Transactions tab:', {
-                                display: transactionsTab?.style.display,
-                                visibility: transactionsTab?.style.visibility,
-                                opacity: transactionsTab?.style.opacity,
-                                height: transactionsTab?.offsetHeight,
-                                width: transactionsTab?.offsetWidth
-                            });
-                            
-                            console.log('Table body:', {
-                                display: tableBody?.style.display,
-                                visibility: tableBody?.style.visibility,
-                                opacity: tableBody?.style.opacity,
-                                height: tableBody?.offsetHeight,
-                                width: tableBody?.offsetWidth,
-                                innerHTML: tableBody?.innerHTML.substring(0, 100) + '...'
-                            });
-                            
-                        }, 1500);
-                        
                     }, 100);
                 }
             });
