@@ -8415,6 +8415,11 @@
                 
                 glAccounts = glData || [];
                 console.log('Loaded GL accounts globally:', glAccounts.length);
+
+                // Initialize UI with loaded data
+                populateAccountDropdowns();
+                renderFinancialTable();
+                updateTrialBalance();
                 
             } catch (error) {
                 console.error('Error loading financial data globally:', error);
