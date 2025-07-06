@@ -5350,8 +5350,8 @@
         function getAPARTransactionData() {
             console.log('Looking for AP/AR data...');
             
-            // First check if aparTransactions global variable exists (this is the main data source)
-            if (typeof aparTransactions !== 'undefined' && Array.isArray(aparTransactions) && aparTransactions.length > 0) {
+            // FIRST: Check for the main aparTransactions variable (where Supabase data is loaded)
+            if (typeof aparTransactions !== 'undefined' && Array.isArray(aparTransactions)) {
                 console.log('Found aparTransactions:', aparTransactions.length, 'transactions');
                 return aparTransactions;
             }
@@ -5367,24 +5367,24 @@
                 return window.transactions;
             }
             
-            // Try to get data from the table as last resort
-            const table = document.querySelector('#apArTable tbody');
-            if (table) {
-                console.log('Extracting from table...');
-                const rows = table.querySelectorAll('tr');
+            // Try to get data from the table if it exists
+            const table = document.getElementById('apArTable');
+            if (table && table.querySelector('tbody')) {
+                console.log('Trying to extract from table...');
+                const rows = table.querySelectorAll('tbody tr');
                 const extractedData = [];
                 
                 rows.forEach(row => {
                     const cells = row.querySelectorAll('td');
-                    if (cells.length >= 7) { // Make sure we have enough columns
+                    if (cells.length >= 6) {
                         extractedData.push({
                             id: cells[0].textContent.trim(),
                             type: cells[1].textContent.trim(),
                             company: cells[2].textContent.trim(),
                             description: cells[3].textContent.trim(),
                             amount: parseFloat(cells[4].textContent.replace(/[^\d.-]/g, '')) || 0,
-                            due_date: cells[5].textContent.trim(), // Use due_date to match database field
-                            status: cells[6] ? cells[6].textContent.trim() : 'Pending' // Default status
+                            due_date: cells[5].textContent.trim(), // Use due_date to match the Supabase field
+                            status: cells[6] ? cells[6].textContent.trim() : 'Pending'
                         });
                     }
                 });
