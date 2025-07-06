@@ -3206,11 +3206,19 @@
                                 <div class="scenarios-header">
                                     <h4 class="scenarios-title">13-Week Cash Flow Impact</h4>
                                     <p class="scenarios-subtitle">Real-time scenario analysis • Drag transactions between weeks</p>
-                                    <div class="scenario-actions">
-                                        <button class="btn btn-primary" onclick="applyScenarioChanges()" id="applyChangesBtn" disabled>
-                                            <i class="fas fa-check"></i> Apply Changes to Forecast
-                                        </button>
+                                    <div class="color-legend" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; padding: 0.75rem; margin: 0.5rem 0;">
+                                        <div style="display: flex; align-items: center; gap: 1.5rem; font-size: 0.8rem; color: #475569;">
+                                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                                <div style="width: 14px; height: 14px; background: #ef4444; border-radius: 3px;"></div>
+                                                <span><strong>Red (AP):</strong> Money going out - amounts we need to pay</span>
+                                            </div>
+                                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                                <div style="width: 14px; height: 14px; background: #10b981; border-radius: 3px;"></div>
+                                                <span><strong>Green (AR):</strong> Money coming in - amounts we will receive</span>
+                                            </div>
+                                        </div>
                                     </div>
+                                    <div class="scenario-actions"></div>
                                 </div>
                                 <div class="scenario-chart-full">
                                     <canvas id="scenarioForecastChart" width="800" height="300"></canvas>
@@ -5308,8 +5316,24 @@
                     dueDate = calculatedDueDate.toISOString().split('T')[0];
                 }
                 
-                const daysFromNow = dueDate ? Math.ceil((new Date(dueDate) - new Date()) / (1000 * 60 * 60 * 24)) : 30;
-                const weekNumber = Math.max(1, Math.min(13, Math.ceil(daysFromNow / 7)));
+                let weekNumber;
+                
+                // Check if transaction is overdue - if so, put in Parked bucket
+                if (transaction.status === 'Overdue') {
+                    weekNumber = 'parked';
+                } else if (dueDate) {
+                    const daysFromNow = Math.ceil((new Date(dueDate) - new Date()) / (1000 * 60 * 60 * 24));
+                    
+                    // If days are negative (past due) but status isn't "Overdue", also put in Parked
+                    if (daysFromNow <= 0) {
+                        weekNumber = 'parked';
+                    } else {
+                        weekNumber = Math.max(1, Math.min(13, Math.ceil(daysFromNow / 7)));
+                    }
+                } else {
+                    // No due date - default to parked
+                    weekNumber = 'parked';
+                }
                 
                 return {
                     id: transaction.id,
@@ -5327,6 +5351,7 @@
             // Copy to working scenario data
             scenarioData = [...originalData];
             console.log('Final scenario data:', scenarioData.length, 'transactions');
+            console.log('Parked transactions:', scenarioData.filter(t => t.currentWeek === 'parked').length);
         }
         
         // Function to get real AP/AR data (connects to existing system)
@@ -5777,9 +5802,9 @@
             let inflows = 0;
             let outflows = 0;
             
-            // Calculate based on current scenario data
+            // Calculate based on current scenario data - exclude parked transactions
             scenarioData.forEach(transaction => {
-                if (transaction.currentWeek == week) {
+                if (transaction.currentWeek == week && transaction.currentWeek !== 'parked') {
                     if (transaction.type === 'AR') {
                         inflows += transaction.amount;
                     } else {
@@ -5833,33 +5858,6 @@
             if (applyBtn) {
                 applyBtn.disabled = !hasScenarioChanges;
             }
-        }
-        
-        function applyScenarioChanges() {
-            if (!hasScenarioChanges) return;
-            
-            // Apply scenario changes to the main forecast data (not dashboard overview)
-            console.log('Applying scenario changes to forecast...');
-            
-            // Update the main forecast data with scenario changes
-            window.appliedScenarioData = [...scenarioData];
-            
-            // Show confirmation
-            const applyBtn = document.getElementById('applyChangesBtn');
-            const originalText = applyBtn.innerHTML;
-            
-            applyBtn.innerHTML = '<i class="fas fa-check"></i> Changes Applied!';
-            applyBtn.style.background = '#10b981';
-            applyBtn.disabled = true;
-            
-            setTimeout(() => {
-                applyBtn.innerHTML = originalText;
-                applyBtn.style.background = '';
-                hasScenarioChanges = false;
-                updateApplyButton();
-            }, 2000);
-            
-            console.log('Scenario changes applied successfully');
         }
         
         function resetScenario() {
