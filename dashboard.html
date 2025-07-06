@@ -4769,6 +4769,10 @@
                 initializeCashFlowForecast();
                 updateAgingAnalysis();
             });
+
+            loadFinancialDataGlobally().then(() => {
+                console.log('Financial statements data loaded globally');
+            });
             
             // Set up automatic check every 24 hours
             setInterval(updateOverdueStatuses, 24 * 60 * 60 * 1000);
@@ -4846,7 +4850,19 @@
                 }
                 if (this.dataset.section === 'statements') {
                     setTimeout(() => {
-                        initializeFinancialStatements();
+                        // Just refresh the display like AP/AR does
+                        renderFinancialTable();
+                        updateTrialBalance();
+                        populateAccountFilters();
+                        
+                        // Add filter event listeners (like AP/AR)
+                        const periodFilter = document.getElementById('periodFilter');
+                        const categoryFilter = document.getElementById('categoryFilter');
+                        const accountFilter = document.getElementById('accountFilter');
+                        
+                        if (periodFilter) periodFilter.addEventListener('change', renderFinancialTable);
+                        if (categoryFilter) categoryFilter.addEventListener('change', renderFinancialTable);
+                        if (accountFilter) accountFilter.addEventListener('change', renderFinancialTable);
                     }, 100);
                 }
             });
@@ -6950,20 +6966,7 @@
         let selectedFinancialTransactions = [];
         let isEditingFinancial = false;
         let editingFinancialId = null;
-        
-        // Initialize Financial Statements
-        async function initializeFinancialStatements() {
-            try {
-                await loadGLAccounts();
-                await loadFinancialTransactions();
-                updateTrialBalance();
-                populateAccountFilters();
-                checkPeriodFilter();
-            } catch (error) {
-                console.error('Error initializing financial statements:', error);
-            }
-        }
-        
+          
         // Load GL Accounts from Supabase
         async function loadGLAccounts() {
             try {
@@ -7038,70 +7041,53 @@
         
         // Render Financial Transactions Table
         function renderFinancialTable() {
-            console.log('=== RENDERING FINANCIAL TABLE ===');
             const tbody = document.getElementById('financialTableBody');
-            if (!tbody) {
-                console.error('Table body not found!');
-                return;
-            }
             
-            console.log('Table body found, processing', financialTransactions.length, 'transactions');
+            if (!tbody) return;
             
             const filteredData = getFilteredFinancialTransactions();
-            console.log('Filtered data:', filteredData.length, 'transactions');
             
-            if (filteredData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 2rem; color: #64748b;">No transactions found. Use the "Add Transaction" button or upload CSV data.</td></tr>';
-                console.log('No data to display, showing empty message');
-            } else {
-                tbody.innerHTML = filteredData.map(transaction => {
-                    const isLinked = transaction.is_linked || transaction.ap_ar_transaction_id;
-                    const isUnbalanced = transaction.debit_amount > 0 && transaction.credit_amount > 0;
-                    
-                    return `
-                        <tr class="${isUnbalanced ? 'unbalanced-row' : ''}" data-id="${transaction.id}">
-                            <td>
-                                <input type="checkbox" class="transaction-checkbox" value="${transaction.id}" 
-                                       onchange="updateSelectedTransactions()">
-                            </td>
-                            <td>${formatDateIndonesian(transaction.transaction_date)}</td>
-                            <td>
-                                <div class="account-info">
-                                    <span class="account-code">${transaction.account_code}</span>
-                                    <span class="account-name">${transaction.account_name}</span>
-                                </div>
-                            </td>
-                            <td title="${transaction.description}">${transaction.description}</td>
-                            <td>${transaction.debit_amount > 0 ? formatCurrency(transaction.debit_amount, 'IDR') : '-'}</td>
-                            <td>${transaction.credit_amount > 0 ? formatCurrency(transaction.credit_amount, 'IDR') : '-'}</td>
-                            <td>${transaction.reference || '-'}</td>
-                            <td>
-                                ${isLinked ? '<i class="fas fa-link link-icon" title="Linked to AP/AR"></i>' : 
-                                  '<button class="btn btn-sm btn-secondary" onclick="linkSingleTransaction(\''+transaction.id+'\')">Link</button>'}
-                            </td>
-                            <td>
-                                <button class="action-btn edit" onclick="editFinancialTransaction('${transaction.id}')" data-tooltip="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="action-btn delete" onclick="deleteFinancialTransaction('${transaction.id}')" data-tooltip="Delete">
-                                    <i class="fas fa-trash-alt"></i>
-                                </button>
-                                ${isLinked ? 
-                                  `<button class="action-btn unlink" onclick="unlinkTransaction('${transaction.id}')" data-tooltip="Unlink">
-                                    <i class="fas fa-unlink"></i>
-                                  </button>` : ''}
-                            </td>
-                        </tr>
-                    `;
-                }).join('');
-                console.log('Table populated with', filteredData.length, 'rows');
-            }
-            
-            updateBalanceIndicator();
-            console.log('=== FINANCIAL TABLE RENDERING COMPLETE ===');
+            tbody.innerHTML = filteredData.map(transaction => {
+                const isLinked = transaction.is_linked || transaction.ap_ar_transaction_id;
+                
+                return `
+                    <tr data-id="${transaction.id}">
+                        <td>
+                            <input type="checkbox" class="transaction-checkbox" value="${transaction.id}" 
+                                   onchange="updateSelectedFinancialTransactions()">
+                        </td>
+                        <td>${formatDateIndonesian(transaction.transaction_date)}</td>
+                        <td>
+                            <div class="account-info">
+                                <span class="account-code">${transaction.account_code}</span>
+                                <span class="account-name">${transaction.account_name}</span>
+                            </div>
+                        </td>
+                        <td title="${transaction.description}">${transaction.description}</td>
+                        <td>${transaction.debit_amount > 0 ? formatCurrency(transaction.debit_amount, 'IDR') : '-'}</td>
+                        <td>${transaction.credit_amount > 0 ? formatCurrency(transaction.credit_amount, 'IDR') : '-'}</td>
+                        <td>${transaction.reference || '-'}</td>
+                        <td>
+                            ${isLinked ? '<i class="fas fa-link link-icon" title="Linked to AP/AR"></i>' : 
+                              '<button class="btn btn-sm btn-secondary" onclick="linkSingleTransaction(\''+transaction.id+'\')">Link</button>'}
+                        </td>
+                        <td>
+                            <button class="action-btn edit" onclick="editFinancialTransaction('${transaction.id}')" data-tooltip="Edit Transaction">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="action-btn delete" onclick="deleteFinancialTransaction('${transaction.id}')" data-tooltip="Delete Transaction">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                            ${isLinked ? 
+                              `<button class="action-btn unlink" onclick="unlinkTransaction('${transaction.id}')" data-tooltip="Unlink">
+                                <i class="fas fa-unlink"></i>
+                              </button>` : ''}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
         }
         
-        // Filter Functions
         function getFilteredFinancialTransactions() {
             let filtered = [...financialTransactions];
             
@@ -7111,7 +7097,7 @@
             const dateFrom = document.getElementById('dateFromFinancial')?.value;
             const dateTo = document.getElementById('dateToFinancial')?.value;
             
-            // Period filtering
+            // Period filtering (same logic as AP/AR date filtering)
             if (periodFilter && periodFilter !== 'custom') {
                 const today = new Date();
                 let startDate;
@@ -7153,6 +7139,21 @@
             }
             
             return filtered;
+        }
+        
+        function updateSelectedFinancialTransactions() {
+            const checkboxes = document.querySelectorAll('.transaction-checkbox:checked');
+            selectedFinancialTransactions = Array.from(checkboxes).map(cb => cb.value);
+            
+            const bulkActions = document.getElementById('bulkActions');
+            const selectedCount = document.getElementById('selectedCount');
+            
+            if (selectedFinancialTransactions.length > 0) {
+                bulkActions.style.display = 'flex';
+                selectedCount.textContent = selectedFinancialTransactions.length;
+            } else {
+                bulkActions.style.display = 'none';
+            }
         }
         
         // Period filter change handler
@@ -8390,6 +8391,35 @@
             document.body.removeChild(link);
             URL.revokeObjectURL(url);
         }
+
+        async function loadFinancialDataGlobally() {
+            try {
+                const { data: financialData, error: financialError } = await supabase
+                    .from('financial_transactions_meridash')
+                    .select('*')
+                    .order('transaction_date', { ascending: false });
+                
+                if (financialError) throw financialError;
+                
+                financialTransactions = financialData || [];
+                console.log('Loaded financial transactions globally:', financialTransactions.length);
+                
+                // Also load GL accounts globally
+                const { data: glData, error: glError } = await supabase
+                    .from('gl_accounts_meridash')
+                    .select('*')
+                    .eq('is_active', true)
+                    .order('account_code');
+                
+                if (glError) throw glError;
+                
+                glAccounts = glData || [];
+                console.log('Loaded GL accounts globally:', glAccounts.length);
+                
+            } catch (error) {
+                console.error('Error loading financial data globally:', error);
+            }
+        }
         
         // Audit Trail Function
         async function logAuditTrail(tableName, recordId, action, oldValues, newValues) {
@@ -8449,19 +8479,6 @@
             
             return date.toISOString().split('T')[0]; // Returns YYYY-MM-DD format
         }
-        
-        // Initialize when page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            // Add initialization for financial statements when the section becomes visible
-            const originalLoadAPARData = loadAPARData;
-            window.loadAPARData = async function() {
-                await originalLoadAPARData();
-                // Also initialize financial statements if that section is active
-                if (document.getElementById('statements-section').style.display !== 'none') {
-                    await initializeFinancialStatements();
-                }
-            };
-        });
         
     </script>
 
