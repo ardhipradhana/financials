@@ -2615,6 +2615,211 @@
                 grid-template-columns: 1fr; /* Single column on mobile */
             }
         }
+
+        /* Financial Statements Specific Styles */
+        .financial-tabs {
+            margin-top: 1rem;
+        }
+        
+        .balance-indicator {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .balance-status {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        .balance-status.balanced {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+        
+        .balance-status.unbalanced {
+            background: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+        
+        .trial-balance-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .balance-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .balance-label {
+            font-size: 0.875rem;
+            color: #64748b;
+            margin-bottom: 0.5rem;
+        }
+        
+        .balance-amount {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .reports-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+        }
+        
+        .report-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+        
+        .report-card h4 {
+            margin: 0 0 1rem 0;
+            color: #1e293b;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 0.5rem;
+        }
+        
+        .account-input-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .account-input-group .form-select {
+            flex: 1;
+        }
+        
+        .linking-section {
+            margin-bottom: 2rem;
+        }
+        
+        .linking-section h4 {
+            margin-bottom: 1rem;
+            color: #1e293b;
+        }
+        
+        .linking-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 1rem;
+        }
+        
+        .linking-item {
+            padding: 0.75rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .linking-item:hover {
+            background: #f8fafc;
+            border-color: #3b82f6;
+        }
+        
+        .linking-item.selected {
+            background: #dbeafe;
+            border-color: #3b82f6;
+        }
+        
+        .bulk-actions {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .bulk-info {
+            font-weight: 500;
+            color: #374151;
+        }
+        
+        .bulk-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .link-icon {
+            color: #3b82f6;
+            margin-right: 0.25rem;
+        }
+        
+        .unbalanced-row {
+            border-left: 3px solid #ef4444 !important;
+            background: rgba(239, 68, 68, 0.05) !important;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .trial-balance-summary {
+                grid-template-columns: 1fr;
+            }
+            
+            .reports-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .bulk-actions {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+
+        /* Add these to your existing styles */
+        .report-section {
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .report-line {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.25rem 0;
+        }
+        
+        .report-total {
+            border-top: 2px solid #1e293b;
+            margin-top: 1rem;
+            padding-top: 0.5rem;
+            background: #f8fafc;
+        }
+        
+        .account-info {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .account-code {
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: #1e293b;
+        }
+        
+        .account-name {
+            font-size: 0.75rem;
+            color: #64748b;
+        }
         
     </style>
 </head>
@@ -3328,6 +3533,398 @@
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Financial Statements Section (add this to your main dashboard.html) -->
+            <div id="statements-section" class="section-content" style="display: none;">
+                <div class="dashboard-section">
+                    <div class="section-header">
+                        <h3 class="section-title">Financial Statements</h3>
+                        <div class="balance-indicator" id="balanceIndicator">
+                            <span class="balance-status balanced" id="balanceStatus">
+                                <i class="fas fa-check-circle"></i>
+                                Trial Balance: In Balance
+                            </span>
+                        </div>
+                    </div>
+            
+                    <!-- Financial Statements Tabs -->
+                    <div class="financial-tabs">
+                        <div class="tab-nav">
+                            <button class="tab-btn active" onclick="switchFinancialTab('transactions')" data-tab="transactions">
+                                <i class="fas fa-list"></i>
+                                Transactions
+                            </button>
+                            <button class="tab-btn" onclick="switchFinancialTab('trial-balance')" data-tab="trial-balance">
+                                <i class="fas fa-balance-scale"></i>
+                                Trial Balance
+                            </button>
+                            <button class="tab-btn" onclick="switchFinancialTab('reports')" data-tab="reports">
+                                <i class="fas fa-chart-line"></i>
+                                Reports
+                            </button>
+                        </div>
+            
+                        <!-- Transactions Tab -->
+                        <div class="tab-content active" id="transactions-tab">
+                            <div class="dashboard-section">
+                                <div class="section-header">
+                                    <h3 class="section-title">General Ledger Transactions</h3>
+                                    <div class="section-actions">
+                                        <button class="btn btn-secondary" onclick="exportFinancialToCSV()">
+                                            <i class="fas fa-file-csv"></i>
+                                            Export to CSV
+                                        </button>
+                                        <button class="btn btn-secondary" onclick="openFinancialUploadModal()">
+                                            <i class="fas fa-file-upload"></i>
+                                            Upload CSV
+                                        </button>
+                                        <button class="btn btn-secondary" onclick="openAPARLinkingModal()">
+                                            <i class="fas fa-link"></i>
+                                            Link AP/AR
+                                        </button>
+                                        <button class="btn btn-primary" onclick="openAddFinancialModal()">
+                                            <i class="fas fa-plus"></i>
+                                            Add Transaction
+                                        </button>
+                                    </div>
+                                </div>
+            
+                                <!-- Filters Section -->
+                                <div class="filters-section">
+                                    <div class="filter-group">
+                                        <label for="periodFilter">Period:</label>
+                                        <select id="periodFilter" class="form-select" onchange="renderFinancialTable()">
+                                            <option value="">All Time</option>
+                                            <option value="MTD">Month to Date</option>
+                                            <option value="QTD">Quarter to Date</option>
+                                            <option value="YTD">Year to Date</option>
+                                            <option value="custom">Custom Range</option>
+                                        </select>
+                                    </div>
+            
+                                    <div class="filter-group" id="customDateRange" style="display: none;">
+                                        <label for="dateFromFinancial">From:</label>
+                                        <input type="date" id="dateFromFinancial" class="form-input" onchange="renderFinancialTable()">
+                                        <label for="dateToFinancial">To:</label>
+                                        <input type="date" id="dateToFinancial" class="form-input" onchange="renderFinancialTable()">
+                                    </div>
+            
+                                    <div class="filter-group">
+                                        <label for="categoryFilter">Category:</label>
+                                        <select id="categoryFilter" class="form-select" onchange="renderFinancialTable()">
+                                            <option value="">All Categories</option>
+                                            <option value="Asset">Assets</option>
+                                            <option value="Liability">Liabilities</option>
+                                            <option value="Equity">Equity</option>
+                                            <option value="Revenue">Revenue</option>
+                                            <option value="Expense">Expenses</option>
+                                        </select>
+                                    </div>
+            
+                                    <div class="filter-group">
+                                        <label for="accountFilter">Account:</label>
+                                        <select id="accountFilter" class="form-select" onchange="renderFinancialTable()">
+                                            <option value="">All Accounts</option>
+                                            <!-- Populated dynamically -->
+                                        </select>
+                                    </div>
+            
+                                    <div class="filter-group">
+                                        <button class="btn btn-secondary" onclick="clearFinancialFilters()">
+                                            <i class="fas fa-times"></i>
+                                            Clear Filters
+                                        </button>
+                                    </div>
+                                </div>
+            
+                                <!-- Bulk Actions -->
+                                <div class="bulk-actions" id="bulkActions" style="display: none;">
+                                    <div class="bulk-info">
+                                        <span id="selectedCount">0</span> transactions selected
+                                    </div>
+                                    <div class="bulk-buttons">
+                                        <button class="btn btn-secondary" onclick="bulkLinkToAPAR()">
+                                            <i class="fas fa-link"></i>
+                                            Link to AP/AR
+                                        </button>
+                                        <button class="btn btn-secondary" onclick="bulkUnlink()">
+                                            <i class="fas fa-unlink"></i>
+                                            Unlink
+                                        </button>
+                                        <button class="btn btn-danger" onclick="bulkDeleteFinancial()">
+                                            <i class="fas fa-trash"></i>
+                                            Delete Selected
+                                        </button>
+                                    </div>
+                                </div>
+            
+                                <!-- Transaction Table -->
+                                <div class="table-container">
+                                    <table class="data-table" id="financialTable">
+                                        <thead>
+                                            <tr>
+                                                <th>
+                                                    <input type="checkbox" id="selectAllFinancial" onchange="toggleSelectAllFinancial()">
+                                                </th>
+                                                <th>Date</th>
+                                                <th>Account</th>
+                                                <th>Description</th>
+                                                <th>Debit</th>
+                                                <th>Credit</th>
+                                                <th>Reference</th>
+                                                <th>Link</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="financialTableBody">
+                                            <!-- Populated by JavaScript -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+            
+                        <!-- Trial Balance Tab -->
+                        <div class="tab-content" id="trial-balance-tab">
+                            <div class="dashboard-section">
+                                <div class="section-header">
+                                    <h3 class="section-title">Trial Balance</h3>
+                                    <div class="section-actions">
+                                        <button class="btn btn-primary" onclick="autoBalanceEntries()" id="autoBalanceBtn" style="display: none;">
+                                            <i class="fas fa-magic"></i>
+                                            Create Balancing Entry
+                                        </button>
+                                    </div>
+                                </div>
+            
+                                <div class="trial-balance-summary" id="trialBalanceSummary">
+                                    <div class="balance-card">
+                                        <div class="balance-label">Total Debits</div>
+                                        <div class="balance-amount" id="totalDebits">Rp 0</div>
+                                    </div>
+                                    <div class="balance-card">
+                                        <div class="balance-label">Total Credits</div>
+                                        <div class="balance-amount" id="totalCredits">Rp 0</div>
+                                    </div>
+                                    <div class="balance-card">
+                                        <div class="balance-label">Difference</div>
+                                        <div class="balance-amount" id="balanceDifference">Rp 0</div>
+                                    </div>
+                                </div>
+            
+                                <div class="table-container">
+                                    <table class="data-table" id="trialBalanceTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Account Code</th>
+                                                <th>Account Name</th>
+                                                <th>Debit Balance</th>
+                                                <th>Credit Balance</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="trialBalanceTableBody">
+                                            <!-- Populated by JavaScript -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+            
+                        <!-- Reports Tab -->
+                        <div class="tab-content" id="reports-tab">
+                            <div class="dashboard-section">
+                                <div class="section-header">
+                                    <h3 class="section-title">Financial Reports</h3>
+                                    <div class="section-actions">
+                                        <button class="btn btn-primary" onclick="generateReports()">
+                                            <i class="fas fa-sync"></i>
+                                            Refresh Reports
+                                        </button>
+                                    </div>
+                                </div>
+            
+                                <div class="reports-grid">
+                                    <div class="report-card">
+                                        <h4>Income Statement</h4>
+                                        <div class="report-content" id="incomeStatement">
+                                            <!-- Generated content -->
+                                        </div>
+                                    </div>
+                                    <div class="report-card">
+                                        <h4>Balance Sheet</h4>
+                                        <div class="report-content" id="balanceSheet">
+                                            <!-- Generated content -->
+                                        </div>
+                                    </div>
+                                    <div class="report-card">
+                                        <h4>Cash Flow Statement</h4>
+                                        <div class="report-content" id="cashFlowStatement">
+                                            <!-- Generated content -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Add Financial Transaction Modal -->
+            <div class="modal-overlay" id="addFinancialModal">
+                <div class="modal">
+                    <div class="modal-header">
+                        <h3 class="modal-title">Add Financial Transaction</h3>
+                        <button class="modal-close" onclick="closeAddFinancialModal()">&times;</button>
+                    </div>
+                    <form id="addFinancialForm" onsubmit="addFinancialTransaction(event)">
+                        <div class="form-group">
+                            <label class="form-label">Transaction Date</label>
+                            <input type="date" class="form-input" id="financialDate" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Account</label>
+                            <div class="account-input-group">
+                                <select class="form-select" id="financialAccount" required onchange="updateAccountDetails()">
+                                    <option value="">Select Account</option>
+                                    <!-- Populated by JavaScript -->
+                                </select>
+                                <button type="button" class="btn btn-secondary" onclick="openNewAccountModal()">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+            
+                        <div class="form-group">
+                            <label class="form-label">Description</label>
+                            <input type="text" class="form-input" id="financialDescription" required>
+                        </div>
+            
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Debit Amount</label>
+                                <input type="number" class="form-input" id="financialDebit" step="0.01" min="0" oninput="handleAmountInput('debit')">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Credit Amount</label>
+                                <input type="number" class="form-input" id="financialCredit" step="0.01" min="0" oninput="handleAmountInput('credit')">
+                            </div>
+                        </div>
+            
+                        <div class="form-group">
+                            <label class="form-label">Reference</label>
+                            <input type="text" class="form-input" id="financialReference">
+                        </div>
+            
+                        <div class="form-group">
+                            <label class="form-label">Notes</label>
+                            <textarea class="form-input" id="financialNotes"></textarea>
+                        </div>
+            
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" onclick="closeAddFinancialModal()">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Add Transaction</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- New GL Account Modal -->
+            <div class="modal-overlay" id="newAccountModal">
+                <div class="modal">
+                    <div class="modal-header">
+                        <h3 class="modal-title">Create New GL Account</h3>
+                        <button class="modal-close" onclick="closeNewAccountModal()">&times;</button>
+                    </div>
+                    <form id="newAccountForm" onsubmit="createNewAccount(event)">
+                        <div class="form-group">
+                            <label class="form-label">Account Code</label>
+                            <input type="text" class="form-input" id="newAccountCode" pattern="[0-9]{4}" maxlength="4" required>
+                            <small class="form-help">4-digit account code (e.g., 5010)</small>
+                        </div>
+            
+                        <div class="form-group">
+                            <label class="form-label">Account Name</label>
+                            <input type="text" class="form-input" id="newAccountName" required>
+                        </div>
+            
+                        <div class="form-group">
+                            <label class="form-label">Category</label>
+                            <select class="form-select" id="newAccountCategory" required>
+                                <option value="">Select Category</option>
+                                <option value="Asset">Asset</option>
+                                <option value="Liability">Liability</option>
+                                <option value="Equity">Equity</option>
+                                <option value="Revenue">Revenue</option>
+                                <option value="Expense">Expense</option>
+                            </select>
+                        </div>
+            
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" onclick="closeNewAccountModal()">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Create Account</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Upload Financial CSV Modal -->
+            <div class="modal-overlay" id="uploadFinancialModal">
+                <div class="modal">
+                    <div class="modal-header">
+                        <h3 class="modal-title">Upload Financial Transactions</h3>
+                        <button class="modal-close" onclick="closeFinancialUploadModal()">&times;</button>
+                    </div>
+                    <div class="modal-content">
+                        <div class="upload-instructions">
+                            <p><strong>CSV Format Required:</strong></p>
+                            <p>Date, Account_Code, Account_Name, Description, Debit, Credit, Reference, Notes</p>
+                            <button class="btn btn-secondary" onclick="downloadFinancialTemplate()">
+                                <i class="fas fa-download"></i>
+                                Download Template
+                            </button>
+                        </div>
+                        
+                        <div class="file-upload-area">
+                            <input type="file" id="financialFileInput" accept=".csv" onchange="handleFinancialFileUpload(event)">
+                            <div class="upload-placeholder">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <p>Choose CSV file or drag and drop</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- AP/AR Linking Modal -->
+            <div class="modal-overlay" id="aparLinkingModal">
+                <div class="modal">
+                    <div class="modal-header">
+                        <h3 class="modal-title">Link Financial Transactions to AP/AR</h3>
+                        <button class="modal-close" onclick="closeAPARLinkingModal()">&times;</button>
+                    </div>
+                    <div class="modal-content">
+                        <div class="linking-section">
+                            <h4>Unlinked Financial Transactions</h4>
+                            <div class="linking-list" id="unlinkFinancialList">
+                                <!-- Populated by JavaScript -->
+                            </div>
+                        </div>
+                        
+                        <div class="linking-section">
+                            <h4>Available AP/AR Transactions</h4>
+                            <div class="linking-list" id="availableAPARList">
+                                <!-- Populated by JavaScript -->
+                            </div>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button class="btn btn-secondary" onclick="closeAPARLinkingModal()">Cancel</button>
+                            <button class="btn btn-primary" onclick="confirmLinking()">Link Selected</button>
                         </div>
                     </div>
                 </div>
@@ -4245,6 +4842,11 @@
                         if (statusFilter) statusFilter.addEventListener('change', renderAPARTable);
                         if (dateFromFilter) dateFromFilter.addEventListener('change', renderAPARTable);
                         if (dateToFilter) dateToFilter.addEventListener('change', renderAPARTable);
+                    }, 100);
+                }
+                if (this.dataset.section === 'statements') {
+                    setTimeout(() => {
+                        initializeFinancialStatements();
                     }, 100);
                 }
             });
@@ -5410,6 +6012,7 @@
         function setupBucketDragAndDrop() {
             document.addEventListener('dragstart', handleBucketDragStart);
             document.addEventListener('dragover', handleBucketDragOver);
+            document.addEventListener('dragleave', handleBucketDragLeave);  // Add this line
             document.addEventListener('drop', handleBucketDrop);
             document.addEventListener('dragend', handleBucketDragEnd);
         }
@@ -5431,9 +6034,24 @@
             if (!isDragging) return;
             e.preventDefault();
             
+            // Remove drag-over from all buckets first
+            document.querySelectorAll('.week-bucket').forEach(bucket => {
+                bucket.classList.remove('drag-over');
+            });
+            
+            // Add drag-over only to the current bucket being hovered
             const bucket = e.target.closest('.week-bucket');
             if (bucket) {
                 bucket.classList.add('drag-over');
+            }
+        }
+
+        function handleBucketDragLeave(e) {
+            if (!isDragging) return;
+            
+            const bucket = e.target.closest('.week-bucket');
+            if (bucket) {
+                bucket.classList.remove('drag-over');
             }
         }
         
@@ -6325,6 +6943,1464 @@
             // Check every 30 seconds
             setInterval(checkSupabaseConnection, 30000);
         }
+
+        // Financial Statements Management
+        let financialTransactions = [];
+        let glAccounts = [];
+        let selectedFinancialTransactions = [];
+        let isEditingFinancial = false;
+        let editingFinancialId = null;
+        
+        // Initialize Financial Statements
+        async function initializeFinancialStatements() {
+            try {
+                await loadGLAccounts();
+                await loadFinancialTransactions();
+                updateTrialBalance();
+                populateAccountFilters();
+                checkPeriodFilter();
+            } catch (error) {
+                console.error('Error initializing financial statements:', error);
+            }
+        }
+        
+        // Load GL Accounts from Supabase
+        async function loadGLAccounts() {
+            try {
+                const { data, error } = await supabase
+                    .from('gl_accounts_meridash')
+                    .select('*')
+                    .eq('is_active', true)
+                    .order('account_code');
+                
+                if (error) throw error;
+                
+                glAccounts = data || [];
+                console.log('Loaded GL accounts:', glAccounts.length);
+                
+                // Populate account dropdowns
+                populateAccountDropdowns();
+            } catch (error) {
+                console.error('Error loading GL accounts:', error);
+                alert('Error loading GL accounts: ' + error.message);
+            }
+        }
+        
+        // Load Financial Transactions from Supabase
+        async function loadFinancialTransactions() {
+            try {
+                const { data, error } = await supabase
+                    .from('financial_transactions_meridash')
+                    .select('*')
+                    .order('transaction_date', { ascending: false });
+                
+                if (error) throw error;
+                
+                financialTransactions = data || [];
+                console.log('Loaded financial transactions:', financialTransactions.length);
+                
+                renderFinancialTable();
+                updateTrialBalance();
+            } catch (error) {
+                console.error('Error loading financial transactions:', error);
+                alert('Error loading financial transactions: ' + error.message);
+            }
+        }
+        
+        // Tab Switching
+        function switchFinancialTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('#statements-section .tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('#statements-section .tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName + '-tab').classList.add('active');
+            
+            // Add active class to clicked button
+            document.querySelector(`#statements-section [data-tab="${tabName}"]`).classList.add('active');
+            
+            // Initialize specific tab content
+            switch(tabName) {
+                case 'trial-balance':
+                    updateTrialBalance();
+                    break;
+                case 'reports':
+                    generateReports();
+                    break;
+            }
+        }
+        
+        // Render Financial Transactions Table
+        function renderFinancialTable() {
+            const tbody = document.getElementById('financialTableBody');
+            if (!tbody) return;
+            
+            const filteredData = getFilteredFinancialTransactions();
+            
+            tbody.innerHTML = filteredData.map(transaction => {
+                const isLinked = transaction.is_linked || transaction.ap_ar_transaction_id;
+                const isUnbalanced = transaction.debit_amount > 0 && transaction.credit_amount > 0;
+                
+                return `
+                    <tr class="${isUnbalanced ? 'unbalanced-row' : ''}" data-id="${transaction.id}">
+                        <td>
+                            <input type="checkbox" class="transaction-checkbox" value="${transaction.id}" 
+                                   onchange="updateSelectedTransactions()">
+                        </td>
+                        <td>${formatDateIndonesian(transaction.transaction_date)}</td>
+                        <td>
+                            <div class="account-info">
+                                <span class="account-code">${transaction.account_code}</span>
+                                <span class="account-name">${transaction.account_name}</span>
+                            </div>
+                        </td>
+                        <td title="${transaction.description}">${transaction.description}</td>
+                        <td>${transaction.debit_amount > 0 ? formatCurrency(transaction.debit_amount, 'IDR') : '-'}</td>
+                        <td>${transaction.credit_amount > 0 ? formatCurrency(transaction.credit_amount, 'IDR') : '-'}</td>
+                        <td>${transaction.reference || '-'}</td>
+                        <td>
+                            ${isLinked ? '<i class="fas fa-link link-icon" title="Linked to AP/AR"></i>' : 
+                              '<button class="btn btn-sm btn-secondary" onclick="linkSingleTransaction(\''+transaction.id+'\')">Link</button>'}
+                        </td>
+                        <td>
+                            <button class="action-btn edit" onclick="editFinancialTransaction('${transaction.id}')" data-tooltip="Edit">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="action-btn delete" onclick="deleteFinancialTransaction('${transaction.id}')" data-tooltip="Delete">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                            ${isLinked ? 
+                              `<button class="action-btn unlink" onclick="unlinkTransaction('${transaction.id}')" data-tooltip="Unlink">
+                                <i class="fas fa-unlink"></i>
+                              </button>` : ''}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+            
+            updateBalanceIndicator();
+        }
+        
+        // Filter Functions
+        function getFilteredFinancialTransactions() {
+            let filtered = [...financialTransactions];
+            
+            const periodFilter = document.getElementById('periodFilter')?.value;
+            const categoryFilter = document.getElementById('categoryFilter')?.value;
+            const accountFilter = document.getElementById('accountFilter')?.value;
+            const dateFrom = document.getElementById('dateFromFinancial')?.value;
+            const dateTo = document.getElementById('dateToFinancial')?.value;
+            
+            // Period filtering
+            if (periodFilter && periodFilter !== 'custom') {
+                const today = new Date();
+                let startDate;
+                
+                switch(periodFilter) {
+                    case 'MTD':
+                        startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+                        break;
+                    case 'QTD':
+                        const quarter = Math.floor(today.getMonth() / 3);
+                        startDate = new Date(today.getFullYear(), quarter * 3, 1);
+                        break;
+                    case 'YTD':
+                        startDate = new Date(today.getFullYear(), 0, 1);
+                        break;
+                }
+                
+                if (startDate) {
+                    filtered = filtered.filter(t => new Date(t.transaction_date) >= startDate);
+                }
+            }
+            
+            // Custom date range
+            if (periodFilter === 'custom' && dateFrom && dateTo) {
+                filtered = filtered.filter(t => {
+                    const transDate = new Date(t.transaction_date);
+                    return transDate >= new Date(dateFrom) && transDate <= new Date(dateTo);
+                });
+            }
+            
+            // Category filtering
+            if (categoryFilter) {
+                filtered = filtered.filter(t => t.category === categoryFilter);
+            }
+            
+            // Account filtering
+            if (accountFilter) {
+                filtered = filtered.filter(t => t.account_code === accountFilter);
+            }
+            
+            return filtered;
+        }
+        
+        // Period filter change handler
+        function checkPeriodFilter() {
+            const periodFilter = document.getElementById('periodFilter');
+            const customDateRange = document.getElementById('customDateRange');
+            
+            if (periodFilter && customDateRange) {
+                periodFilter.addEventListener('change', function() {
+                    if (this.value === 'custom') {
+                        customDateRange.style.display = 'flex';
+                    } else {
+                        customDateRange.style.display = 'none';
+                    }
+                    renderFinancialTable();
+                });
+            }
+        }
+        
+        // Populate account dropdowns
+        function populateAccountDropdowns() {
+            const accountSelects = ['financialAccount', 'accountFilter'];
+            
+            accountSelects.forEach(selectId => {
+                const select = document.getElementById(selectId);
+                if (!select) return;
+                
+                // Keep existing options for filter
+                if (selectId === 'accountFilter') {
+                    const currentOptions = select.innerHTML;
+                    select.innerHTML = `<option value="">All Accounts</option>`;
+                } else {
+                    select.innerHTML = '<option value="">Select Account</option>';
+                }
+                
+                glAccounts.forEach(account => {
+                    const option = document.createElement('option');
+                    option.value = account.account_code;
+                    option.textContent = `${account.account_code} - ${account.account_name}`;
+                    option.dataset.category = account.category;
+                    select.appendChild(option);
+                });
+            });
+        }
+        
+        // Account dropdown populations
+        function populateAccountFilters() {
+            const accountFilter = document.getElementById('accountFilter');
+            if (!accountFilter) return;
+            
+            accountFilter.innerHTML = '<option value="">All Accounts</option>';
+            
+            glAccounts.forEach(account => {
+                const option = document.createElement('option');
+                option.value = account.account_code;
+                option.textContent = `${account.account_code} - ${account.account_name}`;
+                accountFilter.appendChild(option);
+            });
+        }
+        
+        // Clear filters
+        function clearFinancialFilters() {
+            document.getElementById('periodFilter').value = '';
+            document.getElementById('categoryFilter').value = '';
+            document.getElementById('accountFilter').value = '';
+            document.getElementById('dateFromFinancial').value = '';
+            document.getElementById('dateToFinancial').value = '';
+            document.getElementById('customDateRange').style.display = 'none';
+            renderFinancialTable();
+        }
+        
+        // Modal Functions
+        function openAddFinancialModal() {
+            document.getElementById('addFinancialModal').classList.add('active');
+            document.getElementById('financialDate').value = new Date().toISOString().split('T')[0];
+            clearFinancialForm();
+        }
+        
+        function closeAddFinancialModal() {
+            document.getElementById('addFinancialModal').classList.remove('active');
+            clearFinancialForm();
+            isEditingFinancial = false;
+            editingFinancialId = null;
+        }
+        
+        function clearFinancialForm() {
+            document.getElementById('addFinancialForm').reset();
+            document.getElementById('financialDate').value = new Date().toISOString().split('T')[0];
+        }
+        
+        // Amount input handler (ensure only one amount is entered)
+        function handleAmountInput(type) {
+            const debitInput = document.getElementById('financialDebit');
+            const creditInput = document.getElementById('financialCredit');
+            
+            if (type === 'debit' && debitInput.value) {
+                creditInput.value = '';
+            } else if (type === 'credit' && creditInput.value) {
+                debitInput.value = '';
+            }
+        }
+        
+        // Account selection handler
+        function updateAccountDetails() {
+            const accountSelect = document.getElementById('financialAccount');
+            const selectedOption = accountSelect.selectedOptions[0];
+            
+            if (selectedOption && selectedOption.dataset.category) {
+                // Auto-suggest debit/credit based on account type
+                const category = selectedOption.dataset.category;
+                showAccountGuidance(category);
+            }
+        }
+        
+        function showAccountGuidance(category) {
+            const guidance = {
+                'Asset': 'Assets typically have debit balances. Increases are debits.',
+                'Expense': 'Expenses typically have debit balances. Increases are debits.',
+                'Liability': 'Liabilities typically have credit balances. Increases are credits.',
+                'Equity': 'Equity typically has credit balances. Increases are credits.',
+                'Revenue': 'Revenue typically has credit balances. Increases are credits.'
+            };
+            
+            // You can show this guidance in a tooltip or small text below the form
+            console.log('Account guidance:', guidance[category]);
+        }
+        
+        // Add/Edit Financial Transaction
+        async function addFinancialTransaction(event) {
+            event.preventDefault();
+            
+            const formData = {
+                transaction_date: document.getElementById('financialDate').value,
+                account_code: document.getElementById('financialAccount').value,
+                description: document.getElementById('financialDescription').value,
+                debit_amount: parseFloat(document.getElementById('financialDebit').value) || 0,
+                credit_amount: parseFloat(document.getElementById('financialCredit').value) || 0,
+                reference: document.getElementById('financialReference').value,
+                notes: document.getElementById('financialNotes').value
+            };
+            
+            // Validation
+            if (formData.debit_amount === 0 && formData.credit_amount === 0) {
+                alert('Please enter either a debit or credit amount.');
+                return;
+            }
+            
+            if (formData.debit_amount > 0 && formData.credit_amount > 0) {
+                alert('Please enter either debit OR credit amount, not both.');
+                return;
+            }
+            
+            // Get account details
+            const account = glAccounts.find(acc => acc.account_code === formData.account_code);
+            if (!account) {
+                alert('Please select a valid account.');
+                return;
+            }
+            
+            formData.account_name = account.account_name;
+            formData.category = account.category;
+            formData.source = 'Manual';
+            
+            try {
+                if (isEditingFinancial) {
+                    await updateFinancialTransaction(editingFinancialId, formData);
+                } else {
+                    await saveFinancialTransaction(formData);
+                }
+                
+                closeAddFinancialModal();
+                await loadFinancialTransactions();
+            } catch (error) {
+                console.error('Error saving transaction:', error);
+                alert('Error saving transaction: ' + error.message);
+            }
+        }
+        
+        // Save transaction to Supabase
+        async function saveFinancialTransaction(transaction) {
+            try {
+                const { data, error } = await supabase
+                    .from('financial_transactions_meridash')
+                    .insert([transaction])
+                    .select();
+                
+                if (error) throw error;
+                
+                // Add to local array
+                financialTransactions.unshift(data[0]);
+                
+                // Log audit trail
+                await logAuditTrail('financial_transactions_meridash', data[0].id, 'INSERT', null, data[0]);
+                
+                return data[0];
+            } catch (error) {
+                console.error('Error saving financial transaction:', error);
+                throw error;
+            }
+        }
+        
+        // Update transaction in Supabase
+        async function updateFinancialTransaction(id, updates) {
+            try {
+                const oldData = financialTransactions.find(t => t.id === id);
+                
+                const { data, error } = await supabase
+                    .from('financial_transactions_meridash')
+                    .update(updates)
+                    .eq('id', id)
+                    .select();
+                
+                if (error) throw error;
+                
+                // Update local array
+                const index = financialTransactions.findIndex(t => t.id === id);
+                if (index !== -1) {
+                    financialTransactions[index] = data[0];
+                }
+                
+                // Log audit trail
+                await logAuditTrail('financial_transactions_meridash', id, 'UPDATE', oldData, data[0]);
+                
+                return data[0];
+            } catch (error) {
+                console.error('Error updating financial transaction:', error);
+                throw error;
+            }
+        }
+        
+        // Edit transaction
+        function editFinancialTransaction(id) {
+            const transaction = financialTransactions.find(t => t.id === id);
+            if (!transaction) return;
+            
+            isEditingFinancial = true;
+            editingFinancialId = id;
+            
+            // Populate form
+            document.getElementById('financialDate').value = transaction.transaction_date;
+            document.getElementById('financialAccount').value = transaction.account_code;
+            document.getElementById('financialDescription').value = transaction.description;
+            document.getElementById('financialDebit').value = transaction.debit_amount || '';
+            document.getElementById('financialCredit').value = transaction.credit_amount || '';
+            document.getElementById('financialReference').value = transaction.reference || '';
+            document.getElementById('financialNotes').value = transaction.notes || '';
+            
+            // Update modal title
+            document.querySelector('#addFinancialModal .modal-title').textContent = 'Edit Financial Transaction';
+            
+            openAddFinancialModal();
+        }
+        
+        // Delete transaction
+        async function deleteFinancialTransaction(id) {
+            if (!confirm('Are you sure you want to delete this transaction?')) return;
+            
+            try {
+                const oldData = financialTransactions.find(t => t.id === id);
+                
+                const { error } = await supabase
+                    .from('financial_transactions_meridash')
+                    .delete()
+                    .eq('id', id);
+                
+                if (error) throw error;
+                
+                // Remove from local array
+                financialTransactions = financialTransactions.filter(t => t.id !== id);
+                
+                // Log audit trail
+                await logAuditTrail('financial_transactions_meridash', id, 'DELETE', oldData, null);
+                
+                renderFinancialTable();
+                updateTrialBalance();
+            } catch (error) {
+                console.error('Error deleting transaction:', error);
+                alert('Error deleting transaction: ' + error.message);
+            }
+        }
+        
+        // Trial Balance Functions
+        function updateTrialBalance() {
+            const accounts = {};
+            
+            // Group transactions by account
+            financialTransactions.forEach(transaction => {
+                const accountCode = transaction.account_code;
+                
+                if (!accounts[accountCode]) {
+                    accounts[accountCode] = {
+                        account_code: accountCode,
+                        account_name: transaction.account_name,
+                        category: transaction.category,
+                        debit_balance: 0,
+                        credit_balance: 0
+                    };
+                }
+                
+                accounts[accountCode].debit_balance += transaction.debit_amount || 0;
+                accounts[accountCode].credit_balance += transaction.credit_amount || 0;
+            });
+            
+            // Calculate net balances and totals
+            let totalDebits = 0;
+            let totalCredits = 0;
+            
+            const trialBalanceData = Object.values(accounts).map(account => {
+                const netBalance = account.debit_balance - account.credit_balance;
+                
+                if (netBalance > 0) {
+                    account.final_debit = netBalance;
+                    account.final_credit = 0;
+                    totalDebits += netBalance;
+                } else if (netBalance < 0) {
+                    account.final_debit = 0;
+                    account.final_credit = Math.abs(netBalance);
+                    totalCredits += Math.abs(netBalance);
+                } else {
+                    account.final_debit = 0;
+                    account.final_credit = 0;
+                }
+                
+                return account;
+            });
+            
+            // Update trial balance display
+            renderTrialBalanceTable(trialBalanceData);
+            updateTrialBalanceSummary(totalDebits, totalCredits);
+        }
+        
+        function renderTrialBalanceTable(data) {
+            const tbody = document.getElementById('trialBalanceTableBody');
+            if (!tbody) return;
+            
+            tbody.innerHTML = data.map(account => `
+                <tr>
+                    <td>${account.account_code}</td>
+                    <td>${account.account_name}</td>
+                    <td>${account.final_debit > 0 ? formatCurrency(account.final_debit, 'IDR') : '-'}</td>
+                    <td>${account.final_credit > 0 ? formatCurrency(account.final_credit, 'IDR') : '-'}</td>
+                </tr>
+            `).join('');
+        }
+        
+        function updateTrialBalanceSummary(totalDebits, totalCredits) {
+            document.getElementById('totalDebits').textContent = formatCurrency(totalDebits, 'IDR');
+            document.getElementById('totalCredits').textContent = formatCurrency(totalCredits, 'IDR');
+            
+            const difference = totalDebits - totalCredits;
+            document.getElementById('balanceDifference').textContent = formatCurrency(Math.abs(difference), 'IDR');
+            
+            // Update balance indicator
+            updateBalanceIndicator(difference);
+            
+            // Show/hide auto-balance button
+            const autoBalanceBtn = document.getElementById('autoBalanceBtn');
+            if (autoBalanceBtn) {
+                if (Math.abs(difference) > 0.01) { // Allow for small rounding differences
+                    autoBalanceBtn.style.display = 'block';
+                } else {
+                    autoBalanceBtn.style.display = 'none';
+                }
+            }
+        }
+        
+        function updateBalanceIndicator(difference = null) {
+            const indicator = document.getElementById('balanceStatus');
+            if (!indicator) return;
+            
+            if (difference === null) {
+                // Calculate difference
+                const accounts = {};
+                financialTransactions.forEach(transaction => {
+                    const code = transaction.account_code;
+                    if (!accounts[code]) accounts[code] = { debits: 0, credits: 0 };
+                    accounts[code].debits += transaction.debit_amount || 0;
+                    accounts[code].credits += transaction.credit_amount || 0;
+                });
+                
+                let totalDebits = 0, totalCredits = 0;
+                Object.values(accounts).forEach(account => {
+                    const net = account.debits - account.credits;
+                    if (net > 0) totalDebits += net;
+                    else totalCredits += Math.abs(net);
+                });
+                
+                difference = totalDebits - totalCredits;
+            }
+            
+            if (Math.abs(difference) < 0.01) {
+                indicator.className = 'balance-status balanced';
+                indicator.innerHTML = '<i class="fas fa-check-circle"></i> Trial Balance: In Balance';
+            } else {
+                indicator.className = 'balance-status unbalanced';
+                indicator.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Trial Balance: Out of balance by ${formatCurrency(Math.abs(difference), 'IDR')}`;
+            }
+        }
+        
+        // Auto-balance functionality
+        async function autoBalanceEntries() {
+            // Calculate current imbalance
+            const accounts = {};
+            financialTransactions.forEach(transaction => {
+                const code = transaction.account_code;
+                if (!accounts[code]) accounts[code] = { debits: 0, credits: 0 };
+                accounts[code].debits += transaction.debit_amount || 0;
+                accounts[code].credits += transaction.credit_amount || 0;
+            });
+            
+            let totalDebits = 0, totalCredits = 0;
+            Object.values(accounts).forEach(account => {
+                const net = account.debits - account.credits;
+                if (net > 0) totalDebits += net;
+                else totalCredits += Math.abs(net);
+            });
+            
+            const difference = totalDebits - totalCredits;
+            
+            if (Math.abs(difference) < 0.01) {
+                alert('Trial balance is already balanced!');
+                return;
+            }
+            
+            // Show auto-balance suggestion modal
+            showAutoBalanceModal(difference);
+        }
+        
+        function showAutoBalanceModal(difference) {
+            const isDebitNeeded = difference < 0;
+            const amount = Math.abs(difference);
+            
+            // Create modal content
+            const modalContent = `
+                <div class="modal-overlay active" id="autoBalanceModal">
+                    <div class="modal">
+                        <div class="modal-header">
+                            <h3 class="modal-title">Create Balancing Entry</h3>
+                            <button class="modal-close" onclick="closeAutoBalanceModal()">&times;</button>
+                        </div>
+                        <div class="modal-content">
+                            <p>To balance your books, we suggest creating the following entry:</p>
+                            <div class="suggested-entry">
+                                <div class="entry-line">
+                                    <strong>Account:</strong> <select id="balancingAccount" class="form-select"></select>
+                                </div>
+                                <div class="entry-line">
+                                    <strong>Description:</strong> <input type="text" id="balancingDescription" class="form-input" value="Balancing entry">
+                                </div>
+                                <div class="entry-line">
+                                    <strong>${isDebitNeeded ? 'Debit' : 'Credit'}:</strong> ${formatCurrency(amount, 'IDR')}
+                                </div>
+                                <div class="entry-line">
+                                    <strong>Reference:</strong> <input type="text" id="balancingReference" class="form-input" value="BAL-${Date.now()}">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button class="btn btn-secondary" onclick="closeAutoBalanceModal()">Cancel</button>
+                            <button class="btn btn-primary" onclick="createBalancingEntry(${difference})">Create Entry</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Add modal to DOM
+            document.body.insertAdjacentHTML('beforeend', modalContent);
+            
+            // Populate account dropdown with suggested accounts
+            populateBalancingAccounts(isDebitNeeded);
+        }
+        
+        function populateBalancingAccounts(isDebitNeeded) {
+            const select = document.getElementById('balancingAccount');
+            if (!select) return;
+            
+            // Suggest appropriate accounts based on what's needed
+            const suggestedAccounts = isDebitNeeded ? 
+                glAccounts.filter(acc => acc.category === 'Asset' || acc.category === 'Expense') :
+                glAccounts.filter(acc => acc.category === 'Liability' || acc.category === 'Equity' || acc.category === 'Revenue');
+            
+            select.innerHTML = '<option value="">Select Account</option>';
+            suggestedAccounts.forEach(account => {
+                const option = document.createElement('option');
+                option.value = account.account_code;
+                option.textContent = `${account.account_code} - ${account.account_name}`;
+                select.appendChild(option);
+            });
+        }
+        
+        async function createBalancingEntry(difference) {
+            const accountCode = document.getElementById('balancingAccount').value;
+            const description = document.getElementById('balancingDescription').value;
+            const reference = document.getElementById('balancingReference').value;
+            
+            if (!accountCode) {
+                alert('Please select an account for the balancing entry.');
+                return;
+            }
+            
+            const account = glAccounts.find(acc => acc.account_code === accountCode);
+            const amount = Math.abs(difference);
+            const isDebitNeeded = difference < 0;
+            
+            const balancingTransaction = {
+                transaction_date: new Date().toISOString().split('T')[0],
+                account_code: accountCode,
+                account_name: account.account_name,
+                description: description,
+                debit_amount: isDebitNeeded ? amount : 0,
+                credit_amount: isDebitNeeded ? 0 : amount,
+                reference: reference,
+                category: account.category,
+                source: 'Auto-Balance',
+                notes: 'Automatically generated balancing entry'
+            };
+            
+            try {
+                await saveFinancialTransaction(balancingTransaction);
+                closeAutoBalanceModal();
+                await loadFinancialTransactions();
+                alert('Balancing entry created successfully!');
+            } catch (error) {
+                console.error('Error creating balancing entry:', error);
+                alert('Error creating balancing entry: ' + error.message);
+            }
+        }
+        
+        function closeAutoBalanceModal() {
+            const modal = document.getElementById('autoBalanceModal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+        
+        // Selection and bulk operations
+        function updateSelectedTransactions() {
+            const checkboxes = document.querySelectorAll('.transaction-checkbox:checked');
+            selectedFinancialTransactions = Array.from(checkboxes).map(cb => cb.value);
+            
+            const bulkActions = document.getElementById('bulkActions');
+            const selectedCount = document.getElementById('selectedCount');
+            
+            if (selectedFinancialTransactions.length > 0) {
+                bulkActions.style.display = 'flex';
+                selectedCount.textContent = selectedFinancialTransactions.length;
+            } else {
+                bulkActions.style.display = 'none';
+            }
+        }
+        
+        function toggleSelectAllFinancial() {
+            const selectAll = document.getElementById('selectAllFinancial');
+            const checkboxes = document.querySelectorAll('.transaction-checkbox');
+            
+            checkboxes.forEach(cb => {
+                cb.checked = selectAll.checked;
+            });
+            
+            updateSelectedTransactions();
+        }
+        
+        // Bulk operations
+        async function bulkDeleteFinancial() {
+            if (selectedFinancialTransactions.length === 0) return;
+            
+            if (!confirm(`Delete ${selectedFinancialTransactions.length} selected transactions?`)) return;
+            
+            try {
+                for (const id of selectedFinancialTransactions) {
+                    await deleteFinancialTransaction(id);
+                }
+                
+                selectedFinancialTransactions = [];
+                updateSelectedTransactions();
+                alert('Selected transactions deleted successfully!');
+            } catch (error) {
+                console.error('Error deleting transactions:', error);
+                alert('Error deleting transactions: ' + error.message);
+            }
+        }
+        
+        // AP/AR Integration Functions will be added in the next part
+        // (Including linking, unlinking, and import functions)
+        
+        // AP/AR Integration Functions
+        function openAPARLinkingModal() {
+            document.getElementById('aparLinkingModal').classList.add('active');
+            loadUnlinkedFinancialTransactions();
+            loadAvailableAPARTransactions();
+        }
+        
+        function closeAPARLinkingModal() {
+            document.getElementById('aparLinkingModal').classList.remove('active');
+        }
+        
+        function loadUnlinkedFinancialTransactions() {
+            const unlinkedTransactions = financialTransactions.filter(t => !t.is_linked && !t.ap_ar_transaction_id);
+            const container = document.getElementById('unlinkFinancialList');
+            
+            container.innerHTML = unlinkedTransactions.map(transaction => `
+                <div class="linking-item" data-financial-id="${transaction.id}">
+                    <div class="linking-item-header">
+                        <strong>${transaction.account_code} - ${transaction.account_name}</strong>
+                        <span class="amount">${formatCurrency(transaction.debit_amount || transaction.credit_amount, 'IDR')}</span>
+                    </div>
+                    <div class="linking-item-details">
+                        ${transaction.description} | ${formatDateIndonesian(transaction.transaction_date)}
+                    </div>
+                </div>
+            `).join('');
+            
+            // Add click handlers
+            container.querySelectorAll('.linking-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    item.classList.toggle('selected');
+                });
+            });
+        }
+        
+        async function loadAvailableAPARTransactions() {
+            try {
+                // Load AP/AR transactions that aren't already linked
+                const { data: aparData, error } = await supabase
+                    .from('ap_ar_transactions_meridash')
+                    .select('*')
+                    .is('linked_financial_id', null);
+                
+                if (error) throw error;
+                
+                const container = document.getElementById('availableAPARList');
+                
+                container.innerHTML = aparData.map(transaction => `
+                    <div class="linking-item" data-apar-id="${transaction.id}">
+                        <div class="linking-item-header">
+                            <strong>${transaction.type} - ${transaction.company}</strong>
+                            <span class="amount">${formatCurrency(transaction.amount, 'IDR')}</span>
+                        </div>
+                        <div class="linking-item-details">
+                            ${transaction.description} | ${formatDateIndonesian(transaction.invoice_date)}
+                        </div>
+                    </div>
+                `).join('');
+                
+                // Add click handlers
+                container.querySelectorAll('.linking-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        item.classList.toggle('selected');
+                    });
+                });
+            } catch (error) {
+                console.error('Error loading AP/AR transactions:', error);
+            }
+        }
+        
+        async function confirmLinking() {
+            const selectedFinancial = document.querySelectorAll('#unlinkFinancialList .linking-item.selected');
+            const selectedAPAR = document.querySelectorAll('#availableAPARList .linking-item.selected');
+            
+            if (selectedFinancial.length !== 1 || selectedAPAR.length !== 1) {
+                alert('Please select exactly one financial transaction and one AP/AR transaction to link.');
+                return;
+            }
+            
+            const financialId = selectedFinancial[0].dataset.financialId;
+            const aparId = selectedAPAR[0].dataset.aparId;
+            
+            try {
+                // Update financial transaction
+                await updateFinancialTransaction(financialId, {
+                    ap_ar_transaction_id: aparId,
+                    is_linked: true
+                });
+                
+                // Update AP/AR transaction
+                const { error } = await supabase
+                    .from('ap_ar_transactions_meridash')
+                    .update({ linked_financial_id: financialId })
+                    .eq('id', aparId);
+                
+                if (error) throw error;
+                
+                closeAPARLinkingModal();
+                await loadFinancialTransactions();
+                alert('Transactions linked successfully!');
+            } catch (error) {
+                console.error('Error linking transactions:', error);
+                alert('Error linking transactions: ' + error.message);
+            }
+        }
+        
+        // Single transaction linking
+        function linkSingleTransaction(financialId) {
+            // Open a simplified linking modal for single transaction
+            const transaction = financialTransactions.find(t => t.id === financialId);
+            if (!transaction) return;
+            
+            // You can implement a simplified version here or use the main modal
+            openAPARLinkingModal();
+            
+            // Pre-select the financial transaction
+            setTimeout(() => {
+                const financialItem = document.querySelector(`[data-financial-id="${financialId}"]`);
+                if (financialItem) {
+                    financialItem.classList.add('selected');
+                }
+            }, 100);
+        }
+        
+        // Bulk linking
+        async function bulkLinkToAPAR() {
+            if (selectedFinancialTransactions.length === 0) {
+                alert('Please select transactions to link.');
+                return;
+            }
+            
+            // Open linking modal with pre-selected transactions
+            openAPARLinkingModal();
+            
+            // Pre-select the financial transactions
+            setTimeout(() => {
+                selectedFinancialTransactions.forEach(id => {
+                    const item = document.querySelector(`[data-financial-id="${id}"]`);
+                    if (item) {
+                        item.classList.add('selected');
+                    }
+                });
+            }, 100);
+        }
+        
+        // Unlink transactions
+        async function unlinkTransaction(financialId) {
+            if (!confirm('Are you sure you want to unlink this transaction?')) return;
+            
+            try {
+                const transaction = financialTransactions.find(t => t.id === financialId);
+                
+                // Update financial transaction
+                await updateFinancialTransaction(financialId, {
+                    ap_ar_transaction_id: null,
+                    is_linked: false
+                });
+                
+                // Update AP/AR transaction if linked
+                if (transaction.ap_ar_transaction_id) {
+                    const { error } = await supabase
+                        .from('ap_ar_transactions_meridash')
+                        .update({ linked_financial_id: null })
+                        .eq('id', transaction.ap_ar_transaction_id);
+                    
+                    if (error) throw error;
+                }
+                
+                await loadFinancialTransactions();
+                alert('Transaction unlinked successfully!');
+            } catch (error) {
+                console.error('Error unlinking transaction:', error);
+                alert('Error unlinking transaction: ' + error.message);
+            }
+        }
+        
+        // Bulk unlink
+        async function bulkUnlink() {
+            if (selectedFinancialTransactions.length === 0) {
+                alert('Please select transactions to unlink.');
+                return;
+            }
+            
+            if (!confirm(`Unlink ${selectedFinancialTransactions.length} selected transactions?`)) return;
+            
+            try {
+                for (const id of selectedFinancialTransactions) {
+                    await unlinkTransaction(id);
+                }
+                
+                selectedFinancialTransactions = [];
+                updateSelectedTransactions();
+                alert('Selected transactions unlinked successfully!');
+            } catch (error) {
+                console.error('Error unlinking transactions:', error);
+                alert('Error unlinking transactions: ' + error.message);
+            }
+        }
+        
+        // GL Account Creation
+        function openNewAccountModal() {
+            document.getElementById('newAccountModal').classList.add('active');
+        }
+        
+        function closeNewAccountModal() {
+            document.getElementById('newAccountModal').classList.remove('active');
+            document.getElementById('newAccountForm').reset();
+        }
+        
+        async function createNewAccount(event) {
+            event.preventDefault();
+            
+            const accountData = {
+                account_code: document.getElementById('newAccountCode').value,
+                account_name: document.getElementById('newAccountName').value,
+                category: document.getElementById('newAccountCategory').value,
+                is_custom: true
+            };
+            
+            try {
+                // Check if account code already exists
+                const existing = glAccounts.find(acc => acc.account_code === accountData.account_code);
+                if (existing) {
+                    alert('Account code already exists. Please choose a different code.');
+                    return;
+                }
+                
+                const { data, error } = await supabase
+                    .from('gl_accounts_meridash')
+                    .insert([accountData])
+                    .select();
+                
+                if (error) throw error;
+                
+                // Add to local array
+                glAccounts.push(data[0]);
+                glAccounts.sort((a, b) => a.account_code.localeCompare(b.account_code));
+                
+                // Update dropdowns
+                populateAccountDropdowns();
+                
+                // Select the new account in the main form
+                document.getElementById('financialAccount').value = accountData.account_code;
+                
+                closeNewAccountModal();
+                alert('New account created successfully!');
+            } catch (error) {
+                console.error('Error creating account:', error);
+                alert('Error creating account: ' + error.message);
+            }
+        }
+        
+        // File Upload Functions
+        function openFinancialUploadModal() {
+            document.getElementById('uploadFinancialModal').classList.add('active');
+        }
+        
+        function closeFinancialUploadModal() {
+            document.getElementById('uploadFinancialModal').classList.remove('active');
+            document.getElementById('financialFileInput').value = '';
+        }
+        
+        function downloadFinancialTemplate() {
+            const csv = `Date,Account_Code,Account_Name,Description,Debit,Credit,Reference,Notes
+        2025-01-15,1010,Cash and Cash Equivalents,Bank deposit,5000,,DEP-001,Initial deposit
+        2025-01-15,4010,Sales Revenue,Product sales,,5000,INV-001,Cash sale
+        2025-01-16,5100,Salaries and Wages,Monthly salaries,3000,,PAY-001,January payroll
+        2025-01-16,1010,Cash and Cash Equivalents,Salary payment,,3000,PAY-001,Payment to employees`;
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'financial_transactions_template.csv';
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+        
+        async function handleFinancialFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            if (file.type !== 'text/csv' && !file.name.endsWith('.csv')) {
+                alert('Please upload a CSV file.');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const csv = e.target.result;
+                    const lines = csv.split('\n').filter(line => line.trim());
+                    
+                    if (lines.length < 2) {
+                        alert('CSV file appears to be empty or invalid.');
+                        return;
+                    }
+                    
+                    // Parse header
+                    const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+                    
+                    // Expected headers
+                    const expectedHeaders = ['Date', 'Account_Code', 'Account_Name', 'Description', 'Debit', 'Credit', 'Reference', 'Notes'];
+                    const missingHeaders = expectedHeaders.filter(h => !headers.includes(h));
+                    
+                    if (missingHeaders.length > 0) {
+                        alert(`Missing required columns: ${missingHeaders.join(', ')}`);
+                        return;
+                    }
+                    
+                    // Parse data
+                    const newTransactions = [];
+                    for (let i = 1; i < lines.length; i++) {
+                        const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
+                        
+                        if (values.length < expectedHeaders.length) continue;
+                        
+                        const transaction = {};
+                        headers.forEach((header, index) => {
+                            transaction[header] = values[index];
+                        });
+                        
+                        // Validate and format data
+                        const formattedTransaction = {
+                            transaction_date: transaction.Date,
+                            account_code: transaction.Account_Code,
+                            account_name: transaction.Account_Name,
+                            description: transaction.Description,
+                            debit_amount: parseFloat(transaction.Debit) || 0,
+                            credit_amount: parseFloat(transaction.Credit) || 0,
+                            reference: transaction.Reference,
+                            notes: transaction.Notes,
+                            source: 'CSV Import'
+                        };
+                        
+                        // Validate account exists or create it
+                        let account = glAccounts.find(acc => acc.account_code === transaction.Account_Code);
+                        if (!account) {
+                            // Determine category based on account code
+                            let category = 'Asset';
+                            const code = parseInt(transaction.Account_Code);
+                            if (code >= 2000 && code < 3000) category = 'Liability';
+                            else if (code >= 3000 && code < 4000) category = 'Equity';
+                            else if (code >= 4000 && code < 5000) category = 'Revenue';
+                            else if (code >= 5000) category = 'Expense';
+                            
+                            formattedTransaction.category = category;
+                            
+                            // Create account if it doesn't exist
+                            const newAccount = {
+                                account_code: transaction.Account_Code,
+                                account_name: transaction.Account_Name,
+                                category: category,
+                                is_custom: true
+                            };
+                            
+                            try {
+                                const { data: accountData, error: accountError } = await supabase
+                                    .from('gl_accounts_meridash')
+                                    .insert([newAccount])
+                                    .select();
+                                
+                                if (!accountError) {
+                                    glAccounts.push(accountData[0]);
+                                }
+                            } catch (error) {
+                                console.log('Account might already exist:', error);
+                            }
+                        } else {
+                            formattedTransaction.category = account.category;
+                        }
+                        
+                        newTransactions.push(formattedTransaction);
+                    }
+                    
+                    // Insert all transactions
+                    const { data, error } = await supabase
+                        .from('financial_transactions_meridash')
+                        .insert(newTransactions)
+                        .select();
+                    
+                    if (error) throw error;
+                    
+                    // Update local arrays
+                    financialTransactions.unshift(...data);
+                    
+                    closeFinancialUploadModal();
+                    renderFinancialTable();
+                    updateTrialBalance();
+                    populateAccountDropdowns();
+                    
+                    alert(`Successfully imported ${data.length} transactions!`);
+                } catch (error) {
+                    console.error('Error importing file:', error);
+                    alert('Error importing file: ' + error.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+        
+        // Export Functions
+        function exportFinancialToCSV() {
+            const filteredData = getFilteredFinancialTransactions();
+            
+            if (filteredData.length === 0) {
+                alert('No data to export.');
+                return;
+            }
+            
+            // CSV headers
+            const headers = [
+                'Date',
+                'Account Code',
+                'Account Name',
+                'Description',
+                'Debit',
+                'Credit',
+                'Reference',
+                'Category',
+                'Source',
+                'Notes',
+                'Linked'
+            ];
+            
+            // Convert data to CSV format
+            const csvRows = [headers.join(',')];
+            
+            filteredData.forEach(transaction => {
+                const row = [
+                    escapeCSVField(formatDateForCSV(transaction.transaction_date)),
+                    escapeCSVField(transaction.account_code),
+                    escapeCSVField(transaction.account_name),
+                    escapeCSVField(transaction.description),
+                    transaction.debit_amount || '',
+                    transaction.credit_amount || '',
+                    escapeCSVField(transaction.reference),
+                    escapeCSVField(transaction.category),
+                    escapeCSVField(transaction.source),
+                    escapeCSVField(transaction.notes),
+                    transaction.is_linked ? 'Yes' : 'No'
+                ];
+                csvRows.push(row.join(','));
+            });
+            
+            const csvContent = csvRows.join('\n');
+            const filename = `financial_transactions_${new Date().toISOString().split('T')[0]}.csv`;
+            
+            downloadCSVFile(csvContent, filename);
+        }
+        
+        // Reports Generation
+        function generateReports() {
+            generateIncomeStatement();
+            generateBalanceSheet();
+            generateCashFlowStatement();
+        }
+        
+        function generateIncomeStatement() {
+            const revenueAccounts = financialTransactions.filter(t => t.category === 'Revenue');
+            const expenseAccounts = financialTransactions.filter(t => t.category === 'Expense');
+            
+            let totalRevenue = 0;
+            let totalExpenses = 0;
+            
+            // Calculate revenue (credits increase revenue)
+            revenueAccounts.forEach(t => {
+                totalRevenue += t.credit_amount || 0;
+                totalRevenue -= t.debit_amount || 0; // Debits decrease revenue
+            });
+            
+            // Calculate expenses (debits increase expenses)
+            expenseAccounts.forEach(t => {
+                totalExpenses += t.debit_amount || 0;
+                totalExpenses -= t.credit_amount || 0; // Credits decrease expenses
+            });
+            
+            const netIncome = totalRevenue - totalExpenses;
+            
+            const incomeStatement = `
+                <div class="report-section">
+                    <h5>Revenue</h5>
+                    <div class="report-line">
+                        <span>Total Revenue</span>
+                        <span>${formatCurrency(totalRevenue, 'IDR')}</span>
+                    </div>
+                </div>
+                
+                <div class="report-section">
+                    <h5>Expenses</h5>
+                    <div class="report-line">
+                        <span>Total Expenses</span>
+                        <span>${formatCurrency(totalExpenses, 'IDR')}</span>
+                    </div>
+                </div>
+                
+                <div class="report-section report-total">
+                    <div class="report-line">
+                        <span><strong>Net Income</strong></span>
+                        <span><strong>${formatCurrency(netIncome, 'IDR')}</strong></span>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('incomeStatement').innerHTML = incomeStatement;
+        }
+        
+        function generateBalanceSheet() {
+            const assetAccounts = financialTransactions.filter(t => t.category === 'Asset');
+            const liabilityAccounts = financialTransactions.filter(t => t.category === 'Liability');
+            const equityAccounts = financialTransactions.filter(t => t.category === 'Equity');
+            
+            let totalAssets = 0;
+            let totalLiabilities = 0;
+            let totalEquity = 0;
+            
+            // Calculate assets (debits increase assets)
+            assetAccounts.forEach(t => {
+                totalAssets += t.debit_amount || 0;
+                totalAssets -= t.credit_amount || 0;
+            });
+            
+            // Calculate liabilities (credits increase liabilities)
+            liabilityAccounts.forEach(t => {
+                totalLiabilities += t.credit_amount || 0;
+                totalLiabilities -= t.debit_amount || 0;
+            });
+            
+            // Calculate equity (credits increase equity)
+            equityAccounts.forEach(t => {
+                totalEquity += t.credit_amount || 0;
+                totalEquity -= t.debit_amount || 0;
+            });
+            
+            const balanceSheet = `
+                <div class="report-section">
+                    <h5>Assets</h5>
+                    <div class="report-line">
+                        <span>Total Assets</span>
+                        <span>${formatCurrency(totalAssets, 'IDR')}</span>
+                    </div>
+                </div>
+                
+                <div class="report-section">
+                    <h5>Liabilities</h5>
+                    <div class="report-line">
+                        <span>Total Liabilities</span>
+                        <span>${formatCurrency(totalLiabilities, 'IDR')}</span>
+                    </div>
+                </div>
+                
+                <div class="report-section">
+                    <h5>Equity</h5>
+                    <div class="report-line">
+                        <span>Total Equity</span>
+                        <span>${formatCurrency(totalEquity, 'IDR')}</span>
+                    </div>
+                </div>
+                
+                <div class="report-section report-total">
+                    <div class="report-line">
+                        <span><strong>Total Liabilities + Equity</strong></span>
+                        <span><strong>${formatCurrency(totalLiabilities + totalEquity, 'IDR')}</strong></span>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('balanceSheet').innerHTML = balanceSheet;
+        }
+        
+        function generateCashFlowStatement() {
+            // Simplified cash flow - track cash account movements
+            const cashTransactions = financialTransactions.filter(t => 
+                t.account_code === '1010' || t.account_name.toLowerCase().includes('cash')
+            );
+            
+            let cashInflows = 0;
+            let cashOutflows = 0;
+            
+            cashTransactions.forEach(t => {
+                cashInflows += t.debit_amount || 0; // Debits increase cash
+                cashOutflows += t.credit_amount || 0; // Credits decrease cash
+            });
+            
+            const netCashFlow = cashInflows - cashOutflows;
+            
+            const cashFlowStatement = `
+                <div class="report-section">
+                    <h5>Cash Inflows</h5>
+                    <div class="report-line">
+                        <span>Total Cash Inflows</span>
+                        <span>${formatCurrency(cashInflows, 'IDR')}</span>
+                    </div>
+                </div>
+                
+                <div class="report-section">
+                    <h5>Cash Outflows</h5>
+                    <div class="report-line">
+                        <span>Total Cash Outflows</span>
+                        <span>${formatCurrency(cashOutflows, 'IDR')}</span>
+                    </div>
+                </div>
+                
+                <div class="report-section report-total">
+                    <div class="report-line">
+                        <span><strong>Net Cash Flow</strong></span>
+                        <span><strong>${formatCurrency(netCashFlow, 'IDR')}</strong></span>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('cashFlowStatement').innerHTML = cashFlowStatement;
+        }
+        
+        // Utility function for escaping CSV fields (reuse from existing code)
+        function escapeCSVField(field) {
+            if (field === null || field === undefined) return '';
+            const stringField = String(field);
+            if (stringField.includes(',') || stringField.includes('"') || stringField.includes('\n')) {
+                return `"${stringField.replace(/"/g, '""')}"`;
+            }
+            return stringField;
+        }
+        
+        function formatDateForCSV(date) {
+            if (!date) return '';
+            return new Date(date).toISOString().split('T')[0]; // YYYY-MM-DD format
+        }
+        
+        function downloadCSVFile(csvContent, filename) {
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+        
+        // Audit Trail Function
+        async function logAuditTrail(tableName, recordId, action, oldValues, newValues) {
+            try {
+                const auditData = {
+                    table_name: tableName,
+                    record_id: recordId,
+                    action: action,
+                    old_values: oldValues,
+                    new_values: newValues,
+                    user_info: 'System User' // You can enhance this with actual user info
+                };
+                
+                const { error } = await supabase
+                    .from('audit_logs_meridash')
+                    .insert([auditData]);
+                
+                if (error) throw error;
+            } catch (error) {
+                console.error('Error logging audit trail:', error);
+                // Don't throw error as this shouldn't stop the main operation
+            }
+        }
+        
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add initialization for financial statements when the section becomes visible
+            const originalLoadAPARData = loadAPARData;
+            window.loadAPARData = async function() {
+                await originalLoadAPARData();
+                // Also initialize financial statements if that section is active
+                if (document.getElementById('statements-section').style.display !== 'none') {
+                    await initializeFinancialStatements();
+                }
+            };
+        });
         
     </script>
 
