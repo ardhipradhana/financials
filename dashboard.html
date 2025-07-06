@@ -2820,6 +2820,27 @@
             font-size: 0.75rem;
             color: #64748b;
         }
+
+        /* TEMPORARY DEBUG CSS - ADD THIS TO YOUR STYLES */
+        #statements-section {
+            border: 3px solid red !important;
+            background: yellow !important;
+        }
+        
+        #transactions-tab {
+            border: 3px solid blue !important;
+            background: lightgreen !important;
+        }
+        
+        #financialTableBody {
+            border: 3px solid purple !important;
+            background: pink !important;
+        }
+        
+        .financial-tabs {
+            border: 3px solid orange !important;
+            background: lightblue !important;
+        }
         
     </style>
 </head>
@@ -4852,19 +4873,38 @@
                         
                         // Force the tab to stay visible
                         setTimeout(() => {
+                            console.log('=== VISUAL DEBUGGING ===');
                             const statementsSection = document.getElementById('statements-section');
                             const transactionsTab = document.getElementById('transactions-tab');
+                            const tableBody = document.getElementById('financialTableBody');
+                            const financialTabs = document.querySelector('.financial-tabs');
                             
-                            if (statementsSection) {
-                                statementsSection.style.display = 'block';
-                                console.log('Forced statements section to display: block');
-                            }
+                            console.log('Statements section:', {
+                                display: statementsSection?.style.display,
+                                visibility: statementsSection?.style.visibility,
+                                opacity: statementsSection?.style.opacity,
+                                height: statementsSection?.offsetHeight,
+                                width: statementsSection?.offsetWidth
+                            });
                             
-                            if (transactionsTab) {
-                                transactionsTab.classList.add('active');
-                                console.log('Forced transactions tab to be active');
-                            }
-                        }, 200);
+                            console.log('Transactions tab:', {
+                                display: transactionsTab?.style.display,
+                                visibility: transactionsTab?.style.visibility,
+                                opacity: transactionsTab?.style.opacity,
+                                height: transactionsTab?.offsetHeight,
+                                width: transactionsTab?.offsetWidth
+                            });
+                            
+                            console.log('Table body:', {
+                                display: tableBody?.style.display,
+                                visibility: tableBody?.style.visibility,
+                                opacity: tableBody?.style.opacity,
+                                height: tableBody?.offsetHeight,
+                                width: tableBody?.offsetWidth,
+                                innerHTML: tableBody?.innerHTML.substring(0, 100) + '...'
+                            });
+                            
+                        }, 1500);
                         
                     }, 100);
                 }
@@ -6972,63 +7012,14 @@
         
         // Initialize Financial Statements
         async function initializeFinancialStatements() {
-            console.log('=== INITIALIZING FINANCIAL STATEMENTS ===');
-            
             try {
-                // Check if we have the required elements
-                const statementsSection = document.getElementById('statements-section');
-                const financialTableBody = document.getElementById('financialTableBody');
-                const transactionsTab = document.getElementById('transactions-tab');
-                
-                console.log('Statements section found:', !!statementsSection);
-                console.log('Table body found:', !!financialTableBody);
-                console.log('Transactions tab found:', !!transactionsTab);
-                
-                if (!statementsSection || !financialTableBody) {
-                    console.error('Required elements not found!');
-                    return;
-                }
-                
-                // Reset state
-                financialTransactions = [];
-                glAccounts = [];
-                selectedFinancialTransactions = [];
-                
-                console.log('Loading GL accounts...');
                 await loadGLAccounts();
-                console.log('GL accounts loaded:', glAccounts.length);
-                
-                console.log('Loading financial transactions...');
                 await loadFinancialTransactions();
-                console.log('Financial transactions loaded:', financialTransactions.length);
-                
-                console.log('Updating trial balance...');
                 updateTrialBalance();
-                
-                console.log('Populating account filters...');
                 populateAccountFilters();
-                
-                console.log('Setting up period filters...');
                 checkPeriodFilter();
-                
-                console.log('Switching to transactions tab...');
-                switchFinancialTab('transactions');
-                
-                // Add debugging to check visibility after a short delay
-                setTimeout(() => {
-                    console.log('=== CHECKING VISIBILITY AFTER 1 SECOND ===');
-                    console.log('Statements section display:', statementsSection.style.display);
-                    console.log('Transactions tab classes:', transactionsTab.className);
-                    console.log('Transactions tab display:', transactionsTab.style.display);
-                    console.log('Table body HTML length:', financialTableBody.innerHTML.length);
-                }, 1000);
-                
-                console.log('=== FINANCIAL STATEMENTS INITIALIZATION COMPLETE ===');
-                
             } catch (error) {
-                console.error('=== ERROR INITIALIZING FINANCIAL STATEMENTS ===');
-                console.error('Error details:', error);
-                console.error('Stack trace:', error.stack);
+                console.error('Error initializing financial statements:', error);
             }
         }
         
