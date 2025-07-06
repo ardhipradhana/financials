@@ -2857,7 +2857,6 @@
         
         /* Full Width Tables */
         .table-container-full-width {
-            max-height: 500px;
             width: 100%;
             overflow-x: auto;
             border: 1px solid #e2e8f0;
@@ -3029,7 +3028,18 @@
             .report-content {
                 padding: 1rem;
             }
-        
+        }
+
+        .report-line.final-total-line {
+            font-weight: 700;
+            font-size: 1.1rem;
+            border-top: 3px double #1e293b;
+            border-bottom: 3px double #1e293b;
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            padding-bottom: 0.75rem;
+            background: #f8fafc;
+        }
     </style>
 </head>
 <body>
@@ -8664,17 +8674,17 @@
                     </div>
                 </div>
                 
-                <div class="report-line total-line">
+                <div class="report-line subtotal-line">
                     <span>NET INCREASE (DECREASE) IN CASH</span>
                     <span>${formatCurrency(netCashFlow, 'IDR')}</span>
                 </div>
                 
-                <div class="report-line">
+                <div class="report-line subtotal-line">
                     <span>Beginning Cash Balance</span>
                     <span>${formatCurrency(beginningBalance, 'IDR')}</span>
                 </div>
                 
-                <div class="report-line total-line">
+                <div class="report-line final-total-line">
                     <span>ENDING CASH BALANCE</span>
                     <span>${formatCurrency(endingBalance, 'IDR')}</span>
                 </div>
