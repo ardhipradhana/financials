@@ -2155,10 +2155,14 @@
         
         .impact-item {
             display: flex;
-            align-items: flex-start;
-            gap: 0.5rem;
-            margin-bottom: 0.5rem;
-            font-size: 0.75rem;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+            padding: 0.75rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            line-height: 1.4;
+            transition: all 0.15s ease;
         }
         
         .impact-item.risk {
@@ -2174,8 +2178,10 @@
         }
         
         .impact-icon {
-            margin-top: 0.125rem;
             flex-shrink: 0;
+            font-size: 1rem;
+            width: 1.25rem;
+            text-align: center;
         }
         
         /* Drop Zones */
@@ -2376,9 +2382,9 @@
         .parked-bucket {
             background: #fef3c7;
             border-color: #f59e0b;
-            grid-column: span 2;
+            grid-column: span 3;
             justify-self: center;
-            width: calc(50% - 0.5rem);
+            width: calc(75% - 0.75rem);
         }
         
         .parked-bucket .bucket-header {
@@ -2472,7 +2478,7 @@
         
         .change-log-header {
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-start;
             align-items: center;
             margin-bottom: 1rem;
         }
@@ -2492,7 +2498,6 @@
         .log-item {
             display: flex;
             align-items: flex-start;
-            gap: 0.5rem;
             padding: 0.5rem;
             margin-bottom: 0.5rem;
             border-radius: 6px;
@@ -2567,10 +2572,7 @@
             
             .parked-bucket {
                 grid-column: span 2;
-            }
-            
-            .scenario-chart-full {
-                height: 250px;
+                width: 100%;
             }
         }
         
@@ -3250,13 +3252,9 @@
                             <div class="change-log-section">
                                 <div class="change-log-header">
                                     <h4 class="change-log-title">Change Log</h4>
-                                    <button class="btn btn-secondary btn-small" onclick="clearChangeLog()">
-                                        <i class="fas fa-trash"></i> Clear Log
-                                    </button>
                                 </div>
                                 <div class="change-log-content" id="changeLogContent">
                                     <div class="log-item neutral">
-                                        <span class="log-icon">ℹ️</span>
                                         <span>Move transactions between weeks to see changes</span>
                                     </div>
                                 </div>
@@ -5436,11 +5434,11 @@
             const weekDisplay = (week) => week === 'parked' ? 'Parked' : `Week ${week}`;
             
             if (newWeek === 'parked') {
-                logMessage = `${transaction.vendor} moved to Parked (beyond 13 weeks)`;
+                logMessage = `${timestamp} - ${transaction.vendor} moved to Parked (beyond 13 weeks)`;
             } else if (oldWeek === 'parked') {
-                logMessage = `${transaction.vendor} moved from Parked to ${weekDisplay(newWeek)}`;
+                logMessage = `${timestamp} - ${transaction.vendor} moved from Parked to ${weekDisplay(newWeek)}`;
             } else {
-                logMessage = `${transaction.vendor} moved from ${weekDisplay(oldWeek)} → ${weekDisplay(newWeek)}`;
+                logMessage = `${timestamp} - ${transaction.vendor} moved from ${weekDisplay(oldWeek)} → ${weekDisplay(newWeek)}`;
             }
             
             const logEntry = {
@@ -5464,7 +5462,6 @@
             if (changeLog.length === 0) {
                 logContent.innerHTML = `
                     <div class="log-item neutral">
-                        <span class="log-icon">ℹ️</span>
                         <span>Move transactions between weeks to see changes</span>
                     </div>
                 `;
@@ -5473,8 +5470,7 @@
             
             logContent.innerHTML = changeLog.slice(0, 10).map(entry => `
                 <div class="log-item moved">
-                    <span class="log-icon">📋</span>
-                    <span><strong>${entry.timestamp}</strong> - ${entry.message}</span>
+                    <span>${entry.message}</span>
                 </div>
             `).join('');
         }
@@ -5525,13 +5521,13 @@
                     if (isLater) {
                         impacts.push({
                             type: 'risk',
-                            icon: '!',
+                            icon: '❗',
                             text: `Collection delay: ${change.vendor} - Monitor cash flow impact and follow up`
                         });
                     } else {
                         impacts.push({
                             type: 'benefit',
-                            icon: '✓',
+                            icon: '✅',
                             text: `Accelerated collection: ${change.vendor} - Improved cash position`
                         });
                     }
@@ -5547,11 +5543,18 @@
         }
         
         function resetScenario() {
+            // Reset data to original state
             scenarioData = [...originalData];
+            
+            // Clear change log
+            clearChangeLog();
+            
+            // Update all displays
             populateTransactionBuckets();
             updateScenarioChart();
-            clearChangeLog();
             updateImpactAnalysis();
+            
+            console.log('Scenario reset to original state');
         }
         
         // Chart functions (reusing dashboard chart logic)
