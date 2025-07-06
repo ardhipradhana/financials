@@ -8449,6 +8449,7 @@
         }
         
         function generateIncomeStatement() {
+            const filteredTransactions = getFilteredFinancialTransactions();
             const revenueTransactions = financialTransactions.filter(t => t.category === 'Revenue');
             const expenseTransactions = financialTransactions.filter(t => t.category === 'Expense');
             
@@ -8602,8 +8603,8 @@
         
         function generateCashFlowStatement() {
             const beginningBalance = parseFloat(document.getElementById('beginningCashBalance').value) || getStartingCash();
-            // Operating Activities
             const filteredTransactions = getFilteredFinancialTransactions();
+            // Operating Activities
             const operatingAccounts = {
                 'Net Income': netIncomeCalculation(),
                 'Depreciation & Amortization': getAccountBalance(['5600', '5610']),
@@ -8613,7 +8614,6 @@
             };
             
             // Investing Activities 
-            const filteredTransactions = getFilteredFinancialTransactions();
             const investingAccounts = {
                 'Purchase of Equipment': -getAccountBalance(['1500']),
                 'Purchase of Vehicles': -getAccountBalance(['1600']),
@@ -8622,7 +8622,6 @@
             };
             
             // Financing Activities
-            const filteredTransactions = getFilteredFinancialTransactions();
             const financingAccounts = {
                 'Proceeds from Long-term Debt': getAccountBalance(['2200']),
                 'Owner\'s Capital Contributions': getAccountBalance(['3010']),
