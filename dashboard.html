@@ -4846,7 +4846,24 @@
                 }
                 if (this.dataset.section === 'statements') {
                     setTimeout(() => {
+                        // Always re-initialize when coming back to this section
                         initializeFinancialStatements();
+                        
+                        // Ensure all Financial Statements elements are properly visible
+                        const financialSection = document.getElementById('statements-section');
+                        if (financialSection) {
+                            // Re-render the table if data exists
+                            if (financialTransactions && financialTransactions.length > 0) {
+                                renderFinancialTable();
+                                updateTrialBalance();
+                            }
+                            
+                            // Ensure the default tab (transactions) is active
+                            switchFinancialTab('transactions');
+                            
+                            // Re-populate dropdowns
+                            populateAccountDropdowns();
+                        }
                     }, 100);
                 }
             });
@@ -6953,12 +6970,24 @@
         
         // Initialize Financial Statements
         async function initializeFinancialStatements() {
+            console.log('Initializing Financial Statements...');
+            
+            // Reset any previous state
+            financialTransactions = [];
+            glAccounts = [];
+            selectedFinancialTransactions = [];
+            
             try {
                 await loadGLAccounts();
                 await loadFinancialTransactions();
                 updateTrialBalance();
                 populateAccountFilters();
                 checkPeriodFilter();
+                
+                // Ensure transactions tab is active by default
+                switchFinancialTab('transactions');
+                
+                console.log('Financial Statements initialized successfully');
             } catch (error) {
                 console.error('Error initializing financial statements:', error);
             }
