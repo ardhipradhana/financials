@@ -4845,9 +4845,27 @@
                     }, 100);
                 }
                 if (this.dataset.section === 'statements') {
+                    console.log('Financial Statements tab clicked - before timeout');
                     setTimeout(() => {
-                        console.log('Financial Statements tab clicked');
+                        console.log('Financial Statements tab clicked - inside timeout');
                         initializeFinancialStatements();
+                        
+                        // Force the tab to stay visible
+                        setTimeout(() => {
+                            const statementsSection = document.getElementById('statements-section');
+                            const transactionsTab = document.getElementById('transactions-tab');
+                            
+                            if (statementsSection) {
+                                statementsSection.style.display = 'block';
+                                console.log('Forced statements section to display: block');
+                            }
+                            
+                            if (transactionsTab) {
+                                transactionsTab.classList.add('active');
+                                console.log('Forced transactions tab to be active');
+                            }
+                        }, 200);
+                        
                     }, 100);
                 }
             });
@@ -6960,9 +6978,11 @@
                 // Check if we have the required elements
                 const statementsSection = document.getElementById('statements-section');
                 const financialTableBody = document.getElementById('financialTableBody');
+                const transactionsTab = document.getElementById('transactions-tab');
                 
                 console.log('Statements section found:', !!statementsSection);
                 console.log('Table body found:', !!financialTableBody);
+                console.log('Transactions tab found:', !!transactionsTab);
                 
                 if (!statementsSection || !financialTableBody) {
                     console.error('Required elements not found!');
@@ -6993,6 +7013,15 @@
                 
                 console.log('Switching to transactions tab...');
                 switchFinancialTab('transactions');
+                
+                // Add debugging to check visibility after a short delay
+                setTimeout(() => {
+                    console.log('=== CHECKING VISIBILITY AFTER 1 SECOND ===');
+                    console.log('Statements section display:', statementsSection.style.display);
+                    console.log('Transactions tab classes:', transactionsTab.className);
+                    console.log('Transactions tab display:', transactionsTab.style.display);
+                    console.log('Table body HTML length:', financialTableBody.innerHTML.length);
+                }, 1000);
                 
                 console.log('=== FINANCIAL STATEMENTS INITIALIZATION COMPLETE ===');
                 
