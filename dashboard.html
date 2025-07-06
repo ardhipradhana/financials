@@ -3889,8 +3889,8 @@
                             </button>
                         </div>
                         
-                        <div class="file-upload-area">
-                            <input type="file" id="financialFileInput" accept=".csv" onchange="handleFinancialFileUpload(event)">
+                        <div class="file-upload-area" onclick="document.getElementById('financialFileInput').click()">
+                            <input type="file" id="financialFileInput" accept=".csv" onchange="handleFinancialFileUpload(event)" style="display: none;">
                             <div class="upload-placeholder">
                                 <i class="fas fa-cloud-upload-alt"></i>
                                 <p>Choose CSV file or drag and drop</p>
@@ -4748,13 +4748,6 @@
             if (!sidebar.contains(e.target) && !toggle.contains(e.target) && sidebar.classList.contains('open')) {
                 sidebar.classList.remove('open');
                 toggle.style.display = 'flex'; // Show the button again
-            }
-        });
-
-        // Make upload area clickable
-        document.addEventListener('click', function(e) {
-            if (e.target.closest('.file-upload-area')) {
-                document.getElementById('financialFileInput').click();
             }
         });
 
@@ -7042,41 +7035,7 @@
                 if (error) throw error;
                 
                 financialTransactions = data || [];
-                console.log('Loaded financial transactions from DB:', financialTransactions.length);
-                
-                // Add dummy data for testing if no real data exists
-                if (financialTransactions.length === 0) {
-                    console.log('No real transactions found, adding dummy data for testing...');
-                    financialTransactions = [
-                        {
-                            id: 'test-1',
-                            transaction_date: '2025-01-15',
-                            account_code: '1010',
-                            account_name: 'Cash and Cash Equivalents',
-                            description: 'Test transaction 1',
-                            debit_amount: 1000000,
-                            credit_amount: 0,
-                            reference: 'TEST-001',
-                            category: 'Asset',
-                            source: 'Test',
-                            is_linked: false
-                        },
-                        {
-                            id: 'test-2',
-                            transaction_date: '2025-01-15',
-                            account_code: '4010',
-                            account_name: 'Sales Revenue',
-                            description: 'Test transaction 2',
-                            debit_amount: 0,
-                            credit_amount: 1000000,
-                            reference: 'TEST-002',
-                            category: 'Revenue',
-                            source: 'Test',
-                            is_linked: false
-                        }
-                    ];
-                    console.log('Added dummy transactions:', financialTransactions.length);
-                }
+                console.log('Loaded financial transactions:', financialTransactions.length);
                 
                 renderFinancialTable();
                 updateTrialBalance();
