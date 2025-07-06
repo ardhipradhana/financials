@@ -3931,7 +3931,7 @@
             </div>
 
             <!-- Other sections (hidden by default) -->
-            <div id="statements-section" class="section-content" style="display: none;">
+            <div id="statements-placeholder" class="section-content" style="display: none;">
                 <div class="feature-placeholder">
                     <i class="placeholder-icon fas fa-chart-line"></i>
                     <div class="placeholder-text">Financial Statements</div>
@@ -5853,22 +5853,12 @@
 
         // Tab switching function
         function switchAPARTab(tabName) {
-            // Hide all tab contents
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            // Remove active class from all buttons
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            // Show selected tab content
-            document.getElementById(tabName + '-tab').classList.add('active');
-            
-            // Add active class to clicked button
-            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
-            
+            const section = document.getElementById('ap-ar-section');
+            section.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            section.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            section.querySelector('#' + tabName + '-tab').classList.add('active');
+            section.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+
             // Initialize scenario analysis if scenarios tab is selected
             if (tabName === 'scenarios') {
                 setTimeout(() => {
@@ -6526,21 +6516,11 @@
         
         // Update the switchAPARTab function to initialize the new scenario analysis
         function switchAPARTab(tabName) {
-            // Hide all tab contents
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            // Remove active class from all buttons
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            // Show selected tab content
-            document.getElementById(tabName + '-tab').classList.add('active');
-            
-            // Add active class to clicked button
-            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+            const section = document.getElementById('ap-ar-section');
+            section.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            section.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            section.querySelector('#' + tabName + '-tab').classList.add('active');
+            section.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
             
             // Initialize scenario analysis if scenarios tab is selected
             if (tabName === 'scenarios') {
