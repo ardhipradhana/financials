@@ -4751,6 +4751,13 @@
             }
         });
 
+        // Make upload area clickable
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.file-upload-area')) {
+                document.getElementById('financialFileInput').click();
+            }
+        });
+
         // Initialize with mock data
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Meridash Dashboard Loaded');
