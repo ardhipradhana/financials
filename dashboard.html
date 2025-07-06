@@ -5258,6 +5258,8 @@
         
         // Initialize scenario analysis when tab is switched
         function initializeScenarioAnalysis() {
+            console.log('=== INITIALIZING SCENARIO ANALYSIS ===');
+            
             loadScenarioTransactions();
             setupBucketDragAndDrop();
             populateTransactionBuckets();
@@ -5266,21 +5268,24 @@
         }
         
         function loadScenarioTransactions() {
+            console.log('Loading scenario transactions...');
+            
             // Get real transaction data from the main AP/AR system
             const realTransactions = getAPARTransactionData();
+            console.log('Real transactions found:', realTransactions);
             
             // Convert to scenario format and assign to weeks
             originalData = realTransactions
-                .filter(transaction => transaction.status === 'pending' || transaction.status === 'overdue')
+                .filter(transaction => transaction.status === 'pending' || transaction.status === 'overdue' || !transaction.status)
                 .map(transaction => {
                     // Calculate which week this transaction falls into
                     const daysFromNow = Math.ceil((new Date(transaction.dueDate) - new Date()) / (1000 * 60 * 60 * 24));
                     const weekNumber = Math.max(1, Math.min(13, Math.ceil(daysFromNow / 7)));
                     
                     return {
-                        id: transaction.id,
+                        id: transaction.id || `trans_${Date.now()}_${Math.random()}`,
                         type: transaction.type,
-                        vendor: transaction.company,
+                        vendor: transaction.company || transaction.vendor,
                         amount: Math.abs(transaction.amount),
                         description: transaction.description,
                         originalWeek: weekNumber,
@@ -5292,6 +5297,7 @@
             
             // If no real transactions, fall back to sample data
             if (originalData.length === 0) {
+                console.log('No real transactions found, using sample data');
                 originalData = [
                     {
                         id: 'ap1',
@@ -5337,15 +5343,59 @@
             }
             
             scenarioData = [...originalData];
-            console.log('Loaded scenario transactions:', scenarioData);
+            console.log('Final scenario data:', scenarioData);
         }
         
         // Function to get real AP/AR data (connects to existing system)
         function getAPARTransactionData() {
-            // This connects to your existing AP/AR data
-            if (typeof apArData !== 'undefined' && Array.isArray(apArData)) {
-                return apArData;
+            // Check different possible variable names for AP/AR data
+            console.log('Looking for AP/AR data...');
+            
+            // Try different variable names that might exist
+            if (typeof window.apArData !== 'undefined' && Array.isArray(window.apArData)) {
+                console.log('Found apArData:', window.apArData);
+                return window.apArData;
             }
+            
+            if (typeof window.transactions !== 'undefined' && Array.isArray(window.transactions)) {
+                console.log('Found transactions:', window.transactions);
+                return window.transactions;
+            }
+            
+            if (typeof apArTransactions !== 'undefined' && Array.isArray(apArTransactions)) {
+                console.log('Found apArTransactions:', apArTransactions);
+                return apArTransactions;
+            }
+            
+            // Try to get data from the table if it exists
+            const table = document.getElementById('apArTable');
+            if (table && table.querySelector('tbody')) {
+                console.log('Trying to extract from table...');
+                const rows = table.querySelectorAll('tbody tr');
+                const extractedData = [];
+                
+                rows.forEach(row => {
+                    const cells = row.querySelectorAll('td');
+                    if (cells.length >= 6) {
+                        extractedData.push({
+                            id: cells[0].textContent.trim(),
+                            type: cells[1].textContent.trim(),
+                            company: cells[2].textContent.trim(),
+                            description: cells[3].textContent.trim(),
+                            amount: parseFloat(cells[4].textContent.replace(/[^\d.-]/g, '')) || 0,
+                            dueDate: cells[5].textContent.trim(),
+                            status: cells[6] ? cells[6].textContent.trim() : 'pending'
+                        });
+                    }
+                });
+                
+                if (extractedData.length > 0) {
+                    console.log('Extracted from table:', extractedData);
+                    return extractedData;
+                }
+            }
+            
+            console.log('No real AP/AR data found, using sample data');
             return [];
         }
         
@@ -5628,17 +5678,25 @@
         
         // Chart functions (reusing dashboard chart logic)
         function updateScenarioChart() {
-            // Use the same chart generation as dashboard overview
+            console.log('Updating scenario chart...');
             generateScenarioForecastData();
             createScenarioCashFlowChart();
         }
         
         function generateScenarioForecastData() {
-            // Get starting cash from dashboard if available, otherwise use default
-            const startingCash = (typeof getStartingCash === 'function') ? getStartingCash() : 100000000;
-            const today = new Date();
+            console.log('Generating scenario forecast data...');
             
-            // Clear and rebuild scenario forecast data
+            // Get starting cash (try to use dashboard value, fallback to default)
+            let startingCash = 100000000;
+            try {
+                if (typeof getStartingCash === 'function') {
+                    startingCash = getStartingCash();
+                }
+            } catch (e) {
+                console.log('Using default starting cash');
+            }
+            
+            const today = new Date();
             window.scenarioForecastData = [];
             
             let currentCash = startingCash;
@@ -5661,21 +5719,34 @@
                 });
             }
             
+            console.log('Generated forecast data:', window.scenarioForecastData);
             return window.scenarioForecastData;
         }
         
         function createScenarioCashFlowChart() {
+            console.log('Creating scenario cash flow chart...');
+            
             const canvas = document.getElementById('scenarioForecastChart');
-            if (!canvas) return;
+            if (!canvas) {
+                console.error('Canvas not found!');
+                return;
+            }
             
             const ctx = canvas.getContext('2d');
             
             // Clear canvas
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            // Use scenario forecast data
             const data = window.scenarioForecastData || [];
-            if (data.length === 0) return;
+            if (data.length === 0) {
+                console.log('No data to chart');
+                // Show placeholder
+                ctx.fillStyle = '#6b7280';
+                ctx.font = '16px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('Loading chart data...', canvas.width / 2, canvas.height / 2);
+                return;
+            }
             
             // Chart dimensions
             const padding = 50;
@@ -5688,47 +5759,52 @@
             const maxValue = Math.max(...allValues) * 1.05;
             const valueRange = maxValue - minValue;
             
-            // Draw grid and chart (same logic as dashboard)
-            drawChartGrid(ctx, canvas, padding, chartWidth, chartHeight, minValue, maxValue, valueRange);
-            drawCashFlowLine(ctx, padding, chartWidth, chartHeight, data, minValue, valueRange);
-            drawChartTitle(ctx, padding, 'Scenario: 13-Week Cash Flow Forecast');
-        }
-        
-        function drawChartGrid(ctx, canvas, padding, chartWidth, chartHeight, minValue, maxValue, valueRange) {
+            if (valueRange === 0) {
+                console.log('No value range for chart');
+                return;
+            }
+            
+            // Set up styles
             ctx.font = '12px Arial';
             ctx.lineWidth = 1;
+            
+            // Draw grid and labels
             ctx.strokeStyle = '#e5e7eb';
             ctx.fillStyle = '#6b7280';
             
-            // Horizontal grid lines
+            // Horizontal grid lines (5 lines)
             for (let i = 0; i <= 5; i++) {
                 const y = padding + (chartHeight / 5) * i;
                 const value = maxValue - (valueRange / 5) * i;
                 
+                // Grid line
                 ctx.beginPath();
                 ctx.moveTo(padding, y);
                 ctx.lineTo(padding + chartWidth, y);
                 ctx.stroke();
                 
-                ctx.fillText(formatCurrency(value), 5, y + 4);
+                // Y-axis labels
+                ctx.textAlign = 'right';
+                ctx.fillText(formatCurrency(value), padding - 10, y + 4);
             }
             
-            // Vertical grid lines
+            // Vertical grid lines (13 weeks)
             for (let i = 0; i <= 12; i++) {
                 const x = padding + (chartWidth / 12) * i;
                 
+                // Grid line
                 ctx.beginPath();
                 ctx.moveTo(x, padding);
                 ctx.lineTo(x, padding + chartHeight);
                 ctx.stroke();
                 
+                // X-axis labels (every 2 weeks)
                 if (i % 2 === 0) {
-                    ctx.fillText(`W${i + 1}`, x - 8, canvas.height - 10);
+                    ctx.textAlign = 'center';
+                    ctx.fillText(`W${i + 1}`, x, canvas.height - 20);
                 }
             }
-        }
-        
-        function drawCashFlowLine(ctx, padding, chartWidth, chartHeight, data, minValue, valueRange) {
+            
             // Draw cash flow line
             ctx.strokeStyle = '#3b82f6';
             ctx.lineWidth = 3;
@@ -5757,63 +5833,21 @@
                 ctx.arc(x, y, 4, 0, 2 * Math.PI);
                 ctx.fill();
             });
-        }
-        
-        function drawChartTitle(ctx, padding, title) {
+            
+            // Add title
             ctx.fillStyle = '#1f2937';
             ctx.font = 'bold 16px Arial';
-            ctx.fillText(title, padding, 25);
-        }
-        
-        function generateScenarioForecastData() {
-            const startingCash = 100000000; // 100M starting cash
-            const today = new Date();
-            const forecastData = [];
+            ctx.textAlign = 'left';
+            ctx.fillText('Scenario: 13-Week Cash Flow Forecast', padding, 25);
             
-            let currentCash = startingCash;
-            
-            for (let week = 0; week < 13; week++) {
-                const weekDate = new Date(today);
-                weekDate.setDate(today.getDate() + (week * 7));
-                
-                // Calculate weekly flows based on scenario data
-                const weeklyFlows = calculateScenarioWeeklyFlows(week + 1);
-                
-                currentCash += weeklyFlows.inflows - weeklyFlows.outflows;
-                
-                forecastData.push({
-                    week: week + 1,
-                    date: weekDate,
-                    cashPosition: currentCash,
-                    inflows: weeklyFlows.inflows,
-                    outflows: weeklyFlows.outflows
-                });
-            }
-            
-            return forecastData;
-        }
-        
-        function calculateScenarioWeeklyFlows(week) {
-            let inflows = 0;
-            let outflows = 0;
-            
-            // Calculate based on current scenario data
-            scenarioData.forEach(transaction => {
-                if (transaction.currentWeek == week) {
-                    if (transaction.type === 'AR') {
-                        inflows += transaction.amount;
-                    } else {
-                        outflows += transaction.amount;
-                    }
-                }
-            });
-            
-            return { inflows, outflows };
+            console.log('Chart created successfully');
         }
         
         function formatCurrency(value) {
-            if (value >= 1000000) {
-                return `$${(value / 1000000).toFixed(0)}M`;
+            if (value >= 1000000000) {
+                return `$${(value / 1000000000).toFixed(1)}B`;
+            } else if (value >= 1000000) {
+                return `$${(value / 1000000).toFixed(1)}M`;
             } else if (value >= 1000) {
                 return `$${(value / 1000).toFixed(0)}K`;
             }
