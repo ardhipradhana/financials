@@ -2279,6 +2279,300 @@
         .week-dropzone.highlight .drop-indicator {
             opacity: 1;
         }
+
+        /* New Scenarios Layout */
+        .scenarios-new-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            padding: 1rem;
+        }
+        
+        /* Full Width Chart */
+        .scenario-chart-section {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+        }
+        
+        .scenario-chart-full {
+            padding: 1rem;
+            background: #f8fafc;
+            height: 350px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Buckets Grid */
+        .buckets-section {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            padding: 1.5rem;
+        }
+        
+        .buckets-header {
+            margin-bottom: 1.5rem;
+        }
+        
+        .buckets-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin: 0 0 0.5rem 0;
+        }
+        
+        .buckets-subtitle {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin: 0;
+        }
+        
+        .buckets-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+        }
+        
+        .week-bucket {
+            background: #f9fafb;
+            border: 2px dashed #d1d5db;
+            border-radius: 8px;
+            padding: 1rem;
+            min-height: 120px;
+            transition: all 0.15s ease;
+            position: relative;
+        }
+        
+        .week-bucket:hover {
+            border-color: #3b82f6;
+            background: #f0f9ff;
+        }
+        
+        .week-bucket.drag-over {
+            border-color: #10b981;
+            background: rgba(16, 185, 129, 0.1);
+            border-style: solid;
+            transform: scale(1.02);
+        }
+        
+        .bucket-header {
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: #374151;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+        
+        .bucket-subtitle {
+            font-size: 0.75rem;
+            color: #9ca3af;
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .parked-bucket {
+            background: #fef3c7;
+            border-color: #f59e0b;
+            grid-column: span 2;
+            justify-self: center;
+            width: calc(50% - 0.5rem);
+        }
+        
+        .parked-bucket .bucket-header {
+            color: #92400e;
+        }
+        
+        .bucket-content {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        /* Transaction Cards in Buckets */
+        .bucket-transaction-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 0.5rem;
+            cursor: grab;
+            transition: all 0.15s ease;
+            user-select: none;
+        }
+        
+        .bucket-transaction-card:hover {
+            border-color: #3b82f6;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+        }
+        
+        .bucket-transaction-card:active {
+            cursor: grabbing;
+        }
+        
+        .bucket-transaction-card.dragging {
+            opacity: 0.6;
+            transform: scale(1.02);
+            z-index: 1000;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .bucket-transaction-card.ap-card {
+            border-left: 3px solid #dc2626;
+        }
+        
+        .bucket-transaction-card.ar-card {
+            border-left: 3px solid #059669;
+        }
+        
+        .bucket-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.25rem;
+        }
+        
+        .bucket-vendor-name {
+            font-weight: 600;
+            font-size: 0.75rem;
+            color: #374151;
+            line-height: 1.2;
+        }
+        
+        .bucket-amount {
+            font-weight: 700;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            margin-left: 0.25rem;
+        }
+        
+        .bucket-transaction-card.ap-card .bucket-amount {
+            color: #dc2626;
+        }
+        
+        .bucket-transaction-card.ar-card .bucket-amount {
+            color: #059669;
+        }
+        
+        .bucket-description {
+            font-size: 0.7rem;
+            color: #6b7280;
+            line-height: 1.2;
+        }
+        
+        /* Change Log */
+        .change-log-section {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            padding: 1.5rem;
+        }
+        
+        .change-log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .change-log-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin: 0;
+        }
+        
+        .change-log-content {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .log-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            line-height: 1.4;
+            border-left: 3px solid #6b7280;
+        }
+        
+        .log-item.moved {
+            background: rgba(59, 130, 246, 0.05);
+            border-left-color: #3b82f6;
+            color: #1e40af;
+        }
+        
+        .log-item.neutral {
+            background: rgba(107, 114, 128, 0.05);
+            border-left-color: #6b7280;
+            color: #374151;
+        }
+        
+        /* Impact Analysis */
+        .impact-analysis-section {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            padding: 1.5rem;
+        }
+        
+        .impact-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .impact-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin: 0;
+        }
+        
+        .impact-content {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        
+        /* Small button style */
+        .btn-small {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.75rem;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 1024px) {
+            .buckets-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .parked-bucket {
+                grid-column: span 3;
+                width: 100%;
+                justify-self: stretch;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .buckets-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .parked-bucket {
+                grid-column: span 2;
+            }
+            
+            .scenario-chart-full {
+                height: 250px;
+            }
+        }
         
     </style>
 </head>
@@ -2862,69 +3156,129 @@
                         </div>
                     </div>
 
-                    <!-- Cash Flow Scenarios Tab Content (new) -->
+                    <!-- Cash Flow Scenarios Tab Content (new simplified structure) -->
                     <div class="tab-content" id="scenarios-tab">
-                        <div class="scenarios-container">
-                            <!-- Left Panel - Transactions -->
-                            <div class="scenarios-left">
+                        <div class="scenarios-new-container">
+                            <!-- Full Width Chart -->
+                            <div class="scenario-chart-section">
                                 <div class="scenarios-header">
-                                    <h4 class="scenarios-title">Moveable Transactions</h4>
-                                    <p class="scenarios-subtitle">Drag transactions to new dates • Changes update instantly</p>
+                                    <h4 class="scenarios-title">13-Week Cash Flow Impact</h4>
+                                    <p class="scenarios-subtitle">Real-time scenario analysis • Drag transactions between weeks</p>
+                                </div>
+                                <div class="scenario-chart-full">
+                                    <canvas id="scenarioForecastChart" width="800" height="300"></canvas>
+                                </div>
+                            </div>
+                            
+                            <!-- Transaction Buckets Grid -->
+                            <div class="buckets-section">
+                                <div class="buckets-header">
+                                    <h4 class="buckets-title">Transaction Timeline</h4>
+                                    <p class="buckets-subtitle">Drag cards between weeks to see cash flow impact</p>
                                 </div>
                                 
-                                <div class="transactions-list" id="scenarioTransactionsList">
-                                    <!-- Accounts Payable -->
-                                    <div class="transaction-group">
-                                        <div class="group-header ap-header">Accounts Payable</div>
-                                        <div id="apTransactionsContainer">
-                                            <!-- AP transactions will be populated here -->
-                                        </div>
+                                <div class="buckets-grid" id="bucketsGrid">
+                                    <!-- Weeks 1-12 (3 rows of 4) -->
+                                    <!-- Row 1 -->
+                                    <div class="week-bucket" data-week="1">
+                                        <div class="bucket-header">Week 1</div>
+                                        <div class="bucket-content" id="bucket-week-1"></div>
+                                    </div>
+                                    <div class="week-bucket" data-week="2">
+                                        <div class="bucket-header">Week 2</div>
+                                        <div class="bucket-content" id="bucket-week-2"></div>
+                                    </div>
+                                    <div class="week-bucket" data-week="3">
+                                        <div class="bucket-header">Week 3</div>
+                                        <div class="bucket-content" id="bucket-week-3"></div>
+                                    </div>
+                                    <div class="week-bucket" data-week="4">
+                                        <div class="bucket-header">Week 4</div>
+                                        <div class="bucket-content" id="bucket-week-4"></div>
                                     </div>
                                     
-                                    <!-- Accounts Receivable -->
-                                    <div class="transaction-group">
-                                        <div class="group-header ar-header">Accounts Receivable</div>
-                                        <div id="arTransactionsContainer">
-                                            <!-- AR transactions will be populated here -->
-                                        </div>
+                                    <!-- Row 2 -->
+                                    <div class="week-bucket" data-week="5">
+                                        <div class="bucket-header">Week 5</div>
+                                        <div class="bucket-content" id="bucket-week-5"></div>
+                                    </div>
+                                    <div class="week-bucket" data-week="6">
+                                        <div class="bucket-header">Week 6</div>
+                                        <div class="bucket-content" id="bucket-week-6"></div>
+                                    </div>
+                                    <div class="week-bucket" data-week="7">
+                                        <div class="bucket-header">Week 7</div>
+                                        <div class="bucket-content" id="bucket-week-7"></div>
+                                    </div>
+                                    <div class="week-bucket" data-week="8">
+                                        <div class="bucket-header">Week 8</div>
+                                        <div class="bucket-content" id="bucket-week-8"></div>
+                                    </div>
+                                    
+                                    <!-- Row 3 -->
+                                    <div class="week-bucket" data-week="9">
+                                        <div class="bucket-header">Week 9</div>
+                                        <div class="bucket-content" id="bucket-week-9"></div>
+                                    </div>
+                                    <div class="week-bucket" data-week="10">
+                                        <div class="bucket-header">Week 10</div>
+                                        <div class="bucket-content" id="bucket-week-10"></div>
+                                    </div>
+                                    <div class="week-bucket" data-week="11">
+                                        <div class="bucket-header">Week 11</div>
+                                        <div class="bucket-content" id="bucket-week-11"></div>
+                                    </div>
+                                    <div class="week-bucket" data-week="12">
+                                        <div class="bucket-header">Week 12</div>
+                                        <div class="bucket-content" id="bucket-week-12"></div>
+                                    </div>
+                                    
+                                    <!-- Row 4 (2 buckets centered) -->
+                                    <div class="week-bucket" data-week="13">
+                                        <div class="bucket-header">Week 13</div>
+                                        <div class="bucket-content" id="bucket-week-13"></div>
+                                    </div>
+                                    <div class="week-bucket parked-bucket" data-week="parked">
+                                        <div class="bucket-header">Parked</div>
+                                        <div class="bucket-subtitle">Beyond 13 weeks</div>
+                                        <div class="bucket-content" id="bucket-week-parked"></div>
                                     </div>
                                 </div>
                             </div>
                             
-                            <!-- Right Panel - Forecast & Impact -->
-                            <div class="scenarios-right">
-                                <div class="scenarios-header" style="margin: -1rem -1rem 1rem -1rem; border-radius: 0;">
-                                    <h4 class="scenarios-title">13-Week Cash Flow Impact</h4>
-                                    <p class="scenarios-subtitle">Real-time scenario analysis</p>
+                            <!-- Change Log -->
+                            <div class="change-log-section">
+                                <div class="change-log-header">
+                                    <h4 class="change-log-title">Change Log</h4>
+                                    <button class="btn btn-secondary btn-small" onclick="clearChangeLog()">
+                                        <i class="fas fa-trash"></i> Clear Log
+                                    </button>
                                 </div>
-                                
-                                <!-- Mini Cash Flow Chart -->
-                                <div class="scenario-forecast">
-                                    <canvas id="scenarioForecastChart"></canvas>
-                                </div>
-                                
-                                <!-- Impact Analysis -->
-                                <div class="scenario-impact">
-                                    <div class="impact-title">Scenario Impact</div>
-                                    <div id="scenarioImpactList">
-                                        <div class="impact-item neutral">
-                                            <span class="impact-icon">ℹ️</span>
-                                            <span>Move transactions to see impact analysis</span>
-                                        </div>
+                                <div class="change-log-content" id="changeLogContent">
+                                    <div class="log-item neutral">
+                                        <span class="log-icon">ℹ️</span>
+                                        <span>Move transactions between weeks to see changes</span>
                                     </div>
                                 </div>
-                                
-                                <!-- Reset Button -->
-                                <div style="margin-top: 1rem; text-align: center;">
-                                    <button class="btn btn-secondary" onclick="resetScenario()" style="width: 100%;">
-                                        <i class="fas fa-undo"></i>
-                                        Reset to Original
+                            </div>
+                            
+                            <!-- Impact Analysis -->
+                            <div class="impact-analysis-section">
+                                <div class="impact-header">
+                                    <h4 class="impact-title">Impact Analysis</h4>
+                                    <button class="btn btn-secondary btn-small" onclick="resetScenario()">
+                                        <i class="fas fa-undo"></i> Reset All
                                     </button>
+                                </div>
+                                <div class="impact-content" id="impactAnalysisContent">
+                                    <div class="impact-item neutral">
+                                        <span class="impact-icon">ℹ️</span>
+                                        <span>Move transactions to see potential impacts</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    
                 </div>
             </div>
 
@@ -4853,21 +5207,23 @@
                 }, 100);
             }
         }
-        // Scenario Analysis - Drag & Drop Functionality
+        // Scenario Analysis - New Bucket-based Structure
         let scenarioData = [];
         let originalData = [];
+        let changeLog = [];
         let isDragging = false;
         
         // Initialize scenario analysis when tab is switched
         function initializeScenarioAnalysis() {
-            // Load sample data (in real app, this would come from your AP/AR data)
             loadScenarioTransactions();
-            setupDragAndDrop();
+            setupBucketDragAndDrop();
+            populateTransactionBuckets();
             updateScenarioChart();
+            clearChangeLog();
         }
         
         function loadScenarioTransactions() {
-            // Sample data - replace with real AP/AR data
+            // Sample data distributed across different weeks
             originalData = [
                 {
                     id: 'ap1',
@@ -4890,6 +5246,16 @@
                     category: 'Services'
                 },
                 {
+                    id: 'ap3',
+                    type: 'AP',
+                    vendor: 'Tech Solutions Inc',
+                    amount: 75000,
+                    description: 'Software License',
+                    originalWeek: 6,
+                    currentWeek: 6,
+                    category: 'Technology'
+                },
+                {
                     id: 'ar1',
                     type: 'AR',
                     vendor: 'Customer A Inc',
@@ -4908,243 +5274,227 @@
                     originalWeek: 4,
                     currentWeek: 4,
                     category: 'Revenue'
+                },
+                {
+                    id: 'ar3',
+                    type: 'AR',
+                    vendor: 'Customer C Corp',
+                    amount: 120000,
+                    description: 'Enterprise Contract',
+                    originalWeek: 8,
+                    currentWeek: 8,
+                    category: 'Revenue'
+                },
+                {
+                    id: 'ap4',
+                    type: 'AP',
+                    vendor: 'Supplier D Ltd',
+                    amount: 25000,
+                    description: 'Raw Materials',
+                    originalWeek: 10,
+                    currentWeek: 10,
+                    category: 'Materials'
                 }
             ];
             
             scenarioData = [...originalData];
-            renderScenarioTransactions();
         }
         
-        function renderScenarioTransactions() {
-            const apContainer = document.getElementById('apTransactionsContainer');
-            const arContainer = document.getElementById('arTransactionsContainer');
+        function populateTransactionBuckets() {
+            // Clear all buckets first
+            for (let week = 1; week <= 13; week++) {
+                const bucket = document.getElementById(`bucket-week-${week}`);
+                if (bucket) bucket.innerHTML = '';
+            }
             
-            if (!apContainer || !arContainer) return;
+            const parkedBucket = document.getElementById('bucket-week-parked');
+            if (parkedBucket) parkedBucket.innerHTML = '';
             
-            // Clear containers
-            apContainer.innerHTML = '';
-            arContainer.innerHTML = '';
-            
-            // Render AP transactions
-            const apTransactions = scenarioData.filter(t => t.type === 'AP');
-            apTransactions.forEach(transaction => {
-                const card = createTransactionCard(transaction);
-                apContainer.appendChild(card);
+            // Populate buckets with transactions
+            scenarioData.forEach(transaction => {
+                const card = createBucketTransactionCard(transaction);
+                
+                if (transaction.currentWeek === 'parked' || transaction.currentWeek > 13) {
+                    const parkedBucket = document.getElementById('bucket-week-parked');
+                    if (parkedBucket) parkedBucket.appendChild(card);
+                } else {
+                    const bucket = document.getElementById(`bucket-week-${transaction.currentWeek}`);
+                    if (bucket) bucket.appendChild(card);
+                }
             });
-            
-            // Render AR transactions
-            const arTransactions = scenarioData.filter(t => t.type === 'AR');
-            arTransactions.forEach(transaction => {
-                const card = createTransactionCard(transaction);
-                arContainer.appendChild(card);
-            });
-            
-            // Create week drop zones if they don't exist
-            createWeekDropZones();
         }
         
-        function createTransactionCard(transaction) {
+        function createBucketTransactionCard(transaction) {
             const card = document.createElement('div');
-            card.className = 'transaction-card';
+            card.className = `bucket-transaction-card ${transaction.type.toLowerCase()}-card`;
             card.draggable = true;
             card.dataset.transactionId = transaction.id;
             
-            const changeIndicator = transaction.currentWeek !== transaction.originalWeek 
-                ? `→ Week ${transaction.currentWeek}` 
-                : `Week ${transaction.currentWeek}`;
-            
             card.innerHTML = `
-                <div class="drag-handle">⋮⋮</div>
-                <div class="card-content">
-                    <div class="card-header">
-                        <div class="card-company">${transaction.vendor}</div>
-                        <div class="card-amount">$${transaction.amount.toLocaleString()}</div>
-                    </div>
-                    <div class="card-description">${transaction.description}</div>
-                    <div class="card-meta">
-                        <span class="week-info">${changeIndicator}</span>
-                    </div>
+                <div class="bucket-card-header">
+                    <div class="bucket-vendor-name">${transaction.vendor}</div>
+                    <div class="bucket-amount">$${formatAmount(transaction.amount)}</div>
                 </div>
+                <div class="bucket-description">${transaction.description}</div>
             `;
             
             return card;
         }
         
-        function createWeekDropZones() {
-            const rightPanel = document.querySelector('.scenarios-right');
-            if (!rightPanel) return;
-            
-            let dropZonesContainer = document.getElementById('weekDropZones');
-            if (!dropZonesContainer) {
-                dropZonesContainer = document.createElement('div');
-                dropZonesContainer.id = 'weekDropZones';
-                dropZonesContainer.className = 'week-drop-zones';
-                
-                // Insert after the forecast chart
-                const forecastChart = document.querySelector('.scenario-forecast');
-                forecastChart.after(dropZonesContainer);
+        function formatAmount(amount) {
+            if (amount >= 1000000) {
+                return `${(amount / 1000000).toFixed(1)}M`;
+            } else if (amount >= 1000) {
+                return `${(amount / 1000).toFixed(0)}K`;
             }
-            
-            dropZonesContainer.innerHTML = `
-                <div class="drop-zones-header">
-                    <h5>Drop to Reschedule</h5>
-                </div>
-                <div class="drop-zones-grid">
-                    ${Array.from({length: 8}, (_, i) => `
-                        <div class="week-dropzone" data-week="${i + 1}">
-                            <div class="week-label">Week ${i + 1}</div>
-                            <div class="dropped-transactions" id="dropped-week-${i + 1}">
-                                <!-- Transactions will appear here when dropped -->
-                            </div>
-                            <div class="drop-indicator">Drop here</div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-            
-            // Populate existing transactions in their current weeks
-            updateDropZoneContents();
+            return amount.toLocaleString();
         }
         
-        function updateDropZoneContents() {
-            // Clear all drop zones first
-            for (let week = 1; week <= 8; week++) {
-                const container = document.getElementById(`dropped-week-${week}`);
-                if (container) {
-                    container.innerHTML = '';
-                }
-            }
-            
-            // Add transactions to their current week buckets
-            scenarioData.forEach(transaction => {
-                if (transaction.currentWeek <= 8) {
-                    const container = document.getElementById(`dropped-week-${transaction.currentWeek}`);
-                    if (container) {
-                        const miniCard = document.createElement('div');
-                        miniCard.className = `mini-transaction-card ${transaction.type.toLowerCase()}-card`;
-                        miniCard.innerHTML = `
-                            <div class="mini-vendor">${transaction.vendor}</div>
-                            <div class="mini-amount">$${(transaction.amount / 1000).toFixed(0)}K</div>
-                        `;
-                        container.appendChild(miniCard);
-                    }
-                }
-            });
+        function setupBucketDragAndDrop() {
+            document.addEventListener('dragstart', handleBucketDragStart);
+            document.addEventListener('dragover', handleBucketDragOver);
+            document.addEventListener('drop', handleBucketDrop);
+            document.addEventListener('dragend', handleBucketDragEnd);
         }
         
-        function handleDrop(e) {
-            e.preventDefault();
-            
-            const dropZone = e.target.closest('.week-dropzone');
-            if (!dropZone) return;
-            
-            const transactionId = e.dataTransfer.getData('text/plain');
-            const newWeek = parseInt(dropZone.dataset.week);
-            
-            // Update scenario data
-            const transaction = scenarioData.find(t => t.id === transactionId);
-            if (transaction) {
-                transaction.currentWeek = newWeek;
-                
-                // Visual feedback
-                dropZone.style.background = '#10b981';
-                dropZone.style.color = 'white';
-                setTimeout(() => {
-                    dropZone.style.background = '';
-                    dropZone.style.color = '';
-                }, 200);
-                
-                // Update displays
-                renderScenarioTransactions();
-                updateDropZoneContents(); // Show card in bucket
-                updateScenarioChart(); // Update chart
-                updateImpactAnalysis();
-            }
-        }
-        
-        function setupDragAndDrop() {
-            document.addEventListener('dragstart', handleDragStart);
-            document.addEventListener('dragover', handleDragOver);
-            document.addEventListener('drop', handleDrop);
-            document.addEventListener('dragend', handleDragEnd);
-        }
-        
-        function handleDragStart(e) {
-            if (!e.target.classList.contains('transaction-card')) return;
+        function handleBucketDragStart(e) {
+            if (!e.target.classList.contains('bucket-transaction-card')) return;
             
             isDragging = true;
-            e.target.style.opacity = '0.6';
-            e.target.style.transform = 'scale(1.02)';
+            e.target.classList.add('dragging');
             e.dataTransfer.setData('text/plain', e.target.dataset.transactionId);
             
-            // Highlight drop zones
-            document.querySelectorAll('.week-dropzone').forEach(zone => {
-                zone.classList.add('highlight');
+            // Highlight all drop zones
+            document.querySelectorAll('.week-bucket').forEach(bucket => {
+                bucket.classList.add('highlight');
             });
         }
         
-        function handleDragOver(e) {
+        function handleBucketDragOver(e) {
             if (!isDragging) return;
             e.preventDefault();
             
-            if (e.target.closest('.week-dropzone')) {
-                e.target.closest('.week-dropzone').classList.add('drag-over');
+            const bucket = e.target.closest('.week-bucket');
+            if (bucket) {
+                bucket.classList.add('drag-over');
             }
         }
         
-        function handleDrop(e) {
+        function handleBucketDrop(e) {
             e.preventDefault();
             
-            const dropZone = e.target.closest('.week-dropzone');
-            if (!dropZone) return;
+            const bucket = e.target.closest('.week-bucket');
+            if (!bucket) return;
             
             const transactionId = e.dataTransfer.getData('text/plain');
-            const newWeek = parseInt(dropZone.dataset.week);
+            const newWeek = bucket.dataset.week;
             
             // Update scenario data
             const transaction = scenarioData.find(t => t.id === transactionId);
-            if (transaction) {
+            if (transaction && transaction.currentWeek != newWeek) {
+                const oldWeek = transaction.currentWeek;
                 transaction.currentWeek = newWeek;
                 
-                // Visual feedback
-                dropZone.style.background = '#10b981';
-                dropZone.style.color = 'white';
-                setTimeout(() => {
-                    dropZone.style.background = '';
-                    dropZone.style.color = '';
-                }, 200);
+                // Add to change log
+                addToChangeLog(transaction, oldWeek, newWeek);
                 
-                // Re-render and update
-                renderScenarioTransactions();
+                // Visual feedback
+                bucket.style.background = '#10b981';
+                bucket.style.color = 'white';
+                setTimeout(() => {
+                    bucket.style.background = '';
+                    bucket.style.color = '';
+                }, 300);
+                
+                // Update displays
+                populateTransactionBuckets();
                 updateScenarioChart();
                 updateImpactAnalysis();
             }
         }
         
-        function handleDragEnd(e) {
-            if (!e.target.classList.contains('transaction-card')) return;
+        function handleBucketDragEnd(e) {
+            if (!e.target.classList.contains('bucket-transaction-card')) return;
             
             isDragging = false;
-            e.target.style.opacity = '';
-            e.target.style.transform = '';
+            e.target.classList.remove('dragging');
             
             // Remove highlights
-            document.querySelectorAll('.week-dropzone').forEach(zone => {
-                zone.classList.remove('highlight', 'drag-over');
+            document.querySelectorAll('.week-bucket').forEach(bucket => {
+                bucket.classList.remove('highlight', 'drag-over');
             });
         }
         
+        function addToChangeLog(transaction, oldWeek, newWeek) {
+            const timestamp = new Date().toLocaleTimeString('en-US', { 
+                hour12: false, 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+            
+            let logMessage = '';
+            const weekDisplay = (week) => week === 'parked' ? 'Parked' : `Week ${week}`;
+            
+            if (newWeek === 'parked') {
+                logMessage = `${transaction.vendor} moved to Parked (beyond 13 weeks)`;
+            } else if (oldWeek === 'parked') {
+                logMessage = `${transaction.vendor} moved from Parked to ${weekDisplay(newWeek)}`;
+            } else {
+                logMessage = `${transaction.vendor} moved from ${weekDisplay(oldWeek)} → ${weekDisplay(newWeek)}`;
+            }
+            
+            const logEntry = {
+                id: Date.now(),
+                timestamp,
+                message: logMessage,
+                transaction: transaction.vendor,
+                oldWeek,
+                newWeek,
+                type: transaction.type
+            };
+            
+            changeLog.unshift(logEntry); // Add to beginning
+            updateChangeLogDisplay();
+        }
+        
+        function updateChangeLogDisplay() {
+            const logContent = document.getElementById('changeLogContent');
+            if (!logContent) return;
+            
+            if (changeLog.length === 0) {
+                logContent.innerHTML = `
+                    <div class="log-item neutral">
+                        <span class="log-icon">ℹ️</span>
+                        <span>Move transactions between weeks to see changes</span>
+                    </div>
+                `;
+                return;
+            }
+            
+            logContent.innerHTML = changeLog.slice(0, 10).map(entry => `
+                <div class="log-item moved">
+                    <span class="log-icon">📋</span>
+                    <span><strong>${entry.timestamp}</strong> - ${entry.message}</span>
+                </div>
+            `).join('');
+        }
+        
+        function clearChangeLog() {
+            changeLog = [];
+            updateChangeLogDisplay();
+        }
+        
         function updateImpactAnalysis() {
-            const impactList = document.getElementById('scenarioImpactList');
-            if (!impactList) return;
+            const impactContent = document.getElementById('impactAnalysisContent');
+            if (!impactContent) return;
             
             const changes = scenarioData.filter(t => t.currentWeek !== t.originalWeek);
             
             if (changes.length === 0) {
-                impactList.innerHTML = `
+                impactContent.innerHTML = `
                     <div class="impact-item neutral">
                         <span class="impact-icon">ℹ️</span>
-                        <span>Move transactions to see impact analysis</span>
+                        <span>Move transactions to see potential impacts</span>
                     </div>
                 `;
                 return;
@@ -5153,38 +5503,42 @@
             let impacts = [];
             
             changes.forEach(change => {
+                const isLater = (change.currentWeek === 'parked') || 
+                               (change.currentWeek !== 'parked' && change.originalWeek !== 'parked' && 
+                                parseInt(change.currentWeek) > parseInt(change.originalWeek));
+                
                 if (change.type === 'AP') {
-                    if (change.currentWeek > change.originalWeek) {
+                    if (isLater) {
                         impacts.push({
                             type: 'risk',
                             icon: '⚠️',
-                            text: `Late payment risk: ${change.vendor} - Check contract for penalties`
+                            text: `Late payment risk: ${change.vendor} - Check contract for potential penalties`
                         });
                     } else {
                         impacts.push({
                             type: 'benefit',
                             icon: '✓',
-                            text: `Early payment opportunity: ${change.vendor} - Check for discounts`
+                            text: `Early payment opportunity: ${change.vendor} - Check for available discounts`
                         });
                     }
                 } else {
-                    if (change.currentWeek > change.originalWeek) {
+                    if (isLater) {
                         impacts.push({
                             type: 'risk',
                             icon: '!',
-                            text: `Collection delay: ${change.vendor} - Monitor cash flow impact`
+                            text: `Collection delay: ${change.vendor} - Monitor cash flow impact and follow up`
                         });
                     } else {
                         impacts.push({
                             type: 'benefit',
                             icon: '✓',
-                            text: `Early collection: ${change.vendor} - Improved cash position`
+                            text: `Accelerated collection: ${change.vendor} - Improved cash position`
                         });
                     }
                 }
             });
             
-            impactList.innerHTML = impacts.map(impact => `
+            impactContent.innerHTML = impacts.map(impact => `
                 <div class="impact-item ${impact.type}">
                     <span class="impact-icon">${impact.icon}</span>
                     <span>${impact.text}</span>
@@ -5194,22 +5548,17 @@
         
         function resetScenario() {
             scenarioData = [...originalData];
-            renderScenarioTransactions();
+            populateTransactionBuckets();
             updateScenarioChart();
+            clearChangeLog();
             updateImpactAnalysis();
         }
         
+        // Chart functions (reusing dashboard chart logic)
         function updateScenarioChart() {
-            const chartContainer = document.querySelector('.scenario-forecast canvas');
-            if (!chartContainer) {
-                // Create canvas if it doesn't exist
-                const forecastDiv = document.querySelector('.scenario-forecast');
-                if (forecastDiv) {
-                    forecastDiv.innerHTML = '<canvas id="scenarioForecastChart" width="400" height="250"></canvas>';
-                }
-            }
+            const canvas = document.getElementById('scenarioForecastChart');
+            if (!canvas) return;
             
-            // Use the same chart logic as dashboard
             createScenarioCashFlowChart();
         }
         
@@ -5226,53 +5575,58 @@
             const scenarioForecastData = generateScenarioForecastData();
             
             // Chart dimensions
-            const padding = 40;
+            const padding = 50;
             const chartWidth = canvas.width - (padding * 2);
             const chartHeight = canvas.height - (padding * 2);
             
             // Find min/max values for scaling
             const allValues = scenarioForecastData.map(d => d.cashPosition);
-            const minValue = Math.min(...allValues);
-            const maxValue = Math.max(...allValues);
+            const minValue = Math.min(...allValues) * 0.95; // Add 5% padding
+            const maxValue = Math.max(...allValues) * 1.05;
             const valueRange = maxValue - minValue;
+            
+            // Set up styles
+            ctx.font = '12px Arial';
+            ctx.lineWidth = 1;
             
             // Draw grid lines and labels
             ctx.strokeStyle = '#e5e7eb';
-            ctx.lineWidth = 1;
-            ctx.font = '10px Arial';
             ctx.fillStyle = '#6b7280';
             
-            // Horizontal grid lines
+            // Horizontal grid lines (5 lines)
             for (let i = 0; i <= 5; i++) {
                 const y = padding + (chartHeight / 5) * i;
                 const value = maxValue - (valueRange / 5) * i;
                 
+                // Grid line
                 ctx.beginPath();
                 ctx.moveTo(padding, y);
                 ctx.lineTo(padding + chartWidth, y);
                 ctx.stroke();
                 
-                // Labels
-                ctx.fillText(formatCurrency(value), 5, y + 3);
+                // Y-axis labels
+                ctx.fillText(formatCurrency(value), 5, y + 4);
             }
             
-            // Vertical grid lines (weeks)
+            // Vertical grid lines (13 weeks)
             for (let i = 0; i <= 12; i++) {
                 const x = padding + (chartWidth / 12) * i;
                 
+                // Grid line
                 ctx.beginPath();
                 ctx.moveTo(x, padding);
                 ctx.lineTo(x, padding + chartHeight);
                 ctx.stroke();
                 
+                // X-axis labels (every 2 weeks)
                 if (i % 2 === 0) {
-                    ctx.fillText(`W${i + 1}`, x - 8, canvas.height - 5);
+                    ctx.fillText(`W${i + 1}`, x - 8, canvas.height - 10);
                 }
             }
             
             // Draw cash flow line
             ctx.strokeStyle = '#3b82f6';
-            ctx.lineWidth = 2;
+            ctx.lineWidth = 3;
             ctx.beginPath();
             
             scenarioForecastData.forEach((point, index) => {
@@ -5295,9 +5649,14 @@
                 const y = padding + chartHeight - ((point.cashPosition - minValue) / valueRange) * chartHeight;
                 
                 ctx.beginPath();
-                ctx.arc(x, y, 3, 0, 2 * Math.PI);
+                ctx.arc(x, y, 4, 0, 2 * Math.PI);
                 ctx.fill();
             });
+            
+            // Add title
+            ctx.fillStyle = '#1f2937';
+            ctx.font = 'bold 16px Arial';
+            ctx.fillText('13-Week Cash Flow Forecast', padding, 25);
         }
         
         function generateScenarioForecastData() {
@@ -5334,7 +5693,7 @@
             
             // Calculate based on current scenario data
             scenarioData.forEach(transaction => {
-                if (transaction.currentWeek === week) {
+                if (transaction.currentWeek == week) {
                     if (transaction.type === 'AR') {
                         inflows += transaction.amount;
                     } else {
@@ -5352,7 +5711,33 @@
             } else if (value >= 1000) {
                 return `$${(value / 1000).toFixed(0)}K`;
             }
-            return `$${value.toFixed(0)}`;
+            return `$${Math.round(value).toLocaleString()}`;
+        }
+        
+        // Update the switchAPARTab function to initialize the new scenario analysis
+        function switchAPARTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName + '-tab').classList.add('active');
+            
+            // Add active class to clicked button
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+            
+            // Initialize scenario analysis if scenarios tab is selected
+            if (tabName === 'scenarios') {
+                setTimeout(() => {
+                    initializeScenarioAnalysis();
+                }, 100);
+            }
         }
         
         // Calculate aging for transactions
