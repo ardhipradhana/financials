@@ -5686,16 +5686,8 @@
         function generateScenarioForecastData() {
             console.log('Generating scenario forecast data...');
             
-            // Get starting cash (try to use dashboard value, fallback to default)
-            let startingCash = 100000000;
-            try {
-                if (typeof getStartingCash === 'function') {
-                    startingCash = getStartingCash();
-                }
-            } catch (e) {
-                console.log('Using default starting cash');
-            }
-            
+            // Use the same logic as your existing generateForecastData but with scenario data
+            const startingCash = getStartingCash();
             const today = new Date();
             window.scenarioForecastData = [];
             
@@ -5715,11 +5707,12 @@
                     date: weekDate,
                     cashPosition: currentCash,
                     inflows: weeklyFlows.inflows,
-                    outflows: weeklyFlows.outflows
+                    outflows: weeklyFlows.outflows,
+                    label: `Week ${week + 1}`
                 });
             }
             
-            console.log('Generated forecast data:', window.scenarioForecastData);
+            console.log('Generated scenario forecast data:', window.scenarioForecastData);
             return window.scenarioForecastData;
         }
         
@@ -5732,115 +5725,110 @@
                 return;
             }
             
-            const ctx = canvas.getContext('2d');
+            // Check if Chart.js is available (like your existing charts)
+            if (typeof Chart !== 'undefined') {
+                // Use Chart.js like your existing cashflow chart
+                createScenarioChartJS();
+            } else {
+                // Fallback to canvas drawing
+                createScenarioCanvasChart();
+            }
+        }
+
+        function createScenarioChartJS() {
+            const ctx = document.getElementById('scenarioForecastChart');
+            if (!ctx) return;
             
-            // Clear canvas
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            // Destroy existing chart if it exists
+            if (window.scenarioChart) {
+                window.scenarioChart.destroy();
+            }
             
             const data = window.scenarioForecastData || [];
             if (data.length === 0) {
-                console.log('No data to chart');
-                // Show placeholder
-                ctx.fillStyle = '#6b7280';
-                ctx.font = '16px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText('Loading chart data...', canvas.width / 2, canvas.height / 2);
+                console.log('No scenario data to chart');
                 return;
             }
             
-            // Chart dimensions
-            const padding = 50;
-            const chartWidth = canvas.width - (padding * 2);
-            const chartHeight = canvas.height - (padding * 2);
+            const labels = data.map(d => d.label || `Week ${d.week}`);
+            const cashPositions = data.map(d => d.cashPosition);
             
-            // Find min/max values for scaling
-            const allValues = data.map(d => d.cashPosition);
-            const minValue = Math.min(...allValues) * 0.95;
-            const maxValue = Math.max(...allValues) * 1.05;
-            const valueRange = maxValue - minValue;
+            window.scenarioChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Scenario Cash Position',
+                        data: cashPositions,
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        pointBackgroundColor: function(context) {
+                            const value = context.parsed.y;
+                            return value >= 0 ? '#3b82f6' : '#ef4444';
+                        },
+                        pointBorderColor: function(context) {
+                            const value = context.parsed.y;
+                            return value >= 0 ? '#3b82f6' : '#ef4444';
+                        }
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Scenario: 13-Week Cash Flow Forecast',
+                            font: {
+                                size: 16,
+                                weight: 'bold'
+                            }
+                        },
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            ticks: {
+                                callback: function(value) {
+                                    return formatCompactCurrency(value, 'IDR');
+                                }
+                            },
+                            grid: {
+                                color: '#e5e7eb'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: '#e5e7eb'
+                            }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    }
+                }
+            });
             
-            if (valueRange === 0) {
-                console.log('No value range for chart');
-                return;
-            }
+            console.log('Chart.js scenario chart created successfully');
+        }
+        
+        function createScenarioCanvasChart() {
+            // Your existing canvas drawing code here as fallback
+            const canvas = document.getElementById('scenarioForecastChart');
+            const ctx = canvas.getContext('2d');
             
-            // Set up styles
-            ctx.font = '12px Arial';
-            ctx.lineWidth = 1;
-            
-            // Draw grid and labels
-            ctx.strokeStyle = '#e5e7eb';
             ctx.fillStyle = '#6b7280';
-            
-            // Horizontal grid lines (5 lines)
-            for (let i = 0; i <= 5; i++) {
-                const y = padding + (chartHeight / 5) * i;
-                const value = maxValue - (valueRange / 5) * i;
-                
-                // Grid line
-                ctx.beginPath();
-                ctx.moveTo(padding, y);
-                ctx.lineTo(padding + chartWidth, y);
-                ctx.stroke();
-                
-                // Y-axis labels
-                ctx.textAlign = 'right';
-                ctx.fillText(formatCurrency(value), padding - 10, y + 4);
-            }
-            
-            // Vertical grid lines (13 weeks)
-            for (let i = 0; i <= 12; i++) {
-                const x = padding + (chartWidth / 12) * i;
-                
-                // Grid line
-                ctx.beginPath();
-                ctx.moveTo(x, padding);
-                ctx.lineTo(x, padding + chartHeight);
-                ctx.stroke();
-                
-                // X-axis labels (every 2 weeks)
-                if (i % 2 === 0) {
-                    ctx.textAlign = 'center';
-                    ctx.fillText(`W${i + 1}`, x, canvas.height - 20);
-                }
-            }
-            
-            // Draw cash flow line
-            ctx.strokeStyle = '#3b82f6';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            
-            data.forEach((point, index) => {
-                const x = padding + (chartWidth / 12) * index;
-                const y = padding + chartHeight - ((point.cashPosition - minValue) / valueRange) * chartHeight;
-                
-                if (index === 0) {
-                    ctx.moveTo(x, y);
-                } else {
-                    ctx.lineTo(x, y);
-                }
-            });
-            
-            ctx.stroke();
-            
-            // Draw data points
-            ctx.fillStyle = '#3b82f6';
-            data.forEach((point, index) => {
-                const x = padding + (chartWidth / 12) * index;
-                const y = padding + chartHeight - ((point.cashPosition - minValue) / valueRange) * chartHeight;
-                
-                ctx.beginPath();
-                ctx.arc(x, y, 4, 0, 2 * Math.PI);
-                ctx.fill();
-            });
-            
-            // Add title
-            ctx.fillStyle = '#1f2937';
-            ctx.font = 'bold 16px Arial';
-            ctx.textAlign = 'left';
-            ctx.fillText('Scenario: 13-Week Cash Flow Forecast', padding, 25);
-            
-            console.log('Chart created successfully');
+            ctx.font = '16px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Scenario Chart Loading...', canvas.width / 2, canvas.height / 2);
         }
         
         function formatCurrency(value) {
@@ -5852,6 +5840,24 @@
                 return `$${(value / 1000).toFixed(0)}K`;
             }
             return `$${Math.round(value).toLocaleString()}`;
+        }
+
+        function calculateScenarioWeeklyFlows(week) {
+            let inflows = 0;
+            let outflows = 0;
+            
+            // Calculate based on current scenario data
+            scenarioData.forEach(transaction => {
+                if (transaction.currentWeek == week) {
+                    if (transaction.type === 'AR') {
+                        inflows += transaction.amount;
+                    } else {
+                        outflows += transaction.amount;
+                    }
+                }
+            });
+            
+            return { inflows, outflows };
         }
 
         // Track if changes have been made
