@@ -7065,7 +7065,41 @@
                 if (error) throw error;
                 
                 financialTransactions = data || [];
-                console.log('Loaded financial transactions:', financialTransactions.length);
+                console.log('Loaded financial transactions from DB:', financialTransactions.length);
+                
+                // Add dummy data for testing if no real data exists
+                if (financialTransactions.length === 0) {
+                    console.log('No real transactions found, adding dummy data for testing...');
+                    financialTransactions = [
+                        {
+                            id: 'test-1',
+                            transaction_date: '2025-01-15',
+                            account_code: '1010',
+                            account_name: 'Cash and Cash Equivalents',
+                            description: 'Test transaction 1',
+                            debit_amount: 1000000,
+                            credit_amount: 0,
+                            reference: 'TEST-001',
+                            category: 'Asset',
+                            source: 'Test',
+                            is_linked: false
+                        },
+                        {
+                            id: 'test-2',
+                            transaction_date: '2025-01-15',
+                            account_code: '4010',
+                            account_name: 'Sales Revenue',
+                            description: 'Test transaction 2',
+                            debit_amount: 0,
+                            credit_amount: 1000000,
+                            reference: 'TEST-002',
+                            category: 'Revenue',
+                            source: 'Test',
+                            is_linked: false
+                        }
+                    ];
+                    console.log('Added dummy transactions:', financialTransactions.length);
+                }
                 
                 renderFinancialTable();
                 updateTrialBalance();
@@ -7106,53 +7140,67 @@
         
         // Render Financial Transactions Table
         function renderFinancialTable() {
+            console.log('=== RENDERING FINANCIAL TABLE ===');
             const tbody = document.getElementById('financialTableBody');
-            if (!tbody) return;
+            if (!tbody) {
+                console.error('Table body not found!');
+                return;
+            }
+            
+            console.log('Table body found, processing', financialTransactions.length, 'transactions');
             
             const filteredData = getFilteredFinancialTransactions();
+            console.log('Filtered data:', filteredData.length, 'transactions');
             
-            tbody.innerHTML = filteredData.map(transaction => {
-                const isLinked = transaction.is_linked || transaction.ap_ar_transaction_id;
-                const isUnbalanced = transaction.debit_amount > 0 && transaction.credit_amount > 0;
-                
-                return `
-                    <tr class="${isUnbalanced ? 'unbalanced-row' : ''}" data-id="${transaction.id}">
-                        <td>
-                            <input type="checkbox" class="transaction-checkbox" value="${transaction.id}" 
-                                   onchange="updateSelectedTransactions()">
-                        </td>
-                        <td>${formatDateIndonesian(transaction.transaction_date)}</td>
-                        <td>
-                            <div class="account-info">
-                                <span class="account-code">${transaction.account_code}</span>
-                                <span class="account-name">${transaction.account_name}</span>
-                            </div>
-                        </td>
-                        <td title="${transaction.description}">${transaction.description}</td>
-                        <td>${transaction.debit_amount > 0 ? formatCurrency(transaction.debit_amount, 'IDR') : '-'}</td>
-                        <td>${transaction.credit_amount > 0 ? formatCurrency(transaction.credit_amount, 'IDR') : '-'}</td>
-                        <td>${transaction.reference || '-'}</td>
-                        <td>
-                            ${isLinked ? '<i class="fas fa-link link-icon" title="Linked to AP/AR"></i>' : 
-                              '<button class="btn btn-sm btn-secondary" onclick="linkSingleTransaction(\''+transaction.id+'\')">Link</button>'}
-                        </td>
-                        <td>
-                            <button class="action-btn edit" onclick="editFinancialTransaction('${transaction.id}')" data-tooltip="Edit">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="action-btn delete" onclick="deleteFinancialTransaction('${transaction.id}')" data-tooltip="Delete">
-                                <i class="fas fa-trash-alt"></i>
-                            </button>
-                            ${isLinked ? 
-                              `<button class="action-btn unlink" onclick="unlinkTransaction('${transaction.id}')" data-tooltip="Unlink">
-                                <i class="fas fa-unlink"></i>
-                              </button>` : ''}
-                        </td>
-                    </tr>
-                `;
-            }).join('');
+            if (filteredData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 2rem; color: #64748b;">No transactions found. Use the "Add Transaction" button or upload CSV data.</td></tr>';
+                console.log('No data to display, showing empty message');
+            } else {
+                tbody.innerHTML = filteredData.map(transaction => {
+                    const isLinked = transaction.is_linked || transaction.ap_ar_transaction_id;
+                    const isUnbalanced = transaction.debit_amount > 0 && transaction.credit_amount > 0;
+                    
+                    return `
+                        <tr class="${isUnbalanced ? 'unbalanced-row' : ''}" data-id="${transaction.id}">
+                            <td>
+                                <input type="checkbox" class="transaction-checkbox" value="${transaction.id}" 
+                                       onchange="updateSelectedTransactions()">
+                            </td>
+                            <td>${formatDateIndonesian(transaction.transaction_date)}</td>
+                            <td>
+                                <div class="account-info">
+                                    <span class="account-code">${transaction.account_code}</span>
+                                    <span class="account-name">${transaction.account_name}</span>
+                                </div>
+                            </td>
+                            <td title="${transaction.description}">${transaction.description}</td>
+                            <td>${transaction.debit_amount > 0 ? formatCurrency(transaction.debit_amount, 'IDR') : '-'}</td>
+                            <td>${transaction.credit_amount > 0 ? formatCurrency(transaction.credit_amount, 'IDR') : '-'}</td>
+                            <td>${transaction.reference || '-'}</td>
+                            <td>
+                                ${isLinked ? '<i class="fas fa-link link-icon" title="Linked to AP/AR"></i>' : 
+                                  '<button class="btn btn-sm btn-secondary" onclick="linkSingleTransaction(\''+transaction.id+'\')">Link</button>'}
+                            </td>
+                            <td>
+                                <button class="action-btn edit" onclick="editFinancialTransaction('${transaction.id}')" data-tooltip="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="action-btn delete" onclick="deleteFinancialTransaction('${transaction.id}')" data-tooltip="Delete">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                                ${isLinked ? 
+                                  `<button class="action-btn unlink" onclick="unlinkTransaction('${transaction.id}')" data-tooltip="Unlink">
+                                    <i class="fas fa-unlink"></i>
+                                  </button>` : ''}
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+                console.log('Table populated with', filteredData.length, 'rows');
+            }
             
             updateBalanceIndicator();
+            console.log('=== FINANCIAL TABLE RENDERING COMPLETE ===');
         }
         
         // Filter Functions
