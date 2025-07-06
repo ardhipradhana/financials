@@ -8152,7 +8152,7 @@
                         
                         // Validate and format data
                         const formattedTransaction = {
-                            transaction_date: transaction.Date,
+                            transaction_date: formatDateForDatabase(transaction.Date), // FIXED LINE
                             account_code: transaction.Account_Code,
                             account_name: transaction.Account_Name,
                             description: transaction.Description,
@@ -8491,6 +8491,42 @@
                 console.error('Error logging audit trail:', error);
                 // Don't throw error as this shouldn't stop the main operation
             }
+        }
+
+        // Add this function to handle date formatting
+        function formatDateForDatabase(dateString) {
+            if (!dateString) return null;
+            
+            // Handle different date formats
+            let date;
+            
+            // Check if it's already in YYYY-MM-DD format
+            if (dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                return dateString;
+            }
+            
+            // Handle DD/MM/YYYY format
+            if (dateString.match(/^\d{1,2}\/\d{1,2}\/\d{4}$/)) {
+                const [day, month, year] = dateString.split('/');
+                date = new Date(year, month - 1, day);
+            }
+            // Handle MM/DD/YYYY format
+            else if (dateString.match(/^\d{1,2}-\d{1,2}-\d{4}$/)) {
+                const [month, day, year] = dateString.split('-');
+                date = new Date(year, month - 1, day);
+            }
+            // Try to parse as general date
+            else {
+                date = new Date(dateString);
+            }
+            
+            // Validate date and return in YYYY-MM-DD format
+            if (isNaN(date.getTime())) {
+                console.error('Invalid date:', dateString);
+                return null;
+            }
+            
+            return date.toISOString().split('T')[0]; // Returns YYYY-MM-DD format
         }
         
         // Initialize when page loads
