@@ -2157,24 +2157,30 @@
             display: flex;
             align-items: center;
             gap: 0.75rem;
-            margin-bottom: 0.75rem;
-            padding: 0.75rem;
+            margin-bottom: 0.4rem; 
+            padding: 0.5rem 0.75rem; 
             border-radius: 6px;
             font-size: 0.875rem;
-            line-height: 1.4;
+            line-height: 1.1; 
             transition: all 0.15s ease;
         }
         
         .impact-item.risk {
-            color: #dc2626;
+            background: rgba(239, 68, 68, 0.05);
+            border-left: 3px solid #ef4444;
+            color: #7f1d1d;
         }
         
         .impact-item.benefit {
-            color: #059669;
+            background: rgba(16, 185, 129, 0.05);
+            border-left: 3px solid #10b981;
+            color: #064e3b;
         }
         
         .impact-item.neutral {
-            color: #6b7280;
+            background: rgba(107, 114, 128, 0.05);
+            border-left: 3px solid #6b7280;
+            color: #374151;
         }
         
         .impact-icon {
@@ -2543,7 +2549,7 @@
         .impact-content {
             display: flex;
             flex-direction: column;
-            gap: 0.75rem;
+            gap: 0.25rem;
         }
         
         /* Small button style */
@@ -5543,18 +5549,34 @@
         }
         
         function resetScenario() {
-            // Reset data to original state
-            scenarioData = [...originalData];
+            console.log('Resetting scenario...');
+            console.log('Original data:', originalData);
+            
+            // Reset data to original state - deep copy to avoid reference issues
+            scenarioData = originalData.map(transaction => ({
+                ...transaction,
+                currentWeek: transaction.originalWeek
+            }));
+            
+            console.log('Reset scenario data:', scenarioData);
             
             // Clear change log
-            clearChangeLog();
+            changeLog = [];
             
             // Update all displays
             populateTransactionBuckets();
-            updateScenarioChart();
+            updateChangeLogDisplay();
             updateImpactAnalysis();
+            updateScenarioChart();
             
-            console.log('Scenario reset to original state');
+            // Reset bucket colors to original state
+            document.querySelectorAll('.week-bucket').forEach(bucket => {
+                bucket.style.background = '';
+                bucket.style.color = '';
+                bucket.classList.remove('drag-over', 'highlight');
+            });
+            
+            console.log('Scenario reset completed');
         }
         
         // Chart functions (reusing dashboard chart logic)
