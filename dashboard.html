@@ -4673,20 +4673,20 @@
                 
                 return `
                     <tr>
-                        <td><span class="type-badge type-Rp {transaction.type.toLowerCase()}">Rp {transaction.type}</span></td>
-                        <td>Rp {transaction.reference}</td>
-                        <td title="Rp {transaction.company}">Rp {transaction.company}</td>
-                        <td title="Rp {transaction.description}">Rp {transaction.description}</td>
+                        <td><span class="type-badge type-${transaction.type.toLowerCase()}">${transaction.type}</span></td>
+                        <td>${transaction.reference}</td>
+                        <td title="${transaction.company}">${transaction.company}</td>
+                        <td title="${transaction.description}">${transaction.description}</td>
                         <td>Rp {formatCurrency(transaction.amount, transaction.currency || 'IDR')}</td>
                         <td>Rp {formatDateIndonesian(transaction.invoice_date)}</td>
                         <td>Rp {dueDate ? formatDateIndonesian(dueDate) : '-'}Rp {isCalculated ? ' <span style="color: #94a3b8; font-size: 0.75rem;">*</span>' : ''}</td>
                         <td><span class="days-badge Rp {daysClass}">Rp {daysText}</span></td>
                         <td><span class="status-badge status-Rp {actualStatus.toLowerCase()}">Rp {actualStatus}</span></td>
                         <td>
-                            <button class="action-btn edit" onclick="editTransaction('Rp {transaction.id}')" data-tooltip="Edit Transaction">
+                            <button class="action-btn edit" onclick="editTransaction('${transaction.id}')" data-tooltip="Edit Transaction">
                                 <i class="fas fa-edit"></i>
                             </button>
-                            <button class="action-btn delete" onclick="deleteTransaction('Rp {transaction.id}')" data-tooltip="Delete Transaction">
+                            <button class="action-btn delete" onclick="deleteTransaction('${transaction.id}')" data-tooltip="Delete Transaction">
                                 <i class="fas fa-trash-alt"></i>
                             </button>
                         </td>
@@ -6234,7 +6234,7 @@
                         parkedBucket.appendChild(card);
                     }
                 } else {
-                    const bucket = document.getElementById(`bucket-week-Rp {transaction.currentWeek}`);
+                    const bucket = document.getElementById(`bucket-week-${transaction.currentWeek}`);
                     if (bucket) bucket.appendChild(card);
                 }
             });
@@ -6242,16 +6242,16 @@
         
         function createBucketTransactionCard(transaction) {
             const card = document.createElement('div');
-            card.className = `bucket-transaction-card Rp {transaction.type.toLowerCase()}-card`;
+            card.className = `bucket-transaction-card ${transaction.type.toLowerCase()}-card`;
             card.draggable = true;
             card.dataset.transactionId = transaction.id;
             
             card.innerHTML = `
                 <div class="bucket-card-header">
-                    <div class="bucket-vendor-name">Rp {transaction.vendor}</div>
+                    <div class="bucket-vendor-name">${transaction.vendor}</div>
                     <div class="bucket-amount">Rp Rp {formatAmount(transaction.amount)}</div>
                 </div>
-                <div class="bucket-description">Rp {transaction.description}</div>
+                <div class="bucket-description">${transaction.description}</div>
             `;
             
             return card;
@@ -6368,11 +6368,11 @@
             const weekDisplay = (week) => week === 'parked' ? 'Parked' : `Week Rp {week}`;
             
             if (newWeek === 'parked') {
-                logMessage = `Rp {timestamp} - Rp {transaction.vendor} moved to Parked (beyond 13 weeks)`;
+                logMessage = `Rp {timestamp} - ${transaction.vendor} moved to Parked (beyond 13 weeks)`;
             } else if (oldWeek === 'parked') {
-                logMessage = `Rp {timestamp} - Rp {transaction.vendor} moved from Parked to Rp {weekDisplay(newWeek)}`;
+                logMessage = `Rp {timestamp} - ${transaction.vendor} moved from Parked to Rp {weekDisplay(newWeek)}`;
             } else {
-                logMessage = `Rp {timestamp} - Rp {transaction.vendor} moved from Rp {weekDisplay(oldWeek)} → Rp {weekDisplay(newWeek)}`;
+                logMessage = `Rp {timestamp} - ${transaction.vendor} moved from Rp {weekDisplay(oldWeek)} → Rp {weekDisplay(newWeek)}`;
             }
             
             const logEntry = {
@@ -6705,11 +6705,11 @@
             const weekDisplay = (week) => week === 'parked' ? 'Parked' : `Week Rp {week}`;
             
             if (newWeek === 'parked') {
-                logMessage = `Rp {timestamp} - Rp {transaction.vendor} moved to Parked (beyond 13 weeks)`;
+                logMessage = `Rp {timestamp} - ${transaction.vendor} moved to Parked (beyond 13 weeks)`;
             } else if (oldWeek === 'parked') {
-                logMessage = `Rp {timestamp} - Rp {transaction.vendor} moved from Parked to Rp {weekDisplay(newWeek)}`;
+                logMessage = `Rp {timestamp} - ${transaction.vendor} moved from Parked to Rp {weekDisplay(newWeek)}`;
             } else {
-                logMessage = `Rp {timestamp} - Rp {transaction.vendor} moved from Rp {weekDisplay(oldWeek)} → Rp {weekDisplay(newWeek)}`;
+                logMessage = `Rp {timestamp} - ${transaction.vendor} moved from Rp {weekDisplay(oldWeek)} → Rp {weekDisplay(newWeek)}`;
             }
             
             const logEntry = {
@@ -7282,32 +7282,32 @@
                 const isLinked = transaction.is_linked || transaction.ap_ar_transaction_id;
                 
                 return `
-                    <tr data-id="Rp {transaction.id}">
+                    <tr data-id="${transaction.id}">
                         <td>
-                            <input type="checkbox" class="transaction-checkbox" value="Rp {transaction.id}" 
+                            <input type="checkbox" class="transaction-checkbox" value="${transaction.id}" 
                                    onchange="updateSelectedFinancialTransactions()">
                         </td>
                         <td>Rp {formatDateIndonesian(transaction.transaction_date)}</td>
                         <td>
-                            <span class="account-display">Rp {transaction.account_code} - Rp {transaction.account_name}</span>
+                            <span class="account-display">${transaction.account_code} - ${transaction.account_name}</span>
                         </td>
-                        <td title="Rp {transaction.description}">Rp {transaction.description}</td>
-                        <td>Rp {transaction.debit_amount > 0 ? formatCurrency(transaction.debit_amount, 'IDR') : '-'}</td>
-                        <td>Rp {transaction.credit_amount > 0 ? formatCurrency(transaction.credit_amount, 'IDR') : '-'}</td>
-                        <td>Rp {transaction.reference || '-'}</td>
+                        <td title="${transaction.description}">${transaction.description}</td>
+                        <td>${transaction.debit_amount > 0 ? formatCurrency(transaction.debit_amount, 'IDR') : '-'}</td>
+                        <td>${transaction.credit_amount > 0 ? formatCurrency(transaction.credit_amount, 'IDR') : '-'}</td>
+                        <td>${transaction.reference || '-'}</td>
                         <td>
                             Rp {isLinked ? '<i class="fas fa-link link-icon" title="Linked to AP/AR"></i>' : 
                               '<button class="btn btn-sm btn-secondary" onclick="linkSingleTransaction(\''+transaction.id+'\')">Link</button>'}
                         </td>
                         <td>
-                            <button class="action-btn edit" onclick="editFinancialTransaction('Rp {transaction.id}')" data-tooltip="Edit Transaction">
+                            <button class="action-btn edit" onclick="editFinancialTransaction('${transaction.id}')" data-tooltip="Edit Transaction">
                                 <i class="fas fa-edit"></i>
                             </button>
-                            <button class="action-btn delete" onclick="deleteFinancialTransaction('Rp {transaction.id}')" data-tooltip="Delete Transaction">
+                            <button class="action-btn delete" onclick="deleteFinancialTransaction('${transaction.id}')" data-tooltip="Delete Transaction">
                                 <i class="fas fa-trash-alt"></i>
                             </button>
                             Rp {isLinked ? 
-                              `<button class="action-btn unlink" onclick="unlinkTransaction('Rp {transaction.id}')" data-tooltip="Unlink">
+                              `<button class="action-btn unlink" onclick="unlinkTransaction('${transaction.id}')" data-tooltip="Unlink">
                                 <i class="fas fa-unlink"></i>
                               </button>` : ''}
                         </td>
@@ -7991,13 +7991,13 @@
             const container = document.getElementById('unlinkFinancialList');
             
             container.innerHTML = unlinkedTransactions.map(transaction => `
-                <div class="linking-item" data-financial-id="Rp {transaction.id}">
+                <div class="linking-item" data-financial-id="${transaction.id}">
                     <div class="linking-item-header">
-                        <strong>Rp {transaction.account_code} - Rp {transaction.account_name}</strong>
+                        <strong>${transaction.account_code} - ${transaction.account_name}</strong>
                         <span class="amount">Rp {formatCurrency(transaction.debit_amount || transaction.credit_amount, 'IDR')}</span>
                     </div>
                     <div class="linking-item-details">
-                        Rp {transaction.description} | Rp {formatDateIndonesian(transaction.transaction_date)}
+                        ${transaction.description} | Rp {formatDateIndonesian(transaction.transaction_date)}
                     </div>
                 </div>
             `).join('');
@@ -8023,13 +8023,13 @@
                 const container = document.getElementById('availableAPARList');
                 
                 container.innerHTML = aparData.map(transaction => `
-                    <div class="linking-item" data-apar-id="Rp {transaction.id}">
+                    <div class="linking-item" data-apar-id="${transaction.id}">
                         <div class="linking-item-header">
-                            <strong>Rp {transaction.type} - Rp {transaction.company}</strong>
+                            <strong>${transaction.type} - ${transaction.company}</strong>
                             <span class="amount">Rp {formatCurrency(transaction.amount, 'IDR')}</span>
                         </div>
                         <div class="linking-item-details">
-                            Rp {transaction.description} | Rp {formatDateIndonesian(transaction.invoice_date)}
+                            ${transaction.description} | Rp {formatDateIndonesian(transaction.invoice_date)}
                         </div>
                     </div>
                 `).join('');
