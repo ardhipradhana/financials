@@ -2820,6 +2820,214 @@
             font-size: 0.75rem;
             color: #64748b;
         }
+
+        .filters-section-horizontal {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .filter-row {
+            display: flex;
+            align-items: end;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            min-width: 150px;
+        }
+        
+        .filter-group label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #374151;
+        }
+        
+        .filter-group .form-select,
+        .filter-group .form-input {
+            font-size: 0.875rem;
+            padding: 0.5rem;
+        }
+        
+        /* Full Width Tables */
+        .table-container-full-width {
+            width: 100%;
+            overflow-x: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background: white;
+        }
+        
+        .data-table-full {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+        
+        .data-table-full th {
+            background: #f8fafc;
+            padding: 1rem 0.75rem;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 2px solid #e2e8f0;
+            white-space: nowrap;
+        }
+        
+        .data-table-full td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #e2e8f0;
+            vertical-align: middle;
+        }
+        
+        .data-table-full tbody tr:hover {
+            background: #f8fafc;
+        }
+        
+        /* Account Display - Single Line */
+        .account-display {
+            font-weight: 500;
+            color: #1e293b;
+        }
+        
+        /* Reports Audit Layout */
+        .reports-audit-layout {
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 3rem;
+        }
+        
+        .report-statement {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            overflow: hidden;
+            page-break-inside: avoid;
+        }
+        
+        .report-header {
+            background: #1e293b;
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .report-header h4 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        
+        .report-date {
+            margin: 0;
+            font-size: 0.875rem;
+            opacity: 0.9;
+        }
+        
+        .report-content {
+            padding: 2rem;
+        }
+        
+        /* Report Sections */
+        .report-section {
+            margin-bottom: 1.5rem;
+        }
+        
+        .report-section:last-child {
+            margin-bottom: 0;
+        }
+        
+        .report-section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.25rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .report-subsection {
+            margin-left: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .report-subsection-title {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+        
+        .report-line {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.25rem 0;
+            border-bottom: 1px dotted #e2e8f0;
+        }
+        
+        .report-line:last-child {
+            border-bottom: none;
+        }
+        
+        .report-line.total-line {
+            font-weight: 600;
+            border-top: 2px solid #1e293b;
+            border-bottom: 2px solid #1e293b;
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+        }
+        
+        .report-line.subtotal-line {
+            font-weight: 500;
+            border-top: 1px solid #64748b;
+            margin-top: 0.25rem;
+            padding-top: 0.25rem;
+        }
+        
+        .account-item {
+            margin-left: 1.5rem;
+            font-size: 0.875rem;
+            color: #64748b;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .filter-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .filter-group {
+                min-width: auto;
+            }
+            
+            .reports-audit-layout {
+                max-width: 100%;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .table-container-full-width {
+                font-size: 0.75rem;
+            }
+            
+            .data-table-full th,
+            .data-table-full td {
+                padding: 0.5rem 0.25rem;
+            }
+            
+            .report-content {
+                padding: 1rem;
+            }
         
     </style>
 </head>
@@ -3592,55 +3800,57 @@
                                         </button>
                                     </div>
                                 </div>
-            
-                                <!-- Filters Section -->
-                                <div class="filters-section">
-                                    <div class="filter-group">
-                                        <label for="periodFilter">Period:</label>
-                                        <select id="periodFilter" class="form-select" onchange="renderFinancialTable()">
-                                            <option value="">All Time</option>
-                                            <option value="MTD">Month to Date</option>
-                                            <option value="QTD">Quarter to Date</option>
-                                            <option value="YTD">Year to Date</option>
-                                            <option value="custom">Custom Range</option>
-                                        </select>
-                                    </div>
-            
-                                    <div class="filter-group" id="customDateRange" style="display: none;">
-                                        <label for="dateFromFinancial">From:</label>
-                                        <input type="date" id="dateFromFinancial" class="form-input" onchange="renderFinancialTable()">
-                                        <label for="dateToFinancial">To:</label>
-                                        <input type="date" id="dateToFinancial" class="form-input" onchange="renderFinancialTable()">
-                                    </div>
-            
-                                    <div class="filter-group">
-                                        <label for="categoryFilter">Category:</label>
-                                        <select id="categoryFilter" class="form-select" onchange="renderFinancialTable()">
-                                            <option value="">All Categories</option>
-                                            <option value="Asset">Assets</option>
-                                            <option value="Liability">Liabilities</option>
-                                            <option value="Equity">Equity</option>
-                                            <option value="Revenue">Revenue</option>
-                                            <option value="Expense">Expenses</option>
-                                        </select>
-                                    </div>
-            
-                                    <div class="filter-group">
-                                        <label for="accountFilter">Account:</label>
-                                        <select id="accountFilter" class="form-select" onchange="renderFinancialTable()">
-                                            <option value="">All Accounts</option>
-                                            <!-- Populated dynamically -->
-                                        </select>
-                                    </div>
-            
-                                    <div class="filter-group">
-                                        <button class="btn btn-secondary" onclick="clearFinancialFilters()">
-                                            <i class="fas fa-times"></i>
-                                            Clear Filters
-                                        </button>
+                        
+                                <!-- UPDATED: Horizontal Filters Section -->
+                                <div class="filters-section-horizontal">
+                                    <div class="filter-row">
+                                        <div class="filter-group">
+                                            <label for="periodFilter">Period:</label>
+                                            <select id="periodFilter" class="form-select" onchange="renderFinancialTable()">
+                                                <option value="">All Time</option>
+                                                <option value="MTD">Month to Date</option>
+                                                <option value="QTD">Quarter to Date</option>
+                                                <option value="YTD">Year to Date</option>
+                                                <option value="custom">Custom Range</option>
+                                            </select>
+                                        </div>
+                        
+                                        <div class="filter-group" id="customDateRange" style="display: none;">
+                                            <label for="dateFromFinancial">From:</label>
+                                            <input type="date" id="dateFromFinancial" class="form-input" onchange="renderFinancialTable()">
+                                            <label for="dateToFinancial">To:</label>
+                                            <input type="date" id="dateToFinancial" class="form-input" onchange="renderFinancialTable()">
+                                        </div>
+                        
+                                        <div class="filter-group">
+                                            <label for="categoryFilter">Category:</label>
+                                            <select id="categoryFilter" class="form-select" onchange="renderFinancialTable()">
+                                                <option value="">All Categories</option>
+                                                <option value="Asset">Assets</option>
+                                                <option value="Liability">Liabilities</option>
+                                                <option value="Equity">Equity</option>
+                                                <option value="Revenue">Revenue</option>
+                                                <option value="Expense">Expenses</option>
+                                            </select>
+                                        </div>
+                        
+                                        <div class="filter-group">
+                                            <label for="accountFilter">Account:</label>
+                                            <select id="accountFilter" class="form-select" onchange="renderFinancialTable()">
+                                                <option value="">All Accounts</option>
+                                                <!-- Populated dynamically -->
+                                            </select>
+                                        </div>
+                        
+                                        <div class="filter-group">
+                                            <button class="btn btn-secondary" onclick="clearFinancialFilters()">
+                                                <i class="fas fa-times"></i>
+                                                Clear
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
-            
+                        
                                 <!-- Bulk Actions -->
                                 <div class="bulk-actions" id="bulkActions" style="display: none;">
                                     <div class="bulk-info">
@@ -3661,23 +3871,23 @@
                                         </button>
                                     </div>
                                 </div>
-            
-                                <!-- Transaction Table -->
-                                <div class="table-container">
-                                    <table class="data-table" id="financialTable">
+                        
+                                <!-- UPDATED: Full Width Transaction Table -->
+                                <div class="table-container-full-width">
+                                    <table class="data-table-full" id="financialTable">
                                         <thead>
                                             <tr>
-                                                <th>
+                                                <th style="width: 50px;">
                                                     <input type="checkbox" id="selectAllFinancial" onchange="toggleSelectAllFinancial()">
                                                 </th>
-                                                <th>Date</th>
-                                                <th>Account</th>
+                                                <th style="width: 120px;">Date</th>
+                                                <th style="width: 200px;">Account</th>
                                                 <th>Description</th>
-                                                <th>Debit</th>
-                                                <th>Credit</th>
-                                                <th>Reference</th>
-                                                <th>Link</th>
-                                                <th>Actions</th>
+                                                <th style="width: 120px;">Debit</th>
+                                                <th style="width: 120px;">Credit</th>
+                                                <th style="width: 120px;">Reference</th>
+                                                <th style="width: 80px;">Link</th>
+                                                <th style="width: 120px;">Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody id="financialTableBody">
@@ -3700,7 +3910,7 @@
                                         </button>
                                     </div>
                                 </div>
-            
+                        
                                 <div class="trial-balance-summary" id="trialBalanceSummary">
                                     <div class="balance-card">
                                         <div class="balance-label">Total Debits</div>
@@ -3715,15 +3925,16 @@
                                         <div class="balance-amount" id="balanceDifference">Rp 0</div>
                                     </div>
                                 </div>
-            
-                                <div class="table-container">
-                                    <table class="data-table" id="trialBalanceTable">
+                        
+                                <!-- UPDATED: Full Width Trial Balance Table -->
+                                <div class="table-container-full-width">
+                                    <table class="data-table-full" id="trialBalanceTable">
                                         <thead>
                                             <tr>
-                                                <th>Account Code</th>
+                                                <th style="width: 150px;">Account Code</th>
                                                 <th>Account Name</th>
-                                                <th>Debit Balance</th>
-                                                <th>Credit Balance</th>
+                                                <th style="width: 150px;">Debit Balance</th>
+                                                <th style="width: 150px;">Credit Balance</th>
                                             </tr>
                                         </thead>
                                         <tbody id="trialBalanceTableBody">
@@ -3744,28 +3955,52 @@
                                             <i class="fas fa-sync"></i>
                                             Refresh Reports
                                         </button>
+                                        <button class="btn btn-secondary" onclick="exportReportsToPDF()">
+                                            <i class="fas fa-file-pdf"></i>
+                                            Export PDF
+                                        </button>
                                     </div>
                                 </div>
-            
-                                <div class="reports-grid">
-                                    <div class="report-card">
-                                        <h4>Income Statement</h4>
-                                        <div class="report-content" id="incomeStatement">
-                                            <!-- Generated content -->
+                        
+                                <!-- UPDATED: Audit-style Reports Layout -->
+                                <div class="reports-audit-layout">
+                                    
+                                    <!-- Balance Sheet -->
+                                    <div class="report-statement">
+                                        <div class="report-header">
+                                            <h4>Balance Sheet</h4>
+                                            <p class="report-date">As of <span id="reportDate1"></span></p>
+                                        </div>
+                                        
+                                        <div class="report-content" id="balanceSheetDetailed">
+                                            <!-- Generated by JavaScript -->
                                         </div>
                                     </div>
-                                    <div class="report-card">
-                                        <h4>Balance Sheet</h4>
-                                        <div class="report-content" id="balanceSheet">
-                                            <!-- Generated content -->
+                        
+                                    <!-- Income Statement -->
+                                    <div class="report-statement">
+                                        <div class="report-header">
+                                            <h4>Income Statement</h4>
+                                            <p class="report-date">For the period ending <span id="reportDate2"></span></p>
+                                        </div>
+                                        
+                                        <div class="report-content" id="incomeStatementDetailed">
+                                            <!-- Generated by JavaScript -->
                                         </div>
                                     </div>
-                                    <div class="report-card">
-                                        <h4>Cash Flow Statement</h4>
-                                        <div class="report-content" id="cashFlowStatement">
-                                            <!-- Generated content -->
+                        
+                                    <!-- Cash Flow Statement -->
+                                    <div class="report-statement">
+                                        <div class="report-header">
+                                            <h4>Cash Flow Statement</h4>
+                                            <p class="report-date">For the period ending <span id="reportDate3"></span></p>
+                                        </div>
+                                        
+                                        <div class="report-content" id="cashFlowStatementDetailed">
+                                            <!-- Generated by JavaScript -->
                                         </div>
                                     </div>
+                        
                                 </div>
                             </div>
                         </div>
@@ -7038,10 +7273,7 @@
                         </td>
                         <td>${formatDateIndonesian(transaction.transaction_date)}</td>
                         <td>
-                            <div class="account-info">
-                                <span class="account-code">${transaction.account_code}</span>
-                                <span class="account-name">${transaction.account_name}</span>
-                            </div>
+                            <span class="account-display">${transaction.account_code} - ${transaction.account_name}</span>
                         </td>
                         <td title="${transaction.description}">${transaction.description}</td>
                         <td>${transaction.debit_amount > 0 ? formatCurrency(transaction.debit_amount, 'IDR') : '-'}</td>
@@ -7203,6 +7435,13 @@
             document.getElementById('dateToFinancial').value = '';
             document.getElementById('customDateRange').style.display = 'none';
             renderFinancialTable();
+        }
+
+        function exportReportsToPDF() {
+            alert('PDF export functionality will be implemented. For now, you can use browser print (Ctrl+P) to save as PDF.');
+            
+            // Future implementation would use libraries like jsPDF or html2pdf
+            // window.print(); // Simple browser print for now
         }
         
         // Modal Functions
@@ -8182,165 +8421,350 @@
         
         // Reports Generation
         function generateReports() {
-            generateIncomeStatement();
+            // Set current date for reports
+            const currentDate = new Date().toLocaleDateString('id-ID', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            
+            document.getElementById('reportDate1').textContent = currentDate;
+            document.getElementById('reportDate2').textContent = currentDate;
+            document.getElementById('reportDate3').textContent = currentDate;
+            
+            // Generate all three reports
             generateBalanceSheet();
+            generateIncomeStatement();
             generateCashFlowStatement();
         }
         
         function generateIncomeStatement() {
-            const revenueAccounts = financialTransactions.filter(t => t.category === 'Revenue');
-            const expenseAccounts = financialTransactions.filter(t => t.category === 'Expense');
+            const revenueTransactions = financialTransactions.filter(t => t.category === 'Revenue');
+            const expenseTransactions = financialTransactions.filter(t => t.category === 'Expense');
+            
+            const revenueAccounts = groupTransactionsByAccount(revenueTransactions);
+            const expenseAccounts = groupTransactionsByAccount(expenseTransactions);
             
             let totalRevenue = 0;
             let totalExpenses = 0;
             
             // Calculate revenue (credits increase revenue)
-            revenueAccounts.forEach(t => {
-                totalRevenue += t.credit_amount || 0;
-                totalRevenue -= t.debit_amount || 0; // Debits decrease revenue
+            Object.values(revenueAccounts).forEach(account => {
+                const balance = account.credit_total - account.debit_total;
+                totalRevenue += balance;
             });
             
             // Calculate expenses (debits increase expenses)
-            expenseAccounts.forEach(t => {
-                totalExpenses += t.debit_amount || 0;
-                totalExpenses -= t.credit_amount || 0; // Credits decrease expenses
+            Object.values(expenseAccounts).forEach(account => {
+                const balance = account.debit_total - account.credit_total;
+                totalExpenses += balance;
             });
             
             const netIncome = totalRevenue - totalExpenses;
             
             const incomeStatement = `
                 <div class="report-section">
-                    <h5>Revenue</h5>
-                    <div class="report-line">
+                    <div class="report-section-title">REVENUE</div>
+                    ${generateAccountLines(revenueAccounts, ['4010', '4020', '4030', '4040', '4050'], 'credit')}
+                    
+                    <div class="report-line subtotal-line">
                         <span>Total Revenue</span>
                         <span>${formatCurrency(totalRevenue, 'IDR')}</span>
                     </div>
                 </div>
                 
                 <div class="report-section">
-                    <h5>Expenses</h5>
-                    <div class="report-line">
+                    <div class="report-section-title">EXPENSES</div>
+                    
+                    <div class="report-subsection">
+                        <div class="report-subsection-title">Cost of Goods Sold</div>
+                        ${generateAccountLines(expenseAccounts, ['5010', '5020', '5030'], 'debit')}
+                    </div>
+                    
+                    <div class="report-subsection">
+                        <div class="report-subsection-title">Operating Expenses</div>
+                        ${generateAccountLines(expenseAccounts, ['5100', '5110', '5120', '5200', '5210', '5220', '5300', '5400', '5500', '5600', '5700', '5800', '5900'], 'debit')}
+                    </div>
+                    
+                    <div class="report-line subtotal-line">
                         <span>Total Expenses</span>
                         <span>${formatCurrency(totalExpenses, 'IDR')}</span>
                     </div>
                 </div>
                 
-                <div class="report-section report-total">
-                    <div class="report-line">
-                        <span><strong>Net Income</strong></span>
-                        <span><strong>${formatCurrency(netIncome, 'IDR')}</strong></span>
-                    </div>
+                <div class="report-line total-line">
+                    <span>NET INCOME</span>
+                    <span>${formatCurrency(netIncome, 'IDR')}</span>
                 </div>
             `;
             
-            document.getElementById('incomeStatement').innerHTML = incomeStatement;
+            document.getElementById('incomeStatementDetailed').innerHTML = incomeStatement;
         }
         
         function generateBalanceSheet() {
-            const assetAccounts = financialTransactions.filter(t => t.category === 'Asset');
-            const liabilityAccounts = financialTransactions.filter(t => t.category === 'Liability');
-            const equityAccounts = financialTransactions.filter(t => t.category === 'Equity');
+            const assetTransactions = financialTransactions.filter(t => t.category === 'Asset');
+            const liabilityTransactions = financialTransactions.filter(t => t.category === 'Liability');
+            const equityTransactions = financialTransactions.filter(t => t.category === 'Equity');
+            
+            // Group by account
+            const assetAccounts = groupTransactionsByAccount(assetTransactions);
+            const liabilityAccounts = groupTransactionsByAccount(liabilityTransactions);
+            const equityAccounts = groupTransactionsByAccount(equityTransactions);
             
             let totalAssets = 0;
             let totalLiabilities = 0;
             let totalEquity = 0;
             
-            // Calculate assets (debits increase assets)
-            assetAccounts.forEach(t => {
-                totalAssets += t.debit_amount || 0;
-                totalAssets -= t.credit_amount || 0;
+            // Calculate totals
+            Object.values(assetAccounts).forEach(account => {
+                const balance = account.debit_total - account.credit_total;
+                totalAssets += balance;
             });
             
-            // Calculate liabilities (credits increase liabilities)
-            liabilityAccounts.forEach(t => {
-                totalLiabilities += t.credit_amount || 0;
-                totalLiabilities -= t.debit_amount || 0;
+            Object.values(liabilityAccounts).forEach(account => {
+                const balance = account.credit_total - account.debit_total;
+                totalLiabilities += balance;
             });
             
-            // Calculate equity (credits increase equity)
-            equityAccounts.forEach(t => {
-                totalEquity += t.credit_amount || 0;
-                totalEquity -= t.debit_amount || 0;
+            Object.values(equityAccounts).forEach(account => {
+                const balance = account.credit_total - account.debit_total;
+                totalEquity += balance;
             });
             
             const balanceSheet = `
                 <div class="report-section">
-                    <h5>Assets</h5>
-                    <div class="report-line">
-                        <span>Total Assets</span>
+                    <div class="report-section-title">ASSETS</div>
+                    
+                    <div class="report-subsection">
+                        <div class="report-subsection-title">Current Assets</div>
+                        ${generateAccountLines(assetAccounts, ['1010', '1020', '1100', '1110', '1200', '1210', '1220', '1300', '1310', '1320', '1400'])}
+                    </div>
+                    
+                    <div class="report-subsection">
+                        <div class="report-subsection-title">Non-Current Assets</div>
+                        ${generateAccountLines(assetAccounts, ['1500', '1510', '1600', '1610', '1700', '1710', '1800', '1900', '1910'])}
+                    </div>
+                    
+                    <div class="report-line total-line">
+                        <span>TOTAL ASSETS</span>
                         <span>${formatCurrency(totalAssets, 'IDR')}</span>
                     </div>
                 </div>
                 
                 <div class="report-section">
-                    <h5>Liabilities</h5>
-                    <div class="report-line">
+                    <div class="report-section-title">LIABILITIES</div>
+                    
+                    <div class="report-subsection">
+                        <div class="report-subsection-title">Current Liabilities</div>
+                        ${generateAccountLines(liabilityAccounts, ['2010', '2020', '2030', '2040', '2050', '2100', '2110'])}
+                    </div>
+                    
+                    <div class="report-subsection">
+                        <div class="report-subsection-title">Non-Current Liabilities</div>
+                        ${generateAccountLines(liabilityAccounts, ['2200', '2300', '2400', '2410', '2420', '2430'])}
+                    </div>
+                    
+                    <div class="report-line subtotal-line">
                         <span>Total Liabilities</span>
                         <span>${formatCurrency(totalLiabilities, 'IDR')}</span>
                     </div>
                 </div>
                 
                 <div class="report-section">
-                    <h5>Equity</h5>
-                    <div class="report-line">
+                    <div class="report-section-title">EQUITY</div>
+                    ${generateAccountLines(equityAccounts, ['3010', '3020', '3030', '3040', '3050'])}
+                    
+                    <div class="report-line subtotal-line">
                         <span>Total Equity</span>
                         <span>${formatCurrency(totalEquity, 'IDR')}</span>
                     </div>
                 </div>
                 
-                <div class="report-section report-total">
-                    <div class="report-line">
-                        <span><strong>Total Liabilities + Equity</strong></span>
-                        <span><strong>${formatCurrency(totalLiabilities + totalEquity, 'IDR')}</strong></span>
-                    </div>
+                <div class="report-line total-line">
+                    <span>TOTAL LIABILITIES + EQUITY</span>
+                    <span>${formatCurrency(totalLiabilities + totalEquity, 'IDR')}</span>
                 </div>
             `;
             
-            document.getElementById('balanceSheet').innerHTML = balanceSheet;
+            document.getElementById('balanceSheetDetailed').innerHTML = balanceSheet;
         }
         
         function generateCashFlowStatement() {
-            // Simplified cash flow - track cash account movements
-            const cashTransactions = financialTransactions.filter(t => 
-                t.account_code === '1010' || t.account_name.toLowerCase().includes('cash')
-            );
+            // Operating Activities
+            const operatingAccounts = {
+                'Net Income': netIncomeCalculation(),
+                'Depreciation & Amortization': getAccountBalance(['5600', '5610']),
+                'Changes in Accounts Receivable': -getAccountBalanceChange('1100'),
+                'Changes in Accounts Payable': getAccountBalanceChange('2010'),
+                'Changes in Accrued Expenses': getAccountBalanceChange('2020')
+            };
             
-            let cashInflows = 0;
-            let cashOutflows = 0;
+            // Investing Activities  
+            const investingAccounts = {
+                'Purchase of Equipment': -getAccountBalance(['1500']),
+                'Purchase of Vehicles': -getAccountBalance(['1600']),
+                'Purchase of Buildings': -getAccountBalance(['1700']),
+                'Purchase of Intangible Assets': -getAccountBalance(['1900'])
+            };
             
-            cashTransactions.forEach(t => {
-                cashInflows += t.debit_amount || 0; // Debits increase cash
-                cashOutflows += t.credit_amount || 0; // Credits decrease cash
-            });
+            // Financing Activities
+            const financingAccounts = {
+                'Proceeds from Long-term Debt': getAccountBalance(['2200']),
+                'Owner\'s Capital Contributions': getAccountBalance(['3010']),
+                'Owner\'s Drawings': -getAccountBalance(['3050']),
+                'Repayment of Debt': -getAccountBalanceChange('2200', 'negative')
+            };
             
-            const netCashFlow = cashInflows - cashOutflows;
+            let operatingCashFlow = Object.values(operatingAccounts).reduce((sum, val) => sum + val, 0);
+            let investingCashFlow = Object.values(investingAccounts).reduce((sum, val) => sum + val, 0);
+            let financingCashFlow = Object.values(financingAccounts).reduce((sum, val) => sum + val, 0);
+            
+            const netCashFlow = operatingCashFlow + investingCashFlow + financingCashFlow;
             
             const cashFlowStatement = `
                 <div class="report-section">
-                    <h5>Cash Inflows</h5>
-                    <div class="report-line">
-                        <span>Total Cash Inflows</span>
-                        <span>${formatCurrency(cashInflows, 'IDR')}</span>
+                    <div class="report-section-title">CASH FLOWS FROM OPERATING ACTIVITIES</div>
+                    ${generateCashFlowLines(operatingAccounts)}
+                    <div class="report-line subtotal-line">
+                        <span>Net Cash from Operating Activities</span>
+                        <span>${formatCurrency(operatingCashFlow, 'IDR')}</span>
                     </div>
                 </div>
                 
                 <div class="report-section">
-                    <h5>Cash Outflows</h5>
-                    <div class="report-line">
-                        <span>Total Cash Outflows</span>
-                        <span>${formatCurrency(cashOutflows, 'IDR')}</span>
+                    <div class="report-section-title">CASH FLOWS FROM INVESTING ACTIVITIES</div>
+                    ${generateCashFlowLines(investingAccounts)}
+                    <div class="report-line subtotal-line">
+                        <span>Net Cash from Investing Activities</span>
+                        <span>${formatCurrency(investingCashFlow, 'IDR')}</span>
                     </div>
                 </div>
                 
-                <div class="report-section report-total">
-                    <div class="report-line">
-                        <span><strong>Net Cash Flow</strong></span>
-                        <span><strong>${formatCurrency(netCashFlow, 'IDR')}</strong></span>
+                <div class="report-section">
+                    <div class="report-section-title">CASH FLOWS FROM FINANCING ACTIVITIES</div>
+                    ${generateCashFlowLines(financingAccounts)}
+                    <div class="report-line subtotal-line">
+                        <span>Net Cash from Financing Activities</span>
+                        <span>${formatCurrency(financingCashFlow, 'IDR')}</span>
                     </div>
+                </div>
+                
+                <div class="report-line total-line">
+                    <span>NET INCREASE (DECREASE) IN CASH</span>
+                    <span>${formatCurrency(netCashFlow, 'IDR')}</span>
                 </div>
             `;
             
-            document.getElementById('cashFlowStatement').innerHTML = cashFlowStatement;
+            document.getElementById('cashFlowStatementDetailed').innerHTML = cashFlowStatement;
+        }
+
+        function groupTransactionsByAccount(transactions) {
+            const accounts = {};
+            
+            transactions.forEach(transaction => {
+                const accountCode = transaction.account_code;
+                
+                if (!accounts[accountCode]) {
+                    accounts[accountCode] = {
+                        account_code: accountCode,
+                        account_name: transaction.account_name,
+                        debit_total: 0,
+                        credit_total: 0
+                    };
+                }
+                
+                accounts[accountCode].debit_total += transaction.debit_amount || 0;
+                accounts[accountCode].credit_total += transaction.credit_amount || 0;
+            });
+            
+            return accounts;
+        }
+        
+        function generateAccountLines(accountsGroup, accountCodes, balanceType = 'debit') {
+            let lines = '';
+            
+            accountCodes.forEach(code => {
+                if (accountsGroup[code]) {
+                    const account = accountsGroup[code];
+                    let balance;
+                    
+                    if (balanceType === 'credit') {
+                        balance = account.credit_total - account.debit_total;
+                    } else {
+                        balance = account.debit_total - account.credit_total;
+                    }
+                    
+                    if (Math.abs(balance) > 0.01) { // Only show accounts with balances
+                        lines += `
+                            <div class="report-line">
+                                <span class="account-item">${account.account_code} - ${account.account_name}</span>
+                                <span>${formatCurrency(Math.abs(balance), 'IDR')}</span>
+                            </div>
+                        `;
+                    }
+                }
+            });
+            
+            return lines || '<div class="report-line"><span class="account-item">No transactions recorded</span><span>Rp 0</span></div>';
+        }
+        
+        function generateCashFlowLines(cashFlowItems) {
+            let lines = '';
+            
+            Object.entries(cashFlowItems).forEach(([item, amount]) => {
+                if (Math.abs(amount) > 0.01) {
+                    lines += `
+                        <div class="report-line">
+                            <span class="account-item">${item}</span>
+                            <span>${formatCurrency(amount, 'IDR')}</span>
+                        </div>
+                    `;
+                }
+            });
+            
+            return lines || '<div class="report-line"><span class="account-item">No cash flows recorded</span><span>Rp 0</span></div>';
+        }
+        
+        function getAccountBalance(accountCodes) {
+            let total = 0;
+            
+            accountCodes.forEach(code => {
+                const transactions = financialTransactions.filter(t => t.account_code === code);
+                transactions.forEach(t => {
+                    total += (t.debit_amount || 0) - (t.credit_amount || 0);
+                });
+            });
+            
+            return total;
+        }
+        
+        function getAccountBalanceChange(accountCode, type = 'positive') {
+            const transactions = financialTransactions.filter(t => t.account_code === accountCode);
+            let change = 0;
+            
+            transactions.forEach(t => {
+                change += (t.debit_amount || 0) - (t.credit_amount || 0);
+            });
+            
+            return type === 'negative' ? -Math.abs(change) : change;
+        }
+        
+        function netIncomeCalculation() {
+            const revenueTransactions = financialTransactions.filter(t => t.category === 'Revenue');
+            const expenseTransactions = financialTransactions.filter(t => t.category === 'Expense');
+            
+            let totalRevenue = 0;
+            let totalExpenses = 0;
+            
+            revenueTransactions.forEach(t => {
+                totalRevenue += (t.credit_amount || 0) - (t.debit_amount || 0);
+            });
+            
+            expenseTransactions.forEach(t => {
+                totalExpenses += (t.debit_amount || 0) - (t.credit_amount || 0);
+            });
+            
+            return totalRevenue - totalExpenses;
         }
         
         // Utility function for escaping CSV fields (reuse from existing code)
