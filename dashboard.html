@@ -11236,7 +11236,7 @@
             
             // X5: Sales / Total Assets
             const salesToAssets = data.totalAssets > 0 ? 
-                data.revenue / data.totalAssets : 0;
+                (data.revenue * 12) / data.totalAssets : 0;
             
             return {
                 workingCapitalToAssets: Math.max(-1, Math.min(1, workingCapitalToAssets)), // Cap extreme values
@@ -11427,12 +11427,14 @@
             }
             
             // Card 4: Financial Health Score
+            console.log('Card 4 metrics:', metrics.healthScore, metrics.altmanRating, metrics.riskLevel);
             if (metricCards[3]) {
-                const valueElement = metricCards[3].querySelector('.metric-value');
+                const valueElement = metricCards[3].querySelector('.metric-value-large');
                 const changeElement = metricCards[3].querySelector('.metric-change');
                 
                 // Update value with Z-Score
                 if (valueElement) {
+                    console.log('Found valueElement, updating with:', metrics.healthScore);
                     const displayScore = metrics.healthScore > 0 ? metrics.healthScore.toFixed(2) : 'N/A';
                     valueElement.textContent = displayScore;
                 }
