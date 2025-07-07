@@ -3039,6 +3039,72 @@
             background: #f8fafc;
         }
 
+        @media print {
+            /* Hide navigation and sidebar */
+            .sidebar,
+            .nav-link,
+            .page-title,
+            .section-header,
+            .filters-section,
+            .bulk-actions,
+            .tab-nav,
+            .btn,
+            button {
+                display: none !important;
+            }
+            
+            /* Hide everything except the reports content */
+            .dashboard-section:not(#reports-tab .dashboard-section) {
+                display: none !important;
+            }
+            
+            /* Hide all tab content except reports */
+            .tab-content:not(#reports-tab) {
+                display: none !important;
+            }
+            
+            /* Make sure only the report statements show */
+            .reports-audit-layout {
+                display: block !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            
+            /* Style the report statements for print */
+            .report-statement {
+                page-break-inside: avoid;
+                margin-bottom: 30px;
+                border: none !important;
+                box-shadow: none !important;
+            }
+            
+            /* Clean up report headers */
+            .report-header h4 {
+                font-size: 18px;
+                margin-bottom: 10px;
+                border-bottom: 2px solid #000;
+                padding-bottom: 5px;
+            }
+            
+            /* Ensure proper spacing for print */
+            body {
+                margin: 0;
+                padding: 20px;
+                background: white !important;
+            }
+            
+            /* Hide page margins and backgrounds */
+            * {
+                background: transparent !important;
+                color: black !important;
+            }
+            
+            /* Force page breaks between statements if needed */
+            .report-statement:not(:last-child) {
+                page-break-after: always;
+            }
+        }
+
         
     </style>
 </head>
