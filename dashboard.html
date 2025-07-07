@@ -4917,10 +4917,14 @@
                         <td>${dueDate ? formatDateIndonesian(dueDate) : '-'}${isCalculated ? ' <span style="color: #94a3b8; font-size: 0.75rem;">*</span>' : ''}</td>
                         <td><span class="days-badge ${daysClass}">${daysText}</span></td>
                         <td><span class="status-badge status-${actualStatus.toLowerCase()}">${actualStatus}</span></td>
-                        <td>
+                        <td style="text-align: center;">
                             ${transaction.linked_financial_id ? 
-                                '<i class="fas fa-link link-icon" title="Linked to GL"></i>' : 
-                                '<button class="btn btn-sm btn-secondary" onclick="linkAPARToGL(\''+transaction.id+'\')">Link</button>'
+                                `<button class="btn btn-sm btn-danger" onclick="unlinkAPARFromGL('${transaction.id}')" title="Unlink from GL">
+                                    <i class="fas fa-unlink"></i> Unlink
+                                </button>` : 
+                                `<button class="btn btn-sm btn-primary" onclick="linkAPARToGL('${transaction.id}')" title="Link to GL">
+                                    <i class="fas fa-link"></i> Link
+                                </button>`
                             }
                         </td>
                         <td>
@@ -4930,9 +4934,6 @@
                             <button class="action-btn delete" onclick="deleteTransaction('${transaction.id}')" data-tooltip="Delete Transaction">
                                 <i class="fas fa-trash-alt"></i>
                             </button>
-                            ${transaction.linked_financial_id ? 
-                                '<button class="action-btn unlink" onclick="unlinkAPARFromGL(\''+transaction.id+'\')" data-tooltip="Unlink from GL"><i class="fas fa-unlink"></i></button>' : ''
-                            }
                         </td>
                     </tr>
                 `;
