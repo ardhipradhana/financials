@@ -3040,68 +3040,79 @@
         }
 
         @media print {
-            /* Hide navigation and sidebar */
+            /* Hide navigation, sidebar, and UI elements */
             .sidebar,
-            .nav-link,
             .page-title,
-            .section-header,
+            .section-header .section-actions,
+            .tab-nav,
             .filters-section,
             .bulk-actions,
-            .tab-nav,
-            .btn,
-            button {
+            button,
+            .btn {
                 display: none !important;
             }
             
-            /* Hide everything except the reports content */
-            .dashboard-section:not(#reports-tab .dashboard-section) {
+            /* Hide all sections except the reports section */
+            .section-content:not(#statements-section) {
                 display: none !important;
             }
             
-            /* Hide all tab content except reports */
+            /* Hide all tabs except the reports tab */
             .tab-content:not(#reports-tab) {
                 display: none !important;
             }
             
-            /* Make sure only the report statements show */
+            /* Ensure the reports tab is visible */
+            #reports-tab {
+                display: block !important;
+            }
+            
+            /* Make sure the reports layout is visible */
             .reports-audit-layout {
                 display: block !important;
                 margin: 0 !important;
                 padding: 0 !important;
             }
             
-            /* Style the report statements for print */
+            /* Show the report statements */
             .report-statement {
+                display: block !important;
                 page-break-inside: avoid;
                 margin-bottom: 30px;
                 border: none !important;
                 box-shadow: none !important;
+                background: white !important;
             }
             
-            /* Clean up report headers */
+            /* Clean up report headers for print */
             .report-header h4 {
                 font-size: 18px;
                 margin-bottom: 10px;
                 border-bottom: 2px solid #000;
                 padding-bottom: 5px;
+                color: black !important;
             }
             
-            /* Ensure proper spacing for print */
+            .report-content {
+                display: block !important;
+                color: black !important;
+            }
+            
+            /* Clean up the page */
             body {
                 margin: 0;
                 padding: 20px;
                 background: white !important;
-            }
-            
-            /* Hide page margins and backgrounds */
-            * {
-                background: transparent !important;
                 color: black !important;
             }
             
-            /* Force page breaks between statements if needed */
-            .report-statement:not(:last-child) {
-                page-break-after: always;
+            /* Ensure section title shows */
+            .section-title {
+                display: block !important;
+                font-size: 24px;
+                margin-bottom: 20px;
+                text-align: center;
+                color: black !important;
             }
         }
 
