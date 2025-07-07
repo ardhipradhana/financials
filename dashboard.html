@@ -3039,59 +3039,76 @@
             background: #f8fafc;
         }
 
+        /* Print-specific styles - much more direct approach */
         @media print {
-            /* Hide the main page header and navigation */
+            /* Hide everything at the top level except what we want */
+            body > *:not(#statements-section),
             body > *:not(.main-content) {
                 display: none !important;
             }
             
-            /* Hide sidebar and navigation within main content */
+            /* If the header is inside body directly, hide it */
+            .header,
+            .app-header,
+            [class*="header"],
+            [class*="title"]:not(.report-header):not(.section-title):not(.report-section-title),
+            .nav,
+            .navbar,
             .sidebar,
-            .nav-link,
-            .page-title,
-            .section-actions,
-            .tab-nav,
-            .filters-section,
-            .bulk-actions,
-            button,
-            .btn {
+            .navigation {
                 display: none !important;
             }
             
-            /* Hide all sections except statements */
+            /* Target common page header patterns */
+            body > div:first-child:not(#statements-section):not(.main-content) {
+                display: none !important;
+            }
+            
+            /* Hide everything except reports */
             .section-content:not(#statements-section) {
                 display: none !important;
             }
             
-            /* Hide all tabs except reports tab */
             .tab-content:not(#reports-tab) {
                 display: none !important;
             }
             
-            /* Hide the section header (Financial Reports title) */
-            #statements-section .section-header {
+            /* Hide all buttons and controls */
+            button,
+            .btn,
+            .tab-nav,
+            .section-actions,
+            .filters-section {
                 display: none !important;
             }
             
-            /* Clean page styling */
-            body {
+            /* Clean page setup */
+            html, body {
                 margin: 0 !important;
                 padding: 0 !important;
                 background: white !important;
             }
             
+            /* Position reports to start from top */
+            #statements-section,
             .main-content {
-                margin-left: 0 !important;
+                margin: 0 !important;
                 padding: 20px !important;
+                background: white !important;
             }
             
-            /* Ensure reports layout is clean */
             .reports-audit-layout {
                 margin: 0 !important;
                 padding: 0 !important;
             }
             
-            /* Style each statement for print */
+            /* Hide the "Financial Reports" section title */
+            #statements-section .section-header,
+            #statements-section .dashboard-section .section-header {
+                display: none !important;
+            }
+            
+            /* Style the statements */
             .report-statement {
                 page-break-inside: avoid;
                 margin-bottom: 30px;
@@ -3099,7 +3116,6 @@
                 box-shadow: none !important;
             }
             
-            /* Force page breaks between statements */
             .report-statement:nth-child(2) {
                 page-break-before: always;
             }
@@ -3108,17 +3124,27 @@
                 page-break-before: always;
             }
             
-            /* Ensure text is black */
+            /* Ensure proper colors */
             * {
                 color: black !important;
                 background: transparent !important;
             }
             
-            /* Keep header styling */
             .report-header h4 {
                 background: #2c3e50 !important;
                 color: white !important;
                 padding: 15px !important;
+            }
+            
+            /* Nuclear option: hide the very first elements of the page */
+            body > div:first-child:not(.main-content):not(#statements-section) {
+                display: none !important;
+            }
+            
+            body > header,
+            body > nav,
+            body > .header {
+                display: none !important;
             }
         }
 
