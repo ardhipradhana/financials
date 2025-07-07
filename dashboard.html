@@ -137,6 +137,10 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
             border: 1px solid #e2e8f0;
             transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end; /* This pushes content to bottom */
+            min-height: 140px; /* Set minimum height for consistent alignment */
         }
         
         .metric-card:hover {
@@ -147,13 +151,17 @@
         .metric-header {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
+            align-items: flex-end; /* Align items to bottom of header */
             width: 100%;
+            margin-top: auto; /* This pushes the header to bottom */
         }
         
         .metric-content {
             flex: 1;
-            min-width: 0; /* Prevent flex item from growing beyond container */
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end; /* Push content to bottom */
         }
 
         .metric-title, .metric-title-with-selector {
@@ -197,6 +205,7 @@
             margin-left: 1rem;
             position: relative;
             overflow: hidden;
+            margin-bottom: 0;
         }
         
         .metric-icon::before {
@@ -3606,7 +3615,7 @@
                                     <div class="metric-breakdown">
                                         <span class="breakdown-item">
                                             <span class="breakdown-label">Overdue: </span>
-                                            <span class="breakdown-value" id="totalAR">Rp  0</span>
+                                            <span class="breakdown-value" id="totalAR">Rp 0</span>
                                         </span>
                                         <span class="aging-indicator" id="arAging">0 overdue(s)</span>
                                     </div>
@@ -3629,7 +3638,7 @@
                                     <div class="metric-breakdown">
                                         <span class="breakdown-item">
                                             <span class="breakdown-label">Overdue: </span>
-                                            <span class="breakdown-value" id="totalAPAll">Rp  0</span>
+                                            <span class="breakdown-value" id="totalAP">Rp 0</span>
                                         </span>
                                         <span class="aging-indicator" id="apAging">0 overdue(s)</span>
                                     </div>
@@ -4924,6 +4933,16 @@
                     }
                 }, 10000);
             }
+            setTimeout(() => {
+                console.log('=== DEBUGGING REVENUE AFTER LOAD ===');
+                console.log('Financial transactions loaded:', financialTransactions?.length || 0);
+                if (financialTransactions && financialTransactions.length > 0) {
+                    console.log('Sample transaction:', financialTransactions[0]);
+                    console.log('All categories:', [...new Set(financialTransactions.map(t => t.category))]);
+                    console.log('All account names:', [...new Set(financialTransactions.map(t => t.account_name))]);
+                }
+                updateDashboardWithRealData();
+            }, 2000);
         });
 
         // NEW: Confirm and create GL entries
@@ -10457,9 +10476,9 @@
             console.log('Cash impact element:', cashImpactElement);
             console.log('Current cash:', currentCash);
             
-            // 2. FIXED: Use FULL AR/AP amounts, not just overdue
-            const totalARAllElement = document.getElementById('totalAR');
-            const totalAPAllElement = document.getElementById('totalAP');
+            // 2. FIXED: Use CORRECT IDs for FULL AR/AP amounts
+            const totalARAllElement = document.getElementById('totalARAll');  // FULL AR
+            const totalAPAllElement = document.getElementById('totalAPAll');  // FULL AP
             
             console.log('=== DEBUGGING FULL AR/AP VALUES ===');
             console.log('Total AR All Element:', totalARAllElement);
@@ -10467,20 +10486,18 @@
             console.log('Total AP All Element:', totalAPAllElement);
             console.log('Total AP All Text:', totalAPAllElement?.textContent);
             
-            // Parse the FULL amounts (not just overdue)
+            // Parse the FULL amounts
             let fullAR = 0;
             let fullAP = 0;
             
             if (totalARAllElement) {
                 const arText = totalARAllElement.textContent;
-                // Remove "Rp" and any formatting, keep numbers and decimal
                 fullAR = parseFloat(arText.replace(/Rp\s*/g, '').replace(/,/g, '').replace(/[^\d.-]/g, '') || 0);
                 console.log('Parsed full AR:', fullAR);
             }
             
             if (totalAPAllElement) {
                 const apText = totalAPAllElement.textContent;
-                // Remove "Rp" and any formatting, keep numbers and decimal  
                 fullAP = parseFloat(apText.replace(/Rp\s*/g, '').replace(/,/g, '').replace(/[^\d.-]/g, '') || 0);
                 console.log('Parsed full AP:', fullAP);
             }
@@ -10488,7 +10505,7 @@
             const netOverduePosition = fullAR - fullAP;
             console.log('Net position (Full AR - Full AP):', netOverduePosition);
             
-            // Also get overdue amounts for breakdown
+            // Also get overdue amounts for reference
             const overdueAR = parseFloat(document.getElementById('totalAR')?.textContent.replace(/[^\d.-]/g, '') || 0);
             const overdueAP = parseFloat(document.getElementById('totalAP')?.textContent.replace(/[^\d.-]/g, '') || 0);
             
