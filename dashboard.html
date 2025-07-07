@@ -139,8 +139,7 @@
             transition: all 0.3s ease;
             display: flex;
             flex-direction: column;
-            justify-content: flex-end; /* This pushes content to bottom */
-            min-height: 140px; /* Set minimum height for consistent alignment */
+            min-height: 140px;
         }
         
         .metric-card:hover {
@@ -151,9 +150,9 @@
         .metric-header {
             display: flex;
             justify-content: space-between;
-            align-items: flex-end; /* Align items to bottom of header */
+            align-items: flex-start; /* Keep title and icon at top */
             width: 100%;
-            margin-top: auto; /* This pushes the header to bottom */
+            margin-bottom: 0.75rem; /* Space between top and bottom sections */
         }
         
         .metric-content {
@@ -161,7 +160,16 @@
             min-width: 0;
             display: flex;
             flex-direction: column;
-            justify-content: flex-end; /* Push content to bottom */
+        }
+
+        .metric-title-section {
+            /* Title stays at top */
+            margin-bottom: auto; /* This pushes the values section to bottom */
+        }
+
+        .metric-values-section {
+            /* Values go to bottom */
+            margin-top: auto;
         }
 
         .metric-title, .metric-title-with-selector {
@@ -206,6 +214,7 @@
             position: relative;
             overflow: hidden;
             margin-bottom: 0;
+            align-self: flex-start;
         }
         
         .metric-icon::before {
@@ -3391,10 +3400,14 @@
 
                     <div class="metric-card">
                         <div class="metric-header">
-                            <div>
-                                <div class="metric-title">Overdue AR/AP</div>
-                                <div class="metric-value">Rp 18,750</div>
-                                <div class="metric-change negative">AR: Rp 28K | AP: Rp 9.25K</div>
+                            <div class="metric-content">
+                                <div class="metric-title-section">
+                                    <div class="metric-title">Net Overdue Position</div>
+                                </div>
+                                <div class="metric-values-section">
+                                    <div class="metric-value">Rp -59,750,000</div>
+                                    <div class="metric-change">Net Rp 59,750,000 you owe</div>
+                                </div>
                             </div>
                             <div class="metric-icon icon-ar">
                                 <i class="fas fa-receipt"></i>
@@ -5319,7 +5332,7 @@
             const totalARAll = allUnpaidAR.reduce((sum, t) => sum + t.amount, 0);
             const totalAPAll = allUnpaidAP.reduce((sum, t) => sum + t.amount, 0);
             
-            // Calculate ONLY overdue transactions (past due date)
+            // Calculate ONLY overdue transactions
             const overdueAR = allUnpaidAR.filter(t => {
                 let dueDate = t.due_date;
                 if (!dueDate && t.payment_terms && t.invoice_date) {
@@ -5341,12 +5354,14 @@
             const totalAROverdue = overdueAR.reduce((sum, t) => sum + t.amount, 0);
             const totalAPOverdue = overdueAP.reduce((sum, t) => sum + t.amount, 0);
             
-            const netCash = totalARAll - totalAPAll;
+            // DEBUG LOGGING
+            console.log('=== AR/AP SUMMARY DEBUG ===');
+            console.log('All unpaid AR:', allUnpaidAR.length, 'Total:', totalARAll);
+            console.log('All unpaid AP:', allUnpaidAP.length, 'Total:', totalAPAll);
+            console.log('Overdue AR:', overdueAR.length, 'Total:', totalAROverdue);
+            console.log('Overdue AP:', overdueAP.length, 'Total:', totalAPOverdue);
             
-            // Calculate CCC
-            const cccData = calculateCCC();
-            
-            // Update display - check if elements exist
+            // Update display
             if (document.getElementById('totalARAll')) {
                 document.getElementById('totalARAll').textContent = formatCurrencyFull(totalARAll, 'IDR');
             }
@@ -5355,9 +5370,11 @@
             }
             if (document.getElementById('totalAR')) {
                 document.getElementById('totalAR').textContent = formatCurrencyFull(totalAROverdue, 'IDR');
+                console.log('Updated totalAR element with:', formatCurrencyFull(totalAROverdue, 'IDR'));
             }
             if (document.getElementById('totalAP')) {
                 document.getElementById('totalAP').textContent = formatCurrencyFull(totalAPOverdue, 'IDR');
+                console.log('Updated totalAP element with:', formatCurrencyFull(totalAPOverdue, 'IDR'));
             }
             if (document.getElementById('netCashImpact')) {
                 document.getElementById('netCashImpact').textContent = formatCurrencyFull(netCash, 'IDR');
@@ -10468,42 +10485,36 @@
         function calculateDashboardMetrics() {
             console.log('=== CALCULATING DASHBOARD METRICS ===');
             
-            // 1. Get current cash position from AP/AR summary
+            // 1. Get current cash position
             const cashImpactElement = document.getElementById('netCashImpact');
             const currentCash = cashImpactElement ? 
                 parseFloat(cashImpactElement.textContent.replace(/[^\d.-]/g, '') || 0) : 0;
             
-            console.log('Cash impact element:', cashImpactElement);
-            console.log('Current cash:', currentCash);
+            // 2. FIXED: Calculate net position correctly
+            const totalARAllElement = document.getElementById('totalARAll');
+            const totalAPAllElement = document.getElementById('totalAPAll');
             
-            // 2. FIXED: Use CORRECT IDs for FULL AR/AP amounts
-            const totalARAllElement = document.getElementById('totalARAll');  // FULL AR
-            const totalAPAllElement = document.getElementById('totalAPAll');  // FULL AP
+            console.log('=== DEBUGGING NET POSITION CALCULATION ===');
+            console.log('Total AR All Element:', totalARAllElement?.textContent);
+            console.log('Total AP All Element:', totalAPAllElement?.textContent);
             
-            console.log('=== DEBUGGING FULL AR/AP VALUES ===');
-            console.log('Total AR All Element:', totalARAllElement);
-            console.log('Total AR All Text:', totalARAllElement?.textContent);
-            console.log('Total AP All Element:', totalAPAllElement);
-            console.log('Total AP All Text:', totalAPAllElement?.textContent);
-            
-            // Parse the FULL amounts
             let fullAR = 0;
             let fullAP = 0;
             
             if (totalARAllElement) {
-                const arText = totalARAllElement.textContent;
-                fullAR = parseFloat(arText.replace(/Rp\s*/g, '').replace(/,/g, '').replace(/[^\d.-]/g, '') || 0);
-                console.log('Parsed full AR:', fullAR);
+                fullAR = parseFloat(totalARAllElement.textContent.replace(/[^\d.-]/g, '') || 0);
             }
             
             if (totalAPAllElement) {
-                const apText = totalAPAllElement.textContent;
-                fullAP = parseFloat(apText.replace(/Rp\s*/g, '').replace(/,/g, '').replace(/[^\d.-]/g, '') || 0);
-                console.log('Parsed full AP:', fullAP);
+                fullAP = parseFloat(totalAPAllElement.textContent.replace(/[^\d.-]/g, '') || 0);
             }
             
+            console.log('Parsed AR:', fullAR);
+            console.log('Parsed AP:', fullAP);
+            
+            // NET POSITION = AR - AP (positive = money owed TO you, negative = money you owe)
             const netOverduePosition = fullAR - fullAP;
-            console.log('Net position (Full AR - Full AP):', netOverduePosition);
+            console.log('Calculated Net Position (AR - AP):', netOverduePosition);
             
             // Also get overdue amounts for reference
             const overdueAR = parseFloat(document.getElementById('totalAR')?.textContent.replace(/[^\d.-]/g, '') || 0);
@@ -10521,8 +10532,6 @@
                 netOverduePosition,
                 fullAR,
                 fullAP,
-                overdueAR,
-                overdueAP,
                 periodRevenue,
                 selectedPeriod,
                 healthScore
