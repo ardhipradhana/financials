@@ -7774,11 +7774,11 @@
         }
         
         function updateTrialBalanceSummary(totalDebits, totalCredits) {
-            document.getElementById('totalDebits').textContent = formatCurrency(totalDebits, 'IDR');
-            document.getElementById('totalCredits').textContent = formatCurrency(totalCredits, 'IDR');
+            document.getElementById('totalDebits').textContent = formatCurrencyFull(totalDebits, 'IDR');
+            document.getElementById('totalCredits').textContent = formatCurrencyFull(totalCredits, 'IDR');
             
             const difference = totalDebits - totalCredits;
-            document.getElementById('balanceDifference').textContent = formatCurrency(Math.abs(difference), 'IDR');
+            document.getElementById('balanceDifference').textContent = formatCurrencyFull(Math.abs(difference), 'IDR');
             document.getElementById('balanceDifference').style.color = difference !== 0 ? '#ef4444' : '#10b981';
             
             // Update balance indicator
