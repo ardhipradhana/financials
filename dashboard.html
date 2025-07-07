@@ -7558,9 +7558,15 @@
                         <td>${transaction.debit_amount > 0 ? formatCurrency(transaction.debit_amount, 'IDR') : '-'}</td>
                         <td>${transaction.credit_amount > 0 ? formatCurrency(transaction.credit_amount, 'IDR') : '-'}</td>
                         <td>${transaction.reference || '-'}</td>
-                        <td>
-                            ${isLinked ? '<i class="fas fa-link link-icon" title="Linked to AP/AR"></i>' : 
-                              '<button class="btn btn-sm btn-secondary" onclick="linkSingleTransaction(\''+transaction.id+'\')">Link</button>'}
+                        <td style="text-align: center;">
+                            ${isLinked ? 
+                                `<button class="btn btn-sm btn-danger" onclick="unlinkTransaction('${transaction.id}')" title="Unlink from AP/AR">
+                                    <i class="fas fa-unlink"></i> Unlink
+                                </button>` : 
+                                `<button class="btn btn-sm btn-primary" onclick="linkSingleTransaction('${transaction.id}')" title="Link to AP/AR">
+                                    <i class="fas fa-link"></i> Link
+                                </button>`
+                            }
                         </td>
                         <td>
                             <button class="action-btn edit" onclick="editFinancialTransaction('${transaction.id}')" data-tooltip="Edit Transaction">
@@ -7569,10 +7575,6 @@
                             <button class="action-btn delete" onclick="deleteFinancialTransaction('${transaction.id}')" data-tooltip="Delete Transaction">
                                 <i class="fas fa-trash-alt"></i>
                             </button>
-                            ${isLinked ? 
-                              `<button class="action-btn unlink" onclick="unlinkTransaction('${transaction.id}')" data-tooltip="Unlink">
-                                <i class="fas fa-unlink"></i>
-                              </button>` : ''}
                         </td>
                     </tr>
                 `;
