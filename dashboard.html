@@ -357,6 +357,63 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
+        /* Floating Chat Trigger */
+        .chat-trigger-floating {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            border: none;
+            border-radius: 50%;
+            box-shadow: 0 8px 32px rgba(30, 41, 59, 0.4);
+            cursor: pointer;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .chat-trigger-floating:hover {
+            transform: scale(1.1);
+            background: linear-gradient(135deg, #334155 0%, #475569 100%);
+            box-shadow: 0 12px 40px rgba(30, 41, 59, 0.6);
+        }
+        
+        .chat-trigger-floating i {
+            color: #fbbf24;
+            font-size: 24px;
+        }
+        
+        /* Chat Modal Overlay */
+        .chat-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+        
+        .chat-modal-overlay.active {
+            display: flex;
+        }
+        
+        .chat-modal {
+            width: 90%;
+            max-width: 600px;
+            height: 80vh;
+            max-height: 700px;
+            margin: auto;
+            position: relative;
+        }
         /* AI Chat Sidebar */
         .ai-assistant-section {
             background: white;
@@ -4856,61 +4913,66 @@
     </main>
 
     <!-- AI Chat Toggle -->
-    <button class="ai-chat-toggle" onclick="toggleAIChat()">
+    <button class="chat-trigger-floating" onclick="toggleChatModal()">
         <i class="fas fa-comments"></i>
     </button>
-
-    <!-- AI Chat Sidebar -->
-    <div class="ai-assistant-section">
-        <!-- Chat Header -->
-        <div class="chat-header">
-            <div class="chat-header-icon">
-                <i class="fas fa-robot"></i>
-            </div>
-            <div class="chat-header-text">
-                <h3>AI Financial Assistant</h3>
-                <p>Your personal financial data analyst</p>
-            </div>
-            <div class="chat-status">
-                <div class="status-dot"></div>
-                <span>Online</span>
-            </div>
-        </div>
-
-        <!-- Chat Messages -->
-        <div class="chat-messages" id="chatMessages">
-            <!-- Empty State -->
-            <div class="empty-state" id="emptyState">
-                <div class="empty-state-icon">
-                    <i class="fas fa-comments"></i>
+    
+    <!-- Chat Modal Overlay -->
+    <div class="chat-modal-overlay" id="chatModalOverlay">
+        <div class="chat-modal">
+            <!-- Put your entire ai-assistant-section here -->
+            <div class="ai-assistant-section">
+                <!-- Chat Header -->
+                <div class="chat-header">
+                    <div class="chat-header-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="chat-header-text">
+                        <h3>AI Financial Assistant</h3>
+                        <p>Your personal financial data analyst</p>
+                    </div>
+                    <div class="chat-status">
+                        <div class="status-dot"></div>
+                        <span>Online</span>
+                    </div>
                 </div>
-                <h4>Start a conversation</h4>
-                <p>Ask me anything about your financial data and I'll provide insights based on your real-time information.</p>
-            </div>
-
-            <!-- Messages will be dynamically added here -->
-        </div>
-
-        <!-- Dynamic Suggestions -->
-        <div class="suggestions-container">
-            <div class="suggestions-title">Quick Questions</div>
-            <div class="suggestions-grid" id="suggestionsGrid">
-                <!-- Dynamic suggestions based on current tab -->
-            </div>
-        </div>
-
-        <!-- Chat Input -->
-        <div class="chat-input-container">
-            <div class="chat-input-wrapper">
-                <textarea 
-                    class="chat-input" 
-                    id="chatInput"
-                    placeholder="Ask about your financial data..."
-                    rows="1"
-                ></textarea>
-                <button class="chat-send-btn" id="chatSendBtn">
-                    <i class="fas fa-paper-plane"></i>
-                </button>
+        
+                <!-- Chat Messages -->
+                <div class="chat-messages" id="chatMessages">
+                    <!-- Empty State -->
+                    <div class="empty-state" id="emptyState">
+                        <div class="empty-state-icon">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                        <h4>Start a conversation</h4>
+                        <p>Ask me anything about your financial data and I'll provide insights based on your real-time information.</p>
+                    </div>
+        
+                    <!-- Messages will be dynamically added here -->
+                </div>
+        
+                <!-- Dynamic Suggestions -->
+                <div class="suggestions-container">
+                    <div class="suggestions-title">Quick Questions</div>
+                    <div class="suggestions-grid" id="suggestionsGrid">
+                        <!-- Dynamic suggestions based on current tab -->
+                    </div>
+                </div>
+        
+                <!-- Chat Input -->
+                <div class="chat-input-container">
+                    <div class="chat-input-wrapper">
+                        <textarea 
+                            class="chat-input" 
+                            id="chatInput"
+                            placeholder="Ask about your financial data..."
+                            rows="1"
+                        ></textarea>
+                        <button class="chat-send-btn" id="chatSendBtn">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -12230,6 +12292,33 @@
 
         // Call this function when the page loads
         document.addEventListener('DOMContentLoaded', ensureFreshReports);
+
+        function toggleChatModal() {
+            const overlay = document.getElementById('chatModalOverlay');
+            overlay.classList.toggle('active');
+            
+            // Initialize chat if first time opening
+            if (!window.aiChatInitialized) {
+                aiChat = new AIFinancialChat();
+                window.aiChatInitialized = true;
+            }
+        }
+        
+        // Close modal when clicking outside
+        document.addEventListener('click', function(e) {
+            const overlay = document.getElementById('chatModalOverlay');
+            if (e.target === overlay) {
+                overlay.classList.remove('active');
+            }
+        });
+        
+        // Close modal with ESC key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const overlay = document.getElementById('chatModalOverlay');
+                overlay.classList.remove('active');
+            }
+        });
         
     </script>
 
