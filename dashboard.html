@@ -8316,68 +8316,221 @@
                 indicator.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Trial Balance: Out of balance by ${formatCurrency(Math.abs(difference), 'IDR')}`;
             }
         }
-        
-        // Auto-balance functionality
+    
+        // ENHANCED: Smart auto-balance with pattern analysis
         async function autoBalanceEntries() {
-            // Calculate current imbalance
-            const accounts = {};
-            financialTransactions.forEach(transaction => {
-                const code = transaction.account_code;
-                if (!accounts[code]) accounts[code] = { debits: 0, credits: 0 };
-                accounts[code].debits += transaction.debit_amount || 0;
-                accounts[code].credits += transaction.credit_amount || 0;
-            });
+            // Calculate detailed imbalance analysis
+            const analysis = analyzeTrialBalanceImbalance();
             
-            let totalDebits = 0, totalCredits = 0;
-            Object.values(accounts).forEach(account => {
-                const net = account.debits - account.credits;
-                if (net > 0) totalDebits += net;
-                else totalCredits += Math.abs(net);
-            });
-            
-            const difference = totalDebits - totalCredits;
-            
-            if (Math.abs(difference) < 0.01) {
+            if (Math.abs(analysis.totalImbalance) < 0.01) {
                 alert('Trial balance is already balanced!');
                 return;
             }
             
-            // Show auto-balance suggestion modal
-            showAutoBalanceModal(difference);
+            // Show smart balance suggestion modal
+            showSmartBalanceModal(analysis);
         }
         
-        function showAutoBalanceModal(difference) {
-            const isDebitNeeded = difference < 0;
-            const amount = Math.abs(difference);
+        // NEW: Analyze imbalance patterns and suggest solutions
+        function analyzeTrialBalanceImbalance() {
+            const accounts = {};
+            const categoryTotals = {
+                'Asset': { debit: 0, credit: 0 },
+                'Liability': { debit: 0, credit: 0 },
+                'Equity': { debit: 0, credit: 0 },
+                'Revenue': { debit: 0, credit: 0 },
+                'Expense': { debit: 0, credit: 0 }
+            };
             
-            // Create modal content
+            // Group transactions by account and category
+            financialTransactions.forEach(transaction => {
+                const code = transaction.account_code;
+                if (!accounts[code]) {
+                    accounts[code] = {
+                        account_code: code,
+                        account_name: transaction.account_name,
+                        category: transaction.category,
+                        debit_total: 0,
+                        credit_total: 0
+                    };
+                }
+                
+                accounts[code].debit_total += transaction.debit_amount || 0;
+                accounts[code].credit_total += transaction.credit_amount || 0;
+                
+                // Add to category totals
+                const category = transaction.category;
+                if (categoryTotals[category]) {
+                    categoryTotals[category].debit += transaction.debit_amount || 0;
+                    categoryTotals[category].credit += transaction.credit_amount || 0;
+                }
+            });
+            
+            // Calculate net balances
+            let totalDebits = 0, totalCredits = 0;
+            const accountBalances = Object.values(accounts).map(account => {
+                const netBalance = account.debit_total - account.credit_total;
+                account.net_balance = netBalance;
+                
+                if (netBalance > 0) {
+                    totalDebits += netBalance;
+                } else {
+                    totalCredits += Math.abs(netBalance);
+                }
+                
+                return account;
+            });
+            
+            const totalImbalance = totalDebits - totalCredits;
+            
+            // Smart pattern analysis
+            const suggestions = generateSmartSuggestions(accountBalances, categoryTotals, totalImbalance);
+            
+            return {
+                totalImbalance,
+                totalDebits,
+                totalCredits,
+                accountBalances,
+                categoryTotals,
+                suggestions
+            };
+        }
+        
+        // NEW: Generate smart balancing suggestions
+        function generateSmartSuggestions(accountBalances, categoryTotals, imbalance) {
+            const suggestions = [];
+            const isDebitNeeded = imbalance < 0;
+            const amount = Math.abs(imbalance);
+            
+            // Pattern 1: High AR activity suggests missing Revenue
+            const arAccount = accountBalances.find(acc => acc.account_code === '1100');
+            if (arAccount && arAccount.net_balance > amount * 0.5) {
+                suggestions.push({
+                    type: 'revenue_from_ar',
+                    title: 'Revenue from AR Activity',
+                    description: `High AR balance (${formatCurrencyFull(arAccount.net_balance, 'IDR')}) suggests missing revenue entries`,
+                    accounts: [
+                        { code: '4010', name: 'Sales Revenue', action: isDebitNeeded ? 'credit' : 'debit' },
+                        { code: '4020', name: 'Service Revenue', action: isDebitNeeded ? 'credit' : 'debit' }
+                    ],
+                    confidence: 'high'
+                });
+            }
+            
+            // Pattern 2: High AP activity suggests missing Expenses
+            const apAccount = accountBalances.find(acc => acc.account_code === '2010');
+            if (apAccount && Math.abs(apAccount.net_balance) > amount * 0.5) {
+                suggestions.push({
+                    type: 'expense_from_ap',
+                    title: 'Expenses from AP Activity',
+                    description: `High AP balance (${formatCurrencyFull(Math.abs(apAccount.net_balance), 'IDR')}) suggests missing expense entries`,
+                    accounts: [
+                        { code: '5100', name: 'Office Expenses', action: isDebitNeeded ? 'debit' : 'credit' },
+                        { code: '5400', name: 'Professional Services', action: isDebitNeeded ? 'debit' : 'credit' },
+                        { code: '5500', name: 'Office Supplies', action: isDebitNeeded ? 'debit' : 'credit' }
+                    ],
+                    confidence: 'high'
+                });
+            }
+            
+            // Pattern 3: Cash activity suggests bank transactions
+            const cashAccount = accountBalances.find(acc => acc.account_code === '1010');
+            if (cashAccount && Math.abs(cashAccount.net_balance) > amount * 0.3) {
+                suggestions.push({
+                    type: 'cash_activity',
+                    title: 'Cash-Related Balancing',
+                    description: `Significant cash activity suggests bank transactions or cash adjustments`,
+                    accounts: [
+                        { code: '1010', name: 'Cash and Cash Equivalents', action: isDebitNeeded ? 'debit' : 'credit' },
+                        { code: '3040', name: 'Retained Earnings', action: isDebitNeeded ? 'credit' : 'debit' }
+                    ],
+                    confidence: 'medium'
+                });
+            }
+            
+            // Pattern 4: Generic balancing entry (fallback)
+            suggestions.push({
+                type: 'generic_balance',
+                title: 'General Balancing Entry',
+                description: 'Create a balancing entry to resolve the imbalance',
+                accounts: isDebitNeeded ? [
+                    { code: '3040', name: 'Retained Earnings', action: 'debit' },
+                    { code: '1010', name: 'Cash and Cash Equivalents', action: 'debit' },
+                    { code: '5900', name: 'Other Expenses', action: 'debit' }
+                ] : [
+                    { code: '3040', name: 'Retained Earnings', action: 'credit' },
+                    { code: '4040', name: 'Other Revenue', action: 'credit' },
+                    { code: '1010', name: 'Cash and Cash Equivalents', action: 'credit' }
+                ],
+                confidence: 'low'
+            });
+            
+            return suggestions.sort((a, b) => {
+                const confidenceOrder = { 'high': 3, 'medium': 2, 'low': 1 };
+                return confidenceOrder[b.confidence] - confidenceOrder[a.confidence];
+            });
+        }
+        
+        // ENHANCED: Smart balance modal with pattern-based suggestions
+        function showSmartBalanceModal(analysis) {
+            const { totalImbalance, suggestions } = analysis;
+            const isDebitNeeded = totalImbalance < 0;
+            const amount = Math.abs(totalImbalance);
+            
+            // Create enhanced modal content
             const modalContent = `
-                <div class="modal-overlay active" id="autoBalanceModal">
-                    <div class="modal">
+                <div class="modal-overlay active" id="smartBalanceModal">
+                    <div class="modal" style="max-width: 700px;">
                         <div class="modal-header">
-                            <h3 class="modal-title">Create Balancing Entry</h3>
-                            <button class="modal-close" onclick="closeAutoBalanceModal()">&times;</button>
+                            <h3 class="modal-title">Smart Trial Balance Correction</h3>
+                            <button class="modal-close" onclick="closeSmartBalanceModal()">&times;</button>
                         </div>
                         <div class="modal-content">
-                            <p>To balance your books, we suggest creating the following entry:</p>
-                            <div class="suggested-entry">
-                                <div class="entry-line">
-                                    <strong>Account:</strong> <select id="balancingAccount" class="form-select"></select>
+                            <div class="imbalance-summary" style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem;">
+                                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                    <i class="fas fa-exclamation-triangle" style="color: #dc2626;"></i>
+                                    <strong style="color: #dc2626;">Trial Balance Imbalance Detected</strong>
                                 </div>
-                                <div class="entry-line">
-                                    <strong>Description:</strong> <input type="text" id="balancingDescription" class="form-input" value="Balancing entry">
-                                </div>
-                                <div class="entry-line">
-                                    <strong>${isDebitNeeded ? 'Debit' : 'Credit'}:</strong> ${formatCurrencyFull(amount, 'IDR')}
-                                </div>
-                                <div class="entry-line">
-                                    <strong>Reference:</strong> <input type="text" id="balancingReference" class="form-input" value="BAL-${Date.now()}">
+                                <p style="margin: 0; color: #7f1d1d;">
+                                    Your books are out of balance by <strong>${formatCurrencyFull(amount, 'IDR')}</strong>. 
+                                    ${isDebitNeeded ? 'Credits exceed debits' : 'Debits exceed credits'} - 
+                                    a ${isDebitNeeded ? 'debit' : 'credit'} entry is needed.
+                                </p>
+                            </div>
+                            
+                            <h4 style="margin-bottom: 1rem;">Suggested Corrections:</h4>
+                            <div class="suggestions-container" id="suggestionsContainer">
+                                ${generateSuggestionsHTML(suggestions, amount)}
+                            </div>
+                            
+                            <div class="bulk-balance-option" style="margin-top: 1.5rem; padding: 1rem; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                <h5 style="margin: 0 0 0.5rem 0; display: flex; align-items: center; gap: 0.5rem;">
+                                    <i class="fas fa-layer-group"></i>
+                                    Bulk Balancing Entry
+                                </h5>
+                                <p style="margin: 0 0 1rem 0; color: #64748b; font-size: 0.875rem;">
+                                    Create a single balancing entry if none of the above suggestions apply:
+                                </p>
+                                <div style="display: flex; gap: 1rem; align-items: end;">
+                                    <div style="flex: 1;">
+                                        <label style="display: block; margin-bottom: 0.25rem; font-weight: 600; font-size: 0.875rem;">Account:</label>
+                                        <select id="bulkBalanceAccount" class="form-select">
+                                            <option value="">Select Account</option>
+                                        </select>
+                                    </div>
+                                    <div style="flex: 1;">
+                                        <label style="display: block; margin-bottom: 0.25rem; font-weight: 600; font-size: 0.875rem;">Description:</label>
+                                        <input type="text" id="bulkBalanceDescription" class="form-input" value="Trial balance correction" placeholder="Description">
+                                    </div>
+                                    <button class="btn btn-secondary" onclick="createBulkBalancingEntry(${totalImbalance})" style="white-space: nowrap;">
+                                        Create Entry
+                                    </button>
                                 </div>
                             </div>
                         </div>
                         <div class="form-actions">
-                            <button class="btn btn-secondary" onclick="closeAutoBalanceModal()">Cancel</button>
-                            <button class="btn btn-primary" onclick="createBalancingEntry(${difference})">Create Entry</button>
+                            <button class="btn btn-secondary" onclick="closeSmartBalanceModal()">Cancel</button>
+                            <button class="btn btn-primary" onclick="showTrialBalanceDetails()">View Detailed Breakdown</button>
                         </div>
                     </div>
                 </div>
@@ -8386,8 +8539,273 @@
             // Add modal to DOM
             document.body.insertAdjacentHTML('beforeend', modalContent);
             
-            // Populate account dropdown with suggested accounts
-            populateBalancingAccounts(isDebitNeeded);
+            // Populate bulk balance account dropdown
+            populateBulkBalanceAccounts(isDebitNeeded);
+        }
+        
+        // NEW: Generate suggestions HTML
+        function generateSuggestionsHTML(suggestions, amount) {
+            return suggestions.map((suggestion, index) => {
+                const confidenceColor = {
+                    'high': '#10b981',
+                    'medium': '#f59e0b', 
+                    'low': '#6b7280'
+                };
+                
+                const confidenceIcon = {
+                    'high': 'fa-star',
+                    'medium': 'fa-star-half-alt',
+                    'low': 'fa-star'
+                };
+                
+                return `
+                    <div class="suggestion-card" style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; transition: all 0.2s;">
+                        <div style="display: flex; justify-content: between; align-items: start; margin-bottom: 0.75rem;">
+                            <div>
+                                <h6 style="margin: 0 0 0.25rem 0; display: flex; align-items: center; gap: 0.5rem;">
+                                    ${suggestion.title}
+                                    <span style="display: flex; align-items: center; gap: 0.25rem; color: ${confidenceColor[suggestion.confidence]}; font-size: 0.75rem;">
+                                        <i class="fas ${confidenceIcon[suggestion.confidence]}" style="font-size: 0.625rem;"></i>
+                                        ${suggestion.confidence} confidence
+                                    </span>
+                                </h6>
+                                <p style="margin: 0; color: #64748b; font-size: 0.875rem;">${suggestion.description}</p>
+                            </div>
+                        </div>
+                        <div class="suggested-accounts" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                            ${suggestion.accounts.map(account => `
+                                <button class="btn btn-sm btn-outline-primary suggested-account-btn" 
+                                        onclick="createSuggestedEntry('${account.code}', '${account.name}', '${account.action}', ${amount})"
+                                        style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <span>${account.code} - ${account.name}</span>
+                                    <span style="background: ${account.action === 'debit' ? '#dbeafe' : '#dcfce7'}; 
+                                                 color: ${account.action === 'debit' ? '#1e40af' : '#166534'}; 
+                                                 padding: 0.125rem 0.375rem; border-radius: 4px; font-size: 0.75rem;">
+                                        ${account.action.toUpperCase()}
+                                    </span>
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // NEW: Populate bulk balance accounts
+        function populateBulkBalanceAccounts(isDebitNeeded) {
+            const select = document.getElementById('bulkBalanceAccount');
+            if (!select) return;
+            
+            // Show appropriate accounts based on what's needed
+            const suggestedAccounts = isDebitNeeded ? 
+                glAccounts.filter(acc => acc.category === 'Asset' || acc.category === 'Expense') :
+                glAccounts.filter(acc => acc.category === 'Liability' || acc.category === 'Equity' || acc.category === 'Revenue');
+            
+            select.innerHTML = '<option value="">Select Account</option>';
+            
+            // Add a separator and most common balancing accounts at top
+            const commonAccounts = [
+                { code: '3040', name: 'Retained Earnings' },
+                { code: '1010', name: 'Cash and Cash Equivalents' }
+            ].filter(acc => suggestedAccounts.find(sa => sa.account_code === acc.code));
+            
+            if (commonAccounts.length > 0) {
+                commonAccounts.forEach(account => {
+                    const option = document.createElement('option');
+                    option.value = account.code;
+                    option.textContent = `⭐ ${account.code} - ${account.name}`;
+                    select.appendChild(option);
+                });
+                
+                // Add separator
+                const separator = document.createElement('option');
+                separator.disabled = true;
+                separator.textContent = '──────────────────';
+                select.appendChild(separator);
+            }
+            
+            // Add all other accounts
+            suggestedAccounts.forEach(account => {
+                if (!commonAccounts.find(ca => ca.code === account.account_code)) {
+                    const option = document.createElement('option');
+                    option.value = account.account_code;
+                    option.textContent = `${account.account_code} - ${account.account_name}`;
+                    select.appendChild(option);
+                }
+            });
+        }
+        
+        // NEW: Close smart balance modal
+        function closeSmartBalanceModal() {
+            const modal = document.getElementById('smartBalanceModal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+
+        // NEW: Create suggested balancing entry
+        async function createSuggestedEntry(accountCode, accountName, action, amount) {
+            if (!confirm(`Create ${action} entry of ${formatCurrencyFull(amount, 'IDR')} to ${accountCode} - ${accountName}?`)) {
+                return;
+            }
+            
+            try {
+                const account = glAccounts.find(acc => acc.account_code === accountCode);
+                if (!account) {
+                    alert('Account not found in chart of accounts.');
+                    return;
+                }
+                
+                const balancingTransaction = {
+                    transaction_date: new Date().toISOString().split('T')[0],
+                    account_code: accountCode,
+                    account_name: accountName,
+                    description: `Smart balance correction - ${account.category.toLowerCase()} adjustment`,
+                    debit_amount: action === 'debit' ? amount : 0,
+                    credit_amount: action === 'credit' ? amount : 0,
+                    reference: `SMART-BAL-${Date.now()}`,
+                    category: account.category,
+                    source: 'Smart-Balance',
+                    notes: 'Automatically suggested balancing entry based on transaction pattern analysis'
+                };
+                
+                // Show loading state
+                const button = event.target.closest('button');
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
+                button.disabled = true;
+                
+                await saveFinancialTransaction(balancingTransaction);
+                
+                closeSmartBalanceModal();
+                await loadFinancialTransactions();
+                
+                // Show success message with details
+                alert(`✅ Smart balancing entry created successfully!\n\n` +
+                      `Account: ${accountCode} - ${accountName}\n` +
+                      `${action === 'debit' ? 'Debit' : 'Credit'}: ${formatCurrencyFull(amount, 'IDR')}\n` +
+                      `Description: ${balancingTransaction.description}`);
+                
+            } catch (error) {
+                console.error('Error creating suggested entry:', error);
+                alert('Error creating balancing entry: ' + error.message);
+                
+                // Restore button state
+                if (button) {
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                }
+            }
+        }
+        
+        // NEW: Create bulk balancing entry
+        async function createBulkBalancingEntry(imbalance) {
+            const accountCode = document.getElementById('bulkBalanceAccount').value;
+            const description = document.getElementById('bulkBalanceDescription').value;
+            
+            if (!accountCode) {
+                alert('Please select an account for the balancing entry.');
+                return;
+            }
+            
+            if (!description.trim()) {
+                alert('Please provide a description for the balancing entry.');
+                return;
+            }
+            
+            const account = glAccounts.find(acc => acc.account_code === accountCode);
+            if (!account) {
+                alert('Selected account not found in chart of accounts.');
+                return;
+            }
+            
+            const amount = Math.abs(imbalance);
+            const isDebitNeeded = imbalance < 0;
+            
+            if (!confirm(`Create bulk balancing entry?\n\n` +
+                        `Account: ${accountCode} - ${account.account_name}\n` +
+                        `${isDebitNeeded ? 'Debit' : 'Credit'}: ${formatCurrencyFull(amount, 'IDR')}\n` +
+                        `Description: ${description}`)) {
+                return;
+            }
+            
+            try {
+                const balancingTransaction = {
+                    transaction_date: new Date().toISOString().split('T')[0],
+                    account_code: accountCode,
+                    account_name: account.account_name,
+                    description: description,
+                    debit_amount: isDebitNeeded ? amount : 0,
+                    credit_amount: isDebitNeeded ? 0 : amount,
+                    reference: `BULK-BAL-${Date.now()}`,
+                    category: account.category,
+                    source: 'Bulk-Balance',
+                    notes: 'Manual bulk balancing entry to correct trial balance'
+                };
+                
+                await saveFinancialTransaction(balancingTransaction);
+                
+                closeSmartBalanceModal();
+                await loadFinancialTransactions();
+                
+                alert(`✅ Bulk balancing entry created successfully!\n\n` +
+                      `The trial balance should now be corrected.`);
+                
+            } catch (error) {
+                console.error('Error creating bulk balancing entry:', error);
+                alert('Error creating balancing entry: ' + error.message);
+            }
+        }
+        
+        // NEW: Show trial balance details breakdown
+        function showTrialBalanceDetails() {
+            closeSmartBalanceModal();
+            
+            // Switch to the trial balance tab to show details
+            switchFinancialTab('trial-balance');
+            
+            // Highlight the imbalanced accounts
+            setTimeout(() => {
+                const table = document.getElementById('trialBalanceTable');
+                if (table) {
+                    // Add visual highlighting to show problem areas
+                    const rows = table.querySelectorAll('tbody tr');
+                    rows.forEach(row => {
+                        const debitCell = row.cells[2];
+                        const creditCell = row.cells[3];
+                        
+                        if (debitCell && creditCell) {
+                            const debitText = debitCell.textContent.replace(/[^\d.-]/g, '');
+                            const creditText = creditCell.textContent.replace(/[^\d.-]/g, '');
+                            const debitAmount = parseFloat(debitText) || 0;
+                            const creditAmount = parseFloat(creditText) || 0;
+                            
+                            // Highlight significant balances
+                            if (debitAmount > 100000 || creditAmount > 100000) {
+                                row.style.backgroundColor = '#fef3c7';
+                                row.style.borderLeft = '3px solid #f59e0b';
+                            }
+                        }
+                    });
+                    
+                    // Scroll to table
+                    table.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }, 300);
+        }
+        
+        // ENHANCED: Update the close function to match new modal ID
+        function closeAutoBalanceModal() {
+            // Handle both old and new modal IDs for compatibility
+            const oldModal = document.getElementById('autoBalanceModal');
+            const newModal = document.getElementById('smartBalanceModal');
+            
+            if (oldModal) {
+                oldModal.remove();
+            }
+            if (newModal) {
+                newModal.remove();
+            }
         }
         
         function populateBalancingAccounts(isDebitNeeded) {
