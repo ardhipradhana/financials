@@ -7767,8 +7767,8 @@
                 <tr>
                     <td>${account.account_code}</td>
                     <td>${account.account_name}</td>
-                    <td>${account.final_debit > 0 ? formatCurrency(account.final_debit, 'IDR') : '-'}</td>
-                    <td>${account.final_credit > 0 ? formatCurrency(account.final_credit, 'IDR') : '-'}</td>
+                    <td>${account.final_debit > 0 ? formatCurrencyFull(account.final_debit, 'IDR') : '-'}</td>
+                    <td>${account.final_credit > 0 ? formatCurrencyFull(account.final_credit, 'IDR') : '-'}</td>
                 </tr>
             `).join('');
         }
@@ -7879,7 +7879,7 @@
                                     <strong>Description:</strong> <input type="text" id="balancingDescription" class="form-input" value="Balancing entry">
                                 </div>
                                 <div class="entry-line">
-                                    <strong>${isDebitNeeded ? 'Debit' : 'Credit'}:</strong> ${formatCurrency(amount, 'IDR')}
+                                    <strong>${isDebitNeeded ? 'Debit' : 'Credit'}:</strong> ${formatCurrencyFull(amount, 'IDR')}
                                 </div>
                                 <div class="entry-line">
                                     <strong>Reference:</strong> <input type="text" id="balancingReference" class="form-input" value="BAL-${Date.now()}">
@@ -8569,7 +8569,7 @@
                     
                     <div class="report-line subtotal-line">
                         <span>Total Revenue</span>
-                        <span>${formatCurrency(totalRevenue, 'IDR')}</span>
+                        <span>${formatCurrencyFull(totalRevenue, 'IDR')}</span>
                     </div>
                 </div>
                 
@@ -8588,13 +8588,13 @@
                     
                     <div class="report-line subtotal-line">
                         <span>Total Expenses</span>
-                        <span>${formatCurrency(totalExpenses, 'IDR')}</span>
+                        <span>${formatCurrencyFull(totalExpenses, 'IDR')}</span>
                     </div>
                 </div>
                 
                 <div class="report-line total-line">
                     <span>NET INCOME</span>
-                    <span>${formatCurrency(netIncome, 'IDR')}</span>
+                    <span>${formatCurrencyFull(netIncome, 'IDR')}</span>
                 </div>
             `;
             
@@ -8648,7 +8648,7 @@
                     
                     <div class="report-line total-line">
                         <span>TOTAL ASSETS</span>
-                        <span>${formatCurrency(totalAssets, 'IDR')}</span>
+                        <span>${formatCurrencyFull(totalAssets, 'IDR')}</span>
                     </div>
                 </div>
                 
@@ -8667,7 +8667,7 @@
                     
                     <div class="report-line subtotal-line">
                         <span>Total Liabilities</span>
-                        <span>${formatCurrency(totalLiabilities, 'IDR')}</span>
+                        <span>${formatCurrencyFull(totalLiabilities, 'IDR')}</span>
                     </div>
                 </div>
                 
@@ -8677,13 +8677,13 @@
                     
                     <div class="report-line subtotal-line">
                         <span>Total Equity</span>
-                        <span>${formatCurrency(totalEquity, 'IDR')}</span>
+                        <span>${formatCurrencyFull(totalEquity, 'IDR')}</span>
                     </div>
                 </div>
                 
                 <div class="report-line total-line">
                     <span>TOTAL LIABILITIES + EQUITY</span>
-                    <span>${formatCurrency(totalLiabilities + totalEquity, 'IDR')}</span>
+                    <span>${formatCurrencyFull(totalLiabilities + totalEquity, 'IDR')}</span>
                 </div>
             `;
             
@@ -8731,7 +8731,7 @@
                     ${generateCashFlowLines(operatingAccounts)}
                     <div class="report-line subtotal-line">
                         <span>Net Cash from Operating Activities</span>
-                        <span>${formatCurrency(operatingCashFlow, 'IDR')}</span>
+                        <span>${formatCurrencyFull(operatingCashFlow, 'IDR')}</span>
                     </div>
                 </div>
                 
@@ -8740,7 +8740,7 @@
                     ${generateCashFlowLines(investingAccounts)}
                     <div class="report-line subtotal-line">
                         <span>Net Cash from Investing Activities</span>
-                        <span>${formatCurrency(investingCashFlow, 'IDR')}</span>
+                        <span>${formatCurrencyFull(investingCashFlow, 'IDR')}</span>
                     </div>
                 </div>
                 
@@ -8749,23 +8749,23 @@
                     ${generateCashFlowLines(financingAccounts)}
                     <div class="report-line subtotal-line">
                         <span>Net Cash from Financing Activities</span>
-                        <span>${formatCurrency(financingCashFlow, 'IDR')}</span>
+                        <span>${formatCurrencyFull(financingCashFlow, 'IDR')}</span>
                     </div>
                 </div>
                 
                 <div class="report-line subtotal-line">
                     <span>NET INCREASE (DECREASE) IN CASH</span>
-                    <span>${formatCurrency(netCashFlow, 'IDR')}</span>
+                    <span>${formatCurrencyFull(netCashFlow, 'IDR')}</span>
                 </div>
                 
                 <div class="report-line subtotal-line">
                     <span>Beginning Cash Balance</span>
-                    <span>${formatCurrency(beginningBalance, 'IDR')}</span>
+                    <span>${formatCurrencyFull(beginningBalance, 'IDR')}</span>
                 </div>
                 
                 <div class="report-line final-total-line">
                     <span>ENDING CASH BALANCE</span>
-                    <span>${formatCurrency(endingBalance, 'IDR')}</span>
+                    <span>${formatCurrencyFull(endingBalance, 'IDR')}</span>
                 </div>
             `;
             
@@ -8830,7 +8830,7 @@
                     lines += `
                         <div class="report-line">
                             <span class="account-item">${item}</span>
-                            <span>${formatCurrency(amount, 'IDR')}</span>
+                            <span>${formatCurrencyFull(amount, 'IDR')}</span>
                         </div>
                     `;
                 }
