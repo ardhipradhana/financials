@@ -174,6 +174,7 @@
             font-size: 0.875rem;
             font-weight: 600;
             color: #64748b;
+            letter-spacing: 0.5px;
         }
 
         .metric-title {
@@ -3200,7 +3201,8 @@
         }
         
         .period-selector-container {
-            align-self: flex-start;
+            position: relative;
+            display: inline-block;
         }
         
         .period-selector-enhanced {
@@ -3208,13 +3210,14 @@
             background: white;
             border: 1px solid #e2e8f0;
             border-radius: 6px;
-            padding: 0.375rem 1.5rem 0.375rem 0.75rem;
+            padding: 0.375rem 2rem 0.375rem 0.75rem;
             font-size: 0.75rem;
             font-weight: 500;
             color: #374151;
             cursor: pointer;
             transition: all 0.2s ease;
-            min-width: 100px;
+            min-width: 120px;
+            position: relative;
         }
         
         .period-selector-enhanced:hover {
@@ -3236,6 +3239,7 @@
             font-size: 0.625rem;
             color: #9ca3af;
             pointer-events: none;
+            z-index: 1;
         }
         
         .custom-date-range {
@@ -3267,6 +3271,14 @@
             font-size: 0.75rem;
             color: #6b7280;
             font-weight: 500;
+        }
+
+        .title-and-selector {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            margin-bottom: 0.75rem;
         }
         
     </style>
@@ -3383,19 +3395,21 @@
 
                     <div class="metric-card">
                         <div class="metric-header">
-                            <div>
+                            <div class="metric-content">
                                 <div class="metric-title-with-selector">
-                                    <span class="metric-title-text">Revenue</span>
-                                    <div class="period-selector-container">
-                                        <select id="dashboardPeriodFilter" class="period-selector-enhanced" onchange="updateDashboardWithRealData()">
-                                            <option value="MTD">This Month</option>
-                                            <option value="QTD">This Quarter</option>
-                                            <option value="YTD">This Year</option>
-                                            <option value="L30D">Last 30 Days</option>
-                                            <option value="L90D">Last 90 Days</option>
-                                            <option value="custom">Custom Range</option>
-                                        </select>
-                                        <i class="fas fa-chevron-down selector-arrow"></i>
+                                    <div class="title-and-selector">
+                                        <span class="metric-title-text">Revenue</span>
+                                        <div class="period-selector-container">
+                                            <select id="dashboardPeriodFilter" class="period-selector-enhanced" onchange="updateDashboardWithRealData()">
+                                                <option value="MTD">This Month</option>
+                                                <option value="QTD">This Quarter</option>
+                                                <option value="YTD">This Year</option>
+                                                <option value="L30D">Last 30 Days</option>
+                                                <option value="L90D">Last 90 Days</option>
+                                                <option value="custom">Custom Range</option>
+                                            </select>
+                                            <i class="fas fa-chevron-down selector-arrow"></i>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="metric-value" id="revenueValue">Rp 0</div>
@@ -10443,55 +10457,40 @@
             console.log('Cash impact element:', cashImpactElement);
             console.log('Current cash:', currentCash);
             
-            // 2. DEBUG AR/AP VALUES - Calculate NET overdue position (AR - AP)
-            const totalARElement = document.getElementById('totalAR');
-            const totalAPElement = document.getElementById('totalAP');
+            // 2. FIXED: Use FULL AR/AP amounts, not just overdue
+            const totalARAllElement = document.getElementById('totalARAll');
+            const totalAPAllElement = document.getElementById('totalAPAll');
             
-            console.log('=== DEBUGGING AR/AP VALUES ===');
-            console.log('AR Element:', totalARElement);
-            console.log('AR Text Content:', totalARElement?.textContent);
-            console.log('AP Element:', totalAPElement);
-            console.log('AP Text Content:', totalAPElement?.textContent);
+            console.log('=== DEBUGGING FULL AR/AP VALUES ===');
+            console.log('Total AR All Element:', totalARAllElement);
+            console.log('Total AR All Text:', totalARAllElement?.textContent);
+            console.log('Total AP All Element:', totalAPAllElement);
+            console.log('Total AP All Text:', totalAPAllElement?.textContent);
             
-            // Try different parsing approaches
-            let overdueAR = 0;
-            let overdueAP = 0;
+            // Parse the FULL amounts (not just overdue)
+            let fullAR = 0;
+            let fullAP = 0;
             
-            if (totalARElement) {
-                const arText = totalARElement.textContent;
-                // Try multiple parsing methods
-                const arMethod1 = parseFloat(arText.replace(/[^\d.-]/g, '') || 0);
-                const arMethod2 = parseFloat(arText.replace(/[^0-9.-]/g, '') || 0);
-                const arMethod3 = parseFloat(arText.replace(/Rp\s*/, '').replace(/,/g, '') || 0);
-                
-                console.log('AR Parsing Method 1 (remove non-digits):', arMethod1);
-                console.log('AR Parsing Method 2 (numbers only):', arMethod2);
-                console.log('AR Parsing Method 3 (remove Rp and commas):', arMethod3);
-                
-                // Use the method that gives the largest reasonable value
-                overdueAR = Math.max(arMethod1, arMethod2, arMethod3);
+            if (totalARAllElement) {
+                const arText = totalARAllElement.textContent;
+                // Remove "Rp" and any formatting, keep numbers and decimal
+                fullAR = parseFloat(arText.replace(/Rp\s*/g, '').replace(/,/g, '').replace(/[^\d.-]/g, '') || 0);
+                console.log('Parsed full AR:', fullAR);
             }
             
-            if (totalAPElement) {
-                const apText = totalAPElement.textContent;
-                // Try multiple parsing methods
-                const apMethod1 = parseFloat(apText.replace(/[^\d.-]/g, '') || 0);
-                const apMethod2 = parseFloat(apText.replace(/[^0-9.-]/g, '') || 0);
-                const apMethod3 = parseFloat(apText.replace(/Rp\s*/, '').replace(/,/g, '') || 0);
-                
-                console.log('AP Parsing Method 1 (remove non-digits):', apMethod1);
-                console.log('AP Parsing Method 2 (numbers only):', apMethod2);
-                console.log('AP Parsing Method 3 (remove Rp and commas):', apMethod3);
-                
-                // Use the method that gives the largest reasonable value
-                overdueAP = Math.max(apMethod1, apMethod2, apMethod3);
+            if (totalAPAllElement) {
+                const apText = totalAPAllElement.textContent;
+                // Remove "Rp" and any formatting, keep numbers and decimal  
+                fullAP = parseFloat(apText.replace(/Rp\s*/g, '').replace(/,/g, '').replace(/[^\d.-]/g, '') || 0);
+                console.log('Parsed full AP:', fullAP);
             }
             
-            console.log('Final parsed AR:', overdueAR);
-            console.log('Final parsed AP:', overdueAP);
+            const netOverduePosition = fullAR - fullAP;
+            console.log('Net position (Full AR - Full AP):', netOverduePosition);
             
-            const netOverduePosition = overdueAR - overdueAP;
-            console.log('Net overdue position:', netOverduePosition);
+            // Also get overdue amounts for breakdown
+            const overdueAR = parseFloat(document.getElementById('totalAR')?.textContent.replace(/[^\d.-]/g, '') || 0);
+            const overdueAP = parseFloat(document.getElementById('totalAP')?.textContent.replace(/[^\d.-]/g, '') || 0);
             
             // 3. Calculate revenue based on selected period
             const selectedPeriod = document.getElementById('dashboardPeriodFilter')?.value || 'MTD';
@@ -10503,6 +10502,8 @@
             const metrics = {
                 currentCash,
                 netOverduePosition,
+                fullAR,
+                fullAP,
                 overdueAR,
                 overdueAP,
                 periodRevenue,
@@ -10524,134 +10525,126 @@
                 return 0;
             }
             
-            // DEBUG: Check all transaction data
-            console.log('Sample financial transactions:', financialTransactions.slice(0, 3));
+            // DEBUG: Show first few transactions
+            console.log('Sample transactions:', financialTransactions.slice(0, 3));
             
-            // Debug: Check all unique categories
-            const allCategories = [...new Set(financialTransactions.map(t => t.category))];
+            // DEBUG: Show all unique categories and account names
+            const allCategories = [...new Set(financialTransactions.map(t => t.category))].filter(Boolean);
+            const allAccountNames = [...new Set(financialTransactions.map(t => t.account_name))].filter(Boolean);
+            
             console.log('All categories found:', allCategories);
-            
-            // Debug: Check all unique account names
-            const allAccountNames = [...new Set(financialTransactions.map(t => t.account_name))];
             console.log('All account names found:', allAccountNames);
             
-            // Try different revenue filters
-            const revenueFilter1 = financialTransactions.filter(t => t.category === 'Revenue');
-            const revenueFilter2 = financialTransactions.filter(t => t.category && t.category.toLowerCase().includes('revenue'));
-            const revenueFilter3 = financialTransactions.filter(t => t.account_name && t.account_name.toLowerCase().includes('revenue'));
-            const revenueFilter4 = financialTransactions.filter(t => t.account_name && t.account_name.toLowerCase().includes('sales'));
-            const revenueFilter5 = financialTransactions.filter(t => t.account_name && t.account_name.toLowerCase().includes('income'));
-            const revenueFilter6 = financialTransactions.filter(t => (parseFloat(t.credit) || 0) > 0 && t.category !== 'Liability' && t.category !== 'Equity');
+            // Try multiple approaches to find revenue
+            const approaches = [
+                {
+                    name: 'Category = Revenue',
+                    filter: t => t.category === 'Revenue'
+                },
+                {
+                    name: 'Category contains revenue (case insensitive)',
+                    filter: t => t.category && t.category.toLowerCase().includes('revenue')
+                },
+                {
+                    name: 'Account name contains revenue',
+                    filter: t => t.account_name && t.account_name.toLowerCase().includes('revenue')
+                },
+                {
+                    name: 'Account name contains sales',
+                    filter: t => t.account_name && t.account_name.toLowerCase().includes('sales')
+                },
+                {
+                    name: 'Account name contains income',
+                    filter: t => t.account_name && t.account_name.toLowerCase().includes('income')
+                },
+                {
+                    name: 'Credits in income-type accounts',
+                    filter: t => (parseFloat(t.credit) || 0) > 0 && 
+                                 t.account_name && 
+                                 (t.account_name.toLowerCase().includes('revenue') || 
+                                  t.account_name.toLowerCase().includes('sales') || 
+                                  t.account_name.toLowerCase().includes('income'))
+                },
+                {
+                    name: 'All credit transactions (excluding liabilities/equity)',
+                    filter: t => (parseFloat(t.credit) || 0) > 0 && 
+                                 t.category !== 'Liability' && 
+                                 t.category !== 'Equity'
+                }
+            ];
             
-            console.log('Revenue filter 1 (category = Revenue):', revenueFilter1.length, revenueFilter1);
-            console.log('Revenue filter 2 (category contains revenue):', revenueFilter2.length, revenueFilter2);
-            console.log('Revenue filter 3 (account_name contains revenue):', revenueFilter3.length, revenueFilter3);
-            console.log('Revenue filter 4 (account_name contains sales):', revenueFilter4.length, revenueFilter4);
-            console.log('Revenue filter 5 (account_name contains income):', revenueFilter5.length, revenueFilter5);
-            console.log('Revenue filter 6 (credits excluding liabilities/equity):', revenueFilter6.length, revenueFilter6);
+            let bestApproach = null;
+            let bestTransactions = [];
             
-            // Use the filter that returns data, prioritizing the most specific
-            let filtered = [];
-            if (revenueFilter1.length > 0) filtered = revenueFilter1;
-            else if (revenueFilter2.length > 0) filtered = revenueFilter2;
-            else if (revenueFilter3.length > 0) filtered = revenueFilter3;
-            else if (revenueFilter4.length > 0) filtered = revenueFilter4;
-            else if (revenueFilter5.length > 0) filtered = revenueFilter5;
-            else if (revenueFilter6.length > 0) filtered = revenueFilter6;
+            approaches.forEach(approach => {
+                const filtered = financialTransactions.filter(approach.filter);
+                console.log(`${approach.name}: ${filtered.length} transactions`);
+                if (filtered.length > 0) {
+                    console.log('Sample:', filtered.slice(0, 2));
+                }
+                
+                if (filtered.length > bestTransactions.length) {
+                    bestApproach = approach;
+                    bestTransactions = filtered;
+                }
+            });
             
-            console.log('Selected filter returned', filtered.length, 'transactions');
-            console.log('Selected revenue transactions:', filtered);
-            
-            if (filtered.length === 0) {
-                console.log('No revenue transactions found with any filter');
+            if (bestTransactions.length === 0) {
+                console.log('No revenue transactions found with any approach');
                 return 0;
             }
             
-            // Apply date filtering based on period
+            console.log(`Using approach: ${bestApproach.name} (${bestTransactions.length} transactions)`);
+            
+            // Apply date filtering
+            let filtered = bestTransactions;
+            
             if (periodFilter && periodFilter !== 'custom') {
                 const today = new Date();
                 let startDate;
                 
-                console.log('Today:', today);
-                
                 switch(periodFilter) {
                     case 'MTD':
                         startDate = new Date(today.getFullYear(), today.getMonth(), 1);
-                        console.log('MTD start date:', startDate);
                         break;
                     case 'QTD':
                         const quarter = Math.floor(today.getMonth() / 3);
                         startDate = new Date(today.getFullYear(), quarter * 3, 1);
-                        console.log('QTD start date:', startDate, 'Quarter:', quarter);
                         break;
                     case 'YTD':
                         startDate = new Date(today.getFullYear(), 0, 1);
-                        console.log('YTD start date:', startDate);
                         break;
                     case 'L30D':
                         startDate = new Date(today);
                         startDate.setDate(today.getDate() - 30);
-                        console.log('Last 30 days start date:', startDate);
                         break;
                     case 'L90D':
                         startDate = new Date(today);
                         startDate.setDate(today.getDate() - 90);
-                        console.log('Last 90 days start date:', startDate);
                         break;
-                    default:
-                        console.log('No date filtering applied for period:', periodFilter);
                 }
                 
                 if (startDate) {
                     const beforeFilter = filtered.length;
                     filtered = filtered.filter(t => {
                         const transDate = new Date(t.transaction_date);
-                        const isInPeriod = transDate >= startDate && transDate <= today;
-                        console.log(`Transaction ${t.id}: ${t.transaction_date} (${transDate}) - In period: ${isInPeriod}`);
-                        return isInPeriod;
+                        return transDate >= startDate && transDate <= today;
                     });
-                    console.log(`Date filtered: ${beforeFilter} -> ${filtered.length} transactions`);
-                    console.log('Transactions after date filter:', filtered);
+                    console.log(`Date filtered (${periodFilter}): ${beforeFilter} -> ${filtered.length} transactions`);
                 }
             }
             
-            // Custom date range
-            if (periodFilter === 'custom') {
-                const dateFrom = document.getElementById('revenueDateFrom')?.value;
-                const dateTo = document.getElementById('revenueDateTo')?.value;
-                
-                console.log('Custom date range:', dateFrom, 'to', dateTo);
-                
-                if (dateFrom && dateTo) {
-                    const beforeFilter = filtered.length;
-                    filtered = filtered.filter(t => {
-                        const transDate = new Date(t.transaction_date);
-                        const fromDate = new Date(dateFrom);
-                        const toDate = new Date(dateTo);
-                        const isInRange = transDate >= fromDate && transDate <= toDate;
-                        console.log(`Transaction ${t.id}: ${t.transaction_date} - In range: ${isInRange}`);
-                        return isInRange;
-                    });
-                    console.log(`Custom range filtered: ${beforeFilter} -> ${filtered.length} transactions`);
-                } else {
-                    console.log('Custom range selected but no dates provided');
-                }
-            }
-            
-            // Calculate total revenue (credits increase revenue, debits decrease revenue)
+            // Calculate total revenue
             let totalRevenue = 0;
             filtered.forEach(t => {
                 const credit = parseFloat(t.credit || 0);
                 const debit = parseFloat(t.debit || 0);
-                const transactionRevenue = credit - debit;
-                totalRevenue += transactionRevenue;
-                
-                console.log(`Transaction ${t.id} (${t.account_name}): Credit: ${credit}, Debit: ${debit}, Net: ${transactionRevenue}`);
+                const net = credit - debit;
+                totalRevenue += net;
+                console.log(`${t.account_name}: Credit ${credit}, Debit ${debit}, Net ${net}`);
             });
             
             console.log('Final calculated revenue:', totalRevenue);
-            console.log('=== END REVENUE CALCULATION ===');
-            
             return totalRevenue;
         }
 
