@@ -129,7 +129,7 @@
             gap: 1.5rem;
             margin-bottom: 2rem;
         }
-
+        
         .metric-card {
             background: white;
             border-radius: 12px;
@@ -138,22 +138,42 @@
             border: 1px solid #e2e8f0;
             transition: all 0.3s ease;
         }
-
+        
         .metric-card:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
         }
-
+        
         .metric-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 1rem;
             width: 100%;
         }
-
+        
         .metric-content {
             flex: 1;
+            min-width: 0; /* Prevent flex item from growing beyond container */
+        }
+
+        .metric-title, .metric-title-with-selector {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #64748b;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.75rem;
+        }
+        
+        .metric-title-with-selector {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .metric-title-text {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #64748b;
         }
 
         .metric-title {
@@ -174,8 +194,10 @@
             font-size: 1rem;
             flex-shrink: 0;
             margin-left: 1rem;
+            position: relative;
+            overflow: hidden;
         }
-
+        
         .metric-icon::before {
             content: '';
             position: absolute;
@@ -184,7 +206,7 @@
             right: -2px;
             bottom: -2px;
             background: linear-gradient(45deg, rgba(255,255,255,0.1), rgba(255,255,255,0.3));
-            border-radius: 14px;
+            border-radius: 10px;
             z-index: 0;
         }
 
@@ -211,19 +233,23 @@
         }
         
         .metric-value {
-            font-size: 2rem;
+            font-size: 1.75rem;
             font-weight: 700;
             color: #1e293b;
             margin-bottom: 0.5rem;
+            line-height: 1.2;
+            word-break: break-word;
         }
 
         .metric-change {
             font-size: 0.875rem;
             font-weight: 500;
         }
-
+        
         .positive { color: #10b981; }
         .negative { color: #ef4444; }
+        .neutral { color: #64748b; }
+
 
         /* Time Period Selector */
         .time-selector {
@@ -3172,23 +3198,9 @@
             margin: 0 0.25rem;
             width: 120px;
         }
-
-        .metric-title-with-selector {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 0.5rem;
-        }
-        
-        .metric-title-text {
-            font-size: 0.875rem;
-            font-weight: 600;
-            color: #64748b;
-        }
         
         .period-selector-container {
-            position: relative;
-            display: inline-block;
+            align-self: flex-start;
         }
         
         .period-selector-enhanced {
@@ -3238,10 +3250,12 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            flex-wrap: wrap;
         }
         
         .date-input-enhanced {
             flex: 1;
+            min-width: 100px;
             padding: 0.5rem;
             border: 1px solid #d1d5db;
             border-radius: 4px;
