@@ -5942,12 +5942,18 @@
                 
                 const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                 
+                // Parse markdown formatting
+                const formattedContent = content
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                    .replace(/\n/g, '<br>');
+                
                 messageElement.innerHTML = `
                     <div class="message-avatar">
                         <i class="fas fa-${type === 'user' ? 'user' : 'robot'}"></i>
                     </div>
                     <div class="message-content">
-                        ${content}
+                        ${formattedContent}
                         <div class="message-time">${time}</div>
                     </div>
                 `;
