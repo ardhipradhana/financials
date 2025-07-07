@@ -4272,111 +4272,6 @@
         
         // AP/AR Data Management
         let aparTransactions = [];
-        
-        // Navigation handling
-        document.querySelectorAll('.nav-link').forEach(link => {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                
-                // Remove active class from all links
-                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-                
-                // Add active class to clicked link
-                this.classList.add('active');
-                
-                // Hide all sections
-                document.querySelectorAll('.section-content').forEach(section => {
-                    section.style.display = 'none';
-                });
-                
-                // Show selected section
-                const sectionId = this.dataset.section + '-section';
-                const section = document.getElementById(sectionId);
-                if (section) {
-                    section.style.display = 'block';
-                }
-                
-                // Update page title
-                const titles = {
-                    'dashboard': 'Dashboard Overview',
-                    'ap-ar': 'AP/AR Tracking',
-                    'statements': 'Financial Statements',
-                    'forecasting': 'Forecasting & Analytics',
-                    'benchmarking': 'Industry Benchmarking',
-                    'reports': 'Reports & Analytics',
-                    'scenarios': 'Scenario Analysis'
-                };
-                
-                const pageTitle = document.querySelector('.page-title');
-                pageTitle.textContent = titles[this.dataset.section] || 'Dashboard';
-            });
-        });
-
-        // Time period selector
-        document.querySelectorAll('.time-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                
-                // Here you would trigger data refresh based on selected period
-                console.log('Selected period:', this.dataset.period);
-            });
-        });
-
-        // AI Chat functionality
-        function toggleAIChat() {
-            const sidebar = document.getElementById('aiChatSidebar');
-            const toggle = document.querySelector('.ai-chat-toggle');
-            
-            sidebar.classList.toggle('open');
-            
-            // Hide/show toggle button
-            if (sidebar.classList.contains('open')) {
-                toggle.style.display = 'none';
-            } else {
-                toggle.style.display = 'flex';
-            }
-        }
-
-        function toggleSidebar() {
-            const sidebar = document.querySelector('.sidebar');
-            const mainContent = document.querySelector('.main-content');
-            const toggleBtn = document.querySelector('.sidebar-toggle i');
-            
-            sidebar.classList.toggle('collapsed');
-            
-            if (sidebar.classList.contains('collapsed')) {
-                mainContent.style.marginLeft = '60px';
-                toggleBtn.className = 'fas fa-chevron-right';
-            } else {
-                mainContent.style.marginLeft = '280px';
-                toggleBtn.className = 'fas fa-chevron-left';
-            }
-        }
-
-        // AP/AR Data Management   
-        async function loadAPARData() {
-            try {
-                const { data, error } = await supabase
-                    .from('ap_ar_transactions_meridash')
-                    .select('*')
-                    .order('created_at', { ascending: false });
-                
-                if (error) throw error;
-                
-                aparTransactions = data || [];
-                console.log('Loaded transactions:', aparTransactions.length);
-                
-                // Only update UI if we're on the AP/AR section
-                if (document.getElementById('aparTableBody')) {
-                    updateAPARSummary();
-                    renderAPARTable();
-                }
-            } catch (error) {
-                console.error('Error loading data:', error);
-                alert('Error loading transactions: ' + error.message);
-            }
-        }
 
         // AP/AR to GL Linking Functions - GLOBAL SCOPE
         function linkAPARToGL(aparId) {
@@ -4605,6 +4500,111 @@
             
             closeGLLinkingModal();
             openAddFinancialModal();
+        }
+        
+        // Navigation handling
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Remove active class from all links
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                
+                // Add active class to clicked link
+                this.classList.add('active');
+                
+                // Hide all sections
+                document.querySelectorAll('.section-content').forEach(section => {
+                    section.style.display = 'none';
+                });
+                
+                // Show selected section
+                const sectionId = this.dataset.section + '-section';
+                const section = document.getElementById(sectionId);
+                if (section) {
+                    section.style.display = 'block';
+                }
+                
+                // Update page title
+                const titles = {
+                    'dashboard': 'Dashboard Overview',
+                    'ap-ar': 'AP/AR Tracking',
+                    'statements': 'Financial Statements',
+                    'forecasting': 'Forecasting & Analytics',
+                    'benchmarking': 'Industry Benchmarking',
+                    'reports': 'Reports & Analytics',
+                    'scenarios': 'Scenario Analysis'
+                };
+                
+                const pageTitle = document.querySelector('.page-title');
+                pageTitle.textContent = titles[this.dataset.section] || 'Dashboard';
+            });
+        });
+
+        // Time period selector
+        document.querySelectorAll('.time-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Here you would trigger data refresh based on selected period
+                console.log('Selected period:', this.dataset.period);
+            });
+        });
+
+        // AI Chat functionality
+        function toggleAIChat() {
+            const sidebar = document.getElementById('aiChatSidebar');
+            const toggle = document.querySelector('.ai-chat-toggle');
+            
+            sidebar.classList.toggle('open');
+            
+            // Hide/show toggle button
+            if (sidebar.classList.contains('open')) {
+                toggle.style.display = 'none';
+            } else {
+                toggle.style.display = 'flex';
+            }
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const mainContent = document.querySelector('.main-content');
+            const toggleBtn = document.querySelector('.sidebar-toggle i');
+            
+            sidebar.classList.toggle('collapsed');
+            
+            if (sidebar.classList.contains('collapsed')) {
+                mainContent.style.marginLeft = '60px';
+                toggleBtn.className = 'fas fa-chevron-right';
+            } else {
+                mainContent.style.marginLeft = '280px';
+                toggleBtn.className = 'fas fa-chevron-left';
+            }
+        }
+
+        // AP/AR Data Management   
+        async function loadAPARData() {
+            try {
+                const { data, error } = await supabase
+                    .from('ap_ar_transactions_meridash')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                
+                if (error) throw error;
+                
+                aparTransactions = data || [];
+                console.log('Loaded transactions:', aparTransactions.length);
+                
+                // Only update UI if we're on the AP/AR section
+                if (document.getElementById('aparTableBody')) {
+                    updateAPARSummary();
+                    renderAPARTable();
+                }
+            } catch (error) {
+                console.error('Error loading data:', error);
+                alert('Error loading transactions: ' + error.message);
+            }
         }
         
         async function saveTransaction(transaction) {
