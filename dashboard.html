@@ -3490,17 +3490,24 @@
                         </div>
                     </div>
                     
-                    <div class="metric-card">
+                    <div class="metric-card enhanced-card">
+                        <div class="card-accent accent-purple"></div>
                         <div class="metric-header">
-                            <div class="metric-top-section">
-                                <div class="metric-title">Financial Health Score</div>
-                                <div class="metric-icon icon-health">
-                                    <i class="fas fa-heartbeat"></i>
+                            <div class="card-main">
+                                <div class="metric-title-group">
+                                    <div class="metric-title">Altman Z-Score</div>
+                                    <div class="metric-subtitle">Credit Risk Assessment</div>
                                 </div>
-                            </div>
-                            <div class="metric-values-section">
-                                <div class="metric-value">50/100</div>
-                                <div class="metric-change negative">Needs Improvement • -32 pts</div>
+                                <div class="metric-primary-group">
+                                    <span class="metric-value-large" id="healthScoreValue">2.45</span>
+                                    <div class="metric-breakdown">
+                                        <span class="breakdown-item">
+                                            <span class="breakdown-label">Rating: </span>
+                                            <span class="breakdown-value" id="altmanRating">Good</span>
+                                        </span>
+                                        <span class="risk-indicator" id="riskLevel">Low Risk</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -10661,56 +10668,36 @@
             const currentCash = cashImpactElement ? 
                 parseFloat(cashImpactElement.textContent.replace(/[^\d.-]/g, '') || 0) : 0;
             
-            // 2. FIXED: Calculate net OVERDUE position (overdue AR - overdue AP)
-            const overdueARElement = document.getElementById('totalAR');    // Overdue AR
-            const overdueAPElement = document.getElementById('totalAP');    // Overdue AP
-            
-            console.log('=== DEBUGGING NET OVERDUE POSITION ===');
-            console.log('Overdue AR Element:', overdueARElement?.textContent);
-            console.log('Overdue AP Element:', overdueAPElement?.textContent);
-            
-            let overdueAR = 0;
-            let overdueAP = 0;
-            
-            if (overdueARElement) {
-                overdueAR = parseFloat(overdueARElement.textContent.replace(/[^\d.-]/g, '') || 0);
-            }
-            
-            if (overdueAPElement) {
-                overdueAP = parseFloat(overdueAPElement.textContent.replace(/[^\d.-]/g, '') || 0);
-            }
-            
-            console.log('Parsed overdue AR:', overdueAR);
-            console.log('Parsed overdue AP:', overdueAP);
-            
-            // NET OVERDUE POSITION = Overdue AR - Overdue AP
-            const netOverduePosition = overdueAR - overdueAP;
-            console.log('Calculated Net Overdue Position (Overdue AR - Overdue AP):', netOverduePosition);
-            
-            // Also get full amounts for reference
+            // 2. Get AR/AP metrics
             const fullAR = parseFloat(document.getElementById('totalARAll')?.textContent.replace(/[^\d.-]/g, '') || 0);
             const fullAP = parseFloat(document.getElementById('totalAPAll')?.textContent.replace(/[^\d.-]/g, '') || 0);
+            const overdueAR = parseFloat(document.getElementById('totalAR')?.textContent.replace(/[^\d.-]/g, '') || 0);
+            const overdueAP = parseFloat(document.getElementById('totalAP')?.textContent.replace(/[^\d.-]/g, '') || 0);
+            const netOverduePosition = overdueAR - overdueAP;
             
             // 3. Calculate revenue based on selected period
             const selectedPeriod = document.getElementById('dashboardPeriodFilter')?.value || 'MTD';
             const periodRevenue = calculatePeriodRevenue(selectedPeriod);
             
-            // 4. Calculate comprehensive financial health score
-            const healthScore = calculateComprehensiveHealthScore();
+            // 4. Calculate Altman Z-Score instead of comprehensive health score
+            const altmanResult = calculateRatioBasedHealthScore();
             
             const metrics = {
                 currentCash,
-                netOverduePosition,    // This is now overdue AR - overdue AP
+                netOverduePosition,
                 fullAR,
                 fullAP,
                 overdueAR,
                 overdueAP,
                 periodRevenue,
                 selectedPeriod,
-                healthScore
+                healthScore: altmanResult.zScore, // Use Z-Score as health score
+                altmanRating: altmanResult.rating,
+                riskLevel: altmanResult.riskLevel,
+                recommendation: altmanResult.recommendation
             };
             
-            console.log('Final calculated metrics:', metrics);
+            console.log('Final calculated metrics with Altman Z-Score:', metrics);
             return metrics;
         }
         
@@ -11019,102 +11006,259 @@
             }
         }
         
-        function calculateComprehensiveHealthScore() {
-            console.log('=== CALCULATING HEALTH SCORE ===');
-            let score = 0;
-            let breakdown = {};
+        function calculateRatioBasedHealthScore() {
+            console.log('=== CALCULATING ALTMAN Z-SCORE ===');
             
-            // 1. Cash position (25 points)
-            const cashImpactElement = document.getElementById('netCashImpact');
-            const currentCash = cashImpactElement ? 
-                parseFloat(cashImpactElement.textContent.replace(/[^\d.-]/g, '') || 0) : 0;
+            // Get financial data from your existing system
+            const financialData = extractFinancialMetrics();
             
-            let cashScore = 0;
-            if (currentCash > 10000000) cashScore = 25;      // >10M = excellent
-            else if (currentCash > 1000000) cashScore = 20;  // >1M = very good
-            else if (currentCash > 0) cashScore = 15;        // Positive = good
-            else if (currentCash > -5000000) cashScore = 8;  // Slightly negative = fair
-            else cashScore = 0;                              // Very negative = poor
-            
-            breakdown.cash = { value: currentCash, score: cashScore, max: 25 };
-            score += cashScore;
-            
-            // 2. Revenue health (25 points) - USE SAME PERIOD AS DASHBOARD
-            const selectedPeriod = document.getElementById('dashboardPeriodFilter')?.value || 'MTD';
-            const periodRevenue = calculatePeriodRevenue(selectedPeriod);
-            
-            let revenueScore = 0;
-            if (periodRevenue > 50000000) revenueScore = 25;       // >50M = excellent
-            else if (periodRevenue > 20000000) revenueScore = 20;  // >20M = very good  
-            else if (periodRevenue > 5000000) revenueScore = 15;   // >5M = good
-            else if (periodRevenue > 1000000) revenueScore = 10;   // >1M = fair
-            else if (periodRevenue > 0) revenueScore = 5;          // Any revenue = basic
-            else revenueScore = 0;                                 // No revenue = poor
-            
-            breakdown.revenue = { value: periodRevenue, score: revenueScore, max: 25, period: selectedPeriod };
-            score += revenueScore;
-            
-            // 3. AR/AP balance (25 points)
-            const overdueAR = parseFloat(document.getElementById('totalAR')?.textContent.replace(/[^\d.-]/g, '') || 0);
-            const overdueAP = parseFloat(document.getElementById('totalAP')?.textContent.replace(/[^\d.-]/g, '') || 0);
-            const netPosition = overdueAR - overdueAP;
-            
-            let arApScore = 0;
-            if (netPosition > 5000000) arApScore = 25;          // >5M net positive = excellent
-            else if (netPosition > 1000000) arApScore = 20;     // >1M net positive = very good
-            else if (netPosition >= 0) arApScore = 15;          // Break-even or positive = good
-            else if (netPosition > -2000000) arApScore = 8;     // Small negative = fair
-            else arApScore = 0;                                 // Large negative = poor
-            
-            breakdown.arAp = { netPosition, score: arApScore, max: 25 };
-            score += arApScore;
-            
-            // 4. Transaction completeness (25 points) - FIXED DATA STRUCTURE
-            let completenessScore = 0;
-            if (financialTransactions && financialTransactions.length > 0) {
-                // Use correct field names
-                const totalDebits = financialTransactions.reduce((sum, t) => 
-                    sum + (parseFloat(t.debit_amount) || parseFloat(t.debit) || 0), 0);
-                const totalCredits = financialTransactions.reduce((sum, t) => 
-                    sum + (parseFloat(t.credit_amount) || parseFloat(t.credit) || 0), 0);
-                const imbalance = Math.abs(totalDebits - totalCredits);
-                
-                console.log('Transaction balance check:', {
-                    totalDebits,
-                    totalCredits,
-                    imbalance,
-                    transactionCount: financialTransactions.length
-                });
-                
-                if (imbalance < 1000) completenessScore = 25;           // Perfect balance
-                else if (imbalance < 10000) completenessScore = 20;     // Minor imbalance
-                else if (imbalance < 100000) completenessScore = 15;    // Moderate imbalance
-                else if (imbalance < 500000) completenessScore = 8;     // Major imbalance
-                else completenessScore = 0;                             // Severe imbalance
-                
-                breakdown.completeness = { 
-                    imbalance, 
-                    score: completenessScore, 
-                    max: 25,
-                    totalDebits,
-                    totalCredits,
-                    transactionCount: financialTransactions.length
-                };
-            } else {
-                // No transactions = no score
-                breakdown.completeness = { 
-                    imbalance: 0, 
-                    score: 0, 
-                    max: 25,
-                    transactionCount: 0
+            if (!financialData || !financialData.isValid) {
+                console.log('Insufficient financial data for Altman Z-Score calculation');
+                return {
+                    zScore: 0,
+                    rating: 'Insufficient Data',
+                    riskLevel: 'high',
+                    breakdown: {},
+                    recommendation: 'Please ensure complete financial statements are available'
                 };
             }
-            score += completenessScore;
             
-            console.log('Health score breakdown:', breakdown);
-            console.log('Total health score:', score);
+            // Calculate the 5 Altman Z-Score components
+            const components = calculateZScoreComponents(financialData);
             
-            return Math.min(100, Math.max(0, score));
+            // Calculate weighted Z-Score using Altman's formula
+            // Z = 1.2*X1 + 1.4*X2 + 3.3*X3 + 0.6*X4 + 1.0*X5
+            const zScore = 
+                (1.2 * components.workingCapitalToAssets) +
+                (1.4 * components.retainedEarningsToAssets) +
+                (3.3 * components.ebitToAssets) +
+                (0.6 * components.marketValueEquityToLiabilities) +
+                (1.0 * components.salesToAssets);
+            
+            // Determine risk rating based on Z-Score thresholds
+            const rating = getZScoreRating(zScore);
+            const riskLevel = getZScoreRiskLevel(zScore);
+            
+            console.log('Altman Z-Score calculated:', {
+                zScore: zScore.toFixed(2),
+                rating,
+                riskLevel,
+                components
+            });
+            
+            return {
+                zScore: Math.max(0, zScore), // Ensure non-negative for display
+                rating,
+                riskLevel,
+                breakdown: components,
+                recommendation: getZScoreRecommendation(zScore, rating)
+            };
+        }
+        
+        function extractFinancialMetrics() {
+            console.log('=== EXTRACTING FINANCIAL METRICS FOR Z-SCORE ===');
+            
+            try {
+                // Extract metrics from your trial balance/financial transactions
+                const metrics = calculateTrialBalanceData();
+                
+                if (!metrics) {
+                    return { isValid: false };
+                }
+                
+                // Current Assets (Cash + AR + Inventory + other current assets)
+                const currentAssets = 
+                    (metrics.assets?.cash || 0) +
+                    (metrics.assets?.accountsReceivable || 0) +
+                    (metrics.assets?.inventory || 0) +
+                    (metrics.assets?.otherCurrentAssets || 0);
+                
+                // Current Liabilities (AP + short-term debt + accrued expenses)
+                const currentLiabilities = 
+                    (metrics.liabilities?.accountsPayable || 0) +
+                    (metrics.liabilities?.shortTermDebt || 0) +
+                    (metrics.liabilities?.accruedExpenses || 0);
+                
+                // Total Assets
+                const totalAssets = metrics.totalAssets || 0;
+                
+                // Total Liabilities  
+                const totalLiabilities = metrics.totalLiabilities || 0;
+                
+                // Total Equity
+                const totalEquity = metrics.totalEquity || 0;
+                
+                // Revenue (for the selected period)
+                const selectedPeriod = document.getElementById('dashboardPeriodFilter')?.value || 'YTD';
+                const revenue = calculatePeriodRevenue(selectedPeriod);
+                
+                // Net Income (Revenue - Expenses for the period)
+                const expenses = calculatePeriodExpenses(selectedPeriod);
+                const netIncome = revenue - expenses;
+                
+                // Retained Earnings (approximated as accumulated equity changes)
+                const retainedEarnings = totalEquity - netIncome; // Simplified calculation
+                
+                // EBIT (approximated as net income + interest expense)
+                const interestExpense = calculateInterestExpense(selectedPeriod);
+                const ebit = netIncome + interestExpense;
+                
+                // Working Capital
+                const workingCapital = currentAssets - currentLiabilities;
+                
+                // Market Value of Equity (for private companies, use book value)
+                const marketValueEquity = totalEquity; // For SMEs, book value = market value approximation
+                
+                const financialData = {
+                    workingCapital,
+                    totalAssets,
+                    retainedEarnings,
+                    ebit,
+                    marketValueEquity,
+                    totalLiabilities,
+                    revenue,
+                    currentAssets,
+                    currentLiabilities,
+                    totalEquity,
+                    netIncome,
+                    isValid: totalAssets > 0 // Basic validity check
+                };
+                
+                console.log('Extracted financial metrics:', financialData);
+                return financialData;
+                
+            } catch (error) {
+                console.error('Error extracting financial metrics:', error);
+                return { isValid: false };
+            }
+        }
+        
+        function calculateZScoreComponents(data) {
+            // X1: Working Capital / Total Assets
+            const workingCapitalToAssets = data.totalAssets > 0 ? 
+                data.workingCapital / data.totalAssets : 0;
+            
+            // X2: Retained Earnings / Total Assets  
+            const retainedEarningsToAssets = data.totalAssets > 0 ? 
+                data.retainedEarnings / data.totalAssets : 0;
+            
+            // X3: EBIT / Total Assets
+            const ebitToAssets = data.totalAssets > 0 ? 
+                data.ebit / data.totalAssets : 0;
+            
+            // X4: Market Value of Equity / Total Liabilities
+            const marketValueEquityToLiabilities = data.totalLiabilities > 0 ? 
+                data.marketValueEquity / data.totalLiabilities : 1; // Default to 1 if no liabilities
+            
+            // X5: Sales / Total Assets
+            const salesToAssets = data.totalAssets > 0 ? 
+                data.revenue / data.totalAssets : 0;
+            
+            return {
+                workingCapitalToAssets: Math.max(-1, Math.min(1, workingCapitalToAssets)), // Cap extreme values
+                retainedEarningsToAssets: Math.max(-1, Math.min(1, retainedEarningsToAssets)),
+                ebitToAssets: Math.max(-0.5, Math.min(0.5, ebitToAssets)),
+                marketValueEquityToLiabilities: Math.max(0.1, Math.min(10, marketValueEquityToLiabilities)),
+                salesToAssets: Math.max(0, Math.min(3, salesToAssets))
+            };
+        }
+        
+        function getZScoreRating(zScore) {
+            if (zScore >= 3.0) return 'Excellent';
+            if (zScore >= 2.6) return 'Very Good';
+            if (zScore >= 1.8) return 'Good';
+            if (zScore >= 1.1) return 'Fair';
+            if (zScore >= 0.5) return 'Poor';
+            return 'Critical';
+        }
+        
+        function getZScoreRiskLevel(zScore) {
+            if (zScore >= 3.0) return 'very-low';
+            if (zScore >= 1.8) return 'low';
+            if (zScore >= 1.1) return 'moderate';
+            if (zScore >= 0.5) return 'high';
+            return 'critical';
+        }
+        
+        function getZScoreRecommendation(zScore, rating) {
+            if (zScore >= 3.0) {
+                return 'Strong financial position. Suitable for expansion and investment opportunities.';
+            } else if (zScore >= 1.8) {
+                return 'Stable financial health. Continue monitoring key ratios and maintain current performance.';
+            } else if (zScore >= 1.1) {
+                return 'Moderate financial risk. Focus on improving working capital and profitability.';
+            } else if (zScore >= 0.5) {
+                return 'High financial distress risk. Immediate action needed to improve liquidity and reduce debt.';
+            } else {
+                return 'Critical financial condition. Urgent restructuring or capital injection required.';
+            }
+        }
+        
+        // Helper functions for period-based calculations
+        function calculatePeriodExpenses(period) {
+            if (!financialTransactions || financialTransactions.length === 0) {
+                return 0;
+            }
+            
+            const expenseTransactions = financialTransactions.filter(t => t.category === 'Expense');
+            
+            // Apply date filtering based on period
+            const filteredTransactions = filterTransactionsByPeriod(expenseTransactions, period);
+            
+            return filteredTransactions.reduce((sum, t) => {
+                return sum + (parseFloat(t.debit || 0) - parseFloat(t.credit || 0));
+            }, 0);
+        }
+        
+        function calculateInterestExpense(period) {
+            if (!financialTransactions || financialTransactions.length === 0) {
+                return 0;
+            }
+            
+            // Find interest expense transactions (account codes typically 5300-5399)
+            const interestTransactions = financialTransactions.filter(t => {
+                const accountCode = t.account_code || '';
+                return accountCode.startsWith('53') && t.category === 'Expense';
+            });
+            
+            const filteredTransactions = filterTransactionsByPeriod(interestTransactions, period);
+            
+            return filteredTransactions.reduce((sum, t) => {
+                return sum + (parseFloat(t.debit || 0) - parseFloat(t.credit || 0));
+            }, 0);
+        }
+        
+        function filterTransactionsByPeriod(transactions, period) {
+            if (!period || period === 'custom') return transactions;
+            
+            const today = new Date();
+            let startDate;
+            
+            switch(period) {
+                case 'MTD':
+                    startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+                    break;
+                case 'QTD':
+                    const quarter = Math.floor(today.getMonth() / 3);
+                    startDate = new Date(today.getFullYear(), quarter * 3, 1);
+                    break;
+                case 'YTD':
+                    startDate = new Date(today.getFullYear(), 0, 1);
+                    break;
+                case 'L30D':
+                    startDate = new Date(today.getTime() - (30 * 24 * 60 * 60 * 1000));
+                    break;
+                case 'L90D':
+                    startDate = new Date(today.getTime() - (90 * 24 * 60 * 60 * 1000));
+                    break;
+                default:
+                    return transactions;
+            }
+            
+            return transactions.filter(t => {
+                const transDate = new Date(t.transaction_date);
+                return transDate >= startDate && transDate <= today;
+            });
         }
         
         function updateDashboardCards(metrics) {
@@ -11203,17 +11347,18 @@
                 const valueElement = metricCards[3].querySelector('.metric-value');
                 const changeElement = metricCards[3].querySelector('.metric-change');
                 
-                // Update value
-                if (valueElement) valueElement.textContent = `${Math.round(metrics.healthScore)}/100`;
+                // Update value with Z-Score
+                if (valueElement) {
+                    valueElement.textContent = metrics.healthScore.toFixed(2);
+                }
                 
                 // Update rating and change
                 if (changeElement) {
-                    const rating = getHealthRating(metrics.healthScore);
-                    const previousScore = 82; // You can store this for real comparison later
-                    const scoreChange = Math.round(metrics.healthScore) - previousScore;
+                    const rating = metrics.altmanRating;
+                    const riskClass = getRiskClass(metrics.riskLevel);
                     
-                    changeElement.textContent = `${rating} • ${scoreChange >= 0 ? '+' : ''}${scoreChange} pts`;
-                    changeElement.className = `metric-change ${scoreChange >= 0 ? 'positive' : 'negative'}`;
+                    changeElement.textContent = `${rating} • ${getRiskDescription(metrics.riskLevel)}`;
+                    changeElement.className = `metric-change ${riskClass}`;
                 }
             }
             
@@ -11224,13 +11369,98 @@
                 healthScore: Math.round(metrics.healthScore)
             });
         }
+
+        function getRiskClass(riskLevel) {
+            switch(riskLevel) {
+                case 'very-low': return 'excellent';
+                case 'low': return 'positive';
+                case 'moderate': return 'neutral';
+                case 'high': return 'negative';
+                case 'critical': return 'critical';
+                default: return 'neutral';
+            }
+        }
         
-        function getHealthRating(score) {
-            if (score >= 90) return 'Excellent';
-            if (score >= 80) return 'Very Good';
-            if (score >= 70) return 'Good';
-            if (score >= 60) return 'Fair';
-            return 'Needs Improvement';
+        function getRiskDescription(riskLevel) {
+            switch(riskLevel) {
+                case 'very-low': return 'Very Low Risk';
+                case 'low': return 'Low Risk';
+                case 'moderate': return 'Moderate Risk';
+                case 'high': return 'High Risk';
+                case 'critical': return 'Critical Risk';
+                default: return 'Unknown Risk';
+            }
+        }
+
+        function showZScoreBreakdown() {
+            const altmanResult = calculateRatioBasedHealthScore();
+            
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+                background: rgba(0,0,0,0.8); z-index: 1000;
+                display: flex; align-items: center; justify-content: center;
+                padding: 20px;
+            `;
+            
+            modal.innerHTML = `
+                <div style="
+                    background: white; border-radius: 12px; padding: 30px;
+                    max-width: 600px; width: 100%; max-height: 80vh; overflow-y: auto;
+                ">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3 style="margin: 0; color: #1e293b;">Altman Z-Score Breakdown</h3>
+                        <button onclick="this.parentElement.parentElement.parentElement.remove()" 
+                                style="background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px; padding: 15px; background: #f8fafc; border-radius: 8px;">
+                        <div style="font-size: 24px; font-weight: bold; color: #1e293b;">
+                            Z-Score: ${altmanResult.zScore.toFixed(2)}
+                        </div>
+                        <div style="color: #64748b; margin-top: 5px;">
+                            Rating: ${altmanResult.rating} | Risk: ${getRiskDescription(altmanResult.riskLevel)}
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <h4 style="color: #1e293b; margin-bottom: 15px;">Components Breakdown:</h4>
+                        ${generateComponentsHTML(altmanResult.breakdown)}
+                    </div>
+                    
+                    <div style="padding: 15px; background: #fef3c7; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                        <strong>Recommendation:</strong><br>
+                        ${altmanResult.recommendation}
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+
+        function generateComponentsHTML(breakdown) {
+            const components = [
+                { name: 'Working Capital / Total Assets', value: breakdown.workingCapitalToAssets, weight: 1.2 },
+                { name: 'Retained Earnings / Total Assets', value: breakdown.retainedEarningsToAssets, weight: 1.4 },
+                { name: 'EBIT / Total Assets', value: breakdown.ebitToAssets, weight: 3.3 },
+                { name: 'Market Value Equity / Total Liabilities', value: breakdown.marketValueEquityToLiabilities, weight: 0.6 },
+                { name: 'Sales / Total Assets', value: breakdown.salesToAssets, weight: 1.0 }
+            ];
+            
+            return components.map(comp => `
+                <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #e2e8f0;">
+                    <div>
+                        <div style="font-weight: 500;">${comp.name}</div>
+                        <div style="font-size: 12px; color: #64748b;">Weight: ${comp.weight}</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div>${comp.value.toFixed(3)}</div>
+                        <div style="font-size: 12px; color: #64748b;">
+                            = ${(comp.value * comp.weight).toFixed(3)}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
         }
         
         // Audit Trail Function
