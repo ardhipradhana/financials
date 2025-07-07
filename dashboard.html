@@ -5354,14 +5354,21 @@
             const totalAROverdue = overdueAR.reduce((sum, t) => sum + t.amount, 0);
             const totalAPOverdue = overdueAP.reduce((sum, t) => sum + t.amount, 0);
             
+            // FIXED: Calculate netCash before using it
+            const netCash = totalARAll - totalAPAll;
+            
+            // Calculate CCC
+            const cccData = calculateCCC();
+            
             // DEBUG LOGGING
             console.log('=== AR/AP SUMMARY DEBUG ===');
             console.log('All unpaid AR:', allUnpaidAR.length, 'Total:', totalARAll);
             console.log('All unpaid AP:', allUnpaidAP.length, 'Total:', totalAPAll);
             console.log('Overdue AR:', overdueAR.length, 'Total:', totalAROverdue);
             console.log('Overdue AP:', overdueAP.length, 'Total:', totalAPOverdue);
+            console.log('Net Cash:', netCash);
             
-            // Update display
+            // Update display - check if elements exist
             if (document.getElementById('totalARAll')) {
                 document.getElementById('totalARAll').textContent = formatCurrencyFull(totalARAll, 'IDR');
             }
@@ -5384,13 +5391,13 @@
             if (document.getElementById('arAging')) {
                 const arBadge = document.getElementById('arAging');
                 arBadge.textContent = `${overdueAR.length} overdue`;
-                arBadge.className = `summary-badge ${overdueAR.length > 0 ? 'badge-overdue' : 'badge-neutral'}`;
+                arBadge.className = `aging-indicator ${overdueAR.length > 0 ? 'badge-overdue' : 'badge-neutral'}`;
             }
             
             if (document.getElementById('apAging')) {
                 const apBadge = document.getElementById('apAging');
                 apBadge.textContent = `${overdueAP.length} overdue`;
-                apBadge.className = `summary-badge ${overdueAP.length > 0 ? 'badge-overdue' : 'badge-neutral'}`;
+                apBadge.className = `aging-indicator ${overdueAP.length > 0 ? 'badge-overdue' : 'badge-neutral'}`;
             }
             
             if (document.getElementById('cashImpactChange')) {
@@ -5402,7 +5409,7 @@
             // Update CCC display
             if (document.getElementById('cccDisplay') && cccData) {
                 document.getElementById('cccDisplay').textContent = `CCC: ${cccData.ccc} days*`;
-                document.getElementById('cccDisplay').title = `Simplified calculation: DSO (${cccData.dso} days) - DPO (${cccData.dpo} days). Based on average days outstanding for unpaid/overdue transactions. Does not include inventory days or revenue/COGS ratios.`;
+                document.getElementById('cccDisplay').title = `Simplified calculation: DSO (${cccData.dso} days) - DPO (${cccData.dpo} days). Based on average days outstanding for unpaid/overdue transactions.`;
             }
         }
         
