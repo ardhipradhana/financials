@@ -10691,10 +10691,10 @@
                 overdueAP,
                 periodRevenue,
                 selectedPeriod,
-                healthScore: altmanResult.zScore, // Use Z-Score as health score
-                altmanRating: altmanResult.rating,
-                riskLevel: altmanResult.riskLevel,
-                recommendation: altmanResult.recommendation
+                healthScore: altmanResult.zScore || 0, // Use Z-Score as health score
+                altmanRating: altmanResult.rating || 'No Data',
+                riskLevel: altmanResult.riskLevel || 'unknown',
+                recommendation: altmanResult.recommendation || 'Insufficient data for analysis'
             };
             
             console.log('Final calculated metrics with Altman Z-Score:', metrics);
@@ -11059,34 +11059,25 @@
             console.log('=== EXTRACTING FINANCIAL METRICS FOR Z-SCORE ===');
             
             try {
-                // Extract metrics from your trial balance/financial transactions
-                const metrics = calculateTrialBalanceData();
-                
-                if (!metrics) {
+                // Check if we have financial transactions
+                if (!financialTransactions || financialTransactions.length === 0) {
+                    console.log('No financial transactions available');
                     return { isValid: false };
                 }
                 
-                // Current Assets (Cash + AR + Inventory + other current assets)
-                const currentAssets = 
-                    (metrics.assets?.cash || 0) +
-                    (metrics.assets?.accountsReceivable || 0) +
-                    (metrics.assets?.inventory || 0) +
-                    (metrics.assets?.otherCurrentAssets || 0);
+                // Calculate balances by category from financial transactions
+                const balances = calculateAccountBalances();
                 
-                // Current Liabilities (AP + short-term debt + accrued expenses)
-                const currentLiabilities = 
-                    (metrics.liabilities?.accountsPayable || 0) +
-                    (metrics.liabilities?.shortTermDebt || 0) +
-                    (metrics.liabilities?.accruedExpenses || 0);
+                // Extract key financial statement components
+                const totalAssets = balances.totalAssets || 0;
+                const totalLiabilities = balances.totalLiabilities || 0; 
+                const totalEquity = balances.totalEquity || 0;
                 
-                // Total Assets
-                const totalAssets = metrics.totalAssets || 0;
+                // Current Assets (account codes 1000-1999, typically current)
+                const currentAssets = calculateCurrentAssets(balances);
                 
-                // Total Liabilities  
-                const totalLiabilities = metrics.totalLiabilities || 0;
-                
-                // Total Equity
-                const totalEquity = metrics.totalEquity || 0;
+                // Current Liabilities (account codes 2000-2499, typically current)
+                const currentLiabilities = calculateCurrentLiabilities(balances);
                 
                 // Revenue (for the selected period)
                 const selectedPeriod = document.getElementById('dashboardPeriodFilter')?.value || 'YTD';
@@ -11096,8 +11087,8 @@
                 const expenses = calculatePeriodExpenses(selectedPeriod);
                 const netIncome = revenue - expenses;
                 
-                // Retained Earnings (approximated as accumulated equity changes)
-                const retainedEarnings = totalEquity - netIncome; // Simplified calculation
+                // Retained Earnings (approximated as total equity minus current period net income)
+                const retainedEarnings = Math.max(0, totalEquity - netIncome);
                 
                 // EBIT (approximated as net income + interest expense)
                 const interestExpense = calculateInterestExpense(selectedPeriod);
@@ -11106,8 +11097,8 @@
                 // Working Capital
                 const workingCapital = currentAssets - currentLiabilities;
                 
-                // Market Value of Equity (for private companies, use book value)
-                const marketValueEquity = totalEquity; // For SMEs, book value = market value approximation
+                // Market Value of Equity (for SMEs, use book value)
+                const marketValueEquity = Math.max(1, totalEquity); // Ensure positive value
                 
                 const financialData = {
                     workingCapital,
@@ -11115,13 +11106,13 @@
                     retainedEarnings,
                     ebit,
                     marketValueEquity,
-                    totalLiabilities,
+                    totalLiabilities: Math.max(1, totalLiabilities), // Ensure positive for ratio calculation
                     revenue,
                     currentAssets,
                     currentLiabilities,
                     totalEquity,
                     netIncome,
-                    isValid: totalAssets > 0 // Basic validity check
+                    isValid: totalAssets > 0 && revenue >= 0 // Basic validity check
                 };
                 
                 console.log('Extracted financial metrics:', financialData);
@@ -11131,6 +11122,99 @@
                 console.error('Error extracting financial metrics:', error);
                 return { isValid: false };
             }
+        }
+
+        function calculateAccountBalances() {
+            const balances = {
+                totalAssets: 0,
+                totalLiabilities: 0,
+                totalEquity: 0,
+                assetAccounts: {},
+                liabilityAccounts: {},
+                equityAccounts: {}
+            };
+            
+            // Group transactions by account and calculate net balances
+            const accountBalances = {};
+            
+            financialTransactions.forEach(transaction => {
+                const accountCode = transaction.account_code;
+                const debit = parseFloat(transaction.debit_amount || transaction.debit || 0);
+                const credit = parseFloat(transaction.credit_amount || transaction.credit || 0);
+                const netAmount = debit - credit;
+                
+                if (!accountBalances[accountCode]) {
+                    accountBalances[accountCode] = {
+                        balance: 0,
+                        category: transaction.category || getAccountCategory(accountCode)
+                    };
+                }
+                
+                accountBalances[accountCode].balance += netAmount;
+            });
+            
+            // Sum up by category
+            Object.values(accountBalances).forEach(account => {
+                switch (account.category) {
+                    case 'Asset':
+                        balances.totalAssets += account.balance;
+                        break;
+                    case 'Liability':
+                        balances.totalLiabilities += Math.abs(account.balance); // Liabilities are typically credit balances
+                        break;
+                    case 'Equity':
+                        balances.totalEquity += Math.abs(account.balance); // Equity is typically credit balance
+                        break;
+                }
+            });
+            
+            return balances;
+        }
+
+        function getAccountCategory(accountCode) {
+            const code = parseInt(accountCode) || 0;
+            if (code >= 1000 && code < 2000) return 'Asset';
+            if (code >= 2000 && code < 3000) return 'Liability';
+            if (code >= 3000 && code < 4000) return 'Equity';
+            if (code >= 4000 && code < 5000) return 'Revenue';
+            if (code >= 5000) return 'Expense';
+            return 'Asset'; // Default
+        }
+        
+        // Helper function to calculate current assets (typically 1000-1499)
+        function calculateCurrentAssets(balances) {
+            let currentAssets = 0;
+            
+            financialTransactions.forEach(transaction => {
+                const accountCode = parseInt(transaction.account_code) || 0;
+                const debit = parseFloat(transaction.debit_amount || transaction.debit || 0);
+                const credit = parseFloat(transaction.credit_amount || transaction.credit || 0);
+                
+                // Current assets are typically 1000-1499 (Cash, AR, Inventory, Prepaid)
+                if (accountCode >= 1000 && accountCode < 1500 && transaction.category === 'Asset') {
+                    currentAssets += (debit - credit);
+                }
+            });
+            
+            return Math.max(0, currentAssets);
+        }
+        
+        // Helper function to calculate current liabilities (typically 2000-2499)
+        function calculateCurrentLiabilities(balances) {
+            let currentLiabilities = 0;
+            
+            financialTransactions.forEach(transaction => {
+                const accountCode = parseInt(transaction.account_code) || 0;
+                const debit = parseFloat(transaction.debit_amount || transaction.debit || 0);
+                const credit = parseFloat(transaction.credit_amount || transaction.credit || 0);
+                
+                // Current liabilities are typically 2000-2499 (AP, Accrued, Short-term debt)
+                if (accountCode >= 2000 && accountCode < 2500 && transaction.category === 'Liability') {
+                    currentLiabilities += Math.abs(credit - debit); // Liabilities have credit balances
+                }
+            });
+            
+            return Math.max(0, currentLiabilities);
         }
         
         function calculateZScoreComponents(data) {
@@ -11349,7 +11433,8 @@
                 
                 // Update value with Z-Score
                 if (valueElement) {
-                    valueElement.textContent = metrics.healthScore.toFixed(2);
+                    const displayScore = metrics.healthScore > 0 ? metrics.healthScore.toFixed(2) : 'N/A';
+                    valueElement.textContent = displayScore;
                 }
                 
                 // Update rating and change
