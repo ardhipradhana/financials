@@ -3802,10 +3802,6 @@
                                             <i class="fas fa-file-upload"></i>
                                             Upload CSV
                                         </button>
-                                        <button class="btn btn-secondary" onclick="openAPARLinkingModal()">
-                                            <i class="fas fa-link"></i>
-                                            Link AP/AR
-                                        </button>
                                         <button class="btn btn-primary" onclick="openAddFinancialModal()">
                                             <i class="fas fa-plus"></i>
                                             Add Transaction
@@ -3869,15 +3865,11 @@
                                         <span id="selectedCount">0</span> transactions selected
                                     </div>
                                     <div class="bulk-buttons">
-                                        <button class="btn btn-secondary" onclick="bulkLinkToAPAR()">
-                                            <i class="fas fa-link"></i>
-                                            Link to AP/AR
-                                        </button>
                                         <button class="btn btn-secondary" onclick="bulkUnlink()">
                                             <i class="fas fa-unlink"></i>
-                                            Unlink
+                                            Unlink Selected
                                         </button>
-                                        <button class="btn btn-danger" onclick="bulkDeleteFinancial()">
+                                        <button class="action-btn delete" onclick="bulkDeleteFinancial()" style="width: auto; padding: 8px 16px;">
                                             <i class="fas fa-trash"></i>
                                             Delete Selected
                                         </button>
@@ -9153,13 +9145,41 @@
             if (!confirm(`Unlink ${selectedFinancialTransactions.length} selected transactions?`)) return;
             
             try {
+                // Process all transactions without individual confirmations
                 for (const id of selectedFinancialTransactions) {
-                    await unlinkTransaction(id);
+                    const transaction = financialTransactions.find(t => t.id === id);
+                    if (!transaction) continue;
+                    
+                    // Update financial transaction (remove the individual confirmation)
+                    await updateFinancialTransaction(id, {
+                        ap_ar_transaction_id: null,
+                        is_linked: false
+                    });
+                    
+                    // Update AP/AR transaction if linked
+                    if (transaction.ap_ar_transaction_id) {
+                        const { error } = await supabase
+                            .from('ap_ar_transactions_meridash')
+                            .update({ linked_financial_id: null })
+                            .eq('id', transaction.ap_ar_transaction_id);
+                        
+                        if (error) throw error;
+                    }
                 }
                 
+                // Refresh data once after all operations
+                await loadFinancialTransactions();
+                await loadAPARData();
+                renderAPARTable();
+                renderFinancialTable();
+                
+                // Clear selection
                 selectedFinancialTransactions = [];
                 updateSelectedTransactions();
+                
+                // Single success message
                 alert('Selected transactions unlinked successfully!');
+                
             } catch (error) {
                 console.error('Error unlinking transactions:', error);
                 alert('Error unlinking transactions: ' + error.message);
