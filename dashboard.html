@@ -11031,23 +11031,27 @@
             
             let cashScore = 0;
             if (currentCash > 10000000) cashScore = 25;      // >10M = excellent
-            else if (currentCash > 0) cashScore = 20;        // Positive = good
-            else if (currentCash > -5000000) cashScore = 10; // Slightly negative = okay
+            else if (currentCash > 1000000) cashScore = 20;  // >1M = very good
+            else if (currentCash > 0) cashScore = 15;        // Positive = good
+            else if (currentCash > -5000000) cashScore = 8;  // Slightly negative = fair
             else cashScore = 0;                              // Very negative = poor
             
             breakdown.cash = { value: currentCash, score: cashScore, max: 25 };
             score += cashScore;
             
-            // 2. Revenue health (25 points)
-            const mtdRevenue = calculatePeriodRevenue('MTD');
-            let revenueScore = 0;
-            if (mtdRevenue > 50000000) revenueScore = 25;       // >50M MTD = excellent
-            else if (mtdRevenue > 10000000) revenueScore = 20;  // >10M MTD = good
-            else if (mtdRevenue > 1000000) revenueScore = 15;   // >1M MTD = fair
-            else if (mtdRevenue > 0) revenueScore = 10;         // Any revenue = basic
-            else revenueScore = 0;                              // No revenue = poor
+            // 2. Revenue health (25 points) - USE SAME PERIOD AS DASHBOARD
+            const selectedPeriod = document.getElementById('dashboardPeriodFilter')?.value || 'MTD';
+            const periodRevenue = calculatePeriodRevenue(selectedPeriod);
             
-            breakdown.revenue = { value: mtdRevenue, score: revenueScore, max: 25 };
+            let revenueScore = 0;
+            if (periodRevenue > 50000000) revenueScore = 25;       // >50M = excellent
+            else if (periodRevenue > 20000000) revenueScore = 20;  // >20M = very good  
+            else if (periodRevenue > 5000000) revenueScore = 15;   // >5M = good
+            else if (periodRevenue > 1000000) revenueScore = 10;   // >1M = fair
+            else if (periodRevenue > 0) revenueScore = 5;          // Any revenue = basic
+            else revenueScore = 0;                                 // No revenue = poor
+            
+            breakdown.revenue = { value: periodRevenue, score: revenueScore, max: 25, period: selectedPeriod };
             score += revenueScore;
             
             // 3. AR/AP balance (25 points)
@@ -11057,26 +11061,53 @@
             
             let arApScore = 0;
             if (netPosition > 5000000) arApScore = 25;          // >5M net positive = excellent
-            else if (netPosition >= 0) arApScore = 20;          // Break-even or positive = good
-            else if (netPosition > -2000000) arApScore = 10;    // Small negative = fair
+            else if (netPosition > 1000000) arApScore = 20;     // >1M net positive = very good
+            else if (netPosition >= 0) arApScore = 15;          // Break-even or positive = good
+            else if (netPosition > -2000000) arApScore = 8;     // Small negative = fair
             else arApScore = 0;                                 // Large negative = poor
             
             breakdown.arAp = { netPosition, score: arApScore, max: 25 };
             score += arApScore;
             
-            // 4. Transaction completeness (25 points)
+            // 4. Transaction completeness (25 points) - FIXED DATA STRUCTURE
             let completenessScore = 0;
             if (financialTransactions && financialTransactions.length > 0) {
-                const totalDebits = financialTransactions.reduce((sum, t) => sum + (parseFloat(t.debit) || 0), 0);
-                const totalCredits = financialTransactions.reduce((sum, t) => sum + (parseFloat(t.credit) || 0), 0);
+                // Use correct field names
+                const totalDebits = financialTransactions.reduce((sum, t) => 
+                    sum + (parseFloat(t.debit_amount) || parseFloat(t.debit) || 0), 0);
+                const totalCredits = financialTransactions.reduce((sum, t) => 
+                    sum + (parseFloat(t.credit_amount) || parseFloat(t.credit) || 0), 0);
                 const imbalance = Math.abs(totalDebits - totalCredits);
+                
+                console.log('Transaction balance check:', {
+                    totalDebits,
+                    totalCredits,
+                    imbalance,
+                    transactionCount: financialTransactions.length
+                });
                 
                 if (imbalance < 1000) completenessScore = 25;           // Perfect balance
                 else if (imbalance < 10000) completenessScore = 20;     // Minor imbalance
-                else if (imbalance < 100000) completenessScore = 10;    // Moderate imbalance
-                else completenessScore = 0;                             // Major imbalance
+                else if (imbalance < 100000) completenessScore = 15;    // Moderate imbalance
+                else if (imbalance < 500000) completenessScore = 8;     // Major imbalance
+                else completenessScore = 0;                             // Severe imbalance
                 
-                breakdown.completeness = { imbalance, score: completenessScore, max: 25 };
+                breakdown.completeness = { 
+                    imbalance, 
+                    score: completenessScore, 
+                    max: 25,
+                    totalDebits,
+                    totalCredits,
+                    transactionCount: financialTransactions.length
+                };
+            } else {
+                // No transactions = no score
+                breakdown.completeness = { 
+                    imbalance: 0, 
+                    score: 0, 
+                    max: 25,
+                    transactionCount: 0
+                };
             }
             score += completenessScore;
             
