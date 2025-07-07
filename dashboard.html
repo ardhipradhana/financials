@@ -4377,6 +4377,235 @@
                 alert('Error loading transactions: ' + error.message);
             }
         }
+
+        // AP/AR to GL Linking Functions - GLOBAL SCOPE
+        function linkAPARToGL(aparId) {
+            console.log('linkAPARToGL called with ID:', aparId);
+            
+            // Find the transaction
+            const aparTransaction = aparTransactions.find(t => t.id === aparId);
+            if (!aparTransaction) {
+                alert('Transaction not found');
+                return;
+            }
+            
+            // Open the linking modal
+            openGLLinkingModal(aparId);
+        }
+        
+        function unlinkAPARFromGL(aparId) {
+            if (!confirm('Are you sure you want to unlink this AP/AR transaction from GL?')) return;
+            
+            unlinkAPARTransaction(aparId);
+        }
+        
+        function openGLLinkingModal(aparId) {
+            // Create a new modal specifically for AP/AR -> GL linking
+            const modalHTML = `
+                <div class="modal-overlay" id="glLinkingModal">
+                    <div class="modal">
+                        <div class="modal-header">
+                            <h3 class="modal-title">Link AP/AR Transaction to GL</h3>
+                            <button class="modal-close" onclick="closeGLLinkingModal()">&times;</button>
+                        </div>
+                        <div class="modal-content">
+                            <div class="linking-section">
+                                <h4>Selected AP/AR Transaction</h4>
+                                <div class="linking-list" id="selectedAPARTransaction">
+                                    <!-- Will be populated -->
+                                </div>
+                            </div>
+                            
+                            <div class="linking-section">
+                                <h4>Available GL Transactions</h4>
+                                <div class="linking-list" id="availableGLList">
+                                    <!-- Will be populated -->
+                                </div>
+                            </div>
+                            
+                            <div class="linking-section">
+                                <h4>Or Create New GL Transaction</h4>
+                                <button class="btn btn-primary" onclick="showCreateGLForm('${aparId}')">
+                                    <i class="fas fa-plus"></i>
+                                    Create Matching GL Entry
+                                </button>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button class="btn btn-secondary" onclick="closeGLLinkingModal()">Cancel</button>
+                                <button class="btn btn-primary" onclick="confirmGLLinking('${aparId}')">Link Selected</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Remove existing modal if any
+            const existingModal = document.getElementById('glLinkingModal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+            
+            // Add modal to page
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+            document.getElementById('glLinkingModal').classList.add('active');
+            
+            // Load data
+            loadSelectedAPARTransaction(aparId);
+            loadAvailableGLTransactions();
+        }
+        
+        function closeGLLinkingModal() {
+            const modal = document.getElementById('glLinkingModal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+        
+        function loadSelectedAPARTransaction(aparId) {
+            const transaction = aparTransactions.find(t => t.id === aparId);
+            if (!transaction) return;
+            
+            const container = document.getElementById('selectedAPARTransaction');
+            container.innerHTML = `
+                <div class="linking-item selected">
+                    <div class="linking-item-header">
+                        <strong>${transaction.type} - ${transaction.company}</strong>
+                        <span class="amount">${formatCurrencyFull(transaction.amount, transaction.currency || 'IDR')}</span>
+                    </div>
+                    <div class="linking-item-details">
+                        ${transaction.description} | ${formatDateIndonesian(transaction.invoice_date)}
+                    </div>
+                </div>
+            `;
+        }
+        
+        function loadAvailableGLTransactions() {
+            // Load unlinked GL transactions
+            const unlinkedGLTransactions = financialTransactions.filter(t => !t.is_linked && !t.ap_ar_transaction_id);
+            const container = document.getElementById('availableGLList');
+            
+            if (unlinkedGLTransactions.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #64748b; padding: 1rem;">No unlinked GL transactions available</p>';
+                return;
+            }
+            
+            container.innerHTML = unlinkedGLTransactions.map(transaction => `
+                <div class="linking-item" data-gl-id="${transaction.id}">
+                    <div class="linking-item-header">
+                        <strong>${transaction.account_code} - ${transaction.account_name}</strong>
+                        <span class="amount">${formatCurrencyFull(transaction.debit_amount || transaction.credit_amount, 'IDR')}</span>
+                    </div>
+                    <div class="linking-item-details">
+                        ${transaction.description} | ${formatDateIndonesian(transaction.transaction_date)}
+                    </div>
+                </div>
+            `).join('');
+            
+            // Add click handlers
+            container.querySelectorAll('.linking-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    // Remove previous selections
+                    container.querySelectorAll('.linking-item').forEach(i => i.classList.remove('selected'));
+                    // Add selection to clicked item
+                    item.classList.add('selected');
+                });
+            });
+        }
+        
+        async function confirmGLLinking(aparId) {
+            const selectedGL = document.querySelector('#availableGLList .linking-item.selected');
+            
+            if (!selectedGL) {
+                alert('Please select a GL transaction to link.');
+                return;
+            }
+            
+            const glId = selectedGL.dataset.glId;
+            
+            try {
+                // Update AP/AR transaction
+                await updateTransaction(aparId, {
+                    linked_financial_id: glId
+                });
+                
+                // Update GL transaction
+                await updateFinancialTransaction(glId, {
+                    ap_ar_transaction_id: aparId,
+                    is_linked: true
+                });
+                
+                closeGLLinkingModal();
+                
+                // Refresh both tables
+                renderAPARTable();
+                renderFinancialTable();
+                
+                alert('Transactions linked successfully!');
+                
+            } catch (error) {
+                console.error('Error linking transactions:', error);
+                alert('Error linking transactions: ' + error.message);
+            }
+        }
+        
+        async function unlinkAPARTransaction(aparId) {
+            try {
+                const aparTransaction = aparTransactions.find(t => t.id === aparId);
+                
+                // Update AP/AR transaction
+                await updateTransaction(aparId, {
+                    linked_financial_id: null
+                });
+                
+                // Update GL transaction if linked
+                if (aparTransaction.linked_financial_id) {
+                    await updateFinancialTransaction(aparTransaction.linked_financial_id, {
+                        ap_ar_transaction_id: null,
+                        is_linked: false
+                    });
+                }
+                
+                // Refresh both tables
+                renderAPARTable();
+                renderFinancialTable();
+                
+                alert('Transaction unlinked successfully!');
+                
+            } catch (error) {
+                console.error('Error unlinking transaction:', error);
+                alert('Error unlinking transaction: ' + error.message);
+            }
+        }
+        
+        function showCreateGLForm(aparId) {
+            const aparTransaction = aparTransactions.find(t => t.id === aparId);
+            if (!aparTransaction) return;
+            
+            // Pre-populate financial transaction form with AP/AR data
+            document.getElementById('financialDate').value = aparTransaction.invoice_date;
+            document.getElementById('financialDescription').value = `${aparTransaction.type} - ${aparTransaction.company}: ${aparTransaction.description}`;
+            document.getElementById('financialReference').value = aparTransaction.reference || '';
+            
+            // Suggest appropriate GL account based on transaction type
+            const suggestedAccount = aparTransaction.type === 'AR' ? '1100' : '2010'; // Accounts Receivable or Accounts Payable
+            document.getElementById('financialAccount').value = suggestedAccount;
+            
+            // Set amount in appropriate column
+            if (aparTransaction.type === 'AR') {
+                document.getElementById('financialDebit').value = aparTransaction.amount;
+                document.getElementById('financialCredit').value = '';
+            } else {
+                document.getElementById('financialDebit').value = '';
+                document.getElementById('financialCredit').value = aparTransaction.amount;
+            }
+            
+            // Store the AP/AR ID for auto-linking after creation
+            window.pendingAPARLinkId = aparId;
+            
+            closeGLLinkingModal();
+            openAddFinancialModal();
+        }
         
         async function saveTransaction(transaction) {
             try {
@@ -5016,231 +5245,6 @@
             } catch (error) {
                 console.error('Error updating overdue statuses:', error);
             }
-        }
-
-        // AP/AR to GL Linking Functions
-        function linkAPARToGL(aparId) {
-            // Open a reverse linking modal for AP/AR to GL
-            const aparTransaction = aparTransactions.find(t => t.id === aparId);
-            if (!aparTransaction) return;
-            
-            // Open the existing modal but with reverse logic
-            openGLLinkingModal(aparId);
-        }
-        
-        function unlinkAPARFromGL(aparId) {
-            if (!confirm('Are you sure you want to unlink this AP/AR transaction from GL?')) return;
-            
-            unlinkAPARTransaction(aparId);
-        }
-        
-        // New GL Linking Modal (reverse of existing one)
-        function openGLLinkingModal(aparId) {
-            // Create a new modal specifically for AP/AR -> GL linking
-            const modalHTML = `
-                <div class="modal-overlay" id="glLinkingModal">
-                    <div class="modal">
-                        <div class="modal-header">
-                            <h3 class="modal-title">Link AP/AR Transaction to GL</h3>
-                            <button class="modal-close" onclick="closeGLLinkingModal()">&times;</button>
-                        </div>
-                        <div class="modal-content">
-                            <div class="linking-section">
-                                <h4>Selected AP/AR Transaction</h4>
-                                <div class="linking-list" id="selectedAPARTransaction">
-                                    <!-- Will be populated -->
-                                </div>
-                            </div>
-                            
-                            <div class="linking-section">
-                                <h4>Available GL Transactions</h4>
-                                <div class="linking-list" id="availableGLList">
-                                    <!-- Will be populated -->
-                                </div>
-                            </div>
-                            
-                            <div class="linking-section">
-                                <h4>Or Create New GL Transaction</h4>
-                                <button class="btn btn-primary" onclick="showCreateGLForm('${aparId}')">
-                                    <i class="fas fa-plus"></i>
-                                    Create Matching GL Entry
-                                </button>
-                            </div>
-                            
-                            <div class="form-actions">
-                                <button class="btn btn-secondary" onclick="closeGLLinkingModal()">Cancel</button>
-                                <button class="btn btn-primary" onclick="confirmGLLinking('${aparId}')">Link Selected</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            // Remove existing modal if any
-            const existingModal = document.getElementById('glLinkingModal');
-            if (existingModal) {
-                existingModal.remove();
-            }
-            
-            // Add modal to page
-            document.body.insertAdjacentHTML('beforeend', modalHTML);
-            document.getElementById('glLinkingModal').classList.add('active');
-            
-            // Load data
-            loadSelectedAPARTransaction(aparId);
-            loadAvailableGLTransactions();
-        }
-        
-        function closeGLLinkingModal() {
-            const modal = document.getElementById('glLinkingModal');
-            if (modal) {
-                modal.remove();
-            }
-        }
-        
-        function loadSelectedAPARTransaction(aparId) {
-            const transaction = aparTransactions.find(t => t.id === aparId);
-            if (!transaction) return;
-            
-            const container = document.getElementById('selectedAPARTransaction');
-            container.innerHTML = `
-                <div class="linking-item selected">
-                    <div class="linking-item-header">
-                        <strong>${transaction.type} - ${transaction.company}</strong>
-                        <span class="amount">${formatCurrencyFull(transaction.amount, transaction.currency || 'IDR')}</span>
-                    </div>
-                    <div class="linking-item-details">
-                        ${transaction.description} | ${formatDateIndonesian(transaction.invoice_date)}
-                    </div>
-                </div>
-            `;
-        }
-        
-        function loadAvailableGLTransactions() {
-            // Load unlinked GL transactions
-            const unlinkedGLTransactions = financialTransactions.filter(t => !t.is_linked && !t.ap_ar_transaction_id);
-            const container = document.getElementById('availableGLList');
-            
-            if (unlinkedGLTransactions.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: #64748b; padding: 1rem;">No unlinked GL transactions available</p>';
-                return;
-            }
-            
-            container.innerHTML = unlinkedGLTransactions.map(transaction => `
-                <div class="linking-item" data-gl-id="${transaction.id}">
-                    <div class="linking-item-header">
-                        <strong>${transaction.account_code} - ${transaction.account_name}</strong>
-                        <span class="amount">${formatCurrencyFull(transaction.debit_amount || transaction.credit_amount, 'IDR')}</span>
-                    </div>
-                    <div class="linking-item-details">
-                        ${transaction.description} | ${formatDateIndonesian(transaction.transaction_date)}
-                    </div>
-                </div>
-            `).join('');
-            
-            // Add click handlers
-            container.querySelectorAll('.linking-item').forEach(item => {
-                item.addEventListener('click', () => {
-                    // Remove previous selections
-                    container.querySelectorAll('.linking-item').forEach(i => i.classList.remove('selected'));
-                    // Add selection to clicked item
-                    item.classList.add('selected');
-                });
-            });
-        }
-        
-        async function confirmGLLinking(aparId) {
-            const selectedGL = document.querySelector('#availableGLList .linking-item.selected');
-            
-            if (!selectedGL) {
-                alert('Please select a GL transaction to link.');
-                return;
-            }
-            
-            const glId = selectedGL.dataset.glId;
-            
-            try {
-                // Update AP/AR transaction
-                await updateTransaction(aparId, {
-                    linked_financial_id: glId
-                });
-                
-                // Update GL transaction
-                await updateFinancialTransaction(glId, {
-                    ap_ar_transaction_id: aparId,
-                    is_linked: true
-                });
-                
-                closeGLLinkingModal();
-                
-                // Refresh both tables
-                renderAPARTable();
-                renderFinancialTable();
-                
-                alert('Transactions linked successfully!');
-                
-            } catch (error) {
-                console.error('Error linking transactions:', error);
-                alert('Error linking transactions: ' + error.message);
-            }
-        }
-        
-        async function unlinkAPARTransaction(aparId) {
-            try {
-                const aparTransaction = aparTransactions.find(t => t.id === aparId);
-                
-                // Update AP/AR transaction
-                await updateTransaction(aparId, {
-                    linked_financial_id: null
-                });
-                
-                // Update GL transaction if linked
-                if (aparTransaction.linked_financial_id) {
-                    await updateFinancialTransaction(aparTransaction.linked_financial_id, {
-                        ap_ar_transaction_id: null,
-                        is_linked: false
-                    });
-                }
-                
-                // Refresh both tables
-                renderAPARTable();
-                renderFinancialTable();
-                
-                alert('Transaction unlinked successfully!');
-                
-            } catch (error) {
-                console.error('Error unlinking transaction:', error);
-                alert('Error unlinking transaction: ' + error.message);
-            }
-        }
-        
-        function showCreateGLForm(aparId) {
-            const aparTransaction = aparTransactions.find(t => t.id === aparId);
-            if (!aparTransaction) return;
-            
-            // Pre-populate financial transaction form with AP/AR data
-            document.getElementById('financialDate').value = aparTransaction.invoice_date;
-            document.getElementById('financialDescription').value = `${aparTransaction.type} - ${aparTransaction.company}: ${aparTransaction.description}`;
-            document.getElementById('financialReference').value = aparTransaction.reference || '';
-            
-            // Suggest appropriate GL account based on transaction type
-            const suggestedAccount = aparTransaction.type === 'AR' ? '1100' : '2010'; // Accounts Receivable or Accounts Payable
-            document.getElementById('financialAccount').value = suggestedAccount;
-            
-            // Set amount in appropriate column
-            if (aparTransaction.type === 'AR') {
-                document.getElementById('financialDebit').value = aparTransaction.amount;
-                document.getElementById('financialCredit').value = '';
-            } else {
-                document.getElementById('financialDebit').value = '';
-                document.getElementById('financialCredit').value = aparTransaction.amount;
-            }
-            
-            // Store the AP/AR ID for auto-linking after creation
-            window.pendingAPARLinkId = aparId;
-            
-            closeGLLinkingModal();
-            openAddFinancialModal();
         }
 
         // Close AI chat when clicking outside
