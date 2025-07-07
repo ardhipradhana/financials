@@ -156,8 +156,11 @@
         }
 
         .metric-top-section {
-            position: relative;
-            z-index: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            width: 100%;
+            margin-bottom: 1rem;
         }
         
         .metric-content {
@@ -211,6 +214,7 @@
             color: white;
             font-size: 1rem;
             flex-shrink: 0;
+            /* This keeps the icon at top-right */
         }
         
         .metric-icon::before {
@@ -3319,7 +3323,7 @@
             cursor: pointer;
             min-width: 100px;
             position: relative;
-            z-index: 10; /* Ensure it's clickable */
+            z-index: 10;
             background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
             background-position: right 0.5rem center;
             background-repeat: no-repeat;
@@ -10589,7 +10593,7 @@
         }
         
         function calculatePeriodRevenue(periodFilter) {
-            console.log('=== CALCULATING PERIOD REVENUE ===');
+            console.log('=== CALCULATING PERIOD REVENUE (Using Financial Statements Logic) ===');
             console.log('Period filter:', periodFilter);
             console.log('Financial transactions total:', financialTransactions?.length || 0);
             
@@ -10598,74 +10602,18 @@
                 return 0;
             }
             
-            // DEBUG: Show sample transactions and categories
-            console.log('Sample transactions:', financialTransactions.slice(0, 3));
-            const allCategories = [...new Set(financialTransactions.map(t => t.category))].filter(Boolean);
-            const allAccountNames = [...new Set(financialTransactions.map(t => t.account_name))].filter(Boolean);
-            
-            console.log('All categories found:', allCategories);
-            console.log('All account names found:', allAccountNames);
-            
-            // Try multiple approaches to find revenue transactions
-            let revenueTransactions = [];
-            
-            // Approach 1: Direct category match
-            revenueTransactions = financialTransactions.filter(t => t.category === 'Revenue');
-            console.log('Approach 1 (category = Revenue):', revenueTransactions.length);
-            
-            // Approach 2: If no direct match, try income-related categories
-            if (revenueTransactions.length === 0) {
-                revenueTransactions = financialTransactions.filter(t => 
-                    t.category && (
-                        t.category.toLowerCase().includes('revenue') ||
-                        t.category.toLowerCase().includes('income') ||
-                        t.category.toLowerCase().includes('sales')
-                    )
-                );
-                console.log('Approach 2 (income-related categories):', revenueTransactions.length);
-            }
-            
-            // Approach 3: Try account names
-            if (revenueTransactions.length === 0) {
-                revenueTransactions = financialTransactions.filter(t => 
-                    t.account_name && (
-                        t.account_name.toLowerCase().includes('revenue') ||
-                        t.account_name.toLowerCase().includes('sales') ||
-                        t.account_name.toLowerCase().includes('income') ||
-                        t.account_name.toLowerCase().includes('service')
-                    )
-                );
-                console.log('Approach 3 (account names):', revenueTransactions.length);
-            }
-            
-            // Approach 4: Look for account codes that typically represent revenue (4000-4999)
-            if (revenueTransactions.length === 0) {
-                revenueTransactions = financialTransactions.filter(t => 
-                    t.account_code && t.account_code.startsWith('4')
-                );
-                console.log('Approach 4 (account codes 4xxx):', revenueTransactions.length);
-            }
-            
-            // Approach 5: Last resort - all credit transactions excluding liabilities/equity
-            if (revenueTransactions.length === 0) {
-                revenueTransactions = financialTransactions.filter(t => 
-                    (parseFloat(t.credit) || 0) > 0 && 
-                    t.category !== 'Liability' && 
-                    t.category !== 'Equity'
-                );
-                console.log('Approach 5 (credits excluding liab/equity):', revenueTransactions.length);
-            }
-            
-            console.log('Using revenue transactions:', revenueTransactions);
+            // STEP 1: Filter revenue transactions (same as financial statements)
+            const revenueTransactions = financialTransactions.filter(t => t.category === 'Revenue');
+            console.log('Revenue transactions found:', revenueTransactions.length);
             
             if (revenueTransactions.length === 0) {
-                console.log('No revenue transactions found with any approach');
+                console.log('No revenue transactions found');
                 return 0;
             }
             
-            // Apply date filtering
-            let filtered = revenueTransactions;
-
+            // STEP 2: Apply date filtering BEFORE grouping
+            let filteredRevenueTransactions = revenueTransactions;
+            
             if (periodFilter && periodFilter !== 'custom') {
                 const today = new Date();
                 let startDate;
@@ -10691,61 +10639,45 @@
                         break;
                 }
                 
-                console.log('Date filtering:', {
+                console.log('Date range:', {
                     periodFilter,
-                    today: today.toISOString(),
-                    startDate: startDate?.toISOString(),
-                    revenueTransactionDates: revenueTransactions.map(t => ({
-                        date: t.transaction_date,
-                        account: t.account_name,
-                        amount: t.credit - t.debit
-                    }))
+                    startDate: startDate?.toDateString(),
+                    endDate: today.toDateString()
                 });
                 
                 if (startDate) {
-                    const beforeFilter = filtered.length;
-                    filtered = filtered.filter(t => {
+                    const beforeFilter = filteredRevenueTransactions.length;
+                    filteredRevenueTransactions = filteredRevenueTransactions.filter(t => {
                         const transDate = new Date(t.transaction_date);
                         const isInPeriod = transDate >= startDate && transDate <= today;
-                        console.log(`Transaction ${t.account_name} (${t.transaction_date}): ${isInPeriod ? 'INCLUDED' : 'EXCLUDED'}`);
+                        console.log(`${t.account_name} (${t.transaction_date}): ${isInPeriod ? 'INCLUDED' : 'EXCLUDED'}`);
                         return isInPeriod;
                     });
-                    console.log(`Date filtered (${periodFilter}): ${beforeFilter} -> ${filtered.length} transactions`);
+                    console.log(`Date filtered: ${beforeFilter} -> ${filteredRevenueTransactions.length} transactions`);
                     
-                    // If MTD returns 0, try YTD as fallback
-                    if (filtered.length === 0 && periodFilter === 'MTD') {
-                        console.log('MTD returned 0, trying YTD as fallback...');
+                    // If no transactions in period, try YTD as fallback to show some data
+                    if (filteredRevenueTransactions.length === 0 && periodFilter !== 'YTD') {
+                        console.log('No transactions in period, using YTD as fallback...');
                         const ytdStart = new Date(today.getFullYear(), 0, 1);
-                        filtered = revenueTransactions.filter(t => {
+                        filteredRevenueTransactions = revenueTransactions.filter(t => {
                             const transDate = new Date(t.transaction_date);
                             return transDate >= ytdStart && transDate <= today;
                         });
-                        console.log(`YTD fallback: ${filtered.length} transactions found`);
+                        console.log(`YTD fallback found ${filteredRevenueTransactions.length} transactions`);
                     }
                 }
             }
             
-            // Custom date range
-            if (periodFilter === 'custom') {
-                const dateFrom = document.getElementById('revenueDateFrom')?.value;
-                const dateTo = document.getElementById('revenueDateTo')?.value;
-                
-                if (dateFrom && dateTo) {
-                    filtered = filtered.filter(t => {
-                        const transDate = new Date(t.transaction_date);
-                        return transDate >= new Date(dateFrom) && transDate <= new Date(dateTo);
-                    });
-                }
-            }
+            // STEP 3: Group by account (SAME AS FINANCIAL STATEMENTS)
+            const revenueAccounts = groupTransactionsByAccount(filteredRevenueTransactions);
+            console.log('Revenue accounts after grouping:', Object.keys(revenueAccounts));
             
-            // Calculate total revenue (credits increase revenue, debits decrease revenue)
+            // STEP 4: Calculate total revenue (SAME AS FINANCIAL STATEMENTS)
             let totalRevenue = 0;
-            filtered.forEach(t => {
-                const credit = parseFloat(t.credit || 0);
-                const debit = parseFloat(t.debit || 0);
-                const net = credit - debit;
-                totalRevenue += net;
-                console.log(`${t.account_name}: Credit ${credit}, Debit ${debit}, Net ${net}`);
+            Object.values(revenueAccounts).forEach(account => {
+                const balance = account.credit_total - account.debit_total;
+                totalRevenue += balance;
+                console.log(`${account.account_name}: Credits ${account.credit_total} - Debits ${account.debit_total} = ${balance}`);
             });
             
             console.log('Final calculated revenue:', totalRevenue);
