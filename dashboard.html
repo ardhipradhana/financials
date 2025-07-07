@@ -146,9 +146,14 @@
 
         .metric-header {
             display: flex;
-            justify-content: between;
-            align-items: center;
+            justify-content: space-between;
+            align-items: flex-start;
             margin-bottom: 1rem;
+            width: 100%;
+        }
+
+        .metric-content {
+            flex: 1;
         }
 
         .metric-title {
@@ -159,16 +164,16 @@
         }
 
         .metric-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 1.25rem;
-            position: relative;
-            overflow: hidden;
+            font-size: 1rem;
+            flex-shrink: 0;
+            margin-left: 1rem;
         }
 
         .metric-icon::before {
@@ -3338,10 +3343,10 @@
                 <div class="metrics-grid">
                     <div class="metric-card">
                         <div class="metric-header">
-                            <div>
-                                <div class="metric-title">Cash Flow Status</div>
-                                <div class="metric-value">Rp 45,230</div>
-                                <div class="metric-change positive">+12.5% vs last month</div>
+                            <div class="metric-content">
+                                <div class="metric-title">Current Cash Position</div>
+                                <div class="metric-value">Rp -42,750,000</div>
+                                <div class="metric-change negative">-8.2% vs last period</div>
                             </div>
                             <div class="metric-icon icon-cash">
                                 <i class="fas fa-dollar-sign"></i>
@@ -10414,22 +10419,65 @@
         }
         
         function calculateDashboardMetrics() {
+            console.log('=== CALCULATING DASHBOARD METRICS ===');
+            
             // 1. Get current cash position from AP/AR summary
             const cashImpactElement = document.getElementById('netCashImpact');
             const currentCash = cashImpactElement ? 
                 parseFloat(cashImpactElement.textContent.replace(/[^\d.-]/g, '') || 0) : 0;
             
-            // 2. Calculate NET overdue position (AR - AP) - FIX: Get full amounts
-            const overdueAR = parseFloat(document.getElementById('totalAR')?.textContent.replace(/[^\d.-]/g, '') || 0);
-            const overdueAP = parseFloat(document.getElementById('totalAP')?.textContent.replace(/[^\d.-]/g, '') || 0);
+            console.log('Cash impact element:', cashImpactElement);
+            console.log('Current cash:', currentCash);
             
-            // Debug: Log the raw values
-            console.log('Raw AR:', document.getElementById('totalAR')?.textContent);
-            console.log('Raw AP:', document.getElementById('totalAP')?.textContent);
-            console.log('Parsed AR:', overdueAR);
-            console.log('Parsed AP:', overdueAP);
+            // 2. DEBUG AR/AP VALUES - Calculate NET overdue position (AR - AP)
+            const totalARElement = document.getElementById('totalAR');
+            const totalAPElement = document.getElementById('totalAP');
+            
+            console.log('=== DEBUGGING AR/AP VALUES ===');
+            console.log('AR Element:', totalARElement);
+            console.log('AR Text Content:', totalARElement?.textContent);
+            console.log('AP Element:', totalAPElement);
+            console.log('AP Text Content:', totalAPElement?.textContent);
+            
+            // Try different parsing approaches
+            let overdueAR = 0;
+            let overdueAP = 0;
+            
+            if (totalARElement) {
+                const arText = totalARElement.textContent;
+                // Try multiple parsing methods
+                const arMethod1 = parseFloat(arText.replace(/[^\d.-]/g, '') || 0);
+                const arMethod2 = parseFloat(arText.replace(/[^0-9.-]/g, '') || 0);
+                const arMethod3 = parseFloat(arText.replace(/Rp\s*/, '').replace(/,/g, '') || 0);
+                
+                console.log('AR Parsing Method 1 (remove non-digits):', arMethod1);
+                console.log('AR Parsing Method 2 (numbers only):', arMethod2);
+                console.log('AR Parsing Method 3 (remove Rp and commas):', arMethod3);
+                
+                // Use the method that gives the largest reasonable value
+                overdueAR = Math.max(arMethod1, arMethod2, arMethod3);
+            }
+            
+            if (totalAPElement) {
+                const apText = totalAPElement.textContent;
+                // Try multiple parsing methods
+                const apMethod1 = parseFloat(apText.replace(/[^\d.-]/g, '') || 0);
+                const apMethod2 = parseFloat(apText.replace(/[^0-9.-]/g, '') || 0);
+                const apMethod3 = parseFloat(apText.replace(/Rp\s*/, '').replace(/,/g, '') || 0);
+                
+                console.log('AP Parsing Method 1 (remove non-digits):', apMethod1);
+                console.log('AP Parsing Method 2 (numbers only):', apMethod2);
+                console.log('AP Parsing Method 3 (remove Rp and commas):', apMethod3);
+                
+                // Use the method that gives the largest reasonable value
+                overdueAP = Math.max(apMethod1, apMethod2, apMethod3);
+            }
+            
+            console.log('Final parsed AR:', overdueAR);
+            console.log('Final parsed AP:', overdueAP);
             
             const netOverduePosition = overdueAR - overdueAP;
+            console.log('Net overdue position:', netOverduePosition);
             
             // 3. Calculate revenue based on selected period
             const selectedPeriod = document.getElementById('dashboardPeriodFilter')?.value || 'MTD';
@@ -10438,7 +10486,7 @@
             // 4. Calculate comprehensive financial health score
             const healthScore = calculateComprehensiveHealthScore();
             
-            return {
+            const metrics = {
                 currentCash,
                 netOverduePosition,
                 overdueAR,
@@ -10447,6 +10495,9 @@
                 selectedPeriod,
                 healthScore
             };
+            
+            console.log('Final calculated metrics:', metrics);
+            return metrics;
         }
         
         function calculatePeriodRevenue(periodFilter) {
@@ -10459,13 +10510,46 @@
                 return 0;
             }
             
-            // Filter for revenue transactions only
-            let filtered = financialTransactions.filter(t => t.category === 'Revenue');
-            console.log('Revenue transactions found:', filtered.length);
-            console.log('Revenue transactions:', filtered);
+            // DEBUG: Check all transaction data
+            console.log('Sample financial transactions:', financialTransactions.slice(0, 3));
+            
+            // Debug: Check all unique categories
+            const allCategories = [...new Set(financialTransactions.map(t => t.category))];
+            console.log('All categories found:', allCategories);
+            
+            // Debug: Check all unique account names
+            const allAccountNames = [...new Set(financialTransactions.map(t => t.account_name))];
+            console.log('All account names found:', allAccountNames);
+            
+            // Try different revenue filters
+            const revenueFilter1 = financialTransactions.filter(t => t.category === 'Revenue');
+            const revenueFilter2 = financialTransactions.filter(t => t.category && t.category.toLowerCase().includes('revenue'));
+            const revenueFilter3 = financialTransactions.filter(t => t.account_name && t.account_name.toLowerCase().includes('revenue'));
+            const revenueFilter4 = financialTransactions.filter(t => t.account_name && t.account_name.toLowerCase().includes('sales'));
+            const revenueFilter5 = financialTransactions.filter(t => t.account_name && t.account_name.toLowerCase().includes('income'));
+            const revenueFilter6 = financialTransactions.filter(t => (parseFloat(t.credit) || 0) > 0 && t.category !== 'Liability' && t.category !== 'Equity');
+            
+            console.log('Revenue filter 1 (category = Revenue):', revenueFilter1.length, revenueFilter1);
+            console.log('Revenue filter 2 (category contains revenue):', revenueFilter2.length, revenueFilter2);
+            console.log('Revenue filter 3 (account_name contains revenue):', revenueFilter3.length, revenueFilter3);
+            console.log('Revenue filter 4 (account_name contains sales):', revenueFilter4.length, revenueFilter4);
+            console.log('Revenue filter 5 (account_name contains income):', revenueFilter5.length, revenueFilter5);
+            console.log('Revenue filter 6 (credits excluding liabilities/equity):', revenueFilter6.length, revenueFilter6);
+            
+            // Use the filter that returns data, prioritizing the most specific
+            let filtered = [];
+            if (revenueFilter1.length > 0) filtered = revenueFilter1;
+            else if (revenueFilter2.length > 0) filtered = revenueFilter2;
+            else if (revenueFilter3.length > 0) filtered = revenueFilter3;
+            else if (revenueFilter4.length > 0) filtered = revenueFilter4;
+            else if (revenueFilter5.length > 0) filtered = revenueFilter5;
+            else if (revenueFilter6.length > 0) filtered = revenueFilter6;
+            
+            console.log('Selected filter returned', filtered.length, 'transactions');
+            console.log('Selected revenue transactions:', filtered);
             
             if (filtered.length === 0) {
-                console.log('No revenue transactions found');
+                console.log('No revenue transactions found with any filter');
                 return 0;
             }
             
@@ -10473,6 +10557,8 @@
             if (periodFilter && periodFilter !== 'custom') {
                 const today = new Date();
                 let startDate;
+                
+                console.log('Today:', today);
                 
                 switch(periodFilter) {
                     case 'MTD':
@@ -10482,7 +10568,7 @@
                     case 'QTD':
                         const quarter = Math.floor(today.getMonth() / 3);
                         startDate = new Date(today.getFullYear(), quarter * 3, 1);
-                        console.log('QTD start date:', startDate);
+                        console.log('QTD start date:', startDate, 'Quarter:', quarter);
                         break;
                     case 'YTD':
                         startDate = new Date(today.getFullYear(), 0, 1);
@@ -10507,10 +10593,11 @@
                     filtered = filtered.filter(t => {
                         const transDate = new Date(t.transaction_date);
                         const isInPeriod = transDate >= startDate && transDate <= today;
-                        console.log(`Transaction ${t.id}: ${t.transaction_date} - In period: ${isInPeriod}`);
+                        console.log(`Transaction ${t.id}: ${t.transaction_date} (${transDate}) - In period: ${isInPeriod}`);
                         return isInPeriod;
                     });
-                    console.log(`Filtered by date: ${beforeFilter} -> ${filtered.length} transactions`);
+                    console.log(`Date filtered: ${beforeFilter} -> ${filtered.length} transactions`);
+                    console.log('Transactions after date filter:', filtered);
                 }
             }
             
@@ -10531,7 +10618,7 @@
                         console.log(`Transaction ${t.id}: ${t.transaction_date} - In range: ${isInRange}`);
                         return isInRange;
                     });
-                    console.log(`Filtered by custom range: ${beforeFilter} -> ${filtered.length} transactions`);
+                    console.log(`Custom range filtered: ${beforeFilter} -> ${filtered.length} transactions`);
                 } else {
                     console.log('Custom range selected but no dates provided');
                 }
@@ -10545,7 +10632,7 @@
                 const transactionRevenue = credit - debit;
                 totalRevenue += transactionRevenue;
                 
-                console.log(`Transaction ${t.id}: Credit: ${credit}, Debit: ${debit}, Net: ${transactionRevenue}`);
+                console.log(`Transaction ${t.id} (${t.account_name}): Credit: ${credit}, Debit: ${debit}, Net: ${transactionRevenue}`);
             });
             
             console.log('Final calculated revenue:', totalRevenue);
@@ -10755,35 +10842,70 @@
         }
         
         function calculateComprehensiveHealthScore() {
+            console.log('=== CALCULATING HEALTH SCORE ===');
             let score = 0;
+            let breakdown = {};
             
-            // Cash position (25 points)
+            // 1. Cash position (25 points)
             const cashImpactElement = document.getElementById('netCashImpact');
             const currentCash = cashImpactElement ? 
                 parseFloat(cashImpactElement.textContent.replace(/[^\d.-]/g, '') || 0) : 0;
-            if (currentCash > 0) score += 25;
-            else if (currentCash > -1000000) score += 15; // Still okay if slightly negative
             
-            // Revenue health (25 points)
+            let cashScore = 0;
+            if (currentCash > 10000000) cashScore = 25;      // >10M = excellent
+            else if (currentCash > 0) cashScore = 20;        // Positive = good
+            else if (currentCash > -5000000) cashScore = 10; // Slightly negative = okay
+            else cashScore = 0;                              // Very negative = poor
+            
+            breakdown.cash = { value: currentCash, score: cashScore, max: 25 };
+            score += cashScore;
+            
+            // 2. Revenue health (25 points)
             const mtdRevenue = calculatePeriodRevenue('MTD');
-            if (mtdRevenue > 0) score += 25;
+            let revenueScore = 0;
+            if (mtdRevenue > 50000000) revenueScore = 25;       // >50M MTD = excellent
+            else if (mtdRevenue > 10000000) revenueScore = 20;  // >10M MTD = good
+            else if (mtdRevenue > 1000000) revenueScore = 15;   // >1M MTD = fair
+            else if (mtdRevenue > 0) revenueScore = 10;         // Any revenue = basic
+            else revenueScore = 0;                              // No revenue = poor
             
-            // AR/AP balance (25 points)
+            breakdown.revenue = { value: mtdRevenue, score: revenueScore, max: 25 };
+            score += revenueScore;
+            
+            // 3. AR/AP balance (25 points)
             const overdueAR = parseFloat(document.getElementById('totalAR')?.textContent.replace(/[^\d.-]/g, '') || 0);
             const overdueAP = parseFloat(document.getElementById('totalAP')?.textContent.replace(/[^\d.-]/g, '') || 0);
             const netPosition = overdueAR - overdueAP;
-            if (netPosition >= 0) score += 25; // More owed to you than you owe
-            else if (netPosition > -500000) score += 15; // Moderate debt
             
-            // Transaction balance (25 points)
+            let arApScore = 0;
+            if (netPosition > 5000000) arApScore = 25;          // >5M net positive = excellent
+            else if (netPosition >= 0) arApScore = 20;          // Break-even or positive = good
+            else if (netPosition > -2000000) arApScore = 10;    // Small negative = fair
+            else arApScore = 0;                                 // Large negative = poor
+            
+            breakdown.arAp = { netPosition, score: arApScore, max: 25 };
+            score += arApScore;
+            
+            // 4. Transaction completeness (25 points)
+            let completenessScore = 0;
             if (financialTransactions && financialTransactions.length > 0) {
-                const totalDebits = financialTransactions.reduce((sum, t) => sum + (t.debit || 0), 0);
-                const totalCredits = financialTransactions.reduce((sum, t) => sum + (t.credit || 0), 0);
-                if (Math.abs(totalDebits - totalCredits) < 1000) score += 25;
-                else if (Math.abs(totalDebits - totalCredits) < 10000) score += 15;
+                const totalDebits = financialTransactions.reduce((sum, t) => sum + (parseFloat(t.debit) || 0), 0);
+                const totalCredits = financialTransactions.reduce((sum, t) => sum + (parseFloat(t.credit) || 0), 0);
+                const imbalance = Math.abs(totalDebits - totalCredits);
+                
+                if (imbalance < 1000) completenessScore = 25;           // Perfect balance
+                else if (imbalance < 10000) completenessScore = 20;     // Minor imbalance
+                else if (imbalance < 100000) completenessScore = 10;    // Moderate imbalance
+                else completenessScore = 0;                             // Major imbalance
+                
+                breakdown.completeness = { imbalance, score: completenessScore, max: 25 };
             }
+            score += completenessScore;
             
-            return Math.min(100, score);
+            console.log('Health score breakdown:', breakdown);
+            console.log('Total health score:', score);
+            
+            return Math.min(100, Math.max(0, score));
         }
         
         function updateDashboardCards(metrics) {
