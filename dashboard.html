@@ -4184,6 +4184,50 @@
                 </div>
             </div>
 
+            <!-- GL Account Selection Modal for AP/AR Linking -->
+            <div class="modal-overlay" id="glAccountSelectionModal">
+                <div class="modal">
+                    <div class="modal-header">
+                        <h3 class="modal-title">Create GL Entries</h3>
+                        <button class="modal-close" onclick="closeGLAccountSelectionModal()">&times;</button>
+                    </div>
+                    <div class="modal-content">
+                        <div class="linking-section">
+                            <h4>Selected AP/AR Transaction</h4>
+                            <div class="linking-list" id="selectedAPARForGL">
+                                <!-- Will be populated -->
+                            </div>
+                        </div>
+                        
+                        <div class="linking-section">
+                            <h4 id="balancingAccountTitle">Select Balancing Account</h4>
+                            <p id="balancingAccountHelp" style="color: #64748b; font-size: 0.875rem; margin-bottom: 1rem;">
+                                <!-- Will be populated with help text -->
+                            </p>
+                            
+                            <!-- Quick Select Buttons -->
+                            <div class="quick-select-accounts" id="quickSelectAccounts" style="margin-bottom: 1rem;">
+                                <!-- Will be populated with suggested accounts -->
+                            </div>
+                            
+                            <!-- Manual Account Selection -->
+                            <div class="manual-account-selection">
+                                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Or select manually:</label>
+                                <select id="manualAccountSelect" class="form-select" style="width: 100%;">
+                                    <option value="">Choose an account...</option>
+                                    <!-- Will be populated with all GL accounts -->
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button class="btn btn-secondary" onclick="closeGLAccountSelectionModal()">Cancel</button>
+                            <button class="btn btn-primary" onclick="confirmGLCreation()" id="createGLButton">Create GL Entries</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Other sections (hidden by default) -->
             <div id="statements-placeholder" class="section-content" style="display: none;">
                 <div class="feature-placeholder">
@@ -4286,87 +4330,45 @@
                 return;
             }
             
-            // Open the linking modal
-            openGLLinkingModal(aparId);
+            // Open the NEW account selection modal instead of old linking modal
+            openGLAccountSelectionModal(aparId);
         }
-        
-        function unlinkAPARFromGL(aparId) {
-            if (!confirm('Are you sure you want to unlink this AP/AR transaction from GL?')) return;
+
+        // NEW: Open GL Account Selection Modal
+        function openGLAccountSelectionModal(aparId) {
+            const aparTransaction = aparTransactions.find(t => t.id === aparId);
+            if (!aparTransaction) return;
             
-            unlinkAPARTransaction(aparId);
-        }
-        
-        function openGLLinkingModal(aparId) {
-            // Create a new modal specifically for AP/AR -> GL linking
-            const modalHTML = `
-                <div class="modal-overlay" id="glLinkingModal">
-                    <div class="modal">
-                        <div class="modal-header">
-                            <h3 class="modal-title">Link AP/AR Transaction to GL</h3>
-                            <button class="modal-close" onclick="closeGLLinkingModal()">&times;</button>
-                        </div>
-                        <div class="modal-content">
-                            <div class="linking-section">
-                                <h4>Selected AP/AR Transaction</h4>
-                                <div class="linking-list" id="selectedAPARTransaction">
-                                    <!-- Will be populated -->
-                                </div>
-                            </div>
-                            
-                            <div class="linking-section">
-                                <h4>Available GL Transactions</h4>
-                                <div class="linking-list" id="availableGLList">
-                                    <!-- Will be populated -->
-                                </div>
-                            </div>
-                            
-                            <div class="linking-section">
-                                <h4>Or Create New GL Transaction</h4>
-                                <button class="btn btn-primary" onclick="showCreateGLForm('${aparId}')">
-                                    <i class="fas fa-plus"></i>
-                                    Create Matching GL Entry
-                                </button>
-                            </div>
-                            
-                            <div class="form-actions">
-                                <button class="btn btn-secondary" onclick="closeGLLinkingModal()">Cancel</button>
-                                <button class="btn btn-primary" onclick="confirmGLLinking('${aparId}')">Link Selected</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            // Remove existing modal if any
-            const existingModal = document.getElementById('glLinkingModal');
-            if (existingModal) {
-                existingModal.remove();
-            }
-            
-            // Add modal to page
-            document.body.insertAdjacentHTML('beforeend', modalHTML);
-            const modal = document.getElementById('glLinkingModal');
+            // Show the modal
+            const modal = document.getElementById('glAccountSelectionModal');
             modal.classList.add('active');
             modal.style.visibility = 'visible';
             modal.style.opacity = '1';
             
-            // Load data
-            loadSelectedAPARTransaction(aparId);
-            loadAvailableGLTransactions();
-        }
-        
-        function closeGLLinkingModal() {
-            const modal = document.getElementById('glLinkingModal');
-            if (modal) {
-                modal.remove();
-            }
-        }
-        
-        function loadSelectedAPARTransaction(aparId) {
-            const transaction = aparTransactions.find(t => t.id === aparId);
-            if (!transaction) return;
+            // Populate the selected AP/AR transaction
+            populateSelectedAPARForGL(aparTransaction);
             
-            const container = document.getElementById('selectedAPARTransaction');
+            // Setup account selection based on transaction type
+            setupAccountSelection(aparTransaction);
+            
+            // Store the current AP/AR ID for later use
+            window.currentAPARId = aparId;
+        }
+        
+        // NEW: Close GL Account Selection Modal
+        function closeGLAccountSelectionModal() {
+            const modal = document.getElementById('glAccountSelectionModal');
+            modal.classList.remove('active');
+            modal.style.visibility = 'hidden';
+            modal.style.opacity = '0';
+            
+            // Clear stored ID
+            window.currentAPARId = null;
+        }
+        
+        // NEW: Populate selected AP/AR transaction display
+        function populateSelectedAPARForGL(transaction) {
+            const container = document.getElementById('selectedAPARForGL');
             container.innerHTML = `
                 <div class="linking-item selected">
                     <div class="linking-item-header">
@@ -4379,74 +4381,268 @@
                 </div>
             `;
         }
-        
-        function loadAvailableGLTransactions() {
-            // Load unlinked GL transactions
-            const unlinkedGLTransactions = financialTransactions.filter(t => !t.is_linked && !t.ap_ar_transaction_id);
-            const container = document.getElementById('availableGLList');
+
+        // NEW: Setup account selection based on transaction type
+        function setupAccountSelection(transaction) {
+            const titleElement = document.getElementById('balancingAccountTitle');
+            const helpElement = document.getElementById('balancingAccountHelp');
+            const quickSelectContainer = document.getElementById('quickSelectAccounts');
+            const manualSelect = document.getElementById('manualAccountSelect');
             
-            if (unlinkedGLTransactions.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: #64748b; padding: 1rem;">No unlinked GL transactions available</p>';
-                return;
+            // Clear previous content
+            quickSelectContainer.innerHTML = '';
+            manualSelect.innerHTML = '<option value="">Choose an account...</option>';
+            
+            if (transaction.type === 'AR') {
+                // For Accounts Receivable - need Revenue account to balance
+                titleElement.textContent = 'Select Revenue Account';
+                helpElement.textContent = 'This AR transaction will create: Debit Accounts Receivable + Credit Revenue Account';
+                
+                // Quick select revenue accounts
+                const revenueAccounts = [
+                    { code: '4010', name: 'Sales Revenue' },
+                    { code: '4020', name: 'Service Revenue' },
+                    { code: '4030', name: 'Interest Income' },
+                    { code: '4040', name: 'Other Revenue' }
+                ];
+                
+                quickSelectContainer.innerHTML = revenueAccounts.map(account => `
+                    <button class="btn btn-sm btn-outline-primary quick-select-btn" 
+                            onclick="selectQuickAccount('${account.code}', '${account.name}')"
+                            style="margin: 0.25rem;">
+                        ${account.code} - ${account.name}
+                    </button>
+                `).join('');
+                
+                // Populate manual select with all revenue accounts (4xxx)
+                populateManualSelect(['4010', '4020', '4030', '4040', '4050']);
+                
+            } else if (transaction.type === 'AP') {
+                // For Accounts Payable - need Expense account to balance  
+                titleElement.textContent = 'Select Expense Account';
+                helpElement.textContent = 'This AP transaction will create: Debit Expense Account + Credit Accounts Payable';
+                
+                // Quick select expense accounts
+                const expenseAccounts = [
+                    { code: '5100', name: 'Office Expenses' },
+                    { code: '5200', name: 'Marketing Expenses' },
+                    { code: '5400', name: 'Professional Services' },
+                    { code: '5500', name: 'Office Supplies' },
+                    { code: '5800', name: 'Travel and Entertainment' }
+                ];
+                
+                quickSelectContainer.innerHTML = expenseAccounts.map(account => `
+                    <button class="btn btn-sm btn-outline-primary quick-select-btn" 
+                            onclick="selectQuickAccount('${account.code}', '${account.name}')"
+                            style="margin: 0.25rem;">
+                        ${account.code} - ${account.name}
+                    </button>
+                `).join('');
+                
+                // Populate manual select with all expense accounts (5xxx)
+                populateManualSelect(['5100', '5110', '5120', '5200', '5210', '5220', '5300', '5400', '5500', '5600', '5700', '5800', '5900']);
             }
+        }
+        
+        // NEW: Populate manual account dropdown
+        function populateManualSelect(accountCodes) {
+            const manualSelect = document.getElementById('manualAccountSelect');
             
-            container.innerHTML = unlinkedGLTransactions.map(transaction => `
-                <div class="linking-item" data-gl-id="${transaction.id}">
-                    <div class="linking-item-header">
-                        <strong>${transaction.account_code} - ${transaction.account_name}</strong>
-                        <span class="amount">${formatCurrencyFull(transaction.debit_amount || transaction.credit_amount, 'IDR')}</span>
-                    </div>
-                    <div class="linking-item-details">
-                        ${transaction.description} | ${formatDateIndonesian(transaction.transaction_date)}
-                    </div>
-                </div>
-            `).join('');
-            
-            // Add click handlers
-            container.querySelectorAll('.linking-item').forEach(item => {
-                item.addEventListener('click', () => {
-                    // Remove previous selections
-                    container.querySelectorAll('.linking-item').forEach(i => i.classList.remove('selected'));
-                    // Add selection to clicked item
-                    item.classList.add('selected');
-                });
+            // Add accounts that exist in our GL accounts list
+            accountCodes.forEach(code => {
+                const account = glAccounts.find(acc => acc.account_code === code);
+                if (account) {
+                    const option = document.createElement('option');
+                    option.value = account.account_code;
+                    option.textContent = `${account.account_code} - ${account.account_name}`;
+                    manualSelect.appendChild(option);
+                }
             });
         }
         
-        async function confirmGLLinking(aparId) {
-            const selectedGL = document.querySelector('#availableGLList .linking-item.selected');
+        // NEW: Handle quick select button clicks
+        function selectQuickAccount(accountCode, accountName) {
+            // Remove active class from all quick select buttons
+            document.querySelectorAll('.quick-select-btn').forEach(btn => {
+                btn.classList.remove('btn-primary');
+                btn.classList.add('btn-outline-primary');
+            });
             
-            if (!selectedGL) {
-                alert('Please select a GL transaction to link.');
+            // Add active class to clicked button
+            event.target.classList.remove('btn-outline-primary');
+            event.target.classList.add('btn-primary');
+            
+            // Set the manual select to match
+            document.getElementById('manualAccountSelect').value = accountCode;
+            
+            // Store selected account for later use
+            window.selectedBalancingAccount = { code: accountCode, name: accountName };
+            
+            console.log('Selected balancing account:', accountCode, accountName);
+        }
+        
+        // NEW: Handle manual dropdown selection
+        document.addEventListener('DOMContentLoaded', function() {
+            const manualSelect = document.getElementById('manualAccountSelect');
+            if (manualSelect) {
+                manualSelect.addEventListener('change', function() {
+                    if (this.value) {
+                        const account = glAccounts.find(acc => acc.account_code === this.value);
+                        if (account) {
+                            // Clear quick select buttons
+                            document.querySelectorAll('.quick-select-btn').forEach(btn => {
+                                btn.classList.remove('btn-primary');
+                                btn.classList.add('btn-outline-primary');
+                            });
+                            
+                            // Store selected account
+                            window.selectedBalancingAccount = { 
+                                code: account.account_code, 
+                                name: account.account_name 
+                            };
+                            
+                            console.log('Manual selected balancing account:', account.account_code, account.account_name);
+                        }
+                    }
+                });
+            }
+        });
+
+        // NEW: Confirm and create GL entries
+        async function confirmGLCreation() {
+            // Validate selection
+            if (!window.selectedBalancingAccount) {
+                alert('Please select a balancing account first.');
                 return;
             }
             
-            const glId = selectedGL.dataset.glId;
+            if (!window.currentAPARId) {
+                alert('No AP/AR transaction selected.');
+                return;
+            }
+            
+            const aparTransaction = aparTransactions.find(t => t.id === window.currentAPARId);
+            if (!aparTransaction) {
+                alert('AP/AR transaction not found.');
+                return;
+            }
             
             try {
-                // Update AP/AR transaction
-                await updateTransaction(aparId, {
-                    linked_financial_id: glId
+                // Disable button to prevent double-clicking
+                const createButton = document.getElementById('createGLButton');
+                createButton.disabled = true;
+                createButton.textContent = 'Creating...';
+                
+                console.log('Creating GL entries for:', aparTransaction.type, aparTransaction.company);
+                
+                // Create the two GL transactions based on transaction type
+                let glTransaction1, glTransaction2;
+                
+                if (aparTransaction.type === 'AR') {
+                    // AR: Debit Accounts Receivable + Credit Revenue
+                    glTransaction1 = {
+                        transaction_date: aparTransaction.invoice_date,
+                        account_code: '1100', // Accounts Receivable
+                        account_name: 'Accounts Receivable',
+                        description: `AR: ${aparTransaction.company} - ${aparTransaction.description}`,
+                        debit_amount: aparTransaction.amount,
+                        credit_amount: 0,
+                        reference: aparTransaction.reference || '',
+                        notes: `Linked to AP/AR transaction: ${aparTransaction.id}`,
+                        category: 'Asset',
+                        source: 'linked_from_apar',
+                        ap_ar_transaction_id: aparTransaction.id,
+                        is_linked: true
+                    };
+                    
+                    glTransaction2 = {
+                        transaction_date: aparTransaction.invoice_date,
+                        account_code: window.selectedBalancingAccount.code,
+                        account_name: window.selectedBalancingAccount.name,
+                        description: `Revenue: ${aparTransaction.company} - ${aparTransaction.description}`,
+                        debit_amount: 0,
+                        credit_amount: aparTransaction.amount,
+                        reference: aparTransaction.reference || '',
+                        notes: `Linked to AP/AR transaction: ${aparTransaction.id}`,
+                        category: 'Revenue',
+                        source: 'linked_from_apar',
+                        ap_ar_transaction_id: aparTransaction.id,
+                        is_linked: true
+                    };
+                    
+                } else if (aparTransaction.type === 'AP') {
+                    // AP: Debit Expense + Credit Accounts Payable
+                    glTransaction1 = {
+                        transaction_date: aparTransaction.invoice_date,
+                        account_code: window.selectedBalancingAccount.code,
+                        account_name: window.selectedBalancingAccount.name,
+                        description: `Expense: ${aparTransaction.company} - ${aparTransaction.description}`,
+                        debit_amount: aparTransaction.amount,
+                        credit_amount: 0,
+                        reference: aparTransaction.reference || '',
+                        notes: `Linked to AP/AR transaction: ${aparTransaction.id}`,
+                        category: 'Expense',
+                        source: 'linked_from_apar',
+                        ap_ar_transaction_id: aparTransaction.id,
+                        is_linked: true
+                    };
+                    
+                    glTransaction2 = {
+                        transaction_date: aparTransaction.invoice_date,
+                        account_code: '2010', // Accounts Payable
+                        account_name: 'Accounts Payable',
+                        description: `AP: ${aparTransaction.company} - ${aparTransaction.description}`,
+                        debit_amount: 0,
+                        credit_amount: aparTransaction.amount,
+                        reference: aparTransaction.reference || '',
+                        notes: `Linked to AP/AR transaction: ${aparTransaction.id}`,
+                        category: 'Liability',
+                        source: 'linked_from_apar',
+                        ap_ar_transaction_id: aparTransaction.id,
+                        is_linked: true
+                    };
+                }
+                
+                // Save both GL transactions to database
+                console.log('Saving GL transaction 1:', glTransaction1);
+                const savedGL1 = await saveFinancialTransaction(glTransaction1);
+                
+                console.log('Saving GL transaction 2:', glTransaction2);
+                const savedGL2 = await saveFinancialTransaction(glTransaction2);
+                
+                // Update the AP/AR transaction to mark it as linked
+                await updateTransaction(aparTransaction.id, {
+                    linked_financial_id: savedGL1.id, // Link to first GL transaction
+                    source: aparTransaction.source || 'manual' // Preserve existing source
                 });
                 
-                // Update GL transaction
-                await updateFinancialTransaction(glId, {
-                    ap_ar_transaction_id: aparId,
-                    is_linked: true
-                });
-                
-                closeGLLinkingModal();
+                // Close modal and refresh tables
+                closeGLAccountSelectionModal();
                 
                 // Refresh both tables
+                await loadFinancialTransactions();
+                await loadAPARData();
                 renderAPARTable();
-                renderFinancialTable();
                 
-                alert('Transactions linked successfully!');
+                alert(`Successfully created GL entries!\n\nCreated:\n- ${glTransaction1.account_name} (${glTransaction1.debit_amount > 0 ? 'Debit' : 'Credit'}): ${formatCurrencyFull(aparTransaction.amount, 'IDR')}\n- ${glTransaction2.account_name} (${glTransaction2.debit_amount > 0 ? 'Debit' : 'Credit'}): ${formatCurrencyFull(aparTransaction.amount, 'IDR')}`);
                 
             } catch (error) {
-                console.error('Error linking transactions:', error);
-                alert('Error linking transactions: ' + error.message);
+                console.error('Error creating GL entries:', error);
+                alert('Error creating GL entries: ' + error.message);
+            } finally {
+                // Re-enable button
+                const createButton = document.getElementById('createGLButton');
+                if (createButton) {
+                    createButton.disabled = false;
+                    createButton.textContent = 'Create GL Entries';
+                }
             }
+        }
+        
+        function unlinkAPARFromGL(aparId) {
+            if (!confirm('Are you sure you want to unlink this AP/AR transaction from GL?')) return;
+            
+            unlinkAPARTransaction(aparId);
         }
         
         async function unlinkAPARTransaction(aparId) {
@@ -4476,35 +4672,6 @@
                 console.error('Error unlinking transaction:', error);
                 alert('Error unlinking transaction: ' + error.message);
             }
-        }
-        
-        function showCreateGLForm(aparId) {
-            const aparTransaction = aparTransactions.find(t => t.id === aparId);
-            if (!aparTransaction) return;
-            
-            // Pre-populate financial transaction form with AP/AR data
-            document.getElementById('financialDate').value = aparTransaction.invoice_date;
-            document.getElementById('financialDescription').value = `${aparTransaction.type} - ${aparTransaction.company}: ${aparTransaction.description}`;
-            document.getElementById('financialReference').value = aparTransaction.reference || '';
-            
-            // Suggest appropriate GL account based on transaction type
-            const suggestedAccount = aparTransaction.type === 'AR' ? '1100' : '2010'; // Accounts Receivable or Accounts Payable
-            document.getElementById('financialAccount').value = suggestedAccount;
-            
-            // Set amount in appropriate column
-            if (aparTransaction.type === 'AR') {
-                document.getElementById('financialDebit').value = aparTransaction.amount;
-                document.getElementById('financialCredit').value = '';
-            } else {
-                document.getElementById('financialDebit').value = '';
-                document.getElementById('financialCredit').value = aparTransaction.amount;
-            }
-            
-            // Store the AP/AR ID for auto-linking after creation
-            window.pendingAPARLinkId = aparId;
-            
-            closeGLLinkingModal();
-            openAddFinancialModal();
         }
         
         // Navigation handling
