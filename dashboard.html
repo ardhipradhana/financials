@@ -3602,7 +3602,7 @@
                                     <div class="metric-subtitle">Money Coming In</div>
                                 </div>
                                 <div class="metric-primary-group">
-                                    <span class="metric-value-large" id="totalARAll">Rp  0</span>
+                                    <span class="metric-value-large" id="totalAR">Rp  0</span>
                                     <div class="metric-breakdown">
                                         <span class="breakdown-item">
                                             <span class="breakdown-label">Overdue: </span>
@@ -3629,7 +3629,7 @@
                                     <div class="metric-breakdown">
                                         <span class="breakdown-item">
                                             <span class="breakdown-label">Overdue: </span>
-                                            <span class="breakdown-value" id="totalAP">Rp  0</span>
+                                            <span class="breakdown-value" id="totalAPAll">Rp  0</span>
                                         </span>
                                         <span class="aging-indicator" id="apAging">0 overdue(s)</span>
                                     </div>
@@ -5335,10 +5335,10 @@
                 document.getElementById('totalAPAll').textContent = formatCurrencyFull(totalAPAll, 'IDR');
             }
             if (document.getElementById('totalAR')) {
-                document.getElementById('totalAR').textContent = formatCurrency(totalAROverdue, 'IDR');
+                document.getElementById('totalAR').textContent = formatCurrencyFull(totalAROverdue, 'IDR');
             }
             if (document.getElementById('totalAP')) {
-                document.getElementById('totalAP').textContent = formatCurrency(totalAPOverdue, 'IDR');
+                document.getElementById('totalAP').textContent = formatCurrencyFull(totalAPOverdue, 'IDR');
             }
             if (document.getElementById('netCashImpact')) {
                 document.getElementById('netCashImpact').textContent = formatCurrencyFull(netCash, 'IDR');
