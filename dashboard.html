@@ -11450,11 +11450,16 @@
                 
                 // Update rating and change
                 if (changeElement) {
+                    console.log('Before update - changeElement text:', changeElement.textContent);
+                    console.log('Updating with:', metrics.altmanRating, metrics.riskLevel);
+                    
                     const rating = metrics.altmanRating;
                     const riskClass = getRiskClass(metrics.riskLevel);
                     
                     changeElement.textContent = `${rating} • ${getRiskDescription(metrics.riskLevel)}`;
                     changeElement.className = `metric-change ${riskClass}`;
+                    
+                    console.log('After update - changeElement text:', changeElement.textContent);
                 }
             }
             
