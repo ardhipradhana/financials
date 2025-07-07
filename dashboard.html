@@ -3225,12 +3225,16 @@
             background: white;
             border: 1px solid #e2e8f0;
             border-radius: 6px;
-            padding: 0.375rem 2rem 0.375rem 0.75rem;
+            padding: 0.25rem 1.5rem 0.25rem 0.5rem;
             font-size: 0.75rem;
             font-weight: 500;
             color: #374151;
             cursor: pointer;
-            min-width: 120px;
+            min-width: 100px;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1rem;
         }
         
         .period-selector-enhanced:hover {
@@ -3290,6 +3294,13 @@
             align-items: center;
             justify-content: space-between;
             width: 100%;
+        }
+
+        .metric-title-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex: 1;
         }
         
     </style>
@@ -3411,19 +3422,16 @@
                     <div class="metric-card">
                         <div class="metric-header">
                             <div class="metric-top-section">
-                                <div class="metric-title-with-selector">
-                                    <div class="title-and-selector">
-                                        <span class="metric-title">Revenue</span>
-                                        <div class="period-selector-container">
-                                            <select id="dashboardPeriodFilter" class="period-selector-enhanced" onchange="updateDashboardWithRealData()">
-                                                <option value="MTD">This Month</option>
-                                                <option value="QTD">This Quarter</option>
-                                                <option value="YTD">This Year</option>
-                                                <option value="custom">Custom Range</option>
-                                            </select>
-                                            <i class="fas fa-chevron-down selector-arrow"></i>
-                                        </div>
-                                    </div>
+                                <div class="metric-title-wrapper">
+                                    <span class="metric-title">Revenue</span>
+                                    <select id="dashboardPeriodFilter" class="period-selector-enhanced" onchange="updateDashboardWithRealData()">
+                                        <option value="MTD">This Month</option>
+                                        <option value="QTD">This Quarter</option>
+                                        <option value="YTD">This Year</option>
+                                        <option value="L30D">Last 30 Days</option>
+                                        <option value="L90D">Last 90 Days</option>
+                                        <option value="custom">Custom Range</option>
+                                    </select>
                                 </div>
                                 <div class="metric-icon icon-revenue">
                                     <i class="fas fa-chart-line"></i>
@@ -10555,79 +10563,73 @@
                 return 0;
             }
             
-            // DEBUG: Show first few transactions
+            // DEBUG: Show sample transactions and categories
             console.log('Sample transactions:', financialTransactions.slice(0, 3));
-            
-            // DEBUG: Show all unique categories and account names
             const allCategories = [...new Set(financialTransactions.map(t => t.category))].filter(Boolean);
             const allAccountNames = [...new Set(financialTransactions.map(t => t.account_name))].filter(Boolean);
             
             console.log('All categories found:', allCategories);
             console.log('All account names found:', allAccountNames);
             
-            // Try multiple approaches to find revenue
-            const approaches = [
-                {
-                    name: 'Category = Revenue',
-                    filter: t => t.category === 'Revenue'
-                },
-                {
-                    name: 'Category contains revenue (case insensitive)',
-                    filter: t => t.category && t.category.toLowerCase().includes('revenue')
-                },
-                {
-                    name: 'Account name contains revenue',
-                    filter: t => t.account_name && t.account_name.toLowerCase().includes('revenue')
-                },
-                {
-                    name: 'Account name contains sales',
-                    filter: t => t.account_name && t.account_name.toLowerCase().includes('sales')
-                },
-                {
-                    name: 'Account name contains income',
-                    filter: t => t.account_name && t.account_name.toLowerCase().includes('income')
-                },
-                {
-                    name: 'Credits in income-type accounts',
-                    filter: t => (parseFloat(t.credit) || 0) > 0 && 
-                                 t.account_name && 
-                                 (t.account_name.toLowerCase().includes('revenue') || 
-                                  t.account_name.toLowerCase().includes('sales') || 
-                                  t.account_name.toLowerCase().includes('income'))
-                },
-                {
-                    name: 'All credit transactions (excluding liabilities/equity)',
-                    filter: t => (parseFloat(t.credit) || 0) > 0 && 
-                                 t.category !== 'Liability' && 
-                                 t.category !== 'Equity'
-                }
-            ];
+            // Try multiple approaches to find revenue transactions
+            let revenueTransactions = [];
             
-            let bestApproach = null;
-            let bestTransactions = [];
+            // Approach 1: Direct category match
+            revenueTransactions = financialTransactions.filter(t => t.category === 'Revenue');
+            console.log('Approach 1 (category = Revenue):', revenueTransactions.length);
             
-            approaches.forEach(approach => {
-                const filtered = financialTransactions.filter(approach.filter);
-                console.log(`${approach.name}: ${filtered.length} transactions`);
-                if (filtered.length > 0) {
-                    console.log('Sample:', filtered.slice(0, 2));
-                }
-                
-                if (filtered.length > bestTransactions.length) {
-                    bestApproach = approach;
-                    bestTransactions = filtered;
-                }
-            });
+            // Approach 2: If no direct match, try income-related categories
+            if (revenueTransactions.length === 0) {
+                revenueTransactions = financialTransactions.filter(t => 
+                    t.category && (
+                        t.category.toLowerCase().includes('revenue') ||
+                        t.category.toLowerCase().includes('income') ||
+                        t.category.toLowerCase().includes('sales')
+                    )
+                );
+                console.log('Approach 2 (income-related categories):', revenueTransactions.length);
+            }
             
-            if (bestTransactions.length === 0) {
+            // Approach 3: Try account names
+            if (revenueTransactions.length === 0) {
+                revenueTransactions = financialTransactions.filter(t => 
+                    t.account_name && (
+                        t.account_name.toLowerCase().includes('revenue') ||
+                        t.account_name.toLowerCase().includes('sales') ||
+                        t.account_name.toLowerCase().includes('income') ||
+                        t.account_name.toLowerCase().includes('service')
+                    )
+                );
+                console.log('Approach 3 (account names):', revenueTransactions.length);
+            }
+            
+            // Approach 4: Look for account codes that typically represent revenue (4000-4999)
+            if (revenueTransactions.length === 0) {
+                revenueTransactions = financialTransactions.filter(t => 
+                    t.account_code && t.account_code.startsWith('4')
+                );
+                console.log('Approach 4 (account codes 4xxx):', revenueTransactions.length);
+            }
+            
+            // Approach 5: Last resort - all credit transactions excluding liabilities/equity
+            if (revenueTransactions.length === 0) {
+                revenueTransactions = financialTransactions.filter(t => 
+                    (parseFloat(t.credit) || 0) > 0 && 
+                    t.category !== 'Liability' && 
+                    t.category !== 'Equity'
+                );
+                console.log('Approach 5 (credits excluding liab/equity):', revenueTransactions.length);
+            }
+            
+            console.log('Using revenue transactions:', revenueTransactions);
+            
+            if (revenueTransactions.length === 0) {
                 console.log('No revenue transactions found with any approach');
                 return 0;
             }
             
-            console.log(`Using approach: ${bestApproach.name} (${bestTransactions.length} transactions)`);
-            
             // Apply date filtering
-            let filtered = bestTransactions;
+            let filtered = revenueTransactions;
             
             if (periodFilter && periodFilter !== 'custom') {
                 const today = new Date();
@@ -10664,7 +10666,20 @@
                 }
             }
             
-            // Calculate total revenue
+            // Custom date range
+            if (periodFilter === 'custom') {
+                const dateFrom = document.getElementById('revenueDateFrom')?.value;
+                const dateTo = document.getElementById('revenueDateTo')?.value;
+                
+                if (dateFrom && dateTo) {
+                    filtered = filtered.filter(t => {
+                        const transDate = new Date(t.transaction_date);
+                        return transDate >= new Date(dateFrom) && transDate <= new Date(dateTo);
+                    });
+                }
+            }
+            
+            // Calculate total revenue (credits increase revenue, debits decrease revenue)
             let totalRevenue = 0;
             filtered.forEach(t => {
                 const credit = parseFloat(t.credit || 0);
