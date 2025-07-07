@@ -9676,12 +9676,12 @@
                     
                     <div class="report-subsection">
                         <div class="report-subsection-title">Current Assets</div>
-                        ${generateAccountLines(assetAccounts, ['1010', '1020', '1100', '1200', '1300', '1400'])}
+                        ${generateAccountLines(assetAccounts, ['1010', '1020', '1100', '1200', '1300', '1400'], 'debit')}
                     </div>
                     
                     <div class="report-subsection">
                         <div class="report-subsection-title">Non-Current Assets</div>
-                        ${generateAccountLines(assetAccounts, ['1500', '1600', '1700', '1800', '1900'])}
+                        ${generateAccountLines(assetAccounts, ['1500', '1600', '1700', '1800', '1900'], 'debit')}
                     </div>
                     
                     <div class="report-line subtotal-line">
@@ -9695,12 +9695,12 @@
                     
                     <div class="report-subsection">
                         <div class="report-subsection-title">Current Liabilities</div>
-                        ${generateAccountLines(liabilityAccounts, ['2010', '2020', '2030', '2040', '2050', '2100', '2110'])}
+                        ${generateAccountLines(liabilityAccounts, ['2010', '2020', '2030', '2040', '2050', '2100', '2110'], 'credit')}
                     </div>
                     
                     <div class="report-subsection">
                         <div class="report-subsection-title">Non-Current Liabilities</div>
-                        ${generateAccountLines(liabilityAccounts, ['2200', '2300', '2400', '2410', '2420', '2430'])}
+                        ${generateAccountLines(liabilityAccounts, ['2200', '2300', '2400', '2410', '2420', '2430'], 'credit')}
                     </div>
                     
                     <div class="report-line subtotal-line">
@@ -9711,7 +9711,7 @@
                 
                 <div class="report-section">
                     <div class="report-section-title">EQUITY</div>
-                    ${generateEquityAccountLines(equityAccounts, ['3010', '3020', '3030'])}
+                    ${generateEquityAccountLines(equityAccounts, ['3010', '3020', '3030'], 'credit')}
                     
                     <!-- ENHANCED: Two-line Retained Earnings approach -->
                     ${previousRetainedEarnings !== 0 ? `
