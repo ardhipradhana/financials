@@ -8538,6 +8538,12 @@
             
             // Add modal to DOM
             document.body.insertAdjacentHTML('beforeend', modalContent);
+
+            const modal = document.getElementById('smartBalanceModal');
+            if (modal) {
+                modal.style.visibility = 'visible';
+                modal.style.opacity = '1';
+            }
             
             // Populate bulk balance account dropdown
             populateBulkBalanceAccounts(isDebitNeeded);
