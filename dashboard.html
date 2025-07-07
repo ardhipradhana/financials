@@ -159,20 +159,52 @@
         }
 
         .metric-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
+            font-size: 1.25rem;
+            position: relative;
+            overflow: hidden;
         }
 
-        .icon-cash { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
-        .icon-ar { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
-        .icon-revenue { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); }
-        .icon-health { background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); }
+        .metric-icon::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, rgba(255,255,255,0.1), rgba(255,255,255,0.3));
+            border-radius: 14px;
+            z-index: 0;
+        }
 
+        .metric-icon i {
+            position: relative;
+            z-index: 1;
+        }
+
+        .icon-cash { 
+            background: linear-gradient(135deg, #059669 0%, #10b981 50%, #34d399 100%);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+        .icon-ar { 
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #60a5fa 100%);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+        .icon-revenue { 
+            background: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 50%, #a78bfa 100%);
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+        }
+        .icon-health { 
+            background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 50%, #fcd34d 100%);
+            box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
+        }
+        
         .metric-value {
             font-size: 2rem;
             font-weight: 700;
@@ -3135,6 +3167,88 @@
             margin: 0 0.25rem;
             width: 120px;
         }
+
+        .metric-title-with-selector {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+        
+        .metric-title-text {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #64748b;
+        }
+        
+        .period-selector-container {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .period-selector-enhanced {
+            appearance: none;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 0.375rem 1.5rem 0.375rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #374151;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-width: 100px;
+        }
+        
+        .period-selector-enhanced:hover {
+            border-color: #c5c9d4;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .period-selector-enhanced:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .selector-arrow {
+            position: absolute;
+            right: 0.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.625rem;
+            color: #9ca3af;
+            pointer-events: none;
+        }
+        
+        .custom-date-range {
+            margin-top: 0.75rem;
+            padding: 0.75rem;
+            background: #f8fafc;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .date-range-inputs {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .date-input-enhanced {
+            flex: 1;
+            padding: 0.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            background: white;
+        }
+        
+        .date-separator {
+            font-size: 0.75rem;
+            color: #6b7280;
+            font-weight: 500;
+        }
         
     </style>
 </head>
@@ -3251,24 +3365,32 @@
                     <div class="metric-card">
                         <div class="metric-header">
                             <div>
-                                <div class="metric-title">
-                                    <span>Revenue</span>
-                                    <select id="dashboardPeriodFilter" class="period-selector" onchange="updateDashboardWithRealData()">
-                                        <option value="MTD">MTD</option>
-                                        <option value="QTD">QTD</option>
-                                        <option value="YTD">YTD</option>
-                                        <option value="custom">Custom</option>
-                                    </select>
+                                <div class="metric-title-with-selector">
+                                    <span class="metric-title-text">Revenue</span>
+                                    <div class="period-selector-container">
+                                        <select id="dashboardPeriodFilter" class="period-selector-enhanced" onchange="updateDashboardWithRealData()">
+                                            <option value="MTD">This Month</option>
+                                            <option value="QTD">This Quarter</option>
+                                            <option value="YTD">This Year</option>
+                                            <option value="L30D">Last 30 Days</option>
+                                            <option value="L90D">Last 90 Days</option>
+                                            <option value="custom">Custom Range</option>
+                                        </select>
+                                        <i class="fas fa-chevron-down selector-arrow"></i>
+                                    </div>
                                 </div>
                                 <div class="metric-value" id="revenueValue">Rp 0</div>
                                 <div class="metric-change positive" id="revenueChange">+8.3% vs last period</div>
-                                <div id="customRevenueDateRange" style="display: none; margin-top: 0.5rem;">
-                                    <input type="date" id="revenueDateFrom" class="date-input-small" onchange="updateDashboardWithRealData()">
-                                    <input type="date" id="revenueDateTo" class="date-input-small" onchange="updateDashboardWithRealData()">
+                                <div id="customRevenueDateRange" class="custom-date-range" style="display: none;">
+                                    <div class="date-range-inputs">
+                                        <input type="date" id="revenueDateFrom" class="date-input-enhanced" placeholder="From">
+                                        <span class="date-separator">to</span>
+                                        <input type="date" id="revenueDateTo" class="date-input-enhanced" placeholder="To">
+                                    </div>
                                 </div>
                             </div>
                             <div class="metric-icon icon-revenue">
-                                <i class="fas fa-trend-up"></i>
+                                <i class="fas fa-chart-line"></i>
                             </div>
                         </div>
                     </div>
@@ -10297,9 +10419,16 @@
             const currentCash = cashImpactElement ? 
                 parseFloat(cashImpactElement.textContent.replace(/[^\d.-]/g, '') || 0) : 0;
             
-            // 2. Calculate NET overdue position (AR - AP)
+            // 2. Calculate NET overdue position (AR - AP) - FIX: Get full amounts
             const overdueAR = parseFloat(document.getElementById('totalAR')?.textContent.replace(/[^\d.-]/g, '') || 0);
             const overdueAP = parseFloat(document.getElementById('totalAP')?.textContent.replace(/[^\d.-]/g, '') || 0);
+            
+            // Debug: Log the raw values
+            console.log('Raw AR:', document.getElementById('totalAR')?.textContent);
+            console.log('Raw AP:', document.getElementById('totalAP')?.textContent);
+            console.log('Parsed AR:', overdueAR);
+            console.log('Parsed AP:', overdueAP);
+            
             const netOverduePosition = overdueAR - overdueAP;
             
             // 3. Calculate revenue based on selected period
@@ -10321,10 +10450,26 @@
         }
         
         function calculatePeriodRevenue(periodFilter) {
-            if (!financialTransactions || financialTransactions.length === 0) return 0;
+            console.log('=== CALCULATING PERIOD REVENUE ===');
+            console.log('Period filter:', periodFilter);
+            console.log('Financial transactions total:', financialTransactions?.length || 0);
             
+            if (!financialTransactions || financialTransactions.length === 0) {
+                console.log('No financial transactions available');
+                return 0;
+            }
+            
+            // Filter for revenue transactions only
             let filtered = financialTransactions.filter(t => t.category === 'Revenue');
+            console.log('Revenue transactions found:', filtered.length);
+            console.log('Revenue transactions:', filtered);
             
+            if (filtered.length === 0) {
+                console.log('No revenue transactions found');
+                return 0;
+            }
+            
+            // Apply date filtering based on period
             if (periodFilter && periodFilter !== 'custom') {
                 const today = new Date();
                 let startDate;
@@ -10332,18 +10477,40 @@
                 switch(periodFilter) {
                     case 'MTD':
                         startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+                        console.log('MTD start date:', startDate);
                         break;
                     case 'QTD':
                         const quarter = Math.floor(today.getMonth() / 3);
                         startDate = new Date(today.getFullYear(), quarter * 3, 1);
+                        console.log('QTD start date:', startDate);
                         break;
                     case 'YTD':
                         startDate = new Date(today.getFullYear(), 0, 1);
+                        console.log('YTD start date:', startDate);
                         break;
+                    case 'L30D':
+                        startDate = new Date(today);
+                        startDate.setDate(today.getDate() - 30);
+                        console.log('Last 30 days start date:', startDate);
+                        break;
+                    case 'L90D':
+                        startDate = new Date(today);
+                        startDate.setDate(today.getDate() - 90);
+                        console.log('Last 90 days start date:', startDate);
+                        break;
+                    default:
+                        console.log('No date filtering applied for period:', periodFilter);
                 }
                 
                 if (startDate) {
-                    filtered = filtered.filter(t => new Date(t.transaction_date) >= startDate);
+                    const beforeFilter = filtered.length;
+                    filtered = filtered.filter(t => {
+                        const transDate = new Date(t.transaction_date);
+                        const isInPeriod = transDate >= startDate && transDate <= today;
+                        console.log(`Transaction ${t.id}: ${t.transaction_date} - In period: ${isInPeriod}`);
+                        return isInPeriod;
+                    });
+                    console.log(`Filtered by date: ${beforeFilter} -> ${filtered.length} transactions`);
                 }
             }
             
@@ -10352,16 +10519,239 @@
                 const dateFrom = document.getElementById('revenueDateFrom')?.value;
                 const dateTo = document.getElementById('revenueDateTo')?.value;
                 
+                console.log('Custom date range:', dateFrom, 'to', dateTo);
+                
                 if (dateFrom && dateTo) {
+                    const beforeFilter = filtered.length;
                     filtered = filtered.filter(t => {
                         const transDate = new Date(t.transaction_date);
-                        return transDate >= new Date(dateFrom) && transDate <= new Date(dateTo);
+                        const fromDate = new Date(dateFrom);
+                        const toDate = new Date(dateTo);
+                        const isInRange = transDate >= fromDate && transDate <= toDate;
+                        console.log(`Transaction ${t.id}: ${t.transaction_date} - In range: ${isInRange}`);
+                        return isInRange;
                     });
+                    console.log(`Filtered by custom range: ${beforeFilter} -> ${filtered.length} transactions`);
+                } else {
+                    console.log('Custom range selected but no dates provided');
                 }
             }
             
-            // Calculate total revenue (credits increase revenue)
-            return filtered.reduce((sum, t) => sum + (t.credit || 0) - (t.debit || 0), 0);
+            // Calculate total revenue (credits increase revenue, debits decrease revenue)
+            let totalRevenue = 0;
+            filtered.forEach(t => {
+                const credit = parseFloat(t.credit || 0);
+                const debit = parseFloat(t.debit || 0);
+                const transactionRevenue = credit - debit;
+                totalRevenue += transactionRevenue;
+                
+                console.log(`Transaction ${t.id}: Credit: ${credit}, Debit: ${debit}, Net: ${transactionRevenue}`);
+            });
+            
+            console.log('Final calculated revenue:', totalRevenue);
+            console.log('=== END REVENUE CALCULATION ===');
+            
+            return totalRevenue;
+        }
+
+        function calculatePreviousPeriodComparison(currentValue, metric, period) {
+            console.log('=== CALCULATING PREVIOUS PERIOD COMPARISON ===');
+            console.log('Current value:', currentValue, 'Metric:', metric, 'Period:', period);
+            
+            if (!financialTransactions || financialTransactions.length === 0) {
+                console.log('No financial transactions for comparison');
+                return {
+                    changePercent: '0.0',
+                    isPositive: false,
+                    previousPeriod: getPreviousPeriodName(period),
+                    hasPreviousData: false
+                };
+            }
+            
+            const today = new Date();
+            let currentStart, currentEnd, previousStart, previousEnd;
+            
+            switch(period) {
+                case 'MTD':
+                    // Current: 1st of this month to today
+                    currentStart = new Date(today.getFullYear(), today.getMonth(), 1);
+                    currentEnd = new Date(today);
+                    
+                    // Previous: Same days in previous month
+                    previousStart = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+                    previousEnd = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
+                    break;
+                    
+                case 'QTD':
+                    // Current: 1st of this quarter to today
+                    const currentQuarter = Math.floor(today.getMonth() / 3);
+                    currentStart = new Date(today.getFullYear(), currentQuarter * 3, 1);
+                    currentEnd = new Date(today);
+                    
+                    // Previous: Same period in previous quarter
+                    const previousQuarter = currentQuarter - 1;
+                    if (previousQuarter < 0) {
+                        // Previous year's Q4
+                        previousStart = new Date(today.getFullYear() - 1, 9, 1); // October 1st
+                        previousEnd = new Date(today.getFullYear() - 1, 9 + (today.getMonth() % 3), today.getDate());
+                    } else {
+                        previousStart = new Date(today.getFullYear(), previousQuarter * 3, 1);
+                        previousEnd = new Date(today.getFullYear(), previousQuarter * 3 + (today.getMonth() % 3), today.getDate());
+                    }
+                    break;
+                    
+                case 'YTD':
+                    // Current: Jan 1st this year to today
+                    currentStart = new Date(today.getFullYear(), 0, 1);
+                    currentEnd = new Date(today);
+                    
+                    // Previous: Jan 1st last year to same date last year
+                    previousStart = new Date(today.getFullYear() - 1, 0, 1);
+                    previousEnd = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate());
+                    break;
+                    
+                case 'L30D':
+                    // Current: Last 30 days
+                    currentEnd = new Date(today);
+                    currentStart = new Date(today);
+                    currentStart.setDate(today.getDate() - 30);
+                    
+                    // Previous: 30 days before that (days 31-60 ago)
+                    previousEnd = new Date(currentStart);
+                    previousStart = new Date(currentStart);
+                    previousStart.setDate(currentStart.getDate() - 30);
+                    break;
+                    
+                case 'L90D':
+                    // Current: Last 90 days
+                    currentEnd = new Date(today);
+                    currentStart = new Date(today);
+                    currentStart.setDate(today.getDate() - 90);
+                    
+                    // Previous: 90 days before that (days 91-180 ago)
+                    previousEnd = new Date(currentStart);
+                    previousStart = new Date(currentStart);
+                    previousStart.setDate(currentStart.getDate() - 90);
+                    break;
+                    
+                case 'custom':
+                    // For custom, we can't calculate previous period without knowing the range
+                    const dateFrom = document.getElementById('revenueDateFrom')?.value;
+                    const dateTo = document.getElementById('revenueDateTo')?.value;
+                    
+                    if (!dateFrom || !dateTo) {
+                        return {
+                            changePercent: '0.0',
+                            isPositive: false,
+                            previousPeriod: 'previous period',
+                            hasPreviousData: false
+                        };
+                    }
+                    
+                    currentStart = new Date(dateFrom);
+                    currentEnd = new Date(dateTo);
+                    
+                    // Calculate the duration and go back the same period
+                    const durationMs = currentEnd.getTime() - currentStart.getTime();
+                    previousEnd = new Date(currentStart);
+                    previousStart = new Date(currentStart.getTime() - durationMs);
+                    break;
+                    
+                default:
+                    console.log('Unknown period:', period);
+                    return {
+                        changePercent: '0.0',
+                        isPositive: false,
+                        previousPeriod: 'previous period',
+                        hasPreviousData: false
+                    };
+            }
+            
+            console.log('Current period:', currentStart, 'to', currentEnd);
+            console.log('Previous period:', previousStart, 'to', previousEnd);
+            
+            // Calculate previous period value based on metric type
+            let previousValue = 0;
+            
+            if (metric === 'revenue') {
+                // Filter revenue transactions for previous period
+                const previousRevenueTransactions = financialTransactions.filter(t => {
+                    if (t.category !== 'Revenue') return false;
+                    const transDate = new Date(t.transaction_date);
+                    return transDate >= previousStart && transDate <= previousEnd;
+                });
+                
+                // Calculate previous revenue
+                previousValue = previousRevenueTransactions.reduce((sum, t) => {
+                    return sum + (parseFloat(t.credit || 0) - parseFloat(t.debit || 0));
+                }, 0);
+                
+                console.log('Previous revenue transactions:', previousRevenueTransactions.length);
+                console.log('Previous revenue value:', previousValue);
+                
+            } else if (metric === 'cash') {
+                // For cash, we'd need to calculate the cash position at the previous period end
+                // This is more complex as it requires calculating cumulative cash flow
+                // For now, we'll use a simplified approach
+                previousValue = currentValue * 0.95; // Placeholder - you can enhance this
+                
+            } else if (metric === 'healthScore') {
+                // Health score comparison would need historical calculation
+                // For now, return no comparison
+                previousValue = currentValue;
+            }
+            
+            // Calculate percentage change
+            const hasPreviousData = previousValue !== 0;
+            const changePercent = hasPreviousData ? 
+                ((currentValue - previousValue) / Math.abs(previousValue) * 100) : 0;
+            
+            console.log('Comparison result:', {
+                currentValue,
+                previousValue,
+                changePercent: changePercent.toFixed(1),
+                isPositive: changePercent >= 0,
+                hasPreviousData
+            });
+            
+            return {
+                changePercent: changePercent.toFixed(1),
+                isPositive: changePercent >= 0,
+                previousPeriod: getPreviousPeriodName(period),
+                hasPreviousData,
+                previousValue
+            };
+        }
+        
+        function getPreviousPeriodName(period) {
+            const today = new Date();
+            
+            switch(period) {
+                case 'MTD':
+                    const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+                    return lastMonth.toLocaleDateString('en-US', { month: 'short' });
+                    
+                case 'QTD':
+                    const currentQuarter = Math.floor(today.getMonth() / 3) + 1;
+                    const previousQuarter = currentQuarter === 1 ? 4 : currentQuarter - 1;
+                    const previousYear = currentQuarter === 1 ? today.getFullYear() - 1 : today.getFullYear();
+                    return `Q${previousQuarter} ${previousYear}`;
+                    
+                case 'YTD':
+                    return (today.getFullYear() - 1).toString();
+                    
+                case 'L30D':
+                    return 'previous 30 days';
+                    
+                case 'L90D':
+                    return 'previous 90 days';
+                    
+                case 'custom':
+                    return 'previous period';
+                    
+                default:
+                    return 'last period';
+            }
         }
         
         function calculateComprehensiveHealthScore() {
@@ -10453,11 +10843,19 @@
                 // Update value
                 if (valueElement) valueElement.textContent = formatCurrencyFull(metrics.periodRevenue, 'IDR');
                 
+                // Calculate real previous period comparison
+                const revenueComparison = calculatePreviousPeriodComparison(metrics.periodRevenue, 'revenue', metrics.selectedPeriod);
+                
                 // Update change indicator
                 if (changeElement) {
-                    const growthPercent = metrics.periodRevenue > 0 ? '+8.3%' : '0.0%';
-                    changeElement.textContent = `${growthPercent} vs last ${metrics.selectedPeriod}`;
-                    changeElement.className = `metric-change ${metrics.periodRevenue > 0 ? 'positive' : 'neutral'}`;
+                    if (revenueComparison.hasPreviousData) {
+                        const sign = revenueComparison.isPositive ? '+' : '';
+                        changeElement.textContent = `${sign}${revenueComparison.changePercent}% vs ${revenueComparison.previousPeriod}`;
+                        changeElement.className = `metric-change ${revenueComparison.isPositive ? 'positive' : 'negative'}`;
+                    } else {
+                        changeElement.textContent = `No data for ${revenueComparison.previousPeriod}`;
+                        changeElement.className = 'metric-change neutral';
+                    }
                 }
                 
                 // Handle custom date range visibility
@@ -10492,29 +10890,6 @@
                 revenue: formatCurrencyFull(metrics.periodRevenue, 'IDR'),
                 healthScore: Math.round(metrics.healthScore)
             });
-        }
-        
-        function calculateSimpleHealthScore() {
-            // Simple health score based on available data
-            let score = 50; // Base score
-            
-            // Add points for having revenue
-            const revenueTransactions = financialTransactions.filter(t => t.category === 'Revenue');
-            if (revenueTransactions.length > 0) score += 20;
-            
-            // Add points for positive cash
-            const cashAccounts = financialTransactions.filter(t => 
-                t.account && t.account.toLowerCase().includes('cash')
-            );
-            const currentCash = cashAccounts.reduce((sum, t) => sum + (t.debit || 0) - (t.credit || 0), 0);
-            if (currentCash > 0) score += 15;
-            
-            // Add points for balanced books
-            const totalDebits = financialTransactions.reduce((sum, t) => sum + (t.debit || 0), 0);
-            const totalCredits = financialTransactions.reduce((sum, t) => sum + (t.credit || 0), 0);
-            if (Math.abs(totalDebits - totalCredits) < 1000) score += 15;
-            
-            return Math.min(100, score);
         }
         
         function getHealthRating(score) {
