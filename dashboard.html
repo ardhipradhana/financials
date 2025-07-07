@@ -4153,36 +4153,6 @@
                     </div>
                 </div>
             </div>
-            
-            <!-- AP/AR Linking Modal -->
-            <div class="modal-overlay" id="aparLinkingModal">
-                <div class="modal">
-                    <div class="modal-header">
-                        <h3 class="modal-title">Link Financial Transactions to AP/AR</h3>
-                        <button class="modal-close" onclick="closeAPARLinkingModal()">&times;</button>
-                    </div>
-                    <div class="modal-content">
-                        <div class="linking-section">
-                            <h4>Unlinked Financial Transactions</h4>
-                            <div class="linking-list" id="unlinkFinancialList">
-                                <!-- Populated by JavaScript -->
-                            </div>
-                        </div>
-                        
-                        <div class="linking-section">
-                            <h4>Available AP/AR Transactions</h4>
-                            <div class="linking-list" id="availableAPARList">
-                                <!-- Populated by JavaScript -->
-                            </div>
-                        </div>
-                        
-                        <div class="form-actions">
-                            <button class="btn btn-secondary" onclick="closeAPARLinkingModal()">Cancel</button>
-                            <button class="btn btn-primary" onclick="confirmLinking()">Link Selected</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
             <!-- GL Account Selection Modal for AP/AR Linking -->
             <div class="modal-overlay" id="glAccountSelectionModal">
@@ -4223,6 +4193,91 @@
                         <div class="form-actions">
                             <button class="btn btn-secondary" onclick="closeGLAccountSelectionModal()">Cancel</button>
                             <button class="btn btn-primary" onclick="confirmGLCreation()" id="createGLButton">Create GL Entries</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AP/AR Creation Modal for GL Linking -->
+            <div class="modal-overlay" id="aparCreationModal">
+                <div class="modal">
+                    <div class="modal-header">
+                        <h3 class="modal-title">Create AP/AR Entry</h3>
+                        <button class="modal-close" onclick="closeAPARCreationModal()">&times;</button>
+                    </div>
+                    <div class="modal-content">
+                        <div class="linking-section">
+                            <h4>Selected GL Transaction</h4>
+                            <div class="linking-list" id="selectedGLForAPAR">
+                                <!-- Will be populated -->
+                            </div>
+                        </div>
+                        
+                        <div class="linking-section">
+                            <h4>Create AP/AR Transaction</h4>
+                            <form id="aparCreationForm">
+                                <div class="form-row" style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                                    <div style="flex: 1;">
+                                        <label class="form-label">Transaction Type</label>
+                                        <select id="aparType" class="form-select" required>
+                                            <option value="">Select Type</option>
+                                            <option value="AR">Accounts Receivable (AR)</option>
+                                            <option value="AP">Accounts Payable (AP)</option>
+                                        </select>
+                                    </div>
+                                    <div style="flex: 1;">
+                                        <label class="form-label">Company</label>
+                                        <input type="text" id="aparCompany" class="form-input" placeholder="Company name" required>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-row" style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                                    <div style="flex: 1;">
+                                        <label class="form-label">Reference</label>
+                                        <input type="text" id="aparReference" class="form-input" placeholder="INV-001, BILL-001, etc.">
+                                    </div>
+                                    <div style="flex: 1;">
+                                        <label class="form-label">Amount</label>
+                                        <input type="number" id="aparAmount" class="form-input" placeholder="0" readonly>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group" style="margin-bottom: 1rem;">
+                                    <label class="form-label">Description</label>
+                                    <input type="text" id="aparDescription" class="form-input" placeholder="Transaction description" required>
+                                </div>
+                                
+                                <div class="form-row" style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                                    <div style="flex: 1;">
+                                        <label class="form-label">Invoice Date</label>
+                                        <input type="date" id="aparInvoiceDate" class="form-input" required>
+                                    </div>
+                                    <div style="flex: 1;">
+                                        <label class="form-label">Payment Terms (days)</label>
+                                        <select id="aparPaymentTerms" class="form-select">
+                                            <option value="30">Net 30</option>
+                                            <option value="15">Net 15</option>
+                                            <option value="7">Net 7</option>
+                                            <option value="0">Due on Receipt</option>
+                                            <option value="60">Net 60</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Status</label>
+                                    <select id="aparStatus" class="form-select">
+                                        <option value="Unpaid">Unpaid</option>
+                                        <option value="Partial">Partially Paid</option>
+                                        <option value="Paid">Paid</option>
+                                    </select>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button class="btn btn-secondary" onclick="closeAPARCreationModal()">Cancel</button>
+                            <button class="btn btn-primary" onclick="confirmAPARCreation()" id="createAPARButton">Create AP/AR Entry</button>
                         </div>
                     </div>
                 </div>
@@ -8487,152 +8542,198 @@
             }
         }
         
-        // AP/AR Integration Functions will be added in the next part
-        // (Including linking, unlinking, and import functions)
-        
-        // AP/AR Integration Functions
-        function openAPARLinkingModal() {
-            document.getElementById('aparLinkingModal').classList.add('active');
-            loadUnlinkedFinancialTransactions();
-            loadAvailableAPARTransactions();
-        }
-        
-        function closeAPARLinkingModal() {
-            document.getElementById('aparLinkingModal').classList.remove('active');
-        }
-        
-        function loadUnlinkedFinancialTransactions() {
-            const unlinkedTransactions = financialTransactions.filter(t => !t.is_linked && !t.ap_ar_transaction_id);
-            const container = document.getElementById('unlinkFinancialList');
+        // UPDATED: Financial Statements to AP/AR linking  
+        function linkSingleTransaction(financialId) {
+            console.log('linkSingleTransaction called with ID:', financialId);
             
-            container.innerHTML = unlinkedTransactions.map(transaction => `
-                <div class="linking-item" data-financial-id="${transaction.id}">
+            // Find the transaction
+            const transaction = financialTransactions.find(t => t.id === financialId);
+            if (!transaction) {
+                alert('Transaction not found');
+                return;
+            }
+            
+            // Open the NEW AP/AR creation modal
+            openAPARCreationModal(financialId);
+        }
+
+        // NEW: Open AP/AR Creation Modal
+        function openAPARCreationModal(financialId) {
+            const transaction = financialTransactions.find(t => t.id === financialId);
+            if (!transaction) return;
+            
+            // Show the modal
+            const modal = document.getElementById('aparCreationModal');
+            modal.classList.add('active');
+            modal.style.visibility = 'visible';
+            modal.style.opacity = '1';
+            
+            // Populate the selected GL transaction
+            populateSelectedGLForAPAR(transaction);
+            
+            // Pre-populate form with GL data
+            populateAPARForm(transaction);
+            
+            // Store the current GL ID for later use
+            window.currentGLId = financialId;
+        }
+        
+        // NEW: Close AP/AR Creation Modal
+        function closeAPARCreationModal() {
+            const modal = document.getElementById('aparCreationModal');
+            modal.classList.remove('active');
+            modal.style.visibility = 'hidden';
+            modal.style.opacity = '0';
+            
+            // Clear form
+            document.getElementById('aparCreationForm').reset();
+            
+            // Clear stored ID
+            window.currentGLId = null;
+        }
+        
+        // NEW: Populate selected GL transaction display
+        function populateSelectedGLForAPAR(transaction) {
+            const container = document.getElementById('selectedGLForAPAR');
+            const amount = transaction.debit_amount || transaction.credit_amount;
+            
+            container.innerHTML = `
+                <div class="linking-item selected">
                     <div class="linking-item-header">
                         <strong>${transaction.account_code} - ${transaction.account_name}</strong>
-                        <span class="amount">${formatCurrency(transaction.debit_amount || transaction.credit_amount, 'IDR')}</span>
+                        <span class="amount">${formatCurrencyFull(amount, 'IDR')}</span>
                     </div>
                     <div class="linking-item-details">
                         ${transaction.description} | ${formatDateIndonesian(transaction.transaction_date)}
                     </div>
                 </div>
-            `).join('');
-            
-            // Add click handlers
-            container.querySelectorAll('.linking-item').forEach(item => {
-                item.addEventListener('click', () => {
-                    item.classList.toggle('selected');
-                });
-            });
+            `;
         }
         
-        async function loadAvailableAPARTransactions() {
-            try {
-                // Load AP/AR transactions that aren't already linked
-                const { data: aparData, error } = await supabase
-                    .from('ap_ar_transactions_meridash')
-                    .select('*')
-                    .is('linked_financial_id', null);
-                
-                if (error) throw error;
-                
-                const container = document.getElementById('availableAPARList');
-                
-                container.innerHTML = aparData.map(transaction => `
-                    <div class="linking-item" data-apar-id="${transaction.id}">
-                        <div class="linking-item-header">
-                            <strong>${transaction.type} - ${transaction.company}</strong>
-                            <span class="amount">${formatCurrency(transaction.amount, 'IDR')}</span>
-                        </div>
-                        <div class="linking-item-details">
-                            ${transaction.description} | ${formatDateIndonesian(transaction.invoice_date)}
-                        </div>
-                    </div>
-                `).join('');
-                
-                // Add click handlers
-                container.querySelectorAll('.linking-item').forEach(item => {
-                    item.addEventListener('click', () => {
-                        item.classList.toggle('selected');
-                    });
-                });
-            } catch (error) {
-                console.error('Error loading AP/AR transactions:', error);
+        // NEW: Pre-populate AP/AR form with GL data
+        function populateAPARForm(transaction) {
+            const amount = transaction.debit_amount || transaction.credit_amount;
+            
+            // Set amount (readonly)
+            document.getElementById('aparAmount').value = amount;
+            
+            // Set invoice date to GL transaction date
+            document.getElementById('aparInvoiceDate').value = transaction.transaction_date;
+            
+            // Pre-fill description from GL
+            document.getElementById('aparDescription').value = transaction.description;
+            
+            // Pre-fill reference if available
+            document.getElementById('aparReference').value = transaction.reference || '';
+            
+            // Smart suggestion for transaction type based on GL account
+            const accountCode = transaction.account_code;
+            const typeSelect = document.getElementById('aparType');
+            
+            if (accountCode.startsWith('1100')) {
+                // Accounts Receivable account - suggest AR
+                typeSelect.value = 'AR';
+            } else if (accountCode.startsWith('2010')) {
+                // Accounts Payable account - suggest AP
+                typeSelect.value = 'AP';
+            } else if (accountCode.startsWith('4')) {
+                // Revenue account - suggest AR
+                typeSelect.value = 'AR';
+            } else if (accountCode.startsWith('5')) {
+                // Expense account - suggest AP
+                typeSelect.value = 'AP';
             }
-        }
-        
-        async function confirmLinking() {
-            const selectedFinancial = document.querySelectorAll('#unlinkFinancialList .linking-item.selected');
-            const selectedAPAR = document.querySelectorAll('#availableAPARList .linking-item.selected');
             
-            if (selectedFinancial.length !== 1 || selectedAPAR.length !== 1) {
-                alert('Please select exactly one financial transaction and one AP/AR transaction to link.');
+            console.log('Pre-populated form for GL transaction:', transaction.account_code);
+        }
+
+        // NEW: Confirm and create AP/AR entry
+        async function confirmAPARCreation() {
+            // Validate form
+            const aparType = document.getElementById('aparType').value;
+            const aparCompany = document.getElementById('aparCompany').value;
+            const aparDescription = document.getElementById('aparDescription').value;
+            const aparInvoiceDate = document.getElementById('aparInvoiceDate').value;
+            
+            if (!aparType || !aparCompany || !aparDescription || !aparInvoiceDate) {
+                alert('Please fill in all required fields.');
                 return;
             }
             
-            const financialId = selectedFinancial[0].dataset.financialId;
-            const aparId = selectedAPAR[0].dataset.aparId;
+            if (!window.currentGLId) {
+                alert('No GL transaction selected.');
+                return;
+            }
+            
+            const glTransaction = financialTransactions.find(t => t.id === window.currentGLId);
+            if (!glTransaction) {
+                alert('GL transaction not found.');
+                return;
+            }
             
             try {
-                // Update financial transaction
-                await updateFinancialTransaction(financialId, {
-                    ap_ar_transaction_id: aparId,
-                    is_linked: true
+                // Disable button to prevent double-clicking
+                const createButton = document.getElementById('createAPARButton');
+                createButton.disabled = true;
+                createButton.textContent = 'Creating...';
+                
+                console.log('Creating AP/AR entry for GL transaction:', glTransaction.account_code);
+                
+                // Calculate due date
+                const invoiceDate = new Date(aparInvoiceDate);
+                const paymentTerms = parseInt(document.getElementById('aparPaymentTerms').value);
+                const dueDate = new Date(invoiceDate.getTime() + (paymentTerms * 24 * 60 * 60 * 1000));
+                
+                // Create the AP/AR transaction
+                const aparTransaction = {
+                    type: aparType,
+                    reference: document.getElementById('aparReference').value || '',
+                    company: aparCompany,
+                    description: aparDescription,
+                    amount: parseFloat(document.getElementById('aparAmount').value),
+                    currency: 'IDR',
+                    invoice_date: aparInvoiceDate,
+                    due_date: dueDate.toISOString().split('T')[0],
+                    payment_terms: paymentTerms,
+                    status: document.getElementById('aparStatus').value,
+                    source: 'linked_from_gl',
+                    linked_financial_id: glTransaction.id
+                };
+                
+                console.log('Saving AP/AR transaction:', aparTransaction);
+                
+                // Save AP/AR transaction to database
+                const savedAPAR = await saveTransaction(aparTransaction);
+                
+                // Update the GL transaction to mark it as linked
+                await updateFinancialTransaction(glTransaction.id, {
+                    ap_ar_transaction_id: savedAPAR.id,
+                    is_linked: true,
+                    source: glTransaction.source || 'manual' // Preserve existing source
                 });
                 
-                // Update AP/AR transaction
-                const { error } = await supabase
-                    .from('ap_ar_transactions_meridash')
-                    .update({ linked_financial_id: financialId })
-                    .eq('id', aparId);
+                // Close modal and refresh tables
+                closeAPARCreationModal();
                 
-                if (error) throw error;
-                
-                closeAPARLinkingModal();
+                // Refresh both tables
                 await loadFinancialTransactions();
-                alert('Transactions linked successfully!');
+                await loadAPARData();
+                renderAPARTable();
+                renderFinancialTable();
+                
+                alert(`Successfully created ${aparType} entry!\n\nCreated:\n- ${aparType}: ${aparCompany}\n- Amount: ${formatCurrencyFull(aparTransaction.amount, 'IDR')}\n- Due: ${formatDateIndonesian(dueDate.toISOString().split('T')[0])}`);
+                
             } catch (error) {
-                console.error('Error linking transactions:', error);
-                alert('Error linking transactions: ' + error.message);
-            }
-        }
-        
-        // Single transaction linking
-        function linkSingleTransaction(financialId) {
-            // Open a simplified linking modal for single transaction
-            const transaction = financialTransactions.find(t => t.id === financialId);
-            if (!transaction) return;
-            
-            // You can implement a simplified version here or use the main modal
-            openAPARLinkingModal();
-            
-            // Pre-select the financial transaction
-            setTimeout(() => {
-                const financialItem = document.querySelector(`[data-financial-id="${financialId}"]`);
-                if (financialItem) {
-                    financialItem.classList.add('selected');
+                console.error('Error creating AP/AR entry:', error);
+                alert('Error creating AP/AR entry: ' + error.message);
+            } finally {
+                // Re-enable button
+                const createButton = document.getElementById('createAPARButton');
+                if (createButton) {
+                    createButton.disabled = false;
+                    createButton.textContent = 'Create AP/AR Entry';
                 }
-            }, 100);
-        }
-        
-        // Bulk linking
-        async function bulkLinkToAPAR() {
-            if (selectedFinancialTransactions.length === 0) {
-                alert('Please select transactions to link.');
-                return;
             }
-            
-            // Open linking modal with pre-selected transactions
-            openAPARLinkingModal();
-            
-            // Pre-select the financial transactions
-            setTimeout(() => {
-                selectedFinancialTransactions.forEach(id => {
-                    const item = document.querySelector(`[data-financial-id="${id}"]`);
-                    if (item) {
-                        item.classList.add('selected');
-                    }
-                });
-            }, 100);
         }
         
         // Unlink transactions
