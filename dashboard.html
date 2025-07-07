@@ -10775,18 +10775,31 @@
                         console.log(`${t.account_name} (${t.transaction_date}): ${isInPeriod ? 'INCLUDED' : 'EXCLUDED'}`);
                         return isInPeriod;
                     });
-                    console.log(`Date filtered: ${beforeFilter} -> ${filteredRevenueTransactions.length} transactions`);
+                    console.log(`Date filtered (${periodFilter}): ${beforeFilter} -> ${filteredRevenueTransactions.length} transactions`);
                     
-                    // If no transactions in period, try YTD as fallback to show some data
-                    if (filteredRevenueTransactions.length === 0 && periodFilter !== 'YTD') {
-                        console.log('No transactions in period, using YTD as fallback...');
-                        const ytdStart = new Date(today.getFullYear(), 0, 1);
-                        filteredRevenueTransactions = revenueTransactions.filter(t => {
-                            const transDate = new Date(t.transaction_date);
-                            return transDate >= ytdStart && transDate <= today;
-                        });
-                        console.log(`YTD fallback found ${filteredRevenueTransactions.length} transactions`);
-                    }
+                    // REMOVED THE FALLBACK LOGIC - Let it show 0 if no transactions in period
+                    // This ensures the period selector actually affects the value
+                }
+            }
+            
+            // Handle custom date range
+            if (periodFilter === 'custom') {
+                const dateFrom = document.getElementById('revenueDateFrom')?.value;
+                const dateTo = document.getElementById('revenueDateTo')?.value;
+                
+                console.log('Custom date range:', dateFrom, 'to', dateTo);
+                
+                if (dateFrom && dateTo) {
+                    const beforeFilter = filteredRevenueTransactions.length;
+                    filteredRevenueTransactions = filteredRevenueTransactions.filter(t => {
+                        const transDate = new Date(t.transaction_date);
+                        const fromDate = new Date(dateFrom);
+                        const toDate = new Date(dateTo);
+                        const isInRange = transDate >= fromDate && transDate <= toDate;
+                        console.log(`${t.account_name} (${t.transaction_date}): ${isInRange ? 'INCLUDED' : 'EXCLUDED'}`);
+                        return isInRange;
+                    });
+                    console.log(`Custom range filtered: ${beforeFilter} -> ${filteredRevenueTransactions.length} transactions`);
                 }
             }
             
@@ -10802,7 +10815,7 @@
                 console.log(`${account.account_name}: Credits ${account.credit_total} - Debits ${account.debit_total} = ${balance}`);
             });
             
-            console.log('Final calculated revenue:', totalRevenue);
+            console.log(`Final calculated revenue for ${periodFilter}:`, totalRevenue);
             return totalRevenue;
         }
 
