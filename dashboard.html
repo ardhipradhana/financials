@@ -8396,10 +8396,10 @@
             };
         }
         
-        // NEW: Generate smart balancing suggestions
+        // FIXED: Generate smart balancing suggestions
         function generateSmartSuggestions(accountBalances, categoryTotals, imbalance) {
             const suggestions = [];
-            const isDebitNeeded = imbalance < 0;
+            const isCreditNeeded = imbalance > 0; // FIXED: If debits > credits, we need a credit to balance
             const amount = Math.abs(imbalance);
             
             // Pattern 1: High AR activity suggests missing Revenue
@@ -8410,8 +8410,8 @@
                     title: 'Revenue from AR Activity',
                     description: `High AR balance (${formatCurrencyFull(arAccount.net_balance, 'IDR')}) suggests missing revenue entries`,
                     accounts: [
-                        { code: '4010', name: 'Sales Revenue', action: isDebitNeeded ? 'credit' : 'debit' },
-                        { code: '4020', name: 'Service Revenue', action: isDebitNeeded ? 'credit' : 'debit' }
+                        { code: '4010', name: 'Sales Revenue', action: isCreditNeeded ? 'credit' : 'debit' }, // FIXED
+                        { code: '4020', name: 'Service Revenue', action: isCreditNeeded ? 'credit' : 'debit' } // FIXED
                     ],
                     confidence: 'high'
                 });
@@ -8425,9 +8425,9 @@
                     title: 'Expenses from AP Activity',
                     description: `High AP balance (${formatCurrencyFull(Math.abs(apAccount.net_balance), 'IDR')}) suggests missing expense entries`,
                     accounts: [
-                        { code: '5100', name: 'Office Expenses', action: isDebitNeeded ? 'debit' : 'credit' },
-                        { code: '5400', name: 'Professional Services', action: isDebitNeeded ? 'debit' : 'credit' },
-                        { code: '5500', name: 'Office Supplies', action: isDebitNeeded ? 'debit' : 'credit' }
+                        { code: '5100', name: 'Office Expenses', action: isCreditNeeded ? 'credit' : 'debit' }, // FIXED
+                        { code: '5400', name: 'Professional Services', action: isCreditNeeded ? 'credit' : 'debit' }, // FIXED
+                        { code: '5500', name: 'Office Supplies', action: isCreditNeeded ? 'credit' : 'debit' } // FIXED
                     ],
                     confidence: 'high'
                 });
@@ -8441,26 +8441,26 @@
                     title: 'Cash-Related Balancing',
                     description: `Significant cash activity suggests bank transactions or cash adjustments`,
                     accounts: [
-                        { code: '1010', name: 'Cash and Cash Equivalents', action: isDebitNeeded ? 'debit' : 'credit' },
-                        { code: '3040', name: 'Retained Earnings', action: isDebitNeeded ? 'credit' : 'debit' }
+                        { code: '1010', name: 'Cash and Cash Equivalents', action: isCreditNeeded ? 'credit' : 'debit' }, // FIXED
+                        { code: '3040', name: 'Retained Earnings', action: isCreditNeeded ? 'credit' : 'debit' } // FIXED
                     ],
                     confidence: 'medium'
                 });
             }
             
-            // Pattern 4: Generic balancing entry (fallback)
+            // Pattern 4: Generic balancing entry (fallback) - FIXED LOGIC
             suggestions.push({
                 type: 'generic_balance',
                 title: 'General Balancing Entry',
                 description: 'Create a balancing entry to resolve the imbalance',
-                accounts: isDebitNeeded ? [
-                    { code: '3040', name: 'Retained Earnings', action: 'debit' },
-                    { code: '1010', name: 'Cash and Cash Equivalents', action: 'debit' },
-                    { code: '5900', name: 'Other Expenses', action: 'debit' }
-                ] : [
+                accounts: isCreditNeeded ? [
                     { code: '3040', name: 'Retained Earnings', action: 'credit' },
                     { code: '4040', name: 'Other Revenue', action: 'credit' },
                     { code: '1010', name: 'Cash and Cash Equivalents', action: 'credit' }
+                ] : [
+                    { code: '3040', name: 'Retained Earnings', action: 'debit' },
+                    { code: '1010', name: 'Cash and Cash Equivalents', action: 'debit' },
+                    { code: '5900', name: 'Other Expenses', action: 'debit' }
                 ],
                 confidence: 'low'
             });
@@ -8471,10 +8471,10 @@
             });
         }
         
-        // ENHANCED: Smart balance modal with pattern-based suggestions
+        // FIXED: Smart balance modal with corrected logic
         function showSmartBalanceModal(analysis) {
             const { totalImbalance, suggestions } = analysis;
-            const isDebitNeeded = totalImbalance < 0;
+            const isCreditNeeded = totalImbalance > 0; // FIXED
             const amount = Math.abs(totalImbalance);
             
             // Create enhanced modal content
@@ -8493,8 +8493,8 @@
                                 </div>
                                 <p style="margin: 0; color: #7f1d1d;">
                                     Your books are out of balance by <strong>${formatCurrencyFull(amount, 'IDR')}</strong>. 
-                                    ${isDebitNeeded ? 'Credits exceed debits' : 'Debits exceed credits'} - 
-                                    a ${isDebitNeeded ? 'debit' : 'credit'} entry is needed.
+                                    ${isCreditNeeded ? 'Debits exceed credits' : 'Credits exceed debits'} - 
+                                    a ${isCreditNeeded ? 'credit' : 'debit'} entry is needed.
                                 </p>
                             </div>
                             
@@ -8538,7 +8538,8 @@
             
             // Add modal to DOM
             document.body.insertAdjacentHTML('beforeend', modalContent);
-
+            
+            // Force modal to be visible (same fix as other modals)
             const modal = document.getElementById('smartBalanceModal');
             if (modal) {
                 modal.style.visibility = 'visible';
@@ -8546,7 +8547,7 @@
             }
             
             // Populate bulk balance account dropdown
-            populateBulkBalanceAccounts(isDebitNeeded);
+            populateBulkBalanceAccounts(isCreditNeeded); // FIXED: Pass correct variable
         }
         
         // NEW: Generate suggestions HTML
@@ -8597,15 +8598,15 @@
             }).join('');
         }
         
-        // NEW: Populate bulk balance accounts
-        function populateBulkBalanceAccounts(isDebitNeeded) {
+        // FIXED: Populate bulk balance accounts
+        function populateBulkBalanceAccounts(isCreditNeeded) { // FIXED: Parameter name
             const select = document.getElementById('bulkBalanceAccount');
             if (!select) return;
             
-            // Show appropriate accounts based on what's needed
-            const suggestedAccounts = isDebitNeeded ? 
-                glAccounts.filter(acc => acc.category === 'Asset' || acc.category === 'Expense') :
-                glAccounts.filter(acc => acc.category === 'Liability' || acc.category === 'Equity' || acc.category === 'Revenue');
+            // FIXED: Show appropriate accounts based on what's needed
+            const suggestedAccounts = isCreditNeeded ? 
+                glAccounts.filter(acc => acc.category === 'Liability' || acc.category === 'Equity' || acc.category === 'Revenue') :
+                glAccounts.filter(acc => acc.category === 'Asset' || acc.category === 'Expense');
             
             select.innerHTML = '<option value="">Select Account</option>';
             
@@ -8704,7 +8705,7 @@
             }
         }
         
-        // NEW: Create bulk balancing entry
+        // FIXED: Create bulk balancing entry
         async function createBulkBalancingEntry(imbalance) {
             const accountCode = document.getElementById('bulkBalanceAccount').value;
             const description = document.getElementById('bulkBalanceDescription').value;
@@ -8726,11 +8727,11 @@
             }
             
             const amount = Math.abs(imbalance);
-            const isDebitNeeded = imbalance < 0;
+            const isCreditNeeded = imbalance > 0; // FIXED
             
             if (!confirm(`Create bulk balancing entry?\n\n` +
                         `Account: ${accountCode} - ${account.account_name}\n` +
-                        `${isDebitNeeded ? 'Debit' : 'Credit'}: ${formatCurrencyFull(amount, 'IDR')}\n` +
+                        `${isCreditNeeded ? 'Credit' : 'Debit'}: ${formatCurrencyFull(amount, 'IDR')}\n` + // FIXED
                         `Description: ${description}`)) {
                 return;
             }
@@ -8741,8 +8742,8 @@
                     account_code: accountCode,
                     account_name: account.account_name,
                     description: description,
-                    debit_amount: isDebitNeeded ? amount : 0,
-                    credit_amount: isDebitNeeded ? 0 : amount,
+                    debit_amount: isCreditNeeded ? 0 : amount, // FIXED
+                    credit_amount: isCreditNeeded ? amount : 0, // FIXED
                     reference: `BULK-BAL-${Date.now()}`,
                     category: account.category,
                     source: 'Bulk-Balance',
