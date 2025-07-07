@@ -9527,21 +9527,34 @@
             let totalLiabilities = 0;
             let totalEquity = 0;
             
-            // Calculate totals
+            // Calculate asset totals
             Object.values(assetAccounts).forEach(account => {
                 const balance = account.debit_total - account.credit_total;
                 totalAssets += balance;
             });
             
+            // Calculate liability totals
             Object.values(liabilityAccounts).forEach(account => {
                 const balance = account.credit_total - account.debit_total;
                 totalLiabilities += balance;
             });
             
+            // Calculate previous period retained earnings (excluding current period)
+            let previousRetainedEarnings = 0;
             Object.values(equityAccounts).forEach(account => {
                 const balance = account.credit_total - account.debit_total;
-                totalEquity += balance;
+                if (account.account_code === '3040' || account.account_name.toLowerCase().includes('retained earnings')) {
+                    previousRetainedEarnings += balance;
+                } else {
+                    totalEquity += balance;
+                }
             });
+            
+            // Get current period net income from Income Statement
+            const currentNetIncome = getCurrentPeriodNetIncome();
+            
+            // Calculate total equity including current period
+            const totalEquityWithCurrent = totalEquity + previousRetainedEarnings + currentNetIncome;
             
             const balanceSheet = `
                 <div class="report-section">
@@ -9549,16 +9562,16 @@
                     
                     <div class="report-subsection">
                         <div class="report-subsection-title">Current Assets</div>
-                        ${generateAccountLines(assetAccounts, ['1010', '1020', '1100', '1110', '1200', '1210', '1220', '1300', '1310', '1320', '1400'])}
+                        ${generateAccountLines(assetAccounts, ['1010', '1020', '1100', '1200', '1300', '1400'])}
                     </div>
                     
                     <div class="report-subsection">
                         <div class="report-subsection-title">Non-Current Assets</div>
-                        ${generateAccountLines(assetAccounts, ['1500', '1510', '1600', '1610', '1700', '1710', '1800', '1900', '1910'])}
+                        ${generateAccountLines(assetAccounts, ['1500', '1600', '1700', '1800', '1900'])}
                     </div>
                     
-                    <div class="report-line total-line">
-                        <span>TOTAL ASSETS</span>
+                    <div class="report-line subtotal-line">
+                        <span>Total Assets</span>
                         <span>${formatCurrencyFull(totalAssets, 'IDR')}</span>
                     </div>
                 </div>
@@ -9584,21 +9597,86 @@
                 
                 <div class="report-section">
                     <div class="report-section-title">EQUITY</div>
-                    ${generateAccountLines(equityAccounts, ['3010', '3020', '3030', '3040', '3050'])}
+                    ${generateEquityAccountLines(equityAccounts, ['3010', '3020', '3030'])}
+                    
+                    <!-- ENHANCED: Two-line Retained Earnings approach -->
+                    ${previousRetainedEarnings !== 0 ? `
+                        <div class="report-line">
+                            <span class="account-item">Previous Period Retained Earnings</span>
+                            <span>${formatCurrencyFull(previousRetainedEarnings, 'IDR')}</span>
+                        </div>
+                    ` : ''}
+                    
+                    ${currentNetIncome !== 0 ? `
+                        <div class="report-line">
+                            <span class="account-item">Current Period Net Income</span>
+                            <span>${formatCurrencyFull(currentNetIncome, 'IDR')}</span>
+                        </div>
+                    ` : ''}
                     
                     <div class="report-line subtotal-line">
                         <span>Total Equity</span>
-                        <span>${formatCurrencyFull(totalEquity, 'IDR')}</span>
+                        <span>${formatCurrencyFull(totalEquityWithCurrent, 'IDR')}</span>
                     </div>
                 </div>
                 
                 <div class="report-line total-line">
                     <span>TOTAL LIABILITIES + EQUITY</span>
-                    <span>${formatCurrencyFull(totalLiabilities + totalEquity, 'IDR')}</span>
+                    <span>${formatCurrencyFull(totalLiabilities + totalEquityWithCurrent, 'IDR')}</span>
                 </div>
             `;
             
             document.getElementById('balanceSheetDetailed').innerHTML = balanceSheet;
+        }
+        
+        // NEW: Helper function to get current period net income
+        function getCurrentPeriodNetIncome() {
+            // Get net income from the income statement calculation
+            const revenueTransactions = financialTransactions.filter(t => t.category === 'Revenue');
+            const expenseTransactions = financialTransactions.filter(t => t.category === 'Expense');
+            
+            const revenueAccounts = groupTransactionsByAccount(revenueTransactions);
+            const expenseAccounts = groupTransactionsByAccount(expenseTransactions);
+            
+            let totalRevenue = 0;
+            let totalExpenses = 0;
+            
+            // Calculate revenue (credits increase revenue)
+            Object.values(revenueAccounts).forEach(account => {
+                const balance = account.credit_total - account.debit_total;
+                totalRevenue += balance;
+            });
+            
+            // Calculate expenses (debits increase expenses)
+            Object.values(expenseAccounts).forEach(account => {
+                const balance = account.debit_total - account.credit_total;
+                totalExpenses += balance;
+            });
+            
+            return totalRevenue - totalExpenses;
+        }
+        
+        // NEW: Generate equity account lines (excluding retained earnings)
+        function generateEquityAccountLines(accountsGroup, accountCodes) {
+            let lines = '';
+            
+            accountCodes.forEach(code => {
+                if (accountsGroup[code]) {
+                    const account = accountsGroup[code];
+                    const balance = account.credit_total - account.debit_total;
+                    
+                    if (Math.abs(balance) > 0.01) {
+                        lines += `
+                            <div class="report-line">
+                                <span class="account-item">${account.account_code} - ${account.account_name}</span>
+                                <span>${formatCurrencyFull(Math.abs(balance), 'IDR')}</span>
+                            </div>
+                        `;
+                    }
+                }
+            });
+            
+            return lines || '<div class="report-line"><span class="account-item">No equity accounts recorded</span><span>Rp  0</span></div>';
         }
         
         function generateCashFlowStatement() {
