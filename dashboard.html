@@ -9971,9 +9971,13 @@
         }
         
         function generateIncomeStatement() {
+            // GET FILTERED TRANSACTIONS BASED ON PERIOD SELECTOR
             const filteredTransactions = getFilteredFinancialTransactions();
-            const revenueTransactions = financialTransactions.filter(t => t.category === 'Revenue');
-            const expenseTransactions = financialTransactions.filter(t => t.category === 'Expense');
+            console.log('Generating Income Statement with filtered transactions:', filteredTransactions.length);
+            
+            // Use FILTERED transactions for period-specific income statement
+            const revenueTransactions = filteredTransactions.filter(t => t.category === 'Revenue');
+            const expenseTransactions = filteredTransactions.filter(t => t.category === 'Expense');
             
             const revenueAccounts = groupTransactionsByAccount(revenueTransactions);
             const expenseAccounts = groupTransactionsByAccount(expenseTransactions);
@@ -10035,10 +10039,25 @@
         }
         
         function generateBalanceSheet() {
-            const filteredTransactions = getFilteredFinancialTransactions(); 
-            const assetTransactions = filteredTransactions.filter(t => t.category === 'Asset');
-            const liabilityTransactions = financialTransactions.filter(t => t.category === 'Liability');
-            const equityTransactions = financialTransactions.filter(t => t.category === 'Equity');
+            // For Balance Sheet: Use ALL transactions up to the END of the selected period
+            const periodInfo = getCurrentTransactionPeriod();
+            let balanceSheetTransactions = financialTransactions;
+            
+            // If there's a period selected, only include transactions up to the END date
+            if (periodInfo.period && periodInfo.period !== '') {
+                const endDate = getPeriodEndDate(periodInfo);
+                if (endDate) {
+                    balanceSheetTransactions = financialTransactions.filter(t => {
+                        const transDate = new Date(t.transaction_date);
+                        return transDate <= endDate;
+                    });
+                    console.log(`Balance Sheet: Using transactions up to ${endDate.toDateString()}`);
+                }
+            }
+            
+            const assetTransactions = balanceSheetTransactions.filter(t => t.category === 'Asset');
+            const liabilityTransactions = balanceSheetTransactions.filter(t => t.category === 'Liability');
+            const equityTransactions = balanceSheetTransactions.filter(t => t.category === 'Equity');
             
             // Group by account
             const assetAccounts = groupTransactionsByAccount(assetTransactions);
@@ -10072,7 +10091,7 @@
                 }
             });
             
-            // Get current period net income from Income Statement
+            // Get current period net income from Income Statement (using filtered transactions)
             const currentNetIncome = getCurrentPeriodNetIncome();
             
             // Calculate total equity including current period
@@ -10084,16 +10103,16 @@
                     
                     <div class="report-subsection">
                         <div class="report-subsection-title">Current Assets</div>
-                        ${generateAccountLines(assetAccounts, ['1010', '1020', '1100', '1200', '1300', '1400'], 'debit')}
+                        ${generateAccountLines(assetAccounts, ['1000', '1100', '1200', '1300', '1400'], 'debit')}
                     </div>
                     
                     <div class="report-subsection">
-                        <div class="report-subsection-title">Non-Current Assets</div>
-                        ${generateAccountLines(assetAccounts, ['1500', '1600', '1700', '1800', '1900'], 'debit')}
+                        <div class="report-subsection-title">Fixed Assets</div>
+                        ${generateAccountLines(assetAccounts, ['1500', '1510', '1600', '1610', '1700', '1710', '1800', '1900'], 'debit')}
                     </div>
                     
-                    <div class="report-line subtotal-line">
-                        <span>Total Assets</span>
+                    <div class="report-line total-line">
+                        <span>TOTAL ASSETS</span>
                         <span>${formatCurrencyFull(totalAssets, 'IDR')}</span>
                     </div>
                 </div>
@@ -10103,12 +10122,12 @@
                     
                     <div class="report-subsection">
                         <div class="report-subsection-title">Current Liabilities</div>
-                        ${generateAccountLines(liabilityAccounts, ['2010', '2020', '2030', '2040', '2050', '2100', '2110'], 'credit')}
+                        ${generateAccountLines(liabilityAccounts, ['2010', '2020', '2030', '2040', '2050'], 'credit')}
                     </div>
                     
                     <div class="report-subsection">
-                        <div class="report-subsection-title">Non-Current Liabilities</div>
-                        ${generateAccountLines(liabilityAccounts, ['2200', '2300', '2400', '2410', '2420', '2430'], 'credit')}
+                        <div class="report-subsection-title">Long-term Liabilities</div>
+                        ${generateAccountLines(liabilityAccounts, ['2100', '2200', '2300'], 'credit')}
                     </div>
                     
                     <div class="report-line subtotal-line">
@@ -10119,9 +10138,8 @@
                 
                 <div class="report-section">
                     <div class="report-section-title">EQUITY</div>
-                    ${generateEquityAccountLines(equityAccounts, ['3010', '3020', '3030'], 'credit')}
+                    ${generateEquityAccountLines(equityAccounts, ['3010', '3020', '3030'])}
                     
-                    <!-- ENHANCED: Two-line Retained Earnings approach -->
                     ${previousRetainedEarnings !== 0 ? `
                         <div class="report-line">
                             <span class="account-item">Previous Period Retained Earnings</span>
@@ -10149,6 +10167,38 @@
             `;
             
             document.getElementById('balanceSheetDetailed').innerHTML = balanceSheet;
+        }
+
+        function getCurrentTransactionPeriod() {
+            const periodFilter = document.getElementById('periodFilter')?.value;
+            const dateFrom = document.getElementById('dateFromFinancial')?.value;
+            const dateTo = document.getElementById('dateToFinancial')?.value;
+            
+            return {
+                period: periodFilter,
+                customFrom: dateFrom,
+                customTo: dateTo
+            };
+        }
+        
+        function getPeriodEndDate(periodInfo) {
+            const today = new Date();
+            
+            if (periodInfo.period === 'custom' && periodInfo.customTo) {
+                return new Date(periodInfo.customTo);
+            }
+            
+            switch(periodInfo.period) {
+                case 'MTD':
+                    return new Date(today.getFullYear(), today.getMonth() + 1, 0); // Last day of current month
+                case 'QTD':
+                    const quarter = Math.floor(today.getMonth() / 3);
+                    return new Date(today.getFullYear(), (quarter + 1) * 3, 0); // Last day of current quarter
+                case 'YTD':
+                    return new Date(today.getFullYear(), 11, 31); // Dec 31 of current year
+                default:
+                    return today;
+            }
         }
         
         // NEW: Helper function to get current period net income
@@ -10203,30 +10253,51 @@
         
         function generateCashFlowStatement() {
             const beginningBalance = parseFloat(document.getElementById('beginningCashBalance').value) || getStartingCash();
+            
+            // USE FILTERED TRANSACTIONS for period-specific cash flow
             const filteredTransactions = getFilteredFinancialTransactions();
-            // Operating Activities
+            console.log('Generating Cash Flow Statement with filtered transactions:', filteredTransactions.length);
+            
+            // Calculate net income from filtered transactions
+            const revenueTransactions = filteredTransactions.filter(t => t.category === 'Revenue');
+            const expenseTransactions = filteredTransactions.filter(t => t.category === 'Expense');
+            
+            let totalRevenue = 0;
+            let totalExpenses = 0;
+            
+            revenueTransactions.forEach(t => {
+                totalRevenue += (parseFloat(t.credit) || 0) - (parseFloat(t.debit) || 0);
+            });
+            
+            expenseTransactions.forEach(t => {
+                totalExpenses += (parseFloat(t.debit) || 0) - (parseFloat(t.credit) || 0);
+            });
+            
+            const netIncome = totalRevenue - totalExpenses;
+            
+            // Operating Activities (based on filtered transactions)
             const operatingAccounts = {
-                'Net Income': netIncomeCalculation(),
-                'Depreciation & Amortization': getAccountBalance(['5600', '5610']),
-                'Changes in Accounts Receivable': -getAccountBalanceChange('1100'),
-                'Changes in Accounts Payable': getAccountBalanceChange('2010'),
-                'Changes in Accrued Expenses': getAccountBalanceChange('2020')
+                'Net Income': netIncome,
+                'Depreciation & Amortization': getAccountBalanceFromFiltered(['5600', '5610'], filteredTransactions),
+                'Changes in Accounts Receivable': -getAccountBalanceFromFiltered(['1100'], filteredTransactions),
+                'Changes in Accounts Payable': getAccountBalanceFromFiltered(['2010'], filteredTransactions),
+                'Changes in Accrued Expenses': getAccountBalanceFromFiltered(['2020'], filteredTransactions)
             };
             
-            // Investing Activities 
+            // Investing Activities (based on filtered transactions)
             const investingAccounts = {
-                'Purchase of Equipment': -getAccountBalance(['1500']),
-                'Purchase of Vehicles': -getAccountBalance(['1600']),
-                'Purchase of Buildings': -getAccountBalance(['1700']),
-                'Purchase of Intangible Assets': -getAccountBalance(['1900'])
+                'Purchase of Equipment': -getAccountBalanceFromFiltered(['1500'], filteredTransactions),
+                'Purchase of Vehicles': -getAccountBalanceFromFiltered(['1600'], filteredTransactions),
+                'Purchase of Buildings': -getAccountBalanceFromFiltered(['1700'], filteredTransactions),
+                'Purchase of Intangible Assets': -getAccountBalanceFromFiltered(['1900'], filteredTransactions)
             };
             
-            // Financing Activities
+            // Financing Activities (based on filtered transactions)
             const financingAccounts = {
-                'Proceeds from Long-term Debt': getAccountBalance(['2200']),
-                'Owner\'s Capital Contributions': getAccountBalance(['3010']),
-                'Owner\'s Drawings': -getAccountBalance(['3050']),
-                'Repayment of Debt': -getAccountBalanceChange('2200', 'negative')
+                'Proceeds from Long-term Debt': getAccountBalanceFromFiltered(['2200'], filteredTransactions),
+                'Owner\'s Capital Contributions': getAccountBalanceFromFiltered(['3010'], filteredTransactions),
+                'Owner\'s Drawings': -getAccountBalanceFromFiltered(['3050'], filteredTransactions),
+                'Repayment of Debt': -Math.abs(getAccountBalanceFromFiltered(['2200'], filteredTransactions, 'negative'))
             };
             
             let operatingCashFlow = Object.values(operatingAccounts).reduce((sum, val) => sum + val, 0);
@@ -10264,23 +10335,34 @@
                     </div>
                 </div>
                 
-                <div class="report-line subtotal-line">
-                    <span>NET INCREASE (DECREASE) IN CASH</span>
-                    <span>${formatCurrencyFull(netCashFlow, 'IDR')}</span>
-                </div>
-                
-                <div class="report-line subtotal-line">
+                <div class="report-line">
                     <span>Beginning Cash Balance</span>
                     <span>${formatCurrencyFull(beginningBalance, 'IDR')}</span>
                 </div>
-                
-                <div class="report-line final-total-line">
-                    <span>ENDING CASH BALANCE</span>
+                <div class="report-line total-line">
+                    <span>Net Change in Cash</span>
+                    <span>${formatCurrencyFull(netCashFlow, 'IDR')}</span>
+                </div>
+                <div class="report-line total-line">
+                    <span>Ending Cash Balance</span>
                     <span>${formatCurrencyFull(endingBalance, 'IDR')}</span>
                 </div>
             `;
             
             document.getElementById('cashFlowStatementDetailed').innerHTML = cashFlowStatement;
+        }
+
+        function getAccountBalanceFromFiltered(accountCodes, filteredTransactions, type = 'positive') {
+            let total = 0;
+            
+            accountCodes.forEach(code => {
+                const transactions = filteredTransactions.filter(t => t.account_code === code);
+                transactions.forEach(t => {
+                    total += (parseFloat(t.debit) || 0) - (parseFloat(t.credit) || 0);
+                });
+            });
+            
+            return type === 'negative' ? -Math.abs(total) : total;
         }
 
         function groupTransactionsByAccount(transactions) {
