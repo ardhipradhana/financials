@@ -8808,62 +8808,6 @@
             }
         }
         
-        function populateBalancingAccounts(isDebitNeeded) {
-            const select = document.getElementById('balancingAccount');
-            if (!select) return;
-            
-            // Suggest appropriate accounts based on what's needed
-            const suggestedAccounts = isDebitNeeded ? 
-                glAccounts.filter(acc => acc.category === 'Asset' || acc.category === 'Expense') :
-                glAccounts.filter(acc => acc.category === 'Liability' || acc.category === 'Equity' || acc.category === 'Revenue');
-            
-            select.innerHTML = '<option value="">Select Account</option>';
-            suggestedAccounts.forEach(account => {
-                const option = document.createElement('option');
-                option.value = account.account_code;
-                option.textContent = `${account.account_code} - ${account.account_name}`;
-                select.appendChild(option);
-            });
-        }
-        
-        async function createBalancingEntry(difference) {
-            const accountCode = document.getElementById('balancingAccount').value;
-            const description = document.getElementById('balancingDescription').value;
-            const reference = document.getElementById('balancingReference').value;
-            
-            if (!accountCode) {
-                alert('Please select an account for the balancing entry.');
-                return;
-            }
-            
-            const account = glAccounts.find(acc => acc.account_code === accountCode);
-            const amount = Math.abs(difference);
-            const isDebitNeeded = difference < 0;
-            
-            const balancingTransaction = {
-                transaction_date: new Date().toISOString().split('T')[0],
-                account_code: accountCode,
-                account_name: account.account_name,
-                description: description,
-                debit_amount: isDebitNeeded ? amount : 0,
-                credit_amount: isDebitNeeded ? 0 : amount,
-                reference: reference,
-                category: account.category,
-                source: 'Auto-Balance',
-                notes: 'Automatically generated balancing entry'
-            };
-            
-            try {
-                await saveFinancialTransaction(balancingTransaction);
-                closeAutoBalanceModal();
-                await loadFinancialTransactions();
-                alert('Balancing entry created successfully!');
-            } catch (error) {
-                console.error('Error creating balancing entry:', error);
-                alert('Error creating balancing entry: ' + error.message);
-            }
-        }
-        
         function closeAutoBalanceModal() {
             const modal = document.getElementById('autoBalanceModal');
             if (modal) {
