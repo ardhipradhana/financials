@@ -8491,8 +8491,15 @@
                     if (error) throw error;
                 }
                 
+                // Refresh BOTH tables - this was missing!
                 await loadFinancialTransactions();
+                await loadAPARData(); // This line was missing!
+                
+                // Also refresh AP/AR table rendering if we're on that tab
+                renderAPARTable();
+                
                 alert('Transaction unlinked successfully!');
+                
             } catch (error) {
                 console.error('Error unlinking transaction:', error);
                 alert('Error unlinking transaction: ' + error.message);
