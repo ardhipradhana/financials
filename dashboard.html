@@ -10258,6 +10258,15 @@
             const filteredTransactions = getFilteredFinancialTransactions();
             console.log('Generating Cash Flow Statement with filtered transactions:', filteredTransactions.length);
             
+            // DEBUG: Show all account codes available
+            const allAccountCodes = [...new Set(filteredTransactions.map(t => t.account_code))].filter(Boolean);
+            console.log('Available account codes in filtered transactions:', allAccountCodes);
+            
+            // DEBUG: Show sample transaction structure
+            if (filteredTransactions.length > 0) {
+                console.log('Sample transaction structure:', filteredTransactions[0]);
+            }
+            
             // Calculate net income from filtered transactions
             const revenueTransactions = filteredTransactions.filter(t => t.category === 'Revenue');
             const expenseTransactions = filteredTransactions.filter(t => t.category === 'Expense');
@@ -10266,14 +10275,19 @@
             let totalExpenses = 0;
             
             revenueTransactions.forEach(t => {
-                totalRevenue += (parseFloat(t.credit) || 0) - (parseFloat(t.debit) || 0);
+                const creditAmount = parseFloat(t.credit_amount) || parseFloat(t.credit) || 0;
+                const debitAmount = parseFloat(t.debit_amount) || parseFloat(t.debit) || 0;
+                totalRevenue += creditAmount - debitAmount;
             });
             
             expenseTransactions.forEach(t => {
-                totalExpenses += (parseFloat(t.debit) || 0) - (parseFloat(t.credit) || 0);
+                const debitAmount = parseFloat(t.debit_amount) || parseFloat(t.debit) || 0;
+                const creditAmount = parseFloat(t.credit_amount) || parseFloat(t.credit) || 0;
+                totalExpenses += debitAmount - creditAmount;
             });
             
             const netIncome = totalRevenue - totalExpenses;
+            console.log('Calculated Net Income for Cash Flow:', netIncome);
             
             // Operating Activities (based on filtered transactions)
             const operatingAccounts = {
@@ -10284,6 +10298,8 @@
                 'Changes in Accrued Expenses': getAccountBalanceFromFiltered(['2020'], filteredTransactions)
             };
             
+            console.log('Operating accounts calculated:', operatingAccounts);
+            
             // Investing Activities (based on filtered transactions)
             const investingAccounts = {
                 'Purchase of Equipment': -getAccountBalanceFromFiltered(['1500'], filteredTransactions),
@@ -10292,22 +10308,36 @@
                 'Purchase of Intangible Assets': -getAccountBalanceFromFiltered(['1900'], filteredTransactions)
             };
             
+            console.log('Investing accounts calculated:', investingAccounts);
+            
             // Financing Activities (based on filtered transactions)
             const financingAccounts = {
                 'Proceeds from Long-term Debt': getAccountBalanceFromFiltered(['2200'], filteredTransactions),
                 'Owner\'s Capital Contributions': getAccountBalanceFromFiltered(['3010'], filteredTransactions),
-                'Owner\'s Drawings': -getAccountBalanceFromFiltered(['3050'], filteredTransactions),
-                'Repayment of Debt': -Math.abs(getAccountBalanceFromFiltered(['2200'], filteredTransactions, 'negative'))
+                'Owner\'s Drawings': -getAccountBalanceFromFiltered(['3050'], filteredTransactions)
             };
+            
+            console.log('Financing accounts calculated:', financingAccounts);
             
             let operatingCashFlow = Object.values(operatingAccounts).reduce((sum, val) => sum + val, 0);
             let investingCashFlow = Object.values(investingAccounts).reduce((sum, val) => sum + val, 0);
             let financingCashFlow = Object.values(financingAccounts).reduce((sum, val) => sum + val, 0);
             
+            console.log('Cash flow totals:', {
+                operating: operatingCashFlow,
+                investing: investingCashFlow,
+                financing: financingCashFlow
+            });
+            
             const netCashFlow = operatingCashFlow + investingCashFlow + financingCashFlow;
             const endingBalance = beginningBalance + netCashFlow;
             
             const cashFlowStatement = `
+                <div class="report-line">
+                    <span>Beginning Cash Balance</span>
+                    <span>${formatCurrencyFull(beginningBalance, 'IDR')}</span>
+                </div>
+                
                 <div class="report-section">
                     <div class="report-section-title">CASH FLOWS FROM OPERATING ACTIVITIES</div>
                     ${generateCashFlowLines(operatingAccounts)}
@@ -10335,10 +10365,6 @@
                     </div>
                 </div>
                 
-                <div class="report-line">
-                    <span>Beginning Cash Balance</span>
-                    <span>${formatCurrencyFull(beginningBalance, 'IDR')}</span>
-                </div>
                 <div class="report-line total-line">
                     <span>Net Change in Cash</span>
                     <span>${formatCurrencyFull(netCashFlow, 'IDR')}</span>
@@ -10355,13 +10381,27 @@
         function getAccountBalanceFromFiltered(accountCodes, filteredTransactions, type = 'positive') {
             let total = 0;
             
+            console.log('Getting account balance for codes:', accountCodes);
+            console.log('From filtered transactions:', filteredTransactions.length);
+            
             accountCodes.forEach(code => {
                 const transactions = filteredTransactions.filter(t => t.account_code === code);
+                console.log(`Account code ${code}: found ${transactions.length} transactions`);
+                
                 transactions.forEach(t => {
-                    total += (parseFloat(t.debit) || 0) - (parseFloat(t.credit) || 0);
+                    // Use the same field names as your groupTransactionsByAccount function
+                    const debitAmount = parseFloat(t.debit_amount) || parseFloat(t.debit) || 0;
+                    const creditAmount = parseFloat(t.credit_amount) || parseFloat(t.credit) || 0;
+                    const amount = debitAmount - creditAmount;
+                    total += amount;
+                    
+                    if (amount !== 0) {
+                        console.log(`  Transaction: ${t.account_name}, Debit: ${debitAmount}, Credit: ${creditAmount}, Net: ${amount}`);
+                    }
                 });
             });
             
+            console.log(`Total for codes ${accountCodes}: ${total}`);
             return type === 'negative' ? -Math.abs(total) : total;
         }
 
