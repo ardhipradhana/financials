@@ -139,7 +139,8 @@
             transition: all 0.3s ease;
             display: flex;
             flex-direction: column;
-            min-height: 140px; /* Set consistent height */
+            min-height: 140px;
+            position: relative;
         }
         
         .metric-card:hover {
@@ -149,20 +150,17 @@
         
         .metric-header {
             display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            width: 100%;
-            height: 100%;
             flex-direction: column;
+            height: 100%;
+            width: 100%;
         }
 
         .metric-top-section {
-            /* Title and icon row - stays at top */
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
             width: 100%;
-            margin-bottom: 0.75rem;
+            margin-bottom: 1rem;
         }
         
         .metric-content {
@@ -177,7 +175,6 @@
         }
 
         .metric-values-section {
-            /* Values go to bottom */
             margin-top: auto;
         }
 
@@ -205,7 +202,6 @@
             font-weight: 600;
             color: #64748b;
             letter-spacing: 0.5px;
-            margin: 0;
         }
 
         .metric-icon {
@@ -218,7 +214,6 @@
             color: white;
             font-size: 1rem;
             flex-shrink: 0;
-            /* Icon stays in top section */
         }
         
         .metric-icon::before {
@@ -261,13 +256,11 @@
             color: #1e293b;
             margin-bottom: 0.5rem;
             line-height: 1.2;
-            word-break: break-word;
         }
         
         .metric-change {
             font-size: 0.875rem;
             font-weight: 500;
-            margin: 0;
         }
         
         .positive { color: #10b981; }
@@ -3225,7 +3218,6 @@
         
         .period-selector-container {
             position: relative;
-            display: inline-block;
         }
         
         .period-selector-enhanced {
@@ -3238,9 +3230,7 @@
             font-weight: 500;
             color: #374151;
             cursor: pointer;
-            transition: all 0.2s ease;
             min-width: 120px;
-            position: relative;
         }
         
         .period-selector-enhanced:hover {
@@ -3262,7 +3252,6 @@
             font-size: 0.625rem;
             color: #9ca3af;
             pointer-events: none;
-            z-index: 1;
         }
         
         .custom-date-range {
@@ -3406,17 +3395,15 @@
 
                     <div class="metric-card">
                         <div class="metric-header">
-                            <div class="metric-content">
-                                <div class="metric-title-section">
-                                    <div class="metric-title">Net Overdue Position</div>
-                                </div>
-                                <div class="metric-values-section">
-                                    <div class="metric-value">Rp -59,750,000</div>
-                                    <div class="metric-change">Net Rp 59,750,000 you owe</div>
+                            <div class="metric-top-section">
+                                <div class="metric-title">Net Overdue Position</div>
+                                <div class="metric-icon icon-ar">
+                                    <i class="fas fa-receipt"></i>
                                 </div>
                             </div>
-                            <div class="metric-icon icon-ar">
-                                <i class="fas fa-receipt"></i>
+                            <div class="metric-values-section">
+                                <div class="metric-value">Rp 7,250,000</div>
+                                <div class="metric-change positive">Net Rp 7,250,000 owed to you</div>
                             </div>
                         </div>
                     </div>
@@ -3426,7 +3413,7 @@
                             <div class="metric-top-section">
                                 <div class="metric-title-with-selector">
                                     <div class="title-and-selector">
-                                        <span class="metric-title-text">Revenue</span>
+                                        <span class="metric-title">Revenue</span>
                                         <div class="period-selector-container">
                                             <select id="dashboardPeriodFilter" class="period-selector-enhanced" onchange="updateDashboardWithRealData()">
                                                 <option value="MTD">This Month</option>
@@ -3444,7 +3431,7 @@
                             </div>
                             <div class="metric-values-section">
                                 <div class="metric-value" id="revenueValue">Rp 0</div>
-                                <div class="metric-change" id="revenueChange">No data for Jun</div>
+                                <div class="metric-change neutral" id="revenueChange">No data for Jun</div>
                                 <div id="customRevenueDateRange" class="custom-date-range" style="display: none;">
                                     <div class="date-range-inputs">
                                         <input type="date" id="revenueDateFrom" class="date-input-enhanced">
@@ -3458,13 +3445,15 @@
                     
                     <div class="metric-card">
                         <div class="metric-header">
-                            <div>
+                            <div class="metric-top-section">
                                 <div class="metric-title">Financial Health Score</div>
-                                <div class="metric-value">87/100</div>
-                                <div class="metric-change positive">Excellent • +5 pts</div>
+                                <div class="metric-icon icon-health">
+                                    <i class="fas fa-heartbeat"></i>
+                                </div>
                             </div>
-                            <div class="metric-icon icon-health">
-                                <i class="fas fa-heartbeat"></i>
+                            <div class="metric-values-section">
+                                <div class="metric-value">50/100</div>
+                                <div class="metric-change negative">Needs Improvement • -32 pts</div>
                             </div>
                         </div>
                     </div>
