@@ -9908,18 +9908,45 @@
                         balance = account.debit_total - account.credit_total;
                     }
                     
-                    if (Math.abs(balance) > 0.01) { // Only show accounts with balances
+                    if (balance > 0) {
                         lines += `
-                            <div class="report-line">
-                                <span class="account-item">${account.account_code} - ${account.account_name}</span>
-                                <span>${formatCurrencyFull(Math.abs(balance), 'IDR')}</span>
+                            <div class="report-line account-item">
+                                <span>${account.account_code} - ${account.account_name}</span>
+                                <span>${formatCurrencyFull(balance, 'IDR')}</span>
                             </div>
                         `;
                     }
                 }
             });
             
-            return lines || '<div class="report-line"><span class="account-item">No transactions recorded</span><span>Rp  0</span></div>';
+            // If no accounts found with balances, show a message
+            if (lines === '') {
+                lines = `
+                    <div class="report-line account-item">
+                        <span>No transactions recorded</span>
+                        <span>Rp 0</span>
+                    </div>
+                `;
+            }
+            
+            return lines; // THIS WAS MISSING!
+        }
+
+        function generateCashFlowLines(accountsGroup) {
+            let lines = '';
+            
+            Object.entries(accountsGroup).forEach(([name, amount]) => {
+                if (amount !== 0) {
+                    lines += `
+                        <div class="report-line account-item">
+                            <span>${name}</span>
+                            <span>${formatCurrencyFull(amount, 'IDR')}</span>
+                        </div>
+                    `;
+                }
+            });
+            
+            return lines;
         }
         
         function generateCashFlowLines(cashFlowItems) {
