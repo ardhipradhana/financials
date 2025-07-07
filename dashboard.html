@@ -8731,7 +8731,7 @@
                     ${generateCashFlowLines(operatingAccounts)}
                     <div class="report-line subtotal-line">
                         <span>Net Cash from Operating Activities</span>
-                        <span>${formatCurrencyFull(operatingCashFlow, 'IDR')}</span>
+                        <span>${balanceSheetDetailed(operatingCashFlow, 'IDR')}</span>
                     </div>
                 </div>
                 
@@ -8812,7 +8812,7 @@
                         lines += `
                             <div class="report-line">
                                 <span class="account-item">${account.account_code} - ${account.account_name}</span>
-                                <span>${formatCurrency(Math.abs(balance), 'IDR')}</span>
+                                <span>${formatCurrencyFull(Math.abs(balance), 'IDR')}</span>
                             </div>
                         `;
                     }
