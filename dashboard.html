@@ -3870,7 +3870,8 @@
                                             Unlink Selected
                                         </button>
                                         <button class="action-btn delete" onclick="bulkDeleteFinancial()" style="width: auto; padding: 8px 16px;">
-                                            <i class="fas fa-trash"></i> Delete Selected
+                                            <i class="fas fa-trash" style="margin-right: 6px;"></i>
+                                            Delete Selected
                                         </button>
                                     </div>
                                 </div>
@@ -3954,13 +3955,9 @@
                                 <div class="section-header">
                                     <h3 class="section-title">Financial Reports</h3>
                                     <div class="section-actions">
-                                        <button class="btn btn-primary" onclick="generateReports()">
-                                            <i class="fas fa-sync"></i>
-                                            Refresh Reports
-                                        </button>
                                         <button class="btn btn-secondary" onclick="exportReportsToPDF()">
                                             <i class="fas fa-file-pdf"></i>
-                                            Export PDF
+                                            Export to PDF
                                         </button>
                                     </div>
                                 </div>
@@ -7932,10 +7929,13 @@
         }
 
         function exportReportsToPDF() {
-            alert('PDF export functionality will be implemented. For now, you can use browser print (Ctrl+P) to save as PDF.');
+            // First, generate fresh reports
+            generateReports();
             
-            // Future implementation would use libraries like jsPDF or html2pdf
-            // window.print(); // Simple browser print for now
+            // Then trigger the browser print dialog for PDF save
+            setTimeout(() => {
+                window.print();
+            }, 500); // Small delay to ensure reports are fully rendered
         }
         
         // Modal Functions
@@ -10013,6 +10013,28 @@
             
             return date.toISOString().split('T')[0]; // Returns YYYY-MM-DD format
         }
+
+        function ensureFreshReports() {
+            // Auto-refresh reports when tab becomes visible
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                        const reportsTab = document.getElementById('reports-tab');
+                        if (reportsTab && reportsTab.style.display !== 'none' && reportsTab.classList.contains('active')) {
+                            generateReports();
+                        }
+                    }
+                });
+            });
+
+            const reportsTab = document.getElementById('reports-tab');
+            if (reportsTab) {
+                observer.observe(reportsTab, { attributes: true, attributeFilter: ['style', 'class'] });
+            }
+        }
+
+        // Call this function when the page loads
+        document.addEventListener('DOMContentLoaded', ensureFreshReports);
         
     </script>
 
