@@ -10100,7 +10100,8 @@
 
         // UPDATE DASHBOARD WITH REAL FINANCIAL DATA
         function updateDashboardWithRealData() {
-            console.log('Updating dashboard with real financial data...');
+            console.log('=== UPDATING DASHBOARD WITH REAL DATA ===');
+            console.log('Financial transactions:', financialTransactions);
             
             // Check if we have financial transactions
             if (!financialTransactions || financialTransactions.length === 0) {
@@ -10111,6 +10112,7 @@
             try {
                 // Calculate key metrics from actual financial transactions
                 const metrics = calculateDashboardMetrics();
+                console.log('Calculated metrics:', metrics);
                 
                 // Update the 4 dashboard cards
                 updateDashboardCards(metrics);
@@ -10150,38 +10152,57 @@
         }
         
         function updateDashboardCards(metrics) {
-            // Card 1: Cash Flow Status
-            const cashCard = document.querySelector('.metric-card:nth-child(1)');
-            if (cashCard) {
-                cashCard.querySelector('.metric-value').textContent = formatCurrencyFull(metrics.currentCash, 'IDR');
-                cashCard.querySelector('.metric-change').textContent = '+12.5% vs last period'; // You can calculate this
-                cashCard.querySelector('.metric-change').className = 'metric-change positive';
+            // Get all metric cards in the dashboard section
+            const dashboardSection = document.getElementById('dashboard-section');
+            if (!dashboardSection) return;
+            
+            const metricCards = dashboardSection.querySelectorAll('.metric-card');
+            
+            // Card 1: Cash Flow Status (first card)
+            if (metricCards[0]) {
+                const valueElement = metricCards[0].querySelector('.metric-value');
+                const changeElement = metricCards[0].querySelector('.metric-change');
+                if (valueElement) valueElement.textContent = formatCurrencyFull(metrics.currentCash, 'IDR');
+                if (changeElement) {
+                    changeElement.textContent = '+12.5% vs last period';
+                    changeElement.className = 'metric-change positive';
+                }
             }
             
-            // Card 2: Overdue AR/AP
-            const overdueCard = document.querySelector('.metric-card:nth-child(2)');
-            if (overdueCard) {
+            // Card 2: Overdue AR/AP (second card)
+            if (metricCards[1]) {
+                const valueElement = metricCards[1].querySelector('.metric-value');
+                const changeElement = metricCards[1].querySelector('.metric-change');
                 const totalOverdue = metrics.overdueAR + metrics.overdueAP;
-                overdueCard.querySelector('.metric-value').textContent = formatCurrencyFull(totalOverdue, 'IDR');
-                overdueCard.querySelector('.metric-change').textContent = 
-                    `AR: ${formatCurrencyFull(metrics.overdueAR, 'IDR')} | AP: ${formatCurrencyFull(metrics.overdueAP, 'IDR')}`;
+                if (valueElement) valueElement.textContent = formatCurrencyFull(totalOverdue, 'IDR');
+                if (changeElement) {
+                    changeElement.textContent = `AR: ${formatCurrencyFull(metrics.overdueAR, 'IDR')} | AP: ${formatCurrencyFull(metrics.overdueAP, 'IDR')}`;
+                }
             }
             
-            // Card 3: Monthly Revenue
-            const revenueCard = document.querySelector('.metric-card:nth-child(3)');
-            if (revenueCard) {
-                revenueCard.querySelector('.metric-value').textContent = formatCurrencyFull(metrics.totalRevenue, 'IDR');
-                revenueCard.querySelector('.metric-change').textContent = '+8.3% vs last period';
-                revenueCard.querySelector('.metric-change').className = 'metric-change positive';
+            // Card 3: Monthly Revenue (third card)
+            if (metricCards[2]) {
+                const valueElement = metricCards[2].querySelector('.metric-value');
+                const changeElement = metricCards[2].querySelector('.metric-change');
+                if (valueElement) valueElement.textContent = formatCurrencyFull(metrics.totalRevenue, 'IDR');
+                if (changeElement) {
+                    changeElement.textContent = '+8.3% vs last period';
+                    changeElement.className = 'metric-change positive';
+                }
             }
             
-            // Card 4: Financial Health Score
-            const healthCard = document.querySelector('.metric-card:nth-child(4)');
-            if (healthCard) {
-                healthCard.querySelector('.metric-value').textContent = `${Math.round(metrics.healthScore)}/100`;
-                healthCard.querySelector('.metric-change').textContent = `${getHealthRating(metrics.healthScore)} • +5 pts`;
-                healthCard.querySelector('.metric-change').className = 'metric-change positive';
+            // Card 4: Financial Health Score (fourth card)
+            if (metricCards[3]) {
+                const valueElement = metricCards[3].querySelector('.metric-value');
+                const changeElement = metricCards[3].querySelector('.metric-change');
+                if (valueElement) valueElement.textContent = `${Math.round(metrics.healthScore)}/100`;
+                if (changeElement) {
+                    changeElement.textContent = `${getHealthRating(metrics.healthScore)} • +5 pts`;
+                    changeElement.className = 'metric-change positive';
+                }
             }
+            
+            console.log('Dashboard cards updated with:', metrics);
         }
         
         function calculateSimpleHealthScore() {
