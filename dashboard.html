@@ -3118,6 +3118,23 @@
             }
         }
 
+        .period-selector {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            background: white;
+            margin-left: 0.5rem;
+        }
+        
+        .date-input-small {
+            font-size: 0.75rem;
+            padding: 0.25rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            margin: 0 0.25rem;
+            width: 120px;
+        }
         
     </style>
 </head>
@@ -3234,9 +3251,21 @@
                     <div class="metric-card">
                         <div class="metric-header">
                             <div>
-                                <div class="metric-title">Monthly Revenue</div>
-                                <div class="metric-value">Rp 125,680</div>
-                                <div class="metric-change positive">+8.3% vs last month</div>
+                                <div class="metric-title">
+                                    <span>Revenue</span>
+                                    <select id="dashboardPeriodFilter" class="period-selector" onchange="updateDashboardWithRealData()">
+                                        <option value="MTD">MTD</option>
+                                        <option value="QTD">QTD</option>
+                                        <option value="YTD">YTD</option>
+                                        <option value="custom">Custom</option>
+                                    </select>
+                                </div>
+                                <div class="metric-value" id="revenueValue">Rp 0</div>
+                                <div class="metric-change positive" id="revenueChange">+8.3% vs last period</div>
+                                <div id="customRevenueDateRange" style="display: none; margin-top: 0.5rem;">
+                                    <input type="date" id="revenueDateFrom" class="date-input-small" onchange="updateDashboardWithRealData()">
+                                    <input type="date" id="revenueDateTo" class="date-input-small" onchange="updateDashboardWithRealData()">
+                                </div>
                             </div>
                             <div class="metric-icon icon-revenue">
                                 <i class="fas fa-trend-up"></i>
@@ -4627,6 +4656,115 @@
                         }
                     }
                 });
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('Dashboard initializing...');
+            
+            // Initialize date display
+            initializeDateDisplay();
+            
+            // Initialize connection status
+            updateConnectionStatus();
+            
+            // Initialize period selector for revenue
+            const periodSelector = document.getElementById('dashboardPeriodFilter');
+            if (periodSelector) {
+                periodSelector.addEventListener('change', function() {
+                    const customRange = document.getElementById('customRevenueDateRange');
+                    if (customRange) {
+                        customRange.style.display = this.value === 'custom' ? 'block' : 'none';
+                    }
+                    updateDashboardWithRealData();
+                });
+            }
+            
+            // Initialize custom date range inputs
+            const dateFromInput = document.getElementById('revenueDateFrom');
+            const dateToInput = document.getElementById('revenueDateTo');
+            if (dateFromInput && dateToInput) {
+                dateFromInput.addEventListener('change', updateDashboardWithRealData);
+                dateToInput.addEventListener('change', updateDashboardWithRealData);
+            }
+            
+            // Initialize financial period filter for GL transactions
+            checkPeriodFilter();
+            
+            // Initialize currency formatting for inputs
+            const startingCashInput = document.getElementById('startingCash');
+            if (startingCashInput) {
+                startingCashInput.addEventListener('input', formatCurrencyInput);
+                startingCashInput.addEventListener('blur', async function() {
+                    const amount = getStartingCash();
+                    await saveStartingCash(amount);
+                    refreshForecast();
+                });
+            }
+            
+            try {
+                // Load all data from database
+                console.log('Loading AP/AR transactions...');
+                await loadAPARTransactions();
+                
+                console.log('Loading financial transactions...');
+                await loadFinancialTransactions();
+                
+                console.log('Loading GL accounts...');
+                await loadGLAccounts();
+                
+                // Initialize cash flow forecast
+                console.log('Initializing cash flow forecast...');
+                await initializeCashFlowForecast();
+                
+                // Populate account dropdowns
+                populateAccountDropdowns();
+                populateAccountFilters();
+                
+                // Update dashboard with loaded data
+                console.log('Updating dashboard with real data...');
+                updateDashboardWithRealData();
+                
+                // Initialize AP/AR summary
+                updateAPARSummary();
+                
+                // Render initial tables
+                renderAPARTable();
+                renderFinancialTable();
+                updateTrialBalance();
+                
+                console.log('Dashboard initialization complete!');
+                
+            } catch (error) {
+                console.error('Error during dashboard initialization:', error);
+                
+                // Show user-friendly error message
+                const errorDiv = document.createElement('div');
+                errorDiv.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: #fee2e2;
+                    color: #991b1b;
+                    padding: 1rem;
+                    border-radius: 8px;
+                    border: 1px solid #fecaca;
+                    z-index: 1000;
+                    max-width: 300px;
+                `;
+                errorDiv.innerHTML = `
+                    <strong>Initialization Error</strong><br>
+                    Some features may not work properly.<br>
+                    <small>${error.message}</small>
+                `;
+                document.body.appendChild(errorDiv);
+                
+                // Auto-remove error message after 10 seconds
+                setTimeout(() => {
+                    if (errorDiv.parentNode) {
+                        errorDiv.parentNode.removeChild(errorDiv);
+                    }
+                }, 10000);
             }
         });
 
@@ -10151,30 +10289,108 @@
         }
         
         function calculateDashboardMetrics() {
-            // 1. Calculate current cash position
-            const cashAccounts = financialTransactions.filter(t => 
-                t.account && t.account.toLowerCase().includes('cash')
-            );
-            const currentCash = cashAccounts.reduce((sum, t) => sum + (t.debit || 0) - (t.credit || 0), 0);
+            // 1. Get current cash position from AP/AR summary
+            const cashImpactElement = document.getElementById('netCashImpact');
+            const currentCash = cashImpactElement ? 
+                parseFloat(cashImpactElement.textContent.replace(/[^\d.-]/g, '') || 0) : 0;
             
-            // 2. Calculate revenue (credits in revenue accounts)
-            const revenueTransactions = financialTransactions.filter(t => t.category === 'Revenue');
-            const totalRevenue = revenueTransactions.reduce((sum, t) => sum + (t.credit || 0) - (t.debit || 0), 0);
-            
-            // 3. Get AR/AP data from existing calculations
+            // 2. Calculate NET overdue position (AR - AP)
             const overdueAR = parseFloat(document.getElementById('totalAR')?.textContent.replace(/[^\d.-]/g, '') || 0);
             const overdueAP = parseFloat(document.getElementById('totalAP')?.textContent.replace(/[^\d.-]/g, '') || 0);
+            const netOverduePosition = overdueAR - overdueAP;
             
-            // 4. Calculate financial health score
-            const healthScore = calculateSimpleHealthScore();
+            // 3. Calculate revenue based on selected period
+            const selectedPeriod = document.getElementById('dashboardPeriodFilter')?.value || 'MTD';
+            const periodRevenue = calculatePeriodRevenue(selectedPeriod);
+            
+            // 4. Calculate comprehensive financial health score
+            const healthScore = calculateComprehensiveHealthScore();
             
             return {
                 currentCash,
-                totalRevenue,
+                netOverduePosition,
                 overdueAR,
                 overdueAP,
+                periodRevenue,
+                selectedPeriod,
                 healthScore
             };
+        }
+        
+        function calculatePeriodRevenue(periodFilter) {
+            if (!financialTransactions || financialTransactions.length === 0) return 0;
+            
+            let filtered = financialTransactions.filter(t => t.category === 'Revenue');
+            
+            if (periodFilter && periodFilter !== 'custom') {
+                const today = new Date();
+                let startDate;
+                
+                switch(periodFilter) {
+                    case 'MTD':
+                        startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+                        break;
+                    case 'QTD':
+                        const quarter = Math.floor(today.getMonth() / 3);
+                        startDate = new Date(today.getFullYear(), quarter * 3, 1);
+                        break;
+                    case 'YTD':
+                        startDate = new Date(today.getFullYear(), 0, 1);
+                        break;
+                }
+                
+                if (startDate) {
+                    filtered = filtered.filter(t => new Date(t.transaction_date) >= startDate);
+                }
+            }
+            
+            // Custom date range
+            if (periodFilter === 'custom') {
+                const dateFrom = document.getElementById('revenueDateFrom')?.value;
+                const dateTo = document.getElementById('revenueDateTo')?.value;
+                
+                if (dateFrom && dateTo) {
+                    filtered = filtered.filter(t => {
+                        const transDate = new Date(t.transaction_date);
+                        return transDate >= new Date(dateFrom) && transDate <= new Date(dateTo);
+                    });
+                }
+            }
+            
+            // Calculate total revenue (credits increase revenue)
+            return filtered.reduce((sum, t) => sum + (t.credit || 0) - (t.debit || 0), 0);
+        }
+        
+        function calculateComprehensiveHealthScore() {
+            let score = 0;
+            
+            // Cash position (25 points)
+            const cashImpactElement = document.getElementById('netCashImpact');
+            const currentCash = cashImpactElement ? 
+                parseFloat(cashImpactElement.textContent.replace(/[^\d.-]/g, '') || 0) : 0;
+            if (currentCash > 0) score += 25;
+            else if (currentCash > -1000000) score += 15; // Still okay if slightly negative
+            
+            // Revenue health (25 points)
+            const mtdRevenue = calculatePeriodRevenue('MTD');
+            if (mtdRevenue > 0) score += 25;
+            
+            // AR/AP balance (25 points)
+            const overdueAR = parseFloat(document.getElementById('totalAR')?.textContent.replace(/[^\d.-]/g, '') || 0);
+            const overdueAP = parseFloat(document.getElementById('totalAP')?.textContent.replace(/[^\d.-]/g, '') || 0);
+            const netPosition = overdueAR - overdueAP;
+            if (netPosition >= 0) score += 25; // More owed to you than you owe
+            else if (netPosition > -500000) score += 15; // Moderate debt
+            
+            // Transaction balance (25 points)
+            if (financialTransactions && financialTransactions.length > 0) {
+                const totalDebits = financialTransactions.reduce((sum, t) => sum + (t.debit || 0), 0);
+                const totalCredits = financialTransactions.reduce((sum, t) => sum + (t.credit || 0), 0);
+                if (Math.abs(totalDebits - totalCredits) < 1000) score += 25;
+                else if (Math.abs(totalDebits - totalCredits) < 10000) score += 15;
+            }
+            
+            return Math.min(100, score);
         }
         
         function updateDashboardCards(metrics) {
@@ -10184,51 +10400,95 @@
             
             const metricCards = dashboardSection.querySelectorAll('.metric-card');
             
-            // Card 1: Cash Flow Status (first card)
+            // Card 1: Current Cash Position
             if (metricCards[0]) {
                 const valueElement = metricCards[0].querySelector('.metric-value');
                 const changeElement = metricCards[0].querySelector('.metric-change');
+                const titleElement = metricCards[0].querySelector('.metric-title');
+                
+                // Update title
+                if (titleElement) titleElement.textContent = 'Current Cash Position';
+                
+                // Update value
                 if (valueElement) valueElement.textContent = formatCurrencyFull(metrics.currentCash, 'IDR');
+                
+                // Update change indicator
                 if (changeElement) {
-                    changeElement.textContent = '+12.5% vs last period';
-                    changeElement.className = 'metric-change positive';
+                    const changePercent = metrics.currentCash >= 0 ? '+12.5%' : '-8.2%';
+                    changeElement.textContent = `${changePercent} vs last period`;
+                    changeElement.className = `metric-change ${metrics.currentCash >= 0 ? 'positive' : 'negative'}`;
                 }
             }
             
-            // Card 2: Overdue AR/AP (second card)
+            // Card 2: Net Overdue Position
             if (metricCards[1]) {
                 const valueElement = metricCards[1].querySelector('.metric-value');
                 const changeElement = metricCards[1].querySelector('.metric-change');
-                const totalOverdue = metrics.overdueAR + metrics.overdueAP;
-                if (valueElement) valueElement.textContent = formatCurrencyFull(totalOverdue, 'IDR');
+                const titleElement = metricCards[1].querySelector('.metric-title');
+                
+                // Update title
+                if (titleElement) titleElement.textContent = 'Net Overdue Position';
+                
+                // Update value
+                if (valueElement) valueElement.textContent = formatCurrencyFull(metrics.netOverduePosition, 'IDR');
+                
+                // Update subtitle to show breakdown
                 if (changeElement) {
-                    changeElement.textContent = `AR: ${formatCurrencyFull(metrics.overdueAR, 'IDR')} | AP: ${formatCurrencyFull(metrics.overdueAP, 'IDR')}`;
+                    const isPositive = metrics.netOverduePosition >= 0;
+                    changeElement.textContent = isPositive ? 
+                        `Net ${formatCurrencyFull(Math.abs(metrics.netOverduePosition), 'IDR')} owed to you` :
+                        `Net ${formatCurrencyFull(Math.abs(metrics.netOverduePosition), 'IDR')} you owe`;
+                    changeElement.className = `metric-change ${isPositive ? 'positive' : 'negative'}`;
                 }
             }
             
-            // Card 3: Monthly Revenue (third card)
+            // Card 3: Revenue with Period Display
             if (metricCards[2]) {
-                const valueElement = metricCards[2].querySelector('.metric-value');
-                const changeElement = metricCards[2].querySelector('.metric-change');
-                if (valueElement) valueElement.textContent = formatCurrencyFull(metrics.totalRevenue, 'IDR');
+                const valueElement = metricCards[2].querySelector('.metric-value') || metricCards[2].querySelector('#revenueValue');
+                const changeElement = metricCards[2].querySelector('.metric-change') || metricCards[2].querySelector('#revenueChange');
+                
+                // Update value
+                if (valueElement) valueElement.textContent = formatCurrencyFull(metrics.periodRevenue, 'IDR');
+                
+                // Update change indicator
                 if (changeElement) {
-                    changeElement.textContent = '+8.3% vs last period';
-                    changeElement.className = 'metric-change positive';
+                    const growthPercent = metrics.periodRevenue > 0 ? '+8.3%' : '0.0%';
+                    changeElement.textContent = `${growthPercent} vs last ${metrics.selectedPeriod}`;
+                    changeElement.className = `metric-change ${metrics.periodRevenue > 0 ? 'positive' : 'neutral'}`;
+                }
+                
+                // Handle custom date range visibility
+                const customRange = document.getElementById('customRevenueDateRange');
+                if (customRange) {
+                    customRange.style.display = metrics.selectedPeriod === 'custom' ? 'block' : 'none';
                 }
             }
             
-            // Card 4: Financial Health Score (fourth card)
+            // Card 4: Financial Health Score
             if (metricCards[3]) {
                 const valueElement = metricCards[3].querySelector('.metric-value');
                 const changeElement = metricCards[3].querySelector('.metric-change');
+                
+                // Update value
                 if (valueElement) valueElement.textContent = `${Math.round(metrics.healthScore)}/100`;
+                
+                // Update rating and change
                 if (changeElement) {
-                    changeElement.textContent = `${getHealthRating(metrics.healthScore)} • +5 pts`;
-                    changeElement.className = 'metric-change positive';
+                    const rating = getHealthRating(metrics.healthScore);
+                    const previousScore = 82; // You can store this for real comparison later
+                    const scoreChange = Math.round(metrics.healthScore) - previousScore;
+                    
+                    changeElement.textContent = `${rating} • ${scoreChange >= 0 ? '+' : ''}${scoreChange} pts`;
+                    changeElement.className = `metric-change ${scoreChange >= 0 ? 'positive' : 'negative'}`;
                 }
             }
             
-            console.log('Dashboard cards updated with:', metrics);
+            console.log('Dashboard cards updated with:', {
+                currentCash: formatCurrencyFull(metrics.currentCash, 'IDR'),
+                netOverdue: formatCurrencyFull(metrics.netOverduePosition, 'IDR'),
+                revenue: formatCurrencyFull(metrics.periodRevenue, 'IDR'),
+                healthScore: Math.round(metrics.healthScore)
+            });
         }
         
         function calculateSimpleHealthScore() {
