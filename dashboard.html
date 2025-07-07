@@ -9893,6 +9893,56 @@
             
             return accounts;
         }
+
+        // TEMPORARY DEBUGGING FUNCTION - Add this near other functions
+        function debugAccountCodes() {
+            console.log('=== DEBUGGING ACCOUNT CODES ===');
+            
+            if (financialTransactions.length === 0) {
+                console.log('No financial transactions found!');
+                return;
+            }
+            
+            const accountCodes = [...new Set(financialTransactions.map(t => t.account_code))].sort();
+            console.log('Available account codes:', accountCodes);
+            
+            const revenueAccounts = financialTransactions.filter(t => t.category === 'Revenue');
+            console.log('Revenue account codes:', [...new Set(revenueAccounts.map(t => t.account_code))]);
+            
+            const expenseAccounts = financialTransactions.filter(t => t.category === 'Expense');
+            console.log('Expense account codes:', [...new Set(expenseAccounts.map(t => t.account_code))]);
+            
+            const assetAccounts = financialTransactions.filter(t => t.category === 'Asset');
+            console.log('Asset account codes:', [...new Set(assetAccounts.map(t => t.account_code))]);
+            
+            const liabilityAccounts = financialTransactions.filter(t => t.category === 'Liability');
+            console.log('Liability account codes:', [...new Set(liabilityAccounts.map(t => t.account_code))]);
+        }
+        
+        // Call this function when reports tab is accessed
+
+        function generateReports() {
+            // Set current date for reports
+            const currentDate = new Date().toLocaleDateString('id-ID', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            
+            document.getElementById('reportDate1').textContent = currentDate;
+            document.getElementById('reportDate2').textContent = currentDate;
+            document.getElementById('reportDate3').textContent = currentDate;
+            document.getElementById('beginningCashBalance').value = getStartingCash();
+            
+            // DEBUG: Check what account codes we actually have
+            debugAccountCodes();
+            
+            // Generate all three reports
+            generateBalanceSheet();
+            generateIncomeStatement();
+            generateCashFlowStatement();
+        }
+
         
         function generateAccountLines(accountsGroup, accountCodes, balanceType = 'debit') {
             let lines = '';
