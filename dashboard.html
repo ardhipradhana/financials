@@ -3040,38 +3040,45 @@
         }
 
         @media print {
-            /* Hide EVERYTHING first */
-            * {
-                visibility: hidden;
+            /* Hide navigation and UI elements */
+            .sidebar,
+            .page-title,
+            .section-header .section-actions,
+            .tab-nav,
+            .filters-section,
+            .bulk-actions,
+            button,
+            .btn,
+            nav,
+            .nav-link {
+                display: none !important;
             }
             
-            /* Show only the report statements and their children */
-            .report-statement,
-            .report-statement * {
-                visibility: visible;
+            /* Hide all sections except the statements section */
+            .section-content:not(#statements-section) {
+                display: none !important;
             }
             
-            /* Hide the page structure but keep reports visible */
+            /* Hide all tabs except the reports tab */
+            .tab-content:not(#reports-tab) {
+                display: none !important;
+            }
+            
+            /* Clean up the page */
             body {
                 margin: 0;
                 padding: 20px;
                 background: white !important;
+                color: black !important;
             }
             
-            /* Position the reports to fill the page */
+            /* Style the reports */
             .reports-audit-layout {
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: white;
-                margin: 0;
-                padding: 20px;
-                box-sizing: border-box;
+                display: block !important;
+                margin: 0 !important;
+                padding: 0 !important;
             }
             
-            /* Style each financial statement */
             .report-statement {
                 page-break-inside: avoid;
                 margin-bottom: 40px;
@@ -3080,7 +3087,6 @@
                 box-shadow: none !important;
             }
             
-            /* Style the headers */
             .report-header h4 {
                 font-size: 20px;
                 text-align: center;
@@ -3091,16 +3097,7 @@
                 border-radius: 0;
             }
             
-            .report-date {
-                text-align: center;
-                font-size: 14px;
-                margin-bottom: 20px;
-                color: #666 !important;
-            }
-            
-            /* Style the content */
             .report-content {
-                font-size: 12px;
                 color: black !important;
                 background: white !important;
             }
@@ -9894,33 +9891,6 @@
             return accounts;
         }
 
-        // TEMPORARY DEBUGGING FUNCTION - Add this near other functions
-        function debugAccountCodes() {
-            console.log('=== DEBUGGING ACCOUNT CODES ===');
-            
-            if (financialTransactions.length === 0) {
-                console.log('No financial transactions found!');
-                return;
-            }
-            
-            const accountCodes = [...new Set(financialTransactions.map(t => t.account_code))].sort();
-            console.log('Available account codes:', accountCodes);
-            
-            const revenueAccounts = financialTransactions.filter(t => t.category === 'Revenue');
-            console.log('Revenue account codes:', [...new Set(revenueAccounts.map(t => t.account_code))]);
-            
-            const expenseAccounts = financialTransactions.filter(t => t.category === 'Expense');
-            console.log('Expense account codes:', [...new Set(expenseAccounts.map(t => t.account_code))]);
-            
-            const assetAccounts = financialTransactions.filter(t => t.category === 'Asset');
-            console.log('Asset account codes:', [...new Set(assetAccounts.map(t => t.account_code))]);
-            
-            const liabilityAccounts = financialTransactions.filter(t => t.category === 'Liability');
-            console.log('Liability account codes:', [...new Set(liabilityAccounts.map(t => t.account_code))]);
-        }
-        
-        // Call this function when reports tab is accessed
-
         function generateReports() {
             // Set current date for reports
             const currentDate = new Date().toLocaleDateString('id-ID', {
@@ -9933,9 +9903,6 @@
             document.getElementById('reportDate2').textContent = currentDate;
             document.getElementById('reportDate3').textContent = currentDate;
             document.getElementById('beginningCashBalance').value = getStartingCash();
-            
-            // DEBUG: Check what account codes we actually have
-            debugAccountCodes();
             
             // Generate all three reports
             generateBalanceSheet();
