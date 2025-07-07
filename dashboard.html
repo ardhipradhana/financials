@@ -4484,10 +4484,10 @@
             
             // Update display - check if elements exist
             if (document.getElementById('totalARAll')) {
-                document.getElementById('totalARAll').textContent = formatCurrency(totalARAll, 'IDR', false);
+                document.getElementById('totalARAll').textContent = formatCurrencyFull(totalARAll, 'IDR');
             }
             if (document.getElementById('totalAPAll')) {
-                document.getElementById('totalAPAll').textContent = formatCurrency(totalAPAll, 'IDR', false);
+                document.getElementById('totalAPAll').textContent = formatCurrencyFull(totalAPAll, 'IDR');
             }
             if (document.getElementById('totalAR')) {
                 document.getElementById('totalAR').textContent = formatCurrency(totalAROverdue, 'IDR');
@@ -4496,7 +4496,7 @@
                 document.getElementById('totalAP').textContent = formatCurrency(totalAPOverdue, 'IDR');
             }
             if (document.getElementById('netCashImpact')) {
-                document.getElementById('netCashImpact').textContent = formatCurrency(netCash, 'IDR');
+                document.getElementById('netCashImpact').textContent = formatCurrencyFull(netCash, 'IDR');
             }
             
             // Update badges
@@ -4877,6 +4877,24 @@
         function formatCurrency(amount, currency = 'IDR') {
             if (currency === 'IDR') {
                 // Force English locale for comma thousands separator
+                const formatted = new Intl.NumberFormat('en-US', {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                }).format(amount);
+                return `Rp  ${formatted}`;
+            } else {
+                return new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'USD',
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }).format(amount);
+            }
+        }
+
+        // Specific function for AP/AR summary cards - always shows full numbers
+        function formatCurrencyFull(amount, currency = 'IDR') {
+            if (currency === 'IDR') {
                 const formatted = new Intl.NumberFormat('en-US', {
                     minimumFractionDigits: 0,
                     maximumFractionDigits: 0
