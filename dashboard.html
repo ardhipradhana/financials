@@ -660,9 +660,9 @@
         .table-container .financial-table th:nth-child(2) { min-width: 100px; width: 100px; } /* Reference */
         .table-container .financial-table th:nth-child(3) { min-width: 150px; width: 150px; } /* Company */
         .table-container .financial-table th:nth-child(4) { min-width: 250px; width: 250px; } /* Description */
-        .table-container .financial-table th:nth-child(5) { min-width: 120px; width: 120px; } /* Amount */
-        .table-container .financial-table th:nth-child(6) { min-width: 110px; width: 110px; } /* Invoice Date */
-        .table-container .financial-table th:nth-child(7) { min-width: 110px; width: 110px; } /* Due Date */
+        .table-container .financial-table th:nth-child(5) { min-width: 90px; width: 90px; } /* Amount */
+        .table-container .financial-table th:nth-child(6) { min-width: 100px; width: 100px; } /* Invoice Date */
+        .table-container .financial-table th:nth-child(7) { min-width: 100px; width: 100px; } /* Due Date */
         .table-container .financial-table th:nth-child(8) { min-width: 90px; width: 90px; }   /* Days */
         .table-container .financial-table th:nth-child(9) { min-width: 80px; width: 80px; }   /* Status */
         .table-container .financial-table th:nth-child(10) { min-width: 90px; width: 90px; }  /* Actions */
@@ -4699,14 +4699,6 @@
                             ${transaction.linked_financial_id ? 
                                 '<button class="action-btn unlink" onclick="unlinkAPARFromGL(\''+transaction.id+'\')" data-tooltip="Unlink from GL"><i class="fas fa-unlink"></i></button>' : ''
                             }
-                        </td>
-                        <td>
-                            <button class="action-btn edit" onclick="editTransaction('${transaction.id}')" data-tooltip="Edit Transaction">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="action-btn delete" onclick="deleteTransaction('${transaction.id}')" data-tooltip="Delete Transaction">
-                                <i class="fas fa-trash-alt"></i>
-                            </button>
                         </td>
                     </tr>
                 `;
