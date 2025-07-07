@@ -4668,6 +4668,9 @@
             // Initialize connection status
             updateConnectionStatus();
             
+            // Start connection monitoring
+            startConnectionMonitoring();
+            
             // Initialize period selector for revenue
             const periodSelector = document.getElementById('dashboardPeriodFilter');
             if (periodSelector) {
@@ -4703,9 +4706,9 @@
             }
             
             try {
-                // Load all data from database
+                // Load all data from database using correct function names
                 console.log('Loading AP/AR transactions...');
-                await loadAPARTransactions();
+                await loadAPARData(); // Correct function name
                 
                 console.log('Loading financial transactions...');
                 await loadFinancialTransactions();
