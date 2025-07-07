@@ -3737,6 +3737,54 @@
             border-color: #3b82f6;
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
+
+        /* Special styling for Altman Z-Score card */
+        .metric-card.altman-z-score {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .metric-card.altman-z-score::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at top right, rgba(251, 191, 36, 0.1), transparent 70%);
+            pointer-events: none;
+        }
+        
+        .metric-card.altman-z-score .metric-title {
+            color: #fbbf24;
+            font-weight: 600;
+        }
+        
+        .metric-card.altman-z-score .metric-value {
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .metric-card.altman-z-score .metric-change {
+            color: #cbd5e1;
+            opacity: 0.9;
+        }
+        
+        .metric-card.altman-z-score .metric-icon {
+            background: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+            border: 1px solid rgba(251, 191, 36, 0.3);
+        }
+        
+        /* Add subtle glow effect */
+        .metric-card.altman-z-score:hover {
+            box-shadow: 0 8px 32px rgba(251, 191, 36, 0.2);
+            transform: translateY(-2px);
+            transition: all 0.3s ease;
+        }
         
     </style>
 </head>
@@ -3887,23 +3935,19 @@
                         </div>
                     </div>
                     
-                    <div class="metric-card enhanced-card">
-                        <div class="card-accent accent-purple"></div>
+                    <div class="metric-card altman-z-score">
                         <div class="metric-header">
-                            <div class="card-main">
-                                <div class="metric-title-group">
-                                    <div class="metric-title">Altman Z-Score</div>
-                                    <div class="metric-subtitle">Credit Risk Assessment</div>
+                            <div class="metric-top-section">
+                                <div class="metric-title">Altman Z-Score</div>
+                                <div class="metric-icon icon-score">
+                                    <i class="fas fa-chart-line"></i>
                                 </div>
-                                <div class="metric-primary-group">
-                                    <span class="metric-value-large" id="healthScoreValue">2.45</span>
-                                    <div class="metric-breakdown">
-                                        <span class="breakdown-item">
-                                            <span class="breakdown-label">Rating: </span>
-                                            <span class="breakdown-value" id="altmanRating">Good</span>
-                                        </span>
-                                        <span class="risk-indicator" id="riskLevel">Low Risk</span>
-                                    </div>
+                            </div>
+                            <div class="metric-values-section">
+                                <div class="metric-value" id="healthScoreValue">2.45</div>
+                                <div class="metric-change">
+                                    <span>Rating: <span id="altmanRating">Good</span></span>
+                                    <span id="riskLevel">Low Risk</span>
                                 </div>
                             </div>
                         </div>
