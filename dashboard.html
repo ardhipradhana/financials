@@ -3040,66 +3040,63 @@
         }
 
         @media print {
-            /* Hide navigation and UI elements */
+            /* Hide the main page header and navigation */
+            body > *:not(.main-content) {
+                display: none !important;
+            }
+            
+            /* Hide sidebar and navigation within main content */
             .sidebar,
+            .nav-link,
             .page-title,
-            .section-header .section-actions,
+            .section-actions,
             .tab-nav,
             .filters-section,
             .bulk-actions,
             button,
-            .btn,
-            nav,
-            .nav-link {
+            .btn {
                 display: none !important;
             }
             
-            /* Hide all sections except the statements section */
+            /* Hide all sections except statements */
             .section-content:not(#statements-section) {
                 display: none !important;
             }
             
-            /* Hide all tabs except the reports tab */
+            /* Hide all tabs except reports tab */
             .tab-content:not(#reports-tab) {
                 display: none !important;
             }
             
-            /* Clean up the page */
-            body {
-                margin: 0;
-                padding: 20px;
-                background: white !important;
-                color: black !important;
+            /* Hide the section header (Financial Reports title) */
+            #statements-section .section-header {
+                display: none !important;
             }
             
-            /* Style the reports */
+            /* Clean page styling */
+            body {
+                margin: 0 !important;
+                padding: 0 !important;
+                background: white !important;
+            }
+            
+            .main-content {
+                margin-left: 0 !important;
+                padding: 20px !important;
+            }
+            
+            /* Ensure reports layout is clean */
             .reports-audit-layout {
-                display: block !important;
                 margin: 0 !important;
                 padding: 0 !important;
             }
             
+            /* Style each statement for print */
             .report-statement {
                 page-break-inside: avoid;
-                margin-bottom: 40px;
-                background: white !important;
+                margin-bottom: 30px;
                 border: none !important;
                 box-shadow: none !important;
-            }
-            
-            .report-header h4 {
-                font-size: 20px;
-                text-align: center;
-                margin-bottom: 5px;
-                color: white !important;
-                background: #2c3e50 !important;
-                padding: 15px;
-                border-radius: 0;
-            }
-            
-            .report-content {
-                color: black !important;
-                background: white !important;
             }
             
             /* Force page breaks between statements */
@@ -3109,6 +3106,19 @@
             
             .report-statement:nth-child(3) {
                 page-break-before: always;
+            }
+            
+            /* Ensure text is black */
+            * {
+                color: black !important;
+                background: transparent !important;
+            }
+            
+            /* Keep header styling */
+            .report-header h4 {
+                background: #2c3e50 !important;
+                color: white !important;
+                padding: 15px !important;
             }
         }
 
