@@ -460,7 +460,11 @@
             gap: 0.75rem;
             border-bottom: 1px solid #e2e8f0;
             position: relative;
-            padding-right: 4rem; /* Give space for close button */
+            padding-right: 3.5rem; /* Reduced padding for close button */
+        }
+
+        .chat-header-text {
+            flex: 1; /* Take up available space */
         }
 
         .chat-close-btn {
@@ -534,8 +538,10 @@
         }
 
         .chat-status {
-            margin-left: auto;
-            margin-right: 3rem; /* Push status left to avoid close button */
+            position: absolute;
+            top: 50%;
+            right: 3.5rem; /* Position between text and close button */
+            transform: translateY(-50%);
             display: flex;
             align-items: center;
             gap: 0.5rem;
@@ -5714,6 +5720,7 @@
                 this.emptyState = document.getElementById('emptyState');
             }
             
+            // In your AIFinancialChat class, update the setupEventListeners method:
             setupEventListeners() {
                 // Send button click
                 this.sendBtn.addEventListener('click', () => this.sendMessage());
@@ -5732,11 +5739,18 @@
                     this.chatInput.style.height = Math.min(this.chatInput.scrollHeight, 80) + 'px';
                 });
                 
-                // Suggestion clicks
+                // Suggestion clicks - FIXED TO PREVENT DUPLICATES
                 this.suggestionsGrid.addEventListener('click', (e) => {
-                    if (e.target.classList.contains('suggestion-item')) {
-                        this.chatInput.value = e.target.textContent.trim();
-                        this.sendMessage();
+                    if (e.target.classList.contains('suggestion-item') && !this.isLoading) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        const suggestionText = e.target.textContent.trim();
+                        this.chatInput.value = suggestionText;
+                        
+                        setTimeout(() => {
+                            this.sendMessage();
+                        }, 100);
                     }
                 });
             }
