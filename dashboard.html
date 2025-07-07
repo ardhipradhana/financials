@@ -4832,6 +4832,31 @@
                 
                 const pageTitle = document.querySelector('.page-title');
                 pageTitle.textContent = titles[this.dataset.section] || 'Dashboard';
+
+                if (this.dataset.section === 'dashboard') {
+                    setTimeout(() => {
+                        updateDashboardWithRealData();
+                    }, 100);
+                }
+
+                if (this.dataset.section === 'ap-ar') {
+                    setTimeout(() => {
+                        updateOverdueStatuses();
+                        // Refresh AP/AR data when section becomes visible
+                        updateAPARSummary();
+                        renderAPARTable();
+                        
+                        const typeFilter = document.getElementById('typeFilter');
+                        const statusFilter = document.getElementById('statusFilter');
+                        const dateFromFilter = document.getElementById('dateFromFilter');
+                        const dateToFilter = document.getElementById('dateToFilter');
+                        
+                        if (typeFilter) typeFilter.addEventListener('change', renderAPARTable);
+                        if (statusFilter) statusFilter.addEventListener('change', renderAPARTable);
+                        if (dateFromFilter) dateFromFilter.addEventListener('change', renderAPARTable);
+                        if (dateToFilter) dateToFilter.addEventListener('change', renderAPARTable);
+                    }, 100);
+                }
             });
         });
 
@@ -5571,6 +5596,7 @@
                 startConnectionMonitoring();
                 initializeCashFlowForecast();
                 updateAgingAnalysis();
+                updateDashboardWithRealData();
             });
 
             loadFinancialDataGlobally().then(() => {
