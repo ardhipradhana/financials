@@ -8005,13 +8005,29 @@
         }
 
         function exportReportsToPDF() {
-            // First, generate fresh reports
+            // First, ensure we have financial data loaded
+            if (!financialTransactions || financialTransactions.length === 0) {
+                alert('No financial data available. Please add some transactions first.');
+                return;
+            }
+            
+            // Generate fresh reports with current data
             generateReports();
             
-            // Then trigger the browser print dialog for PDF save
+            // Wait a moment for the reports to fully render
             setTimeout(() => {
+                // Double-check that reports have content
+                const balanceSheet = document.getElementById('balanceSheetDetailed');
+                const incomeStatement = document.getElementById('incomeStatementDetailed');
+                
+                if (!balanceSheet.innerHTML.trim() || !incomeStatement.innerHTML.trim()) {
+                    alert('Reports are being generated. Please try again in a moment.');
+                    return;
+                }
+                
+                // Trigger the print dialog
                 window.print();
-            }, 500); // Small delay to ensure reports are fully rendered
+            }, 1000); // Increased delay to ensure reports are fully generated
         }
         
         // Modal Functions
