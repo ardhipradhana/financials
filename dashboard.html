@@ -3430,7 +3430,8 @@
                     <div class="metric-card">
                         <div class="metric-header">
                             <div class="metric-top-section">
-                                <div class="metric-title">Current Cash Position</div>
+                                <div class="metric-title">Cash & Liquidity</div>
+                                <div class="metric-subtitle">Net Impact & Cycle</div>
                                 <div class="metric-icon icon-cash">
                                     <i class="fas fa-dollar-sign"></i>
                                 </div>
@@ -3446,6 +3447,7 @@
                         <div class="metric-header">
                             <div class="metric-top-section">
                                 <div class="metric-title">Net Overdue Position</div>
+                                <div class="metric-subtitle">Receivables vs payables balance</div>
                                 <div class="metric-icon icon-ar">
                                     <i class="fas fa-receipt"></i>
                                 </div>
@@ -3462,7 +3464,8 @@
                         <div class="metric-header">
                             <div class="metric-top-section">
                                 <div class="revenue-title-row">
-                                    <span class="metric-title">Revenue</span>
+                                    <div class="metric-title">Revenue</div>
+                                    <div class="metric-subtitle">Period Performance</div>
                                     <select id="dashboardPeriodFilter" class="period-selector-fixed" onchange="updateDashboardWithRealData()">
                                         <option value="MTD">This Month</option>
                                         <option value="QTD">This Quarter</option>
@@ -3497,6 +3500,9 @@
                                 <div class="metric-title-group">
                                     <div class="metric-title">Altman Z-Score</div>
                                     <div class="metric-subtitle">Credit Risk Assessment</div>
+                                    <div class="card-icon">
+                                        <i class="fas fa-shield-alt"></i>
+                                    </div>
                                 </div>
                                 <div class="metric-primary-group">
                                     <span class="metric-value-large" id="healthScoreValue">2.45</span>
@@ -5206,10 +5212,24 @@
                     'reports': 'Reports & Analytics',
                     'scenarios': 'Scenario Analysis'
                 };
+
+                const subtitles = {
+                    'dashboard': 'Real-time financial insights and cash flow management',
+                    'ap-ar': 'Track overdue payments and manage cash cycles',
+                    'statements': 'Generate income statements, balance sheets, and cash flow reports',
+                    'forecasting': '13-week cash flow projections and trend analysis',
+                    'benchmarking': 'Compare performance against industry standards',
+                    'reports': 'Financial ratios and comprehensive business analytics',
+                    'scenarios': 'What-if modeling and strategic financial planning'
+                };
                 
                 const pageTitle = document.querySelector('.page-title');
+                const pageSubtitle = document.querySelector('.page-subtitle'); // or whatever class your subtitle uses
                 pageTitle.textContent = titles[this.dataset.section] || 'Dashboard';
-
+                if (pageSubtitle) {
+                    pageSubtitle.textContent = subtitles[this.dataset.section] || 'Real-time financial insights and cash flow management';
+                }
+                
                 if (this.dataset.section === 'dashboard') {
                     setTimeout(() => {
                         updateDashboardWithRealData();
@@ -11257,12 +11277,12 @@
         }
         
         function getZScoreRating(zScore) {
-            if (zScore >= 3.0) return 'Excellent';
-            if (zScore >= 2.6) return 'Very Good';
-            if (zScore >= 1.8) return 'Good';
-            if (zScore >= 1.1) return 'Fair';
-            if (zScore >= 0.5) return 'Poor';
-            return 'Critical';
+            if (zScore >= 3.0) return 'Investment Grade';
+            if (zScore >= 2.6) return 'Financially Strong';
+            if (zScore >= 1.8) return 'Stable & Creditworthy';
+            if (zScore >= 1.1) return 'Needs Monitoring';
+            if (zScore >= 0.5) return 'High Risk';
+            return 'Distressed';
         }
         
         function getZScoreRiskLevel(zScore) {
@@ -11275,15 +11295,15 @@
         
         function getZScoreRecommendation(zScore, rating) {
             if (zScore >= 3.0) {
-                return 'Strong financial position. Suitable for expansion and investment opportunities.';
+                return 'Prime candidate for loans, investments, and business expansion. Consider leveraging strong position for growth opportunities.';
             } else if (zScore >= 1.8) {
-                return 'Stable financial health. Continue monitoring key ratios and maintain current performance.';
+                return 'Eligible for most financing options. Maintain current financial discipline and monitor key performance indicators regularly.';
             } else if (zScore >= 1.1) {
-                return 'Moderate financial risk. Focus on improving working capital and profitability.';
+                return 'Moderate credit risk detected. Focus on increasing revenue, improving cash flow, and reducing unnecessary expenses.';
             } else if (zScore >= 0.5) {
-                return 'High financial distress risk. Immediate action needed to improve liquidity and reduce debt.';
+                return 'High bankruptcy risk. Urgent actions needed: restructure debt, improve working capital, and secure additional funding sources.';
             } else {
-                return 'Critical financial condition. Urgent restructuring or capital injection required.';
+                return 'Critical financial distress. Immediate professional financial consultation recommended. Consider debt restructuring or capital injection.';
             }
         }
         
@@ -11489,12 +11509,12 @@
         
         function getRiskDescription(riskLevel) {
             switch(riskLevel) {
-                case 'very-low': return 'Very Low Risk';
-                case 'low': return 'Low Risk';
-                case 'moderate': return 'Moderate Risk';
-                case 'high': return 'High Risk';
-                case 'critical': return 'Critical Risk';
-                default: return 'Unknown Risk';
+                case 'very-low': return 'Excellent for lending/investment';
+                case 'low': return 'Safe for credit extension';
+                case 'moderate': return 'Requires closer monitoring';
+                case 'high': return 'Credit review recommended';
+                case 'critical': return 'Immediate attention required';
+                default: return 'Insufficient data';
             }
         }
 
