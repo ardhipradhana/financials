@@ -7644,10 +7644,23 @@
         
         // Delete transaction
         async function deleteFinancialTransaction(id) {
-            if (!confirm('Are you sure you want to delete this transaction?')) return;
+            // Prevent multiple simultaneous deletions
+            if (window.deletingTransaction) {
+                return;
+            }
+            
+            if (!confirm('Are you sure you want to delete this transaction?')) {
+                return;
+            }
             
             try {
-                const oldData = financialTransactions.find(t => t.id === id);
+                // Set flag to prevent multiple deletions
+                window.deletingTransaction = true;
+                
+                const transaction = financialTransactions.find(t => t.id === id);
+                if (!transaction) {
+                    throw new Error('Transaction not found');
+                }
                 
                 const { error } = await supabase
                     .from('financial_transactions_meridash')
@@ -7657,16 +7670,24 @@
                 if (error) throw error;
                 
                 // Remove from local array
-                financialTransactions = financialTransactions.filter(t => t.id !== id);
+                const index = financialTransactions.findIndex(t => t.id === id);
+                if (index !== -1) {
+                    financialTransactions.splice(index, 1);
+                }
                 
                 // Log audit trail
-                await logAuditTrail('financial_transactions_meridash', id, 'DELETE', oldData, null);
+                await logAuditTrail('financial_transactions_meridash', id, 'DELETE', transaction, null);
                 
+                // Refresh displays
                 renderFinancialTable();
                 updateTrialBalance();
+                
             } catch (error) {
-                console.error('Error deleting transaction:', error);
+                console.error('Error deleting financial transaction:', error);
                 alert('Error deleting transaction: ' + error.message);
+            } finally {
+                // Always clear the flag
+                window.deletingTransaction = false;
             }
         }
         
@@ -7954,21 +7975,63 @@
         
         // Bulk operations
         async function bulkDeleteFinancial() {
-            if (selectedFinancialTransactions.length === 0) return;
+            if (selectedFinancialTransactions.length === 0) {
+                alert('Please select transactions to delete.');
+                return;
+            }
             
-            if (!confirm(`Delete ${selectedFinancialTransactions.length} selected transactions?`)) return;
+            // Prevent multiple simultaneous bulk operations
+            if (window.bulkDeleting) {
+                return;
+            }
+            
+            if (!confirm(`Delete ${selectedFinancialTransactions.length} selected transactions? This action cannot be undone.`)) {
+                return;
+            }
             
             try {
-                for (const id of selectedFinancialTransactions) {
-                    await deleteFinancialTransaction(id);
+                // Set flag to prevent multiple bulk operations
+                window.bulkDeleting = true;
+                
+                // Store transactions for audit trail
+                const transactionsToDelete = selectedFinancialTransactions.map(id => 
+                    financialTransactions.find(t => t.id === id)
+                ).filter(t => t); // Remove any null/undefined
+                
+                // Delete all selected transactions in one operation
+                const { error } = await supabase
+                    .from('financial_transactions_meridash')
+                    .delete()
+                    .in('id', selectedFinancialTransactions);
+                
+                if (error) throw error;
+                
+                // Remove from local array
+                financialTransactions = financialTransactions.filter(t => 
+                    !selectedFinancialTransactions.includes(t.id)
+                );
+                
+                // Log audit trail for each deleted transaction
+                for (const transaction of transactionsToDelete) {
+                    await logAuditTrail('financial_transactions_meridash', transaction.id, 'DELETE', transaction, null);
                 }
                 
+                // Clear selection and update UI
                 selectedFinancialTransactions = [];
-                updateSelectedTransactions();
-                alert('Selected transactions deleted successfully!');
+                updateSelectedFinancialTransactions();
+                
+                // Refresh displays
+                renderFinancialTable();
+                updateTrialBalance();
+                
+                alert(`Successfully deleted ${transactionsToDelete.length} transactions.`);
+                
             } catch (error) {
                 console.error('Error deleting transactions:', error);
                 alert('Error deleting transactions: ' + error.message);
+            } finally {
+                // Always clear the flag
+                window.bulkDeleting = false;
             }
         }
         
