@@ -4484,10 +4484,10 @@
             
             // Update display - check if elements exist
             if (document.getElementById('totalARAll')) {
-                document.getElementById('totalARAll').textContent = formatCurrency(totalARAll, 'IDR');
+                document.getElementById('totalARAll').textContent = formatCurrency(totalARAll, 'IDR', false);
             }
             if (document.getElementById('totalAPAll')) {
-                document.getElementById('totalAPAll').textContent = formatCurrency(totalAPAll, 'IDR');
+                document.getElementById('totalAPAll').textContent = formatCurrency(totalAPAll, 'IDR', false);
             }
             if (document.getElementById('totalAR')) {
                 document.getElementById('totalAR').textContent = formatCurrency(totalAROverdue, 'IDR');
