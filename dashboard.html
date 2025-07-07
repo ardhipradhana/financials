@@ -139,7 +139,7 @@
             transition: all 0.3s ease;
             display: flex;
             flex-direction: column;
-            min-height: 140px;
+            min-height: 140px; /* Set consistent height */
         }
         
         .metric-card:hover {
@@ -150,14 +150,23 @@
         .metric-header {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start; /* Keep title and icon at top */
+            align-items: flex-start;
             width: 100%;
-            margin-bottom: 0.75rem; /* Space between top and bottom sections */
+            height: 100%;
+            flex-direction: column;
+        }
+
+        .metric-top-section {
+            /* Title and icon row - stays at top */
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            width: 100%;
+            margin-bottom: 0.75rem;
         }
         
         .metric-content {
             flex: 1;
-            min-width: 0;
             display: flex;
             flex-direction: column;
         }
@@ -181,9 +190,7 @@
         }
         
         .metric-title-with-selector {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
+            margin: 0;
         }
         
         .metric-title-text {
@@ -198,6 +205,7 @@
             font-weight: 600;
             color: #64748b;
             letter-spacing: 0.5px;
+            margin: 0;
         }
 
         .metric-icon {
@@ -210,11 +218,7 @@
             color: white;
             font-size: 1rem;
             flex-shrink: 0;
-            margin-left: 1rem;
-            position: relative;
-            overflow: hidden;
-            margin-bottom: 0;
-            align-self: flex-start;
+            /* Icon stays in top section */
         }
         
         .metric-icon::before {
@@ -259,10 +263,11 @@
             line-height: 1.2;
             word-break: break-word;
         }
-
+        
         .metric-change {
             font-size: 0.875rem;
             font-weight: 500;
+            margin: 0;
         }
         
         .positive { color: #10b981; }
@@ -3296,7 +3301,6 @@
             align-items: center;
             justify-content: space-between;
             width: 100%;
-            margin-bottom: 0.75rem;
         }
         
     </style>
@@ -3387,13 +3391,15 @@
                 <div class="metrics-grid">
                     <div class="metric-card">
                         <div class="metric-header">
-                            <div class="metric-content">
+                            <div class="metric-top-section">
                                 <div class="metric-title">Current Cash Position</div>
+                                <div class="metric-icon icon-cash">
+                                    <i class="fas fa-dollar-sign"></i>
+                                </div>
+                            </div>
+                            <div class="metric-values-section">
                                 <div class="metric-value">Rp -42,750,000</div>
                                 <div class="metric-change negative">-8.2% vs last period</div>
-                            </div>
-                            <div class="metric-icon icon-cash">
-                                <i class="fas fa-dollar-sign"></i>
                             </div>
                         </div>
                     </div>
@@ -3417,7 +3423,7 @@
 
                     <div class="metric-card">
                         <div class="metric-header">
-                            <div class="metric-content">
+                            <div class="metric-top-section">
                                 <div class="metric-title-with-selector">
                                     <div class="title-and-selector">
                                         <span class="metric-title-text">Revenue</span>
@@ -3426,30 +3432,30 @@
                                                 <option value="MTD">This Month</option>
                                                 <option value="QTD">This Quarter</option>
                                                 <option value="YTD">This Year</option>
-                                                <option value="L30D">Last 30 Days</option>
-                                                <option value="L90D">Last 90 Days</option>
                                                 <option value="custom">Custom Range</option>
                                             </select>
                                             <i class="fas fa-chevron-down selector-arrow"></i>
                                         </div>
                                     </div>
                                 </div>
+                                <div class="metric-icon icon-revenue">
+                                    <i class="fas fa-chart-line"></i>
+                                </div>
+                            </div>
+                            <div class="metric-values-section">
                                 <div class="metric-value" id="revenueValue">Rp 0</div>
-                                <div class="metric-change positive" id="revenueChange">+8.3% vs last period</div>
+                                <div class="metric-change" id="revenueChange">No data for Jun</div>
                                 <div id="customRevenueDateRange" class="custom-date-range" style="display: none;">
                                     <div class="date-range-inputs">
-                                        <input type="date" id="revenueDateFrom" class="date-input-enhanced" placeholder="From">
+                                        <input type="date" id="revenueDateFrom" class="date-input-enhanced">
                                         <span class="date-separator">to</span>
-                                        <input type="date" id="revenueDateTo" class="date-input-enhanced" placeholder="To">
+                                        <input type="date" id="revenueDateTo" class="date-input-enhanced">
                                     </div>
                                 </div>
                             </div>
-                            <div class="metric-icon icon-revenue">
-                                <i class="fas fa-chart-line"></i>
-                            </div>
                         </div>
                     </div>
-
+                    
                     <div class="metric-card">
                         <div class="metric-header">
                             <div>
