@@ -156,11 +156,8 @@
         }
 
         .metric-top-section {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            width: 100%;
-            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
         }
         
         .metric-content {
@@ -3302,6 +3299,43 @@
             gap: 0.75rem;
             flex: 1;
         }
+
+        .revenue-title-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex: 1;
+        }
+
+        .period-selector-fixed {
+            appearance: none;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 0.25rem 1.75rem 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #374151;
+            cursor: pointer;
+            min-width: 100px;
+            position: relative;
+            z-index: 10; /* Ensure it's clickable */
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1rem;
+        }
+
+        .period-selector-fixed:hover {
+            border-color: #c5c9d4;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .period-selector-fixed:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
         
     </style>
 </head>
@@ -3419,12 +3453,13 @@
                         </div>
                     </div>
 
+                    <!-- Revenue Card - FIXED -->
                     <div class="metric-card">
                         <div class="metric-header">
                             <div class="metric-top-section">
-                                <div class="metric-title-wrapper">
+                                <div class="revenue-title-row">
                                     <span class="metric-title">Revenue</span>
-                                    <select id="dashboardPeriodFilter" class="period-selector-enhanced" onchange="updateDashboardWithRealData()">
+                                    <select id="dashboardPeriodFilter" class="period-selector-fixed" onchange="updateDashboardWithRealData()">
                                         <option value="MTD">This Month</option>
                                         <option value="QTD">This Quarter</option>
                                         <option value="YTD">This Year</option>
@@ -10630,7 +10665,7 @@
             
             // Apply date filtering
             let filtered = revenueTransactions;
-            
+
             if (periodFilter && periodFilter !== 'custom') {
                 const today = new Date();
                 let startDate;
@@ -10656,13 +10691,37 @@
                         break;
                 }
                 
+                console.log('Date filtering:', {
+                    periodFilter,
+                    today: today.toISOString(),
+                    startDate: startDate?.toISOString(),
+                    revenueTransactionDates: revenueTransactions.map(t => ({
+                        date: t.transaction_date,
+                        account: t.account_name,
+                        amount: t.credit - t.debit
+                    }))
+                });
+                
                 if (startDate) {
                     const beforeFilter = filtered.length;
                     filtered = filtered.filter(t => {
                         const transDate = new Date(t.transaction_date);
-                        return transDate >= startDate && transDate <= today;
+                        const isInPeriod = transDate >= startDate && transDate <= today;
+                        console.log(`Transaction ${t.account_name} (${t.transaction_date}): ${isInPeriod ? 'INCLUDED' : 'EXCLUDED'}`);
+                        return isInPeriod;
                     });
                     console.log(`Date filtered (${periodFilter}): ${beforeFilter} -> ${filtered.length} transactions`);
+                    
+                    // If MTD returns 0, try YTD as fallback
+                    if (filtered.length === 0 && periodFilter === 'MTD') {
+                        console.log('MTD returned 0, trying YTD as fallback...');
+                        const ytdStart = new Date(today.getFullYear(), 0, 1);
+                        filtered = revenueTransactions.filter(t => {
+                            const transDate = new Date(t.transaction_date);
+                            return transDate >= ytdStart && transDate <= today;
+                        });
+                        console.log(`YTD fallback: ${filtered.length} transactions found`);
+                    }
                 }
             }
             
