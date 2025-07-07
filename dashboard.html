@@ -3506,6 +3506,7 @@
                                             <th>Due Date</th>
                                             <th>Days</th>
                                             <th>Status</th>
+                                            <th>Link</th>
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
@@ -4682,6 +4683,23 @@
                         <td>${dueDate ? formatDateIndonesian(dueDate) : '-'}${isCalculated ? ' <span style="color: #94a3b8; font-size: 0.75rem;">*</span>' : ''}</td>
                         <td><span class="days-badge ${daysClass}">${daysText}</span></td>
                         <td><span class="status-badge status-${actualStatus.toLowerCase()}">${actualStatus}</span></td>
+                        <td>
+                            ${transaction.linked_financial_id ? 
+                                '<i class="fas fa-link link-icon" title="Linked to GL"></i>' : 
+                                '<button class="btn btn-sm btn-secondary" onclick="linkAPARToGL(\''+transaction.id+'\')">Link</button>'
+                            }
+                        </td>
+                        <td>
+                            <button class="action-btn edit" onclick="editTransaction('${transaction.id}')" data-tooltip="Edit Transaction">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="action-btn delete" onclick="deleteTransaction('${transaction.id}')" data-tooltip="Delete Transaction">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                            ${transaction.linked_financial_id ? 
+                                '<button class="action-btn unlink" onclick="unlinkAPARFromGL(\''+transaction.id+'\')" data-tooltip="Unlink from GL"><i class="fas fa-unlink"></i></button>' : ''
+                            }
+                        </td>
                         <td>
                             <button class="action-btn edit" onclick="editTransaction('${transaction.id}')" data-tooltip="Edit Transaction">
                                 <i class="fas fa-edit"></i>
