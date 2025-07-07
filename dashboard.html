@@ -11095,7 +11095,7 @@
                 const ebit = netIncome + interestExpense;
                 
                 // Working Capital
-                const workingCapital = currentAssets - currentLiabilities;
+                const workingCapital = Math.max(-totalAssets, currentAssets - currentLiabilities);
                 
                 // Market Value of Equity (for SMEs, use book value)
                 const marketValueEquity = Math.max(1, totalEquity); // Ensure positive value
@@ -11160,10 +11160,10 @@
                         balances.totalAssets += account.balance;
                         break;
                     case 'Liability':
-                        balances.totalLiabilities += Math.abs(account.balance); // Liabilities are typically credit balances
+                        balances.totalLiabilities += (account.balance < 0 ? Math.abs(account.balance) : account.balance);
                         break;
                     case 'Equity':
-                        balances.totalEquity += Math.abs(account.balance); // Equity is typically credit balance
+                        balances.totalEquity += (account.balance < 0 ? Math.abs(account.balance) : account.balance);
                         break;
                 }
             });
@@ -11232,7 +11232,7 @@
             
             // X4: Market Value of Equity / Total Liabilities
             const marketValueEquityToLiabilities = data.totalLiabilities > 0 ? 
-                data.marketValueEquity / data.totalLiabilities : 1; // Default to 1 if no liabilities
+                data.marketValueEquity / data.totalLiabilities : 0.6; // Default to 1 if no liabilities
             
             // X5: Sales / Total Assets
             const salesToAssets = data.totalAssets > 0 ? 
@@ -11245,6 +11245,15 @@
                 marketValueEquityToLiabilities: Math.max(0.1, Math.min(10, marketValueEquityToLiabilities)),
                 salesToAssets: Math.max(0, Math.min(3, salesToAssets))
             };
+
+            console.log('Z-Score component details:', {
+                workingCapital: data.workingCapital,
+                totalAssets: data.totalAssets,
+                totalLiabilities: data.totalLiabilities,
+                marketValueEquity: data.marketValueEquity,
+                revenue: data.revenue,
+                ebit: data.ebit
+            });
         }
         
         function getZScoreRating(zScore) {
@@ -11454,6 +11463,12 @@
                 netOverdue: formatCurrencyFull(metrics.netOverduePosition, 'IDR'),
                 revenue: formatCurrencyFull(metrics.periodRevenue, 'IDR'),
                 healthScore: Math.round(metrics.healthScore)
+            });
+            console.log('Updating Card 4 with:', {
+                rating: metrics.altmanRating,
+                riskLevel: metrics.riskLevel,
+                riskClass: getRiskClass(metrics.riskLevel),
+                riskDescription: getRiskDescription(metrics.riskLevel)
             });
         }
 
