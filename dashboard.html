@@ -357,7 +357,26 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
-        /* Floating Chat Trigger */
+        /* Right-Side Chat Container */
+        .chat-container-right {
+            position: fixed;
+            top: 0.5cm;
+            right: 0.5cm;
+            bottom: 0.5cm;
+            width: 400px;
+            z-index: 2000;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            opacity: 0;
+            visibility: hidden;
+        }
+        
+        .chat-container-right.active {
+            transform: translateX(0);
+            opacity: 1;
+            visibility: visible;
+        }
+        
         .chat-trigger-floating {
             position: fixed;
             bottom: 24px;
@@ -418,11 +437,12 @@
         .ai-assistant-section {
             background: white;
             border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
             overflow: hidden;
-            height: 600px;
+            height: 100%;
             display: flex;
             flex-direction: column;
+            border: 1px solid #e2e8f0;
         }
 
         .chat-header {
@@ -433,6 +453,52 @@
             align-items: center;
             gap: 0.75rem;
             border-bottom: 1px solid #e2e8f0;
+            position: relative;
+        }
+
+        .chat-close-btn {
+            position: absolute;
+            top: 50%;
+            right: 1rem;
+            transform: translateY(-50%);
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s ease;
+        }
+
+        .chat-close-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        @media (max-width: 1200px) {
+            .chat-container-right {
+                width: 350px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .chat-container-right {
+                top: 0;
+                right: 0;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                border-radius: 0;
+            }
+            
+            .ai-assistant-section {
+                border-radius: 0;
+                height: 100vh;
+            }
         }
 
         .chat-header-icon {
@@ -4913,65 +4979,65 @@
     </main>
 
     <!-- AI Chat Toggle -->
-    <button class="chat-trigger-floating" onclick="toggleChatModal()">
+    <button class="chat-trigger-floating" onclick="toggleChatPanel()">
         <i class="fas fa-comments"></i>
     </button>
     
     <!-- Chat Modal Overlay -->
-    <div class="chat-modal-overlay" id="chatModalOverlay">
-        <div class="chat-modal">
-            <!-- Put your entire ai-assistant-section here -->
-            <div class="ai-assistant-section">
-                <!-- Chat Header -->
-                <div class="chat-header">
-                    <div class="chat-header-icon">
-                        <i class="fas fa-robot"></i>
-                    </div>
-                    <div class="chat-header-text">
-                        <h3>AI Financial Assistant</h3>
-                        <p>Your personal financial data analyst</p>
-                    </div>
-                    <div class="chat-status">
-                        <div class="status-dot"></div>
-                        <span>Online</span>
-                    </div>
+    <div class="chat-container-right" id="chatContainerRight">
+        <div class="ai-assistant-section">
+            <!-- Chat Header with Close Button -->
+            <div class="chat-header">
+                <div class="chat-header-icon">
+                    <i class="fas fa-robot"></i>
                 </div>
-        
-                <!-- Chat Messages -->
-                <div class="chat-messages" id="chatMessages">
-                    <!-- Empty State -->
-                    <div class="empty-state" id="emptyState">
-                        <div class="empty-state-icon">
-                            <i class="fas fa-comments"></i>
-                        </div>
-                        <h4>Start a conversation</h4>
-                        <p>Ask me anything about your financial data and I'll provide insights based on your real-time information.</p>
-                    </div>
-        
-                    <!-- Messages will be dynamically added here -->
+                <div class="chat-header-text">
+                    <h3>AI Financial Assistant</h3>
+                    <p>Your personal financial data analyst</p>
                 </div>
-        
-                <!-- Dynamic Suggestions -->
-                <div class="suggestions-container">
-                    <div class="suggestions-title">Quick Questions</div>
-                    <div class="suggestions-grid" id="suggestionsGrid">
-                        <!-- Dynamic suggestions based on current tab -->
-                    </div>
+                <div class="chat-status">
+                    <div class="status-dot"></div>
+                    <span>Online</span>
                 </div>
-        
-                <!-- Chat Input -->
-                <div class="chat-input-container">
-                    <div class="chat-input-wrapper">
-                        <textarea 
-                            class="chat-input" 
-                            id="chatInput"
-                            placeholder="Ask about your financial data..."
-                            rows="1"
-                        ></textarea>
-                        <button class="chat-send-btn" id="chatSendBtn">
-                            <i class="fas fa-paper-plane"></i>
-                        </button>
+                <button class="chat-close-btn" onclick="toggleChatPanel()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+    
+            <!-- Chat Messages -->
+            <div class="chat-messages" id="chatMessages">
+                <!-- Empty State -->
+                <div class="empty-state" id="emptyState">
+                    <div class="empty-state-icon">
+                        <i class="fas fa-comments"></i>
                     </div>
+                    <h4>Start a conversation</h4>
+                    <p>Ask me anything about your financial data and I'll provide insights based on your real-time information.</p>
+                </div>
+    
+                <!-- Messages will be dynamically added here -->
+            </div>
+    
+            <!-- Dynamic Suggestions -->
+            <div class="suggestions-container">
+                <div class="suggestions-title">Quick Questions</div>
+                <div class="suggestions-grid" id="suggestionsGrid">
+                    <!-- Dynamic suggestions based on current tab -->
+                </div>
+            </div>
+    
+            <!-- Chat Input -->
+            <div class="chat-input-container">
+                <div class="chat-input-wrapper">
+                    <textarea 
+                        class="chat-input" 
+                        id="chatInput"
+                        placeholder="Ask about your financial data..."
+                        rows="1"
+                    ></textarea>
+                    <button class="chat-send-btn" id="chatSendBtn">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
                 </div>
             </div>
         </div>
@@ -12293,30 +12359,35 @@
         // Call this function when the page loads
         document.addEventListener('DOMContentLoaded', ensureFreshReports);
 
-        function toggleChatModal() {
-            const overlay = document.getElementById('chatModalOverlay');
-            overlay.classList.toggle('active');
+        function toggleChatPanel() {
+            const chatContainer = document.getElementById('chatContainerRight');
+            chatContainer.classList.toggle('active');
             
             // Initialize chat if first time opening
-            if (!window.aiChatInitialized) {
+            if (!window.aiChatInitialized && chatContainer.classList.contains('active')) {
                 aiChat = new AIFinancialChat();
                 window.aiChatInitialized = true;
             }
         }
         
-        // Close modal when clicking outside
+        // Close panel when clicking outside
         document.addEventListener('click', function(e) {
-            const overlay = document.getElementById('chatModalOverlay');
-            if (e.target === overlay) {
-                overlay.classList.remove('active');
+            const chatContainer = document.getElementById('chatContainerRight');
+            const chatTrigger = document.querySelector('.chat-trigger-floating');
+            
+            // Check if click is outside the chat container and not on the trigger button
+            if (chatContainer.classList.contains('active') && 
+                !chatContainer.contains(e.target) && 
+                !chatTrigger.contains(e.target)) {
+                chatContainer.classList.remove('active');
             }
         });
         
-        // Close modal with ESC key
+        // Close panel with ESC key
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
-                const overlay = document.getElementById('chatModalOverlay');
-                overlay.classList.remove('active');
+                const chatContainer = document.getElementById('chatContainerRight');
+                chatContainer.classList.remove('active');
             }
         });
         
