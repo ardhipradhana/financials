@@ -3040,79 +3040,78 @@
         }
 
         @media print {
-            /* Hide navigation, sidebar, and UI elements */
-            .sidebar,
-            .page-title,
-            .section-header .section-actions,
-            .tab-nav,
-            .filters-section,
-            .bulk-actions,
-            button,
-            .btn {
-                display: none !important;
+            /* Hide EVERYTHING first */
+            * {
+                visibility: hidden;
             }
             
-            /* Hide all sections except the reports section */
-            .section-content:not(#statements-section) {
-                display: none !important;
+            /* Show only the report statements and their children */
+            .report-statement,
+            .report-statement * {
+                visibility: visible;
             }
             
-            /* Hide all tabs except the reports tab */
-            .tab-content:not(#reports-tab) {
-                display: none !important;
-            }
-            
-            /* Ensure the reports tab is visible */
-            #reports-tab {
-                display: block !important;
-            }
-            
-            /* Make sure the reports layout is visible */
-            .reports-audit-layout {
-                display: block !important;
-                margin: 0 !important;
-                padding: 0 !important;
-            }
-            
-            /* Show the report statements */
-            .report-statement {
-                display: block !important;
-                page-break-inside: avoid;
-                margin-bottom: 30px;
-                border: none !important;
-                box-shadow: none !important;
-                background: white !important;
-            }
-            
-            /* Clean up report headers for print */
-            .report-header h4 {
-                font-size: 18px;
-                margin-bottom: 10px;
-                border-bottom: 2px solid #000;
-                padding-bottom: 5px;
-                color: black !important;
-            }
-            
-            .report-content {
-                display: block !important;
-                color: black !important;
-            }
-            
-            /* Clean up the page */
+            /* Hide the page structure but keep reports visible */
             body {
                 margin: 0;
                 padding: 20px;
                 background: white !important;
-                color: black !important;
             }
             
-            /* Ensure section title shows */
-            .section-title {
-                display: block !important;
-                font-size: 24px;
-                margin-bottom: 20px;
+            /* Position the reports to fill the page */
+            .reports-audit-layout {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: white;
+                margin: 0;
+                padding: 20px;
+                box-sizing: border-box;
+            }
+            
+            /* Style each financial statement */
+            .report-statement {
+                page-break-inside: avoid;
+                margin-bottom: 40px;
+                background: white !important;
+                border: none !important;
+                box-shadow: none !important;
+            }
+            
+            /* Style the headers */
+            .report-header h4 {
+                font-size: 20px;
                 text-align: center;
+                margin-bottom: 5px;
+                color: white !important;
+                background: #2c3e50 !important;
+                padding: 15px;
+                border-radius: 0;
+            }
+            
+            .report-date {
+                text-align: center;
+                font-size: 14px;
+                margin-bottom: 20px;
+                color: #666 !important;
+            }
+            
+            /* Style the content */
+            .report-content {
+                font-size: 12px;
                 color: black !important;
+                background: white !important;
+            }
+            
+            /* Force page breaks between statements */
+            .report-statement:nth-child(2) {
+                page-break-before: always;
+            }
+            
+            .report-statement:nth-child(3) {
+                page-break-before: always;
             }
         }
 
