@@ -24,8 +24,9 @@
         html {
             transform: scale(0.9);
             transform-origin: top left;
-            width: 111.11%; /* 100% / 0.9 to compensate for scaling */
-            height: 111.11%;
+            width: 111.11%; /* 100% / 0.9 */
+            height: 111.11%; /* 100% / 0.9 */
+            min-height: 111.11vh; /* Ensure full viewport height */
         }
 
         body {
@@ -36,6 +37,7 @@
             margin: 0;
             padding: 0;
             overflow-x: hidden;
+            min-height: 111.11vh;
         }
 
         /* Sidebar Navigation */
@@ -44,7 +46,8 @@
             left: 0;
             top: 0;
             width: 280px;
-            height: 100vh;
+            height: 111.11vh; /* Make sure sidebar takes full scaled height */
+            min-height: 111.11vh;
             background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
             color: white;
             z-index: 1000;
