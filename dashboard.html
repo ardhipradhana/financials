@@ -21,11 +21,21 @@
             box-sizing: border-box;
         }
 
+        html {
+            transform: scale(0.9);
+            transform-origin: top left;
+            width: 111.11%; /* 100% / 0.9 to compensate for scaling */
+            height: 111.11%;
+        }
+
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
             color: #334155;
             line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
         }
 
         /* Sidebar Navigation */
