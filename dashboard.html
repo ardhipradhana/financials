@@ -13209,6 +13209,55 @@
             updateYoYDisplay();
             generateComparisonReport();
         }
+
+        // Generate P&L comparison report
+        async function generateComparisonReport() {
+            const currentPeriod = document.getElementById('currentPeriod').value;
+            const previousPeriod = document.getElementById('previousPeriod').value;
+            const includeYoY = document.getElementById('includeYoY').checked;
+            
+            if (!currentPeriod || !previousPeriod) {
+                return;
+            }
+            
+            showComparisonLoadingState(true);
+            
+            try {
+                // Fetch data for all periods
+                const [currentData, previousData, lastYearData] = await Promise.all([
+                    fetchFinancialDataForComparisonPeriod(currentPeriod),
+                    fetchFinancialDataForComparisonPeriod(previousPeriod),
+                    includeYoY ? fetchFinancialDataForComparisonPeriod(getLastYearPeriod(currentPeriod)) : null
+                ]);
+                
+                comparisonData = {
+                    current: currentData,
+                    previous: previousData,
+                    lastYear: lastYearData
+                };
+                
+                renderComparisonTable();
+                renderWaterfallCharts();
+                renderExecutiveSummary();
+                
+                // Show charts and summary
+                document.getElementById('waterfallChartsSection').style.display = 'block';
+                document.getElementById('executiveSummary').style.display = 'block';
+                
+            } catch (error) {
+                console.error('Error generating comparison report:', error);
+                document.getElementById('comparisonTableContent').innerHTML = 
+                    '<div class="error-message">Error generating report. Please try again.</div>';
+            } finally {
+                showComparisonLoadingState(false);
+            }
+        }
+        
+        // Get last year period
+        function getLastYearPeriod(period) {
+            const [year, month] = period.split('-').map(Number);
+            return `${year - 1}-${String(month).padStart(2, '0')}`;
+        }
         
         // Update period type selection with QTD/YTD logic
         function updatePeriodType(type) {
