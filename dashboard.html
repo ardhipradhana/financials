@@ -13188,6 +13188,27 @@
             
             updateYoYDisplay();
         }
+
+        // Update YoY display text
+        function updateYoYDisplay() {
+            const currentPeriod = document.getElementById('currentPeriod').value;
+            const yoyDisplay = document.getElementById('yoyPeriodDisplay');
+            
+            if (currentPeriod) {
+                const [year, month] = currentPeriod.split('-').map(Number);
+                const lastYear = year - 1;
+                const lastYearPeriod = `${lastYear}-${String(month).padStart(2, '0')}`;
+                
+                const monthName = new Date(lastYear, month - 1).toLocaleDateString('en-US', { month: 'long' });
+                yoyDisplay.textContent = `${monthName} ${lastYear} (if available)`;
+            }
+        }
+        
+        // Update period selection and trigger comparison
+        function updatePeriodSelection() {
+            updateYoYDisplay();
+            generateComparisonReport();
+        }
         
         // Update period type selection with QTD/YTD logic
         function updatePeriodType(type) {
