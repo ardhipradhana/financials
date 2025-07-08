@@ -12678,6 +12678,60 @@
                 }
             }
         }
+
+        function initializeSampleData() {
+            console.log('Initializing sample AP/AR data...');
+            
+            const sampleData = [
+                {
+                    id: 'sample_1',
+                    type: 'AR',
+                    description: 'Web Development Services',
+                    amount: 5000000,
+                    invoice_date: '2025-01-15',
+                    due_date: '2025-02-14',
+                    company: 'ABC Corp',
+                    status: 'Overdue',
+                    reference: 'INV-001',
+                    currency: 'IDR',
+                    payment_terms: 30
+                },
+                {
+                    id: 'sample_2',
+                    type: 'AP',
+                    description: 'Office Supplies',
+                    amount: 250000,
+                    invoice_date: '2025-01-10',
+                    due_date: '2025-02-09',
+                    company: 'OfficeMax',
+                    status: 'Overdue',
+                    reference: 'BILL-501',
+                    currency: 'IDR',
+                    payment_terms: 30
+                },
+                {
+                    id: 'sample_3',
+                    type: 'AR',
+                    description: 'Consulting Services',
+                    amount: 3000000,
+                    invoice_date: '2025-01-20',
+                    due_date: '2025-02-19',
+                    company: 'XYZ Ltd',
+                    status: 'Pending',
+                    reference: 'INV-002',
+                    currency: 'IDR',
+                    payment_terms: 30
+                }
+            ];
+            
+            // Store in localStorage as backup
+            localStorage.setItem('aparTransactions', JSON.stringify(sampleData));
+            
+            // Also set global variable
+            aparTransactions = sampleData;
+            
+            console.log('Sample data initialized:', sampleData.length, 'transactions');
+        }
         
         // Close panel when clicking outside
         document.addEventListener('click', function(e) {
