@@ -13513,58 +13513,6 @@
             document.getElementById('comparisonTableContent').innerHTML = tableHTML;
         }
         
-        // Generate table rows for P&L items
-        function generateTableRows(current, previous, lastYear) {
-            const lineItems = [
-                { key: 'grossRevenue', label: '📈 Gross Revenue', isRevenue: true },
-                { key: 'discounts', label: '📉 Discounts', isExpense: true },
-                { key: 'netRevenue', label: '💰 Net Revenue', isRevenue: true },
-                { key: 'cogs', label: '🏭 COGS', isExpense: true },
-                { key: 'grossProfit', label: '🎯 Gross Profit', isProfit: true },
-                { key: 'opex', label: '🏢 OPEX', isExpense: true },
-                { key: 'ebitda', label: '💎 EBITDA', isProfit: true },
-                { key: 'ebit', label: '📊 EBIT', isProfit: true },
-                { key: 'netIncome', label: '🎯 Net Income', isProfit: true }
-            ];
-            
-            return lineItems.map(item => {
-                const currentValue = current[item.key] || 0;
-                const previousValue = previous[item.key] || 0;
-                const lastYearValue = lastYear ? (lastYear[item.key] || 0) : null;
-                
-                const momChange = currentValue - previousValue;
-                const momPercent = previousValue !== 0 ? (momChange / Math.abs(previousValue)) * 100 : 0;
-                
-                const yoyChange = lastYearValue !== null ? currentValue - lastYearValue : null;
-                const yoyPercent = lastYearValue !== null && lastYearValue !== 0 ? 
-                    (yoyChange / Math.abs(lastYearValue)) * 100 : null;
-                
-                const margin = item.key === 'netRevenue' ? 
-                    current.netRevenue !== 0 ? ((current.netRevenue / current.grossRevenue) * 100).toFixed(1) + '%' : '0%' :
-                    item.key === 'grossProfit' ?
-                    current.netRevenue !== 0 ? ((current.grossProfit / current.netRevenue) * 100).toFixed(1) + '%' : '0%' :
-                    item.key === 'ebitda' ?
-                    current.netRevenue !== 0 ? ((current.ebitda / current.netRevenue) * 100).toFixed(1) + '%' : '0%' :
-                    item.key === 'netIncome' ?
-                    current.netRevenue !== 0 ? ((current.netIncome / current.netRevenue) * 100).toFixed(1) + '%' : '0%' :
-                    '';
-                
-                return `
-                    <tr>
-                        <td class="line-item-cell">${item.label}</td>
-                        <td class="value-cell">${formatCurrency(currentValue)}</td>
-                        <td class="value-cell">${formatCurrency(previousValue)}</td>
-                        <td class="change-cell ${getChangeClass(momChange)}">${formatCurrency(momChange, true)}</td>
-                        <td class="change-cell ${getChangeClass(momChange)}">${formatPercent(momPercent, true)}</td>
-                        <td class="value-cell">${lastYearValue !== null ? formatCurrency(lastYearValue) : 'N/A'}</td>
-                        <td class="change-cell ${yoyChange !== null ? getChangeClass(yoyChange) : ''}">${yoyChange !== null ? formatCurrency(yoyChange, true) : 'N/A'}</td>
-                        <td class="change-cell ${yoyChange !== null ? getChangeClass(yoyChange) : ''}">${yoyPercent !== null ? formatPercent(yoyPercent, true) : 'N/A'}</td>
-                        <td class="margin-cell">${margin}</td>
-                    </tr>
-                `;
-            }).join('');
-        }
-        
         // Format currency with Indonesian Rupiah
         function formatCurrency(amount, showSign = false) {
             const absAmount = Math.abs(amount);
