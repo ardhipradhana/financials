@@ -4041,7 +4041,7 @@
         
         .comparison-table th:first-child {
             text-align: left;
-            min-width: 180px;
+            min-width: 200px;
         }
         
         .comparison-table td {
@@ -4054,26 +4054,81 @@
             background: #f8fafc;
         }
         
+        /* Line Item Styles */
         .line-item-cell {
             font-weight: 600;
             color: #1e293b;
-            display: flex;
-            align-items: center;
+            padding-left: 1rem !important;
         }
         
-        .line-item-cell i {
-            margin-right: 0.5rem;
-            width: 16px;
+        .line-item-prominent {
+            font-weight: 700;
+            color: #1e293b;
+            font-size: 0.95rem;
+            background: linear-gradient(90deg, #f8fafc 0%, #ffffff 100%);
+            border-top: 2px solid #e2e8f0;
+            border-bottom: 2px solid #e2e8f0;
         }
         
+        .line-item-margin {
+            font-weight: 500;
+            color: #6b7280;
+            font-size: 0.8rem;
+            font-style: italic;
+            padding-left: 2rem !important;
+            background: #f9fafb;
+        }
+        
+        /* Value Cell Styles */
         .value-cell {
             text-align: right;
             font-weight: 500;
+            font-family: 'SF Mono', 'Monaco', monospace;
         }
         
+        .value-cell-prominent {
+            text-align: right;
+            font-weight: 700;
+            font-family: 'SF Mono', 'Monaco', monospace;
+            font-size: 0.95rem;
+            background: linear-gradient(90deg, #f8fafc 0%, #ffffff 100%);
+            border-top: 2px solid #e2e8f0;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .value-cell-margin {
+            text-align: right;
+            font-weight: 500;
+            font-family: 'SF Mono', 'Monaco', monospace;
+            font-size: 0.8rem;
+            color: #6b7280;
+            background: #f9fafb;
+        }
+        
+        /* Change Cell Styles */
         .change-cell {
             text-align: right;
             font-weight: 600;
+            font-family: 'SF Mono', 'Monaco', monospace;
+        }
+        
+        .change-cell-prominent {
+            text-align: right;
+            font-weight: 700;
+            font-family: 'SF Mono', 'Monaco', monospace;
+            font-size: 0.95rem;
+            background: linear-gradient(90deg, #f8fafc 0%, #ffffff 100%);
+            border-top: 2px solid #e2e8f0;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .change-cell-margin {
+            text-align: right;
+            font-weight: 500;
+            font-family: 'SF Mono', 'Monaco', monospace;
+            font-size: 0.8rem;
+            color: #6b7280;
+            background: #f9fafb;
         }
         
         .change-positive {
@@ -4086,12 +4141,6 @@
         
         .change-neutral {
             color: #6b7280;
-        }
-        
-        .margin-cell {
-            text-align: right;
-            color: #6b7280;
-            font-size: 0.8rem;
         }
         
         /* Waterfall Charts Section */
@@ -13084,13 +13133,15 @@
         };
         
         let availablePeriods = [];
-
+        
+        // Initialize Reports & Analytics when page loads
         function initializeReportsAnalytics() {
             populateAvailablePeriods();
             setDefaultPeriods();
             updatePeriodSelection();
         }
-
+        
+        // Populate available periods from financial data
         function populateAvailablePeriods() {
             // Generate last 24 months for demo
             const periods = [];
@@ -13135,7 +13186,7 @@
             updateYoYDisplay();
         }
         
-        // Update period type selection
+        // Update period type selection with QTD/YTD logic
         function updatePeriodType(type) {
             const currentSelect = document.getElementById('currentPeriod');
             const previousSelect = document.getElementById('previousPeriod');
@@ -13154,86 +13205,37 @@
             updatePeriodSelection();
         }
         
-        // Update YoY display text
-        function updateYoYDisplay() {
-            const currentPeriod = document.getElementById('currentPeriod').value;
-            const yoyDisplay = document.getElementById('yoyPeriodDisplay');
-            
-            if (currentPeriod) {
-                const [year, month] = currentPeriod.split('-').map(Number);
-                const lastYear = year - 1;
-                const lastYearPeriod = `${lastYear}-${String(month).padStart(2, '0')}`;
-                
-                const monthName = new Date(lastYear, month - 1).toLocaleDateString('en-US', { month: 'long' });
-                yoyDisplay.textContent = `${monthName} ${lastYear} (if available)`;
-            }
-        }
-        
-        // Update period selection and trigger comparison
-        function updatePeriodSelection() {
-            updateYoYDisplay();
-            generateComparisonReport();
-        }
-        
-        // Generate P&L comparison report
-        async function generateComparisonReport() {
-            const currentPeriod = document.getElementById('currentPeriod').value;
-            const previousPeriod = document.getElementById('previousPeriod').value;
-            const includeYoY = document.getElementById('includeYoY').checked;
-            
-            if (!currentPeriod || !previousPeriod) {
-                return;
-            }
-            
-            showComparisonLoadingState(true);
-            
-            try {
-                // Fetch data for all periods
-                const [currentData, previousData, lastYearData] = await Promise.all([
-                    fetchFinancialDataForComparisonPeriod(currentPeriod),
-                    fetchFinancialDataForComparisonPeriod(previousPeriod),
-                    includeYoY ? fetchFinancialDataForComparisonPeriod(getLastYearPeriod(currentPeriod)) : null
-                ]);
-                
-                comparisonData = {
-                    current: currentData,
-                    previous: previousData,
-                    lastYear: lastYearData
-                };
-                
-                renderComparisonTable();
-                renderWaterfallCharts();
-                renderExecutiveSummary();
-                
-                // Show charts and summary
-                document.getElementById('waterfallChartsSection').style.display = 'block';
-                document.getElementById('executiveSummary').style.display = 'block';
-                
-            } catch (error) {
-                console.error('Error generating comparison report:', error);
-                document.getElementById('comparisonTableContent').innerHTML = 
-                    '<div class="error-message">Error generating report. Please try again.</div>';
-            } finally {
-                showComparisonLoadingState(false);
-            }
-        }
-        
-        // Get last year period
-        function getLastYearPeriod(period) {
-            const [year, month] = period.split('-').map(Number);
-            return `${year - 1}-${String(month).padStart(2, '0')}`;
-        }
-        
-        // Fetch financial data for a specific period
+        // Fetch financial data with QTD/YTD logic
         async function fetchFinancialDataForComparisonPeriod(period) {
             try {
                 console.log('Fetching financial data for period:', period);
                 
                 const [year, month] = period.split('-').map(Number);
-                const startDate = `${year}-${String(month).padStart(2, '0')}-01`;
-                const endDate = new Date(year, month, 0).toISOString().split('T')[0];
+                const periodType = document.querySelector('input[name="periodType"]:checked').value;
                 
-                // Use existing Supabase query pattern
+                let startDate, endDate;
+                
+                if (periodType === 'mom') {
+                    // Month-over-Month: Just the selected month
+                    startDate = `${year}-${String(month).padStart(2, '0')}-01`;
+                    endDate = new Date(year, month, 0).toISOString().split('T')[0];
+                } else if (periodType === 'qoq') {
+                    // Quarter-to-Date: From start of quarter to selected month
+                    const quarterStartMonth = Math.floor((month - 1) / 3) * 3 + 1;
+                    startDate = `${year}-${String(quarterStartMonth).padStart(2, '0')}-01`;
+                    endDate = new Date(year, month, 0).toISOString().split('T')[0];
+                } else if (periodType === 'yoy') {
+                    // Year-to-Date: From January to selected month
+                    startDate = `${year}-01-01`;
+                    endDate = new Date(year, month, 0).toISOString().split('T')[0];
+                } else {
+                    // Custom: Just the selected month (default)
+                    startDate = `${year}-${String(month).padStart(2, '0')}-01`;
+                    endDate = new Date(year, month, 0).toISOString().split('T')[0];
+                }
+                
+                console.log(`Period type: ${periodType}, Date range: ${startDate} to ${endDate}`);
+                
                 const { data, error } = await supabase
                     .from('financial_transactions_meridash')
                     .select('*')
@@ -13242,7 +13244,7 @@
                 
                 if (error) throw error;
                 
-                return processFinancialDataForComparison(data || [], period);
+                return processFinancialDataForComparison(data || [], period, periodType);
                 
             } catch (error) {
                 console.error('Error fetching financial data:', error);
@@ -13250,11 +13252,11 @@
             }
         }
         
-        // Process financial data into P&L structure
-        function processFinancialDataForComparison(transactions, period) {
+        // Process financial data with period type context
+        function processFinancialDataForComparison(transactions, period, periodType = 'mom') {
             const pnlData = {
                 period: period,
-                periodName: formatPeriodName(period),
+                periodName: formatPeriodName(period, periodType),
                 grossRevenue: 0,
                 discounts: 0,
                 netRevenue: 0,
@@ -13272,7 +13274,7 @@
                 const accountCode = transaction.account_code || '';
                 const accountName = (transaction.account_name || '').toLowerCase();
                 
-                // Categorize based on account patterns (simplified for demo)
+                // Categorize based on account patterns
                 if (accountCode.startsWith('4') || accountName.includes('revenue') || accountName.includes('sales')) {
                     if (accountName.includes('discount') || accountName.includes('return')) {
                         pnlData.discounts += Math.abs(amount);
@@ -13296,14 +13298,116 @@
             return pnlData;
         }
         
-        // Format period name for display
-        function formatPeriodName(period) {
+        // Format period name with type context
+        function formatPeriodName(period, periodType = 'mom') {
             const [year, month] = period.split('-').map(Number);
             const date = new Date(year, month - 1);
-            return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+            const monthName = date.toLocaleDateString('en-US', { month: 'short' });
+            
+            if (periodType === 'qoq') {
+                const quarter = Math.floor((month - 1) / 3) + 1;
+                return `Q${quarter} ${year}`;
+            } else if (periodType === 'yoy') {
+                return `YTD ${monthName} ${year}`;
+            } else {
+                return `${monthName} ${year}`;
+            }
         }
         
-        // Render comparison table
+        // Generate table rows with new structure (no icons, prominent lines, margin rows)
+        function generateTableRows(current, previous, lastYear) {
+            const lineItems = [
+                { key: 'grossRevenue', label: 'Gross Revenue', type: 'regular' },
+                { key: 'discounts', label: 'Discounts', type: 'regular' },
+                { key: 'netRevenue', label: 'Net Revenue', type: 'prominent' },
+                { key: 'grossToNetMargin', label: 'Gross to Net %', type: 'margin' },
+                { key: 'cogs', label: 'COGS', type: 'regular' },
+                { key: 'grossProfit', label: 'Gross Profit', type: 'prominent' },
+                { key: 'grossProfitMargin', label: 'Gross Profit Margin %', type: 'margin' },
+                { key: 'opex', label: 'OPEX', type: 'regular' },
+                { key: 'opexToSalesMargin', label: 'OPEX to Sales %', type: 'margin' },
+                { key: 'ebitda', label: 'EBITDA', type: 'prominent' },
+                { key: 'ebitdaMargin', label: 'EBITDA Margin %', type: 'margin' },
+                { key: 'ebit', label: 'EBIT', type: 'regular' },
+                { key: 'netIncome', label: 'Net Income', type: 'prominent' },
+                { key: 'netIncomeMargin', label: 'Net Income Margin %', type: 'margin' }
+            ];
+            
+            return lineItems.map(item => {
+                let currentValue, previousValue, lastYearValue;
+                
+                // Calculate values including margin rows
+                if (item.key === 'grossToNetMargin') {
+                    currentValue = current.grossRevenue !== 0 ? (current.netRevenue / current.grossRevenue) * 100 : 0;
+                    previousValue = previous.grossRevenue !== 0 ? (previous.netRevenue / previous.grossRevenue) * 100 : 0;
+                    lastYearValue = lastYear && lastYear.grossRevenue !== 0 ? (lastYear.netRevenue / lastYear.grossRevenue) * 100 : null;
+                } else if (item.key === 'grossProfitMargin') {
+                    currentValue = current.netRevenue !== 0 ? (current.grossProfit / current.netRevenue) * 100 : 0;
+                    previousValue = previous.netRevenue !== 0 ? (previous.grossProfit / previous.netRevenue) * 100 : 0;
+                    lastYearValue = lastYear && lastYear.netRevenue !== 0 ? (lastYear.grossProfit / lastYear.netRevenue) * 100 : null;
+                } else if (item.key === 'opexToSalesMargin') {
+                    currentValue = current.netRevenue !== 0 ? (current.opex / current.netRevenue) * 100 : 0;
+                    previousValue = previous.netRevenue !== 0 ? (previous.opex / previous.netRevenue) * 100 : 0;
+                    lastYearValue = lastYear && lastYear.netRevenue !== 0 ? (lastYear.opex / lastYear.netRevenue) * 100 : null;
+                } else if (item.key === 'ebitdaMargin') {
+                    currentValue = current.netRevenue !== 0 ? (current.ebitda / current.netRevenue) * 100 : 0;
+                    previousValue = previous.netRevenue !== 0 ? (previous.ebitda / previous.netRevenue) * 100 : 0;
+                    lastYearValue = lastYear && lastYear.netRevenue !== 0 ? (lastYear.ebitda / lastYear.netRevenue) * 100 : null;
+                } else if (item.key === 'netIncomeMargin') {
+                    currentValue = current.netRevenue !== 0 ? (current.netIncome / current.netRevenue) * 100 : 0;
+                    previousValue = previous.netRevenue !== 0 ? (previous.netIncome / previous.netRevenue) * 100 : 0;
+                    lastYearValue = lastYear && lastYear.netRevenue !== 0 ? (lastYear.netIncome / lastYear.netRevenue) * 100 : null;
+                } else {
+                    currentValue = current[item.key] || 0;
+                    previousValue = previous[item.key] || 0;
+                    lastYearValue = lastYear ? (lastYear[item.key] || 0) : null;
+                }
+                
+                const momChange = currentValue - previousValue;
+                const momPercent = previousValue !== 0 ? (momChange / Math.abs(previousValue)) * 100 : 0;
+                
+                const yoyChange = lastYearValue !== null ? currentValue - lastYearValue : null;
+                const yoyPercent = lastYearValue !== null && lastYearValue !== 0 ? 
+                    (yoyChange / Math.abs(lastYearValue)) * 100 : null;
+                
+                // Determine cell classes based on type
+                const cellClass = item.type === 'prominent' ? 'prominent' : 
+                                 item.type === 'margin' ? 'margin' : 'regular';
+                
+                // Format values based on type
+                const formatValue = (val) => {
+                    if (item.type === 'margin') {
+                        return val !== null ? `${val.toFixed(1)}%` : 'N/A';
+                    } else {
+                        return val !== null ? formatCurrency(val) : 'N/A';
+                    }
+                };
+                
+                const formatChange = (change, isPercent = false) => {
+                    if (change === null) return 'N/A';
+                    if (item.type === 'margin') {
+                        return isPercent ? formatPercent(change, true) : `${change >= 0 ? '+' : ''}${change.toFixed(1)}pp`;
+                    } else {
+                        return isPercent ? formatPercent(change, true) : formatCurrency(change, true);
+                    }
+                };
+                
+                return `
+                    <tr>
+                        <td class="line-item-cell line-item-${cellClass}">${item.label}</td>
+                        <td class="value-cell value-cell-${cellClass}">${formatValue(currentValue)}</td>
+                        <td class="value-cell value-cell-${cellClass}">${formatValue(previousValue)}</td>
+                        <td class="change-cell change-cell-${cellClass} ${getChangeClass(momChange)}">${formatChange(momChange)}</td>
+                        <td class="change-cell change-cell-${cellClass} ${getChangeClass(momChange)}">${formatChange(momPercent, true)}</td>
+                        <td class="value-cell value-cell-${cellClass}">${lastYearValue !== null ? formatValue(lastYearValue) : 'N/A'}</td>
+                        <td class="change-cell change-cell-${cellClass} ${yoyChange !== null ? getChangeClass(yoyChange) : ''}">${yoyChange !== null ? formatChange(yoyChange) : 'N/A'}</td>
+                        <td class="change-cell change-cell-${cellClass} ${yoyChange !== null ? getChangeClass(yoyChange) : ''}">${yoyPercent !== null ? formatChange(yoyPercent, true) : 'N/A'}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+        
+        // Update table rendering to remove Margins column
         function renderComparisonTable() {
             const { current, previous, lastYear } = comparisonData;
             
@@ -13325,11 +13429,16 @@
                             ${lastYear ? `<th>${lastYear.periodName}<br>(Last Year)</th>` : '<th>Last Year<br>(N/A)</th>'}
                             ${lastYear ? `<th>YoY Value<br>Change</th>` : '<th>YoY Value<br>(N/A)</th>'}
                             ${lastYear ? `<th>YoY %<br>Change</th>` : '<th>YoY %<br>(N/A)</th>'}
-                            <th>Margins</th>
                         </tr>
                     </thead>
                     <tbody>
                         ${generateTableRows(current, previous, lastYear)}
+                    </tbody>
+                </table>
+            `;
+            
+            document.getElementById('comparisonTableContent').innerHTML = tableHTML;
+        }generateTableRows(current, previous, lastYear)}
                     </tbody>
                 </table>
             `;
@@ -13608,7 +13717,7 @@
                 observer.observe(reportsSection, { attributes: true });
             }
         });
-
+        
         // Additional CSS for waterfall charts (add to style section)
         const additionalCSS = `
         <style>
