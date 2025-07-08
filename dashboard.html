@@ -4150,8 +4150,8 @@
         
         .charts-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
         }
         
         .chart-container {
@@ -4253,6 +4253,18 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        @media (max-width: 1400px) {
+            .charts-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
         
         /* Responsive Design */
         @media (max-width: 1200px) {
@@ -4285,6 +4297,45 @@
                 flex-direction: column;
                 gap: 0.5rem;
             }
+        }
+
+        .waterfall-connector {
+            height: 2px;
+            background: #d1d5db;
+            margin: 0 -10px;
+            align-self: center;
+        }
+
+        .waterfall-base {
+            background: linear-gradient(135deg, #64748b, #475569);
+        }
+        
+        .waterfall-positive {
+            background: linear-gradient(135deg, #059669, #047857);
+        }
+        
+        .waterfall-negative {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+        }
+        
+        .waterfall-total {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            border: 2px solid #f59e0b;
+        }
+        
+        .waterfall-bar:hover::after {
+            content: attr(data-value);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1f2937;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            z-index: 1000;
         }
         
     </style>
@@ -13544,68 +13595,160 @@
         
         // Render waterfall charts
         function renderWaterfallCharts() {
-            renderRevenueWaterfallChart();
-            renderProfitWaterfallChart();
-        }
-        
-        // Render revenue waterfall chart
-        function renderRevenueWaterfallChart() {
             const { current, previous } = comparisonData;
             
             if (!current || !previous) return;
             
-            const revenueChange = current.netRevenue - previous.netRevenue;
-            const chartContainer = document.getElementById('revenueWaterfallChart');
+            // Update the charts grid to show 4 cards
+            const chartsGrid = document.querySelector('.charts-grid');
+            chartsGrid.innerHTML = `
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h4>Revenue Bridge Analysis</h4>
+                        <p>Key drivers of revenue change</p>
+                    </div>
+                    <div id="revenueWaterfallChart" class="waterfall-chart"></div>
+                </div>
+                
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h4>Gross Profit Bridge</h4>
+                        <p>COGS impact on gross profit</p>
+                    </div>
+                    <div id="grossProfitWaterfallChart" class="waterfall-chart"></div>
+                </div>
+                
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h4>OPEX Bridge</h4>
+                        <p>Operating expense breakdown</p>
+                    </div>
+                    <div id="opexWaterfallChart" class="waterfall-chart"></div>
+                </div>
+                
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h4>EBITDA Bridge</h4>
+                        <p>Path to EBITDA performance</p>
+                    </div>
+                    <div id="ebitdaWaterfallChart" class="waterfall-chart"></div>
+                </div>
+            `;
             
-            // Simplified waterfall visualization
+            // Render each waterfall chart
+            renderRevenueWaterfallChart();
+            renderGrossProfitWaterfallChart();
+            renderOpexWaterfallChart();
+            renderEbitdaWaterfallChart();
+        }
+        
+        // Revenue Bridge Analysis
+        function renderRevenueWaterfallChart() {
+            const { current, previous } = comparisonData;
+            const revenueChange = current.netRevenue - previous.netRevenue;
+            
+            // Generate 7 revenue drivers
             const waterfallData = [
                 { label: 'Previous Revenue', value: previous.netRevenue, type: 'base' },
-                { label: 'Volume Growth', value: revenueChange * 0.6, type: 'positive' },
-                { label: 'Price Changes', value: revenueChange * 0.3, type: 'positive' },
-                { label: 'Mix Changes', value: revenueChange * 0.1, type: 'positive' },
+                { label: 'New Customers', value: revenueChange * 0.25, type: 'positive' },
+                { label: 'Customer Growth', value: revenueChange * 0.20, type: 'positive' },
+                { label: 'Price Changes', value: revenueChange * 0.15, type: 'positive' },
+                { label: 'Product Mix', value: revenueChange * 0.10, type: 'positive' },
+                { label: 'Market Expansion', value: revenueChange * 0.15, type: 'positive' },
+                { label: 'Customer Churn', value: revenueChange * -0.10, type: 'negative' },
+                { label: 'Seasonal Impact', value: revenueChange * 0.25, type: revenueChange > 0 ? 'positive' : 'negative' },
                 { label: 'Current Revenue', value: current.netRevenue, type: 'total' }
             ];
             
-            chartContainer.innerHTML = createWaterfallHTML(waterfallData, 'Revenue Bridge');
+            document.getElementById('revenueWaterfallChart').innerHTML = createWaterfallHTML(waterfallData);
         }
         
-        // Render profit waterfall chart
-        function renderProfitWaterfallChart() {
+        // Gross Profit Bridge Analysis  
+        function renderGrossProfitWaterfallChart() {
             const { current, previous } = comparisonData;
+            const grossProfitChange = current.grossProfit - previous.grossProfit;
+            const revenueImpact = current.netRevenue - previous.netRevenue;
+            const cogsImpact = -(current.cogs - previous.cogs);
             
-            if (!current || !previous) return;
-            
-            const profitChange = current.grossProfit - previous.grossProfit;
-            const chartContainer = document.getElementById('profitWaterfallChart');
-            
-            // Simplified profit waterfall
             const waterfallData = [
-                { label: 'Previous Profit', value: previous.grossProfit, type: 'base' },
-                { label: 'Revenue Impact', value: profitChange * 0.7, type: 'positive' },
-                { label: 'Cost Impact', value: profitChange * 0.3, type: 'negative' },
-                { label: 'Current Profit', value: current.grossProfit, type: 'total' }
+                { label: 'Previous Gross Profit', value: previous.grossProfit, type: 'base' },
+                { label: 'Revenue Volume Impact', value: revenueImpact * 0.6, type: revenueImpact > 0 ? 'positive' : 'negative' },
+                { label: 'Revenue Price Impact', value: revenueImpact * 0.4, type: revenueImpact > 0 ? 'positive' : 'negative' },
+                { label: 'Material Cost Change', value: cogsImpact * 0.4, type: cogsImpact > 0 ? 'positive' : 'negative' },
+                { label: 'Labor Cost Change', value: cogsImpact * 0.3, type: cogsImpact > 0 ? 'positive' : 'negative' },
+                { label: 'Overhead Cost Change', value: cogsImpact * 0.2, type: cogsImpact > 0 ? 'positive' : 'negative' },
+                { label: 'Production Efficiency', value: cogsImpact * 0.1, type: cogsImpact > 0 ? 'positive' : 'negative' },
+                { label: 'Current Gross Profit', value: current.grossProfit, type: 'total' }
             ];
             
-            chartContainer.innerHTML = createWaterfallHTML(waterfallData, 'Profit Variance');
+            document.getElementById('grossProfitWaterfallChart').innerHTML = createWaterfallHTML(waterfallData);
+        }
+        
+        // OPEX Bridge Analysis
+        function renderOpexWaterfallChart() {
+            const { current, previous } = comparisonData;
+            const opexChange = current.opex - previous.opex;
+            
+            const waterfallData = [
+                { label: 'Previous OPEX', value: previous.opex, type: 'base' },
+                { label: 'Salary & Benefits', value: opexChange * 0.30, type: 'negative' },
+                { label: 'Marketing Spend', value: opexChange * 0.20, type: 'negative' },
+                { label: 'Office & Admin', value: opexChange * 0.15, type: 'negative' },
+                { label: 'Professional Services', value: opexChange * 0.10, type: 'negative' },
+                { label: 'Technology Costs', value: opexChange * 0.10, type: 'negative' },
+                { label: 'Travel & Entertainment', value: opexChange * 0.08, type: 'negative' },
+                { label: 'Cost Optimization', value: opexChange * -0.07, type: 'positive' },
+                { label: 'Current OPEX', value: current.opex, type: 'total' }
+            ];
+            
+            document.getElementById('opexWaterfallChart').innerHTML = createWaterfallHTML(waterfallData);
+        }
+        
+        // EBITDA Bridge Analysis
+        function renderEbitdaWaterfallChart() {
+            const { current, previous } = comparisonData;
+            const revenueImpact = current.netRevenue - previous.netRevenue;
+            const cogsImpact = -(current.cogs - previous.cogs);
+            const opexImpact = -(current.opex - previous.opex);
+            
+            const waterfallData = [
+                { label: 'Previous EBITDA', value: previous.ebitda, type: 'base' },
+                { label: 'Revenue Growth', value: revenueImpact, type: revenueImpact > 0 ? 'positive' : 'negative' },
+                { label: 'COGS Impact', value: cogsImpact, type: cogsImpact > 0 ? 'positive' : 'negative' },
+                { label: 'OPEX Impact', value: opexImpact, type: opexImpact > 0 ? 'positive' : 'negative' },
+                { label: 'Gross Margin Change', value: (revenueImpact + cogsImpact) * 0.1, type: (revenueImpact + cogsImpact) > 0 ? 'positive' : 'negative' },
+                { label: 'Operating Leverage', value: opexImpact * 0.2, type: opexImpact > 0 ? 'positive' : 'negative' },
+                { label: 'Efficiency Gains', value: (revenueImpact - Math.abs(opexImpact)) * 0.05, type: 'positive' },
+                { label: 'Current EBITDA', value: current.ebitda, type: 'total' }
+            ];
+            
+            document.getElementById('ebitdaWaterfallChart').innerHTML = createWaterfallHTML(waterfallData);
         }
         
         // Create waterfall HTML visualization
-        function createWaterfallHTML(data, title) {
+        function createWaterfallHTML(data) {
             const maxValue = Math.max(...data.map(d => Math.abs(d.value)));
             
             return `
                 <div class="waterfall-container">
                     <div class="waterfall-bars">
-                        ${data.map((item, index) => `
-                            <div class="waterfall-bar-group">
-                                <div class="waterfall-bar ${item.type}" 
-                                     style="height: ${(Math.abs(item.value) / maxValue) * 100}%"
-                                     data-value="${formatCurrency(item.value)}">
+                        ${data.map((item, index) => {
+                            const height = Math.max((Math.abs(item.value) / maxValue) * 100, 15);
+                            const isConnector = index > 0 && index < data.length - 1;
+                            
+                            return `
+                                <div class="waterfall-bar-group">
+                                    ${isConnector ? '<div class="waterfall-connector"></div>' : ''}
+                                    <div class="waterfall-bar waterfall-${item.type}" 
+                                         style="height: ${height}%"
+                                         data-value="${formatCurrency(item.value)}"
+                                         title="${item.label}: ${formatCurrency(item.value)}">
+                                    </div>
+                                    <div class="waterfall-label">${item.label}</div>
+                                    <div class="waterfall-value">${formatCurrency(item.value)}</div>
                                 </div>
-                                <div class="waterfall-label">${item.label}</div>
-                                <div class="waterfall-value">${formatCurrency(item.value)}</div>
-                            </div>
-                        `).join('')}
+                            `;
+                        }).join('')}
                     </div>
                 </div>
             `;
