@@ -3858,7 +3858,7 @@
             margin: 0;
         }
         
-        /* Comparison table specific styles */
+        /* Comparison table - extends your existing financial-table styles */
         .comparison-table {
             width: 100%;
             border-collapse: collapse;
@@ -3899,7 +3899,7 @@
             background: #f9fafb;
         }
         
-        /* Value formatting using your existing color scheme */
+        /* Value formatting - using your existing color scheme */
         .positive-change {
             color: #059669;
         }
@@ -3944,8 +3944,8 @@
                 </a>
             </div>
             <div class="nav-item">
-                <a href="#reports-analytics" class="nav-link" data-section="forecasting" data-tooltip="Forecasting & Analytics">
-                    <i class="nav-icon fas fa-chart-area"></i>
+                <a href="#reports" class="nav-link" data-section="reports" data-tooltip="Reports & Analytics">
+                    <i class="nav-icon fas fa-chart-bar"></i>
                     <span>Reports & Analytics</span>
                 </a>
             </div>
@@ -5900,10 +5900,10 @@
                 // Update page title
                 const titles = {
                     'dashboard': 'Dashboard Overview',
-                    'ap-ar': 'AP/AR Tracking',
+                    'ap-ar': 'AP/AR Tracking', 
                     'statements': 'Financial Statements',
-                    'reports-analytics': 'Reports & Analytics',
-                    'forecasting': 'Forecast & Analytics',
+                    'reports': 'Reports & Analytics',  // This should match data-section="reports"
+                    'forecasting': 'Forecasting & Analytics',
                     'benchmarking': 'Industry Benchmarking',
                     'scenarios': 'Scenario Analysis'
                 };
@@ -5912,7 +5912,7 @@
                     'dashboard': 'Real-time financial insights and cash flow management',
                     'ap-ar': 'Track overdue payments and manage cash cycles',
                     'statements': 'Generate income statements, balance sheets, and cash flow reports',
-                    'reports-analytics': 'Financial ratios and comprehensive business analytics',
+                    'reports': 'Period-to-period variance analysis and business intelligence', // Updated subtitle
                     'forecasting': '13-week cash flow projections and trend analysis',
                     'benchmarking': 'Compare performance against industry standards',
                     'scenarios': 'What-if modeling and strategic financial planning'
@@ -5949,7 +5949,7 @@
                         if (dateToFilter) dateToFilter.addEventListener('change', renderAPARTable);
                     }, 100);
                 }
-                if (this.dataset.section === 'forecasting') {
+                if (this.dataset.section === 'reports') {
                     setTimeout(() => {
                         initializeReportsAnalytics();
                     }, 100);
@@ -7092,11 +7092,11 @@
                 // Update page title
                 const titles = {
                     'dashboard': 'Dashboard Overview',
-                    'ap-ar': 'AP/AR Tracking',
+                    'ap-ar': 'AP/AR Tracking', 
                     'statements': 'Financial Statements',
+                    'reports': 'Reports & Analytics',  // This should match data-section="reports"
                     'forecasting': 'Forecasting & Analytics',
                     'benchmarking': 'Industry Benchmarking',
-                    'reports': 'Reports & Analytics',
                     'scenarios': 'Scenario Analysis'
                 };
                 
@@ -12831,21 +12831,24 @@
 
         function initializeReportsAnalytics() {
             console.log('Initializing Reports & Analytics...');
-            populatePeriodSelectors();
+            populateComparisonPeriodSelectors();
             setupComparisonEventListeners();
         }
 
-        function populatePeriodSelectors() {
+        function populateComparisonPeriodSelectors() {
             const currentSelect = document.getElementById('currentPeriod');
             const previousSelect = document.getElementById('previousPeriod');
             
             if (!currentSelect || !previousSelect) return;
             
-            const periods = generatePeriodOptions();
+            // Generate periods similar to your existing date filters
+            const periods = generateComparisonPeriods();
             
+            // Clear existing options
             currentSelect.innerHTML = '';
             previousSelect.innerHTML = '';
             
+            // Populate both selectors
             periods.forEach((period, index) => {
                 const currentOption = new Option(period.label, period.value);
                 const previousOption = new Option(period.label, period.value);
@@ -12853,13 +12856,14 @@
                 currentSelect.add(currentOption);
                 previousSelect.add(previousOption);
                 
+                // Set default selections (current month and previous month)
                 if (index === 0) currentOption.selected = true;
                 if (index === 1) previousOption.selected = true;
             });
         }
         
         // Generate period options (reusing your existing date logic patterns)
-        function generatePeriodOptions() {
+        function generateComparisonPeriods() {
             const periods = [];
             const now = new Date();
             
@@ -12886,28 +12890,41 @@
         
         // Setup event listeners (following your existing patterns)
         function setupComparisonEventListeners() {
+            // Period type radio buttons
             const periodTypeRadios = document.querySelectorAll('input[name="periodType"]');
             periodTypeRadios.forEach(radio => {
-                radio.addEventListener('change', handlePeriodTypeChange);
+                radio.addEventListener('change', handleComparisonPeriodTypeChange);
             });
             
+            // Generate comparison button
             const generateBtn = document.getElementById('generateComparisonBtn');
             if (generateBtn) {
-                generateBtn.addEventListener('click', generateComparison);
+                generateBtn.addEventListener('click', generatePeriodComparison);
+            }
+            
+            // Include YoY checkbox
+            const includeYoYCheckbox = document.getElementById('includeYoY');
+            if (includeYoYCheckbox) {
+                includeYoYCheckbox.addEventListener('change', updateComparisonPeriodSelectors);
             }
         }
         
         // Handle period type changes (similar to your existing filter handlers)
-        function handlePeriodTypeChange(event) {
+        function handleComparisonPeriodTypeChange(event) {
             const periodType = event.target.value;
-            updatePeriodSelectors(periodType);
+            console.log('Period type changed to:', periodType);
+            updateComparisonPeriodSelectors(periodType);
         }
         
-        function updatePeriodSelectors(periodType) {
-            // Auto-select appropriate periods based on type
+        function updateComparisonPeriodSelectors(periodType) {
             const currentSelect = document.getElementById('currentPeriod');
             const previousSelect = document.getElementById('previousPeriod');
             
+            if (!periodType) {
+                periodType = document.querySelector('input[name="periodType"]:checked')?.value || 'mom';
+            }
+            
+            // Auto-select appropriate previous period based on type
             const currentValue = currentSelect.value;
             if (!currentValue) return;
             
@@ -12932,36 +12949,62 @@
                     previousMonth = currentMonth;
                     previousYear = currentYear - 1;
                     break;
-                default:
-                    return;
+                default: // custom
+                    return; // Don't auto-select for custom
             }
-            
+    
             const previousValue = `${previousYear}-${String(previousMonth).padStart(2, '0')}`;
             previousSelect.value = previousValue;
         }
         
         // Generate comparison (placeholder - will be implemented next)
-        async function generateComparison() {
-            console.log('Generating comparison...');
+        async function generatePeriodComparison() {
+            const currentPeriod = document.getElementById('currentPeriod').value;
+            const previousPeriod = document.getElementById('previousPeriod').value;
+            const includeYoY = document.getElementById('includeYoY').checked;
             
-            showComparisonLoading(true);
+            if (!currentPeriod || !previousPeriod) {
+                alert('Please select both current and previous periods.');
+                return;
+            }
             
-            // Placeholder for now
-            setTimeout(() => {
-                showComparisonLoading(false);
-                document.getElementById('comparisonTableContent').innerHTML = `
-                    <div style="text-align: center; padding: 2rem; color: #6b7280;">
-                        <i class="fas fa-chart-line" style="font-size: 3rem; margin-bottom: 1rem;"></i>
-                        <h4>Comparison table will be implemented next</h4>
-                        <p>Period comparison logic and table generation coming in the next step</p>
-                    </div>
-                `;
+            console.log('Generating comparison:', { currentPeriod, previousPeriod, includeYoY });
+            
+            // Show loading state (reusing your existing loading pattern)
+            showComparisonLoadingState(true);
+            
+            try {
+                // Use your existing financial data fetching approach
+                const currentData = await fetchFinancialDataForComparisonPeriod(currentPeriod);
+                const previousData = await fetchFinancialDataForComparisonPeriod(previousPeriod);
+                
+                let lastYearData = null;
+                if (includeYoY) {
+                    const [year, month] = currentPeriod.split('-').map(Number);
+                    const lastYearPeriod = `${year - 1}-${String(month).padStart(2, '0')}`;
+                    lastYearData = await fetchFinancialDataForComparisonPeriod(lastYearPeriod);
+                }
+                
+                // Generate and display the comparison table
+                generateComparisonTable(currentData, previousData, lastYearData, {
+                    currentPeriod,
+                    previousPeriod,
+                    includeYoY
+                });
+                
+                // Show export options (reusing your existing export button visibility pattern)
                 document.getElementById('exportOptions').style.display = 'flex';
-            }, 1500);
+                
+            } catch (error) {
+                console.error('Error generating comparison:', error);
+                alert('Error generating comparison report. Please try again.');
+            } finally {
+                showComparisonLoadingState(false);
+            }
         }
         
         // Show/hide loading (reusing your existing loading pattern)
-        function showComparisonLoading(show) {
+        function showComparisonLoadingState(show) {
             const loading = document.getElementById('comparisonLoading');
             const content = document.getElementById('comparisonTableContent');
             
@@ -12972,20 +13015,90 @@
                 loading.style.display = 'none';
             }
         }
+
+        async function fetchFinancialDataForComparisonPeriod(period) {
+            try {
+                console.log('Fetching financial data for period:', period);
+                
+                const [year, month] = period.split('-').map(Number);
+                const startDate = `${year}-${String(month).padStart(2, '0')}-01`;
+                const endDate = new Date(year, month, 0).toISOString().split('T')[0]; // Last day of month
+                
+                // Use your existing Supabase query pattern
+                const { data, error } = await supabase
+                    .from('financial_transactions_meridash')
+                    .select('*')
+                    .gte('transaction_date', startDate)
+                    .lte('transaction_date', endDate);
+                
+                if (error) throw error;
+                
+                // Process the data into P&L structure (reusing your existing categorization logic)
+                return processFinancialDataForComparison(data || [], period);
+                
+            } catch (error) {
+                console.error('Error fetching financial data:', error);
+                return null;
+            }
+        }
         
-        // Export placeholders (following your existing export patterns)
+        // Process financial data into P&L structure (following your existing data processing patterns)
+        function processFinancialDataForComparison(transactions, period) {
+            // Initialize P&L structure
+            const pnlData = {
+                period: period,
+                grossRevenue: 0,
+                discounts: 0,
+                netRevenue: 0,
+                cogs: 0,
+                grossProfit: 0,
+                opex: 0,
+                ebitda: 0,
+                ebit: 0,
+                netIncome: 0
+            };
+            
+            // Process transactions into categories (reusing your existing categorization logic)
+            transactions.forEach(transaction => {
+                const amount = transaction.debit_amount - transaction.credit_amount;
+                const accountCode = transaction.account_code || '';
+                const accountName = (transaction.account_name || '').toLowerCase();
+                
+                // Categorize based on account codes (following your existing GL account patterns)
+                if (accountCode.startsWith('4') || accountName.includes('revenue') || accountName.includes('sales')) {
+                    pnlData.grossRevenue += Math.abs(amount);
+                } else if (accountName.includes('discount') || accountName.includes('allowance')) {
+                    pnlData.discounts += Math.abs(amount);
+                } else if (accountCode.startsWith('5') && (accountName.includes('cogs') || accountName.includes('cost of goods'))) {
+                    pnlData.cogs += Math.abs(amount);
+                } else if (accountCode.startsWith('5') || accountName.includes('expense')) {
+                    pnlData.opex += Math.abs(amount);
+                }
+            });
+            
+            // Calculate derived values (following your existing calculation patterns)
+            pnlData.netRevenue = pnlData.grossRevenue - pnlData.discounts;
+            pnlData.grossProfit = pnlData.netRevenue - pnlData.cogs;
+            pnlData.ebitda = pnlData.grossProfit - pnlData.opex;
+            pnlData.ebit = pnlData.ebitda; // Simplified for now
+            pnlData.netIncome = pnlData.ebit; // Simplified for now
+            
+            return pnlData;
+        }
+        
+        // Export functions (placeholders using your existing export patterns)
         function exportComparisonToPDF() {
-            console.log('Exporting to PDF...');
+            console.log('Exporting comparison to PDF...');
             alert('PDF export functionality will be implemented next.');
         }
         
         function copyComparisonToClipboard() {
-            console.log('Copying to clipboard...');
-            alert('Clipboard functionality will be implemented next.');
+            console.log('Copying comparison to clipboard...');
+            alert('Clipboard copy functionality will be implemented next.');
         }
         
         function exportComparisonToExcel() {
-            console.log('Exporting to Excel...');
+            console.log('Exporting comparison to Excel...');
             alert('Excel export functionality will be implemented next.');
         }
 
