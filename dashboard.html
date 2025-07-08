@@ -7961,7 +7961,23 @@
             section.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             section.querySelector('#' + tabName + '-tab').classList.add('active');
             section.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
-
+        
+            // Initialize aging analysis when aging tab is selected
+            if (tabName === 'aging') {
+                console.log('Aging tab selected, ensuring data is loaded...');
+                
+                // Check if data is loaded, if not load it
+                if (!aparTransactions || aparTransactions.length === 0) {
+                    console.log('No data found, loading from Supabase...');
+                    loadAPARData().then(() => {
+                        updateAgingAnalysis();
+                    });
+                } else {
+                    console.log('Data already loaded, updating aging analysis...');
+                    updateAgingAnalysis();
+                }
+            }
+        
             // Initialize scenario analysis if scenarios tab is selected
             if (tabName === 'scenarios') {
                 setTimeout(() => {
@@ -8687,28 +8703,134 @@
             return aging;
         }
         
-        // Update aging analysis
+        // Update aging analysis with better error handling
         function updateAgingAnalysis() {
-            if (!aparTransactions || aparTransactions.length === 0) return;
-        
-            // Separate AR and AP transactions
-            const arTransactions = aparTransactions.filter(t => t.type === 'AR');
-            const apTransactions = aparTransactions.filter(t => t.type === 'AP');
-        
-            // Calculate aging for both
-            const arAging = calculateAging(arTransactions);
-            const apAging = calculateAging(apTransactions);
-        
-            // Remove this line: updateAgingSummaryCards(arAging, apAging);
+            console.log('=== UPDATING AGING ANALYSIS ===');
+            console.log('aparTransactions:', aparTransactions?.length || 0);
             
-            // Update aging tables
-            updateAgingTables(arAging, apAging);
+            if (!aparTransactions || aparTransactions.length === 0) {
+                console.warn('No aparTransactions available, showing empty state');
+                showEmptyAgingState();
+                return;
+            }
+        
+            try {
+                // Separate AR and AP transactions
+                const arTransactions = aparTransactions.filter(t => t.type === 'AR');
+                const apTransactions = aparTransactions.filter(t => t.type === 'AP');
+                
+                console.log('AR transactions:', arTransactions.length);
+                console.log('AP transactions:', apTransactions.length);
+        
+                // Calculate aging for both
+                const arAging = calculateAging(arTransactions);
+                const apAging = calculateAging(apTransactions);
+                
+                console.log('Calculated aging data:', { arAging, apAging });
+        
+                // Update aging tables
+                updateAgingTables(arAging, apAging);
+                
+                // Update additional analytics
+                updateAdditionalAnalytics(arTransactions, apTransactions);
+                
+                // Create charts with validation
+                createAgingChartsWithValidation(arAging, apAging);
+                
+            } catch (error) {
+                console.error('Error in updateAgingAnalysis:', error);
+                showEmptyAgingState('Error processing aging data');
+            }
+        }
+        
+        // Add this new function to handle empty/error states
+        function showEmptyAgingState(message = 'No aging data available') {
+            console.log('Showing empty aging state:', message);
             
-            // Update additional analytics
-            updateAdditionalAnalytics(arTransactions, apTransactions);
+            // Clear aging tables
+            const arTableBody = document.getElementById('arAgingTableBody');
+            const apTableBody = document.getElementById('apAgingTableBody');
             
-            // Create charts
-            createAgingCharts(arAging, apAging);
+            if (arTableBody) {
+                arTableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #6b7280; padding: 2rem;">${message}</td></tr>`;
+            }
+            if (apTableBody) {
+                apTableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #6b7280; padding: 2rem;">${message}</td></tr>`;
+            }
+            
+            // Show message on charts
+            showAgingChartError(message);
+        }
+        
+        // Add this improved chart creation function
+        function createAgingChartsWithValidation(arAging, apAging) {
+            console.log('Creating aging charts with validation...');
+            
+            if (!arAging || !apAging) {
+                console.error('Missing aging data for charts');
+                showAgingChartError('Unable to create charts - missing data');
+                return;
+            }
+            
+            const buckets = ['0-30', '30-60', '60-90', '90-120', '120+'];
+            const bucketLabels = ['0-30 Days', '30-60 Days', '60-90 Days', '90-120 Days', '120+ Days'];
+            
+            try {
+                // AR Chart with data validation
+                const arData = buckets.map(bucket => {
+                    const bucketData = arAging[bucket];
+                    return (bucketData && typeof bucketData.total === 'number') ? bucketData.total : 0;
+                });
+                
+                // AP Chart with data validation
+                const apData = buckets.map(bucket => {
+                    const bucketData = apAging[bucket];
+                    return (bucketData && typeof bucketData.total === 'number') ? bucketData.total : 0;
+                });
+                
+                console.log('Chart data prepared:', { arData, apData });
+                
+                // Only create charts if canvas elements exist
+                const arCanvas = document.getElementById('arAgingChart');
+                const apCanvas = document.getElementById('apAgingChart');
+                
+                if (arCanvas && apCanvas) {
+                    createAgingChart('arAgingChart', 'Accounts Receivable', arData, bucketLabels, '#10b981');
+                    createAgingChart('apAgingChart', 'Accounts Payable', apData, bucketLabels, '#ef4444');
+                    console.log('Aging charts created successfully');
+                } else {
+                    console.error('Chart canvas elements not found');
+                    showAgingChartError('Chart containers not found');
+                }
+                
+            } catch (error) {
+                console.error('Error creating aging charts:', error);
+                showAgingChartError('Failed to create charts');
+            }
+        }
+        
+        // Add the error display function
+        function showAgingChartError(message) {
+            const canvases = ['arAgingChart', 'apAgingChart'];
+            
+            canvases.forEach(canvasId => {
+                const canvas = document.getElementById(canvasId);
+                if (canvas) {
+                    const ctx = canvas.getContext('2d');
+                    
+                    // Clear canvas
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    
+                    // Set text style
+                    ctx.fillStyle = '#6b7280';
+                    ctx.font = '14px Inter, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    
+                    // Draw message
+                    ctx.fillText(message, canvas.width / 2, canvas.height / 2);
+                }
+            });
         }
         
         // Update summary cards
