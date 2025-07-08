@@ -13126,6 +13126,9 @@
             }
         }
 
+        // Add these JavaScript functions to the <script> section in dashboard.html
+
+        // Reports & Analytics Variables
         let comparisonData = {
             current: null,
             previous: null,
@@ -13433,12 +13436,6 @@
                     </thead>
                     <tbody>
                         ${generateTableRows(current, previous, lastYear)}
-                    </tbody>
-                </table>
-            `;
-            
-            document.getElementById('comparisonTableContent').innerHTML = tableHTML;
-        }generateTableRows(current, previous, lastYear)}
                     </tbody>
                 </table>
             `;
