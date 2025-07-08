@@ -3838,6 +3838,79 @@
             transform: translateY(-2px);
             transition: all 0.3s ease;
         }
+
+        /* Period type radio group styling */
+        .period-type-group {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        
+        .period-type-group input[type="radio"] {
+            margin: 0 0.25rem 0 0;
+        }
+        
+        .period-type-group label {
+            color: #374151;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin: 0;
+        }
+        
+        /* Comparison table specific styles */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+            background: white;
+        }
+        
+        .comparison-table th {
+            background: #f8fafc;
+            padding: 0.75rem 0.5rem;
+            text-align: center;
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 2px solid #e5e7eb;
+            font-size: 0.75rem;
+            white-space: nowrap;
+        }
+        
+        .comparison-table th:first-child {
+            text-align: left;
+            width: 18%;
+        }
+        
+        .comparison-table td {
+            padding: 0.75rem 0.5rem;
+            border-bottom: 1px solid #f3f4f6;
+            text-align: right;
+            font-weight: 500;
+        }
+        
+        .comparison-table td:first-child {
+            text-align: left;
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .comparison-table tbody tr:hover {
+            background: #f9fafb;
+        }
+        
+        /* Value formatting using your existing color scheme */
+        .positive-change {
+            color: #059669;
+        }
+        
+        .negative-change {
+            color: #dc2626;
+        }
+        
+        .neutral-change {
+            color: #6b7280;
+        }
         
     </style>
 </head>
@@ -3873,7 +3946,7 @@
             <div class="nav-item">
                 <a href="#forecasting" class="nav-link" data-section="forecasting" data-tooltip="Forecasting & Analytics">
                     <i class="nav-icon fas fa-chart-area"></i>
-                    <span>Forecasting & Analytics</span>
+                    <span>Reports & Analytics</span>
                 </a>
             </div>
             <div class="nav-item">
@@ -5103,6 +5176,106 @@
                 </div>
             </div>
 
+            <!-- Reports & Analytics Section -->
+            <div id="forecasting-section" class="section-content" style="display: none;">
+                <div class="dashboard-section">
+                    <div class="section-header">
+                        <h3 class="section-title">Reports & Analytics</h3>
+                        <div class="section-actions">
+                            <!-- Period selector will go here -->
+                        </div>
+                    </div>
+            
+                    <!-- Period Comparison Container -->
+                    <div class="workspace-card">
+                        <div class="card-header">
+                            <h3>
+                                <i class="fas fa-balance-scale"></i>
+                                Period-to-Period P&L Comparison
+                            </h3>
+                            
+                            <!-- Period Selector using existing filter patterns -->
+                            <div class="filters-section" style="margin-bottom: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
+                                <div class="period-type-group">
+                                    <label style="margin-right: 0.5rem;">Comparison Type:</label>
+                                    <input type="radio" name="periodType" value="mom" id="momRadio" checked>
+                                    <label for="momRadio" style="margin-right: 1rem;">Month-over-Month</label>
+                                    <input type="radio" name="periodType" value="qoq" id="qoqRadio">
+                                    <label for="qoqRadio" style="margin-right: 1rem;">Quarter-over-Quarter</label>
+                                    <input type="radio" name="periodType" value="yoy" id="yoyRadio">
+                                    <label for="yoyRadio" style="margin-right: 1rem;">Year-over-Year</label>
+                                    <input type="radio" name="periodType" value="custom" id="customRadio">
+                                    <label for="customRadio">Custom</label>
+                                </div>
+                                
+                                <select id="currentPeriod" class="filter-select">
+                                    <!-- Will be populated by JavaScript -->
+                                </select>
+                                
+                                <span style="color: #6b7280;">vs</span>
+                                
+                                <select id="previousPeriod" class="filter-select">
+                                    <!-- Will be populated by JavaScript -->
+                                </select>
+                                
+                                <label style="display: flex; align-items: center; gap: 0.25rem;">
+                                    <input type="checkbox" id="includeYoY" checked>
+                                    Include YoY
+                                </label>
+                                
+                                <button id="generateComparisonBtn" class="btn btn-primary">
+                                    <i class="fas fa-chart-line"></i>
+                                    Generate Report
+                                </button>
+                            </div>
+                        </div>
+            
+                        <!-- Comparison Table Container -->
+                        <div class="table-container" id="comparisonTableContainer">
+                            <div class="loading-state" id="comparisonLoading" style="display: none; text-align: center; padding: 2rem;">
+                                <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: #3b82f6;"></i>
+                                <p style="margin-top: 1rem; color: #6b7280;">Generating comparison report...</p>
+                            </div>
+                            
+                            <!-- The comparison table will be inserted here -->
+                            <div id="comparisonTableContent"></div>
+                        </div>
+            
+                        <!-- Export Options using existing button styles -->
+                        <div class="section-actions" id="exportOptions" style="display: none; margin-top: 1rem; justify-content: flex-start;">
+                            <button class="btn btn-secondary" onclick="exportComparisonToPDF()">
+                                <i class="fas fa-file-pdf"></i>
+                                Export to PDF
+                            </button>
+                            <button class="btn btn-secondary" onclick="copyComparisonToClipboard()">
+                                <i class="fas fa-clipboard"></i>
+                                Copy for PowerPoint
+                            </button>
+                            <button class="btn btn-secondary" onclick="exportComparisonToExcel()">
+                                <i class="fas fa-file-excel"></i>
+                                Export to Excel
+                            </button>
+                        </div>
+                    </div>
+            
+                    <!-- Waterfall Chart Section (Phase 2) -->
+                    <div class="workspace-card" id="waterfallSection" style="display: none;">
+                        <div class="card-header">
+                            <h3>
+                                <i class="fas fa-chart-waterfall"></i>
+                                P&L Waterfall Analysis
+                            </h3>
+                        </div>
+                        
+                        <div class="coming-soon" style="text-align: center; padding: 3rem; color: #6b7280;">
+                            <i class="fas fa-tools" style="font-size: 3rem; margin-bottom: 1rem; color: #9ca3af;"></i>
+                            <h4 style="margin-bottom: 0.5rem; color: #374151;">Waterfall Chart Coming Soon</h4>
+                            <p>Interactive variance bridge analysis</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <!-- Other sections (hidden by default) -->
             <div id="statements-placeholder" class="section-content" style="display: none;">
                 <div class="feature-placeholder">
@@ -5774,6 +5947,11 @@
                         if (statusFilter) statusFilter.addEventListener('change', renderAPARTable);
                         if (dateFromFilter) dateFromFilter.addEventListener('change', renderAPARTable);
                         if (dateToFilter) dateToFilter.addEventListener('change', renderAPARTable);
+                    }, 100);
+                }
+                if (this.dataset.section === 'forecasting') {
+                    setTimeout(() => {
+                        initializeReportsAnalytics();
                     }, 100);
                 }
             });
@@ -12649,6 +12827,166 @@
             if (reportsTab) {
                 observer.observe(reportsTab, { attributes: true, attributeFilter: ['style', 'class'] });
             }
+        }
+
+        function initializeReportsAnalytics() {
+            console.log('Initializing Reports & Analytics...');
+            populatePeriodSelectors();
+            setupComparisonEventListeners();
+        }
+
+        function populatePeriodSelectors() {
+            const currentSelect = document.getElementById('currentPeriod');
+            const previousSelect = document.getElementById('previousPeriod');
+            
+            if (!currentSelect || !previousSelect) return;
+            
+            const periods = generatePeriodOptions();
+            
+            currentSelect.innerHTML = '';
+            previousSelect.innerHTML = '';
+            
+            periods.forEach((period, index) => {
+                const currentOption = new Option(period.label, period.value);
+                const previousOption = new Option(period.label, period.value);
+                
+                currentSelect.add(currentOption);
+                previousSelect.add(previousOption);
+                
+                if (index === 0) currentOption.selected = true;
+                if (index === 1) previousOption.selected = true;
+            });
+        }
+        
+        // Generate period options (reusing your existing date logic patterns)
+        function generatePeriodOptions() {
+            const periods = [];
+            const now = new Date();
+            
+            for (let i = 0; i < 24; i++) {
+                const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                const year = date.getFullYear();
+                const month = date.getMonth();
+                
+                const monthNames = [
+                    'January', 'February', 'March', 'April', 'May', 'June',
+                    'July', 'August', 'September', 'October', 'November', 'December'
+                ];
+                
+                periods.push({
+                    label: `${monthNames[month]} ${year}`,
+                    value: `${year}-${String(month + 1).padStart(2, '0')}`,
+                    year: year,
+                    month: month + 1
+                });
+            }
+            
+            return periods;
+        }
+        
+        // Setup event listeners (following your existing patterns)
+        function setupComparisonEventListeners() {
+            const periodTypeRadios = document.querySelectorAll('input[name="periodType"]');
+            periodTypeRadios.forEach(radio => {
+                radio.addEventListener('change', handlePeriodTypeChange);
+            });
+            
+            const generateBtn = document.getElementById('generateComparisonBtn');
+            if (generateBtn) {
+                generateBtn.addEventListener('click', generateComparison);
+            }
+        }
+        
+        // Handle period type changes (similar to your existing filter handlers)
+        function handlePeriodTypeChange(event) {
+            const periodType = event.target.value;
+            updatePeriodSelectors(periodType);
+        }
+        
+        function updatePeriodSelectors(periodType) {
+            // Auto-select appropriate periods based on type
+            const currentSelect = document.getElementById('currentPeriod');
+            const previousSelect = document.getElementById('previousPeriod');
+            
+            const currentValue = currentSelect.value;
+            if (!currentValue) return;
+            
+            const [currentYear, currentMonth] = currentValue.split('-').map(Number);
+            let previousYear, previousMonth;
+            
+            switch (periodType) {
+                case 'mom':
+                    previousMonth = currentMonth === 1 ? 12 : currentMonth - 1;
+                    previousYear = currentMonth === 1 ? currentYear - 1 : currentYear;
+                    break;
+                case 'qoq':
+                    previousMonth = currentMonth - 3;
+                    if (previousMonth <= 0) {
+                        previousMonth += 12;
+                        previousYear = currentYear - 1;
+                    } else {
+                        previousYear = currentYear;
+                    }
+                    break;
+                case 'yoy':
+                    previousMonth = currentMonth;
+                    previousYear = currentYear - 1;
+                    break;
+                default:
+                    return;
+            }
+            
+            const previousValue = `${previousYear}-${String(previousMonth).padStart(2, '0')}`;
+            previousSelect.value = previousValue;
+        }
+        
+        // Generate comparison (placeholder - will be implemented next)
+        async function generateComparison() {
+            console.log('Generating comparison...');
+            
+            showComparisonLoading(true);
+            
+            // Placeholder for now
+            setTimeout(() => {
+                showComparisonLoading(false);
+                document.getElementById('comparisonTableContent').innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: #6b7280;">
+                        <i class="fas fa-chart-line" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                        <h4>Comparison table will be implemented next</h4>
+                        <p>Period comparison logic and table generation coming in the next step</p>
+                    </div>
+                `;
+                document.getElementById('exportOptions').style.display = 'flex';
+            }, 1500);
+        }
+        
+        // Show/hide loading (reusing your existing loading pattern)
+        function showComparisonLoading(show) {
+            const loading = document.getElementById('comparisonLoading');
+            const content = document.getElementById('comparisonTableContent');
+            
+            if (show) {
+                loading.style.display = 'block';
+                content.innerHTML = '';
+            } else {
+                loading.style.display = 'none';
+            }
+        }
+        
+        // Export placeholders (following your existing export patterns)
+        function exportComparisonToPDF() {
+            console.log('Exporting to PDF...');
+            alert('PDF export functionality will be implemented next.');
+        }
+        
+        function copyComparisonToClipboard() {
+            console.log('Copying to clipboard...');
+            alert('Clipboard functionality will be implemented next.');
+        }
+        
+        function exportComparisonToExcel() {
+            console.log('Exporting to Excel...');
+            alert('Excel export functionality will be implemented next.');
         }
 
         // Call this function when the page loads
