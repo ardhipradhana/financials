@@ -6838,18 +6838,6 @@
             }
         }
 
-        // Close AI chat when clicking outside
-        document.addEventListener('click', function(e) {
-            const sidebar = document.getElementById('aiChatSidebar');
-            const toggle = document.querySelector('.ai-chat-toggle');
-            
-            // Only close if clicking outside both sidebar and toggle, and sidebar is open
-            if (!sidebar.contains(e.target) && !toggle.contains(e.target) && sidebar.classList.contains('open')) {
-                sidebar.classList.remove('open');
-                toggle.style.display = 'flex'; // Show the button again
-            }
-        });
-
         // Initialize with mock data
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Meridash Dashboard Loaded');
