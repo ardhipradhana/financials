@@ -4406,6 +4406,231 @@
             white-space: nowrap;
             z-index: 1000;
         }
+
+        /* Financing-specific styles */
+        .financing-options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .financing-option button {
+            width: 100%;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            text-align: center;
+        }
+        
+        .financing-option i {
+            font-size: 1.5rem;
+        }
+        
+        .scenario-transactions-list {
+            margin: 1.5rem 0;
+            min-height: 200px;
+        }
+        
+        .no-scenarios {
+            text-align: center;
+            padding: 2rem;
+            color: #6b7280;
+            background: #f9fafb;
+            border-radius: 8px;
+            border: 1px dashed #e2e8f0;
+        }
+        
+        .scenario-financing-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            background: white;
+            transition: box-shadow 0.2s ease;
+        }
+        
+        .scenario-financing-item:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .financing-icon {
+            font-size: 1.5rem;
+            color: #3b82f6;
+            width: 40px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        
+        .financing-details {
+            flex: 1;
+        }
+        
+        .financing-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .financing-header h5 {
+            margin: 0;
+            color: #1e293b;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        
+        .financing-amount {
+            font-weight: 600;
+            color: #059669;
+            font-size: 0.9rem;
+        }
+        
+        .financing-terms {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .term-item {
+            font-size: 0.75rem;
+            color: #6b7280;
+            background: #f3f4f6;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            white-space: nowrap;
+        }
+        
+        .financing-purpose {
+            font-size: 0.875rem;
+            color: #374151;
+            font-style: italic;
+        }
+        
+        .remove-scenario-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            flex-shrink: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .remove-scenario-btn:hover {
+            background: #dc2626;
+        }
+        
+        .scenario-impact-summary {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .scenario-impact-summary h5 {
+            margin: 0 0 1rem 0;
+            color: #1e293b;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        
+        .impact-metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        .impact-metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .metric-label {
+            font-size: 0.875rem;
+            color: #374151;
+            font-weight: 500;
+        }
+        
+        .metric-value {
+            font-weight: 600;
+            color: #059669;
+            font-size: 0.9rem;
+        }
+        
+        .scenario-financing-section {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .scenario-financing-section h4 {
+            margin: 0 0 0.5rem 0;
+            color: #1e293b;
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .section-description {
+            color: #6b7280;
+            font-size: 0.875rem;
+            margin: 0 0 1.5rem 0;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .financing-options-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .financing-terms {
+                gap: 0.5rem;
+            }
+            
+            .financing-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.25rem;
+            }
+            
+            .impact-metrics {
+                grid-template-columns: 1fr;
+            }
+            
+            .scenario-financing-item {
+                padding: 0.75rem;
+                gap: 0.75rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .financing-options-grid {
+                grid-template-columns: 1fr;
+            }
+        }
         
     </style>
 </head>
@@ -5176,6 +5401,53 @@
                                     <div class="impact-item neutral">
                                         <span class="impact-icon">ℹ️</span>
                                         <span>Move transactions to see potential impacts</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="scenario-financing-section">
+                            <h4><i class="fas fa-plus-circle"></i> What-if Financing Options</h4>
+                            <p class="section-description">Simulate financing options to improve cash flow without affecting your actual AP/AR data</p>
+                            
+                            <div class="financing-options-grid">
+                                <div class="financing-option">
+                                    <button class="btn btn-secondary" onclick="openFinancingModal('loan')">
+                                        <i class="fas fa-building-columns"></i> Add Bank Loan
+                                    </button>
+                                </div>
+                                <div class="financing-option">
+                                    <button class="btn btn-secondary" onclick="openFinancingModal('credit_line')">
+                                        <i class="fas fa-credit-card"></i> Add Credit Line
+                                    </button>
+                                </div>
+                                <div class="financing-option">
+                                    <button class="btn btn-secondary" onclick="openFinancingModal('invoice_factoring')">
+                                        <i class="fas fa-file-invoice-dollar"></i> Invoice Factoring
+                                    </button>
+                                </div>
+                                <div class="financing-option">
+                                    <button class="btn btn-secondary" onclick="openFinancingModal('equity')">
+                                        <i class="fas fa-chart-pie"></i> Equity Injection
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Scenario Financing List -->
+                            <div id="scenarioFinancingList" class="scenario-transactions-list">
+                                <!-- Will be populated by JavaScript -->
+                            </div>
+                            
+                            <div class="scenario-impact-summary">
+                                <h5>Projected Impact</h5>
+                                <div class="impact-metrics">
+                                    <div class="impact-metric">
+                                        <span class="metric-label">Cash Position Improvement:</span>
+                                        <span id="cashImprovementAmount" class="metric-value">+Rp 0</span>
+                                    </div>
+                                    <div class="impact-metric">
+                                        <span class="metric-label">Extended Runway:</span>
+                                        <span id="runwayExtension" class="metric-value">+0 days</span>
                                     </div>
                                 </div>
                             </div>
@@ -5976,6 +6248,8 @@
         
         // AP/AR Data Management
         let aparTransactions = [];
+        let scenarioFinancingItems = [];
+        let scenarioCashImpact = 0;
 
         // Add this function globally (outside any other function)
         function assignOverdueToRealisticWeek(transaction, dueDate) {
@@ -8844,6 +9118,7 @@
             if (tabName === 'scenarios') {
                 setTimeout(() => {
                     initializeScenarioAnalysis();
+                    initializeScenarioFinancing();
                 }, 100);
             }
         }
@@ -14632,6 +14907,218 @@
             
             console.log('Sample data initialized:', sampleData.length, 'transactions');
         }
+
+        // Financing Modal Functions
+        function openFinancingModal(type) {
+            const modal = document.getElementById('financingModal');
+            const typeSelect = document.getElementById('financingType');
+            const modalTitle = document.getElementById('financingModalTitle');
+            
+            // Set default type and title
+            typeSelect.value = type;
+            const titles = {
+                'loan': 'Add Bank Loan',
+                'credit_line': 'Add Credit Line', 
+                'invoice_factoring': 'Add Invoice Factoring',
+                'equity': 'Add Equity Injection'
+            };
+            modalTitle.textContent = titles[type] || 'Add Financing Option';
+            
+            // Set default values based on type
+            setFinancingDefaults(type);
+            
+            modal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeFinancingModal() {
+            const modal = document.getElementById('financingModal');
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+            document.getElementById('financingForm').reset();
+        }
+        
+        function setFinancingDefaults(type) {
+            const amountInput = document.getElementById('financingAmount');
+            const termInput = document.getElementById('financingTerm');
+            const rateInput = document.getElementById('financingRate');
+            const purposeInput = document.getElementById('financingPurpose');
+            
+            // Set defaults based on financing type
+            switch(type) {
+                case 'loan':
+                    amountInput.placeholder = '100000000'; // 100M IDR
+                    termInput.value = '24';
+                    rateInput.value = '8.5';
+                    purposeInput.value = 'Working capital expansion';
+                    break;
+                case 'credit_line':
+                    amountInput.placeholder = '50000000'; // 50M IDR
+                    termInput.value = '12';
+                    rateInput.value = '12.0';
+                    purposeInput.value = 'Short-term liquidity';
+                    break;
+                case 'invoice_factoring':
+                    amountInput.placeholder = '25000000'; // 25M IDR
+                    termInput.value = '3';
+                    rateInput.value = '15.0';
+                    purposeInput.value = 'Accelerate receivables';
+                    break;
+                case 'equity':
+                    amountInput.placeholder = '200000000'; // 200M IDR
+                    termInput.value = '0';
+                    rateInput.value = '0';
+                    purposeInput.value = 'Growth capital';
+                    break;
+            }
+            
+            // Set default available date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('financingAvailableDate').value = today;
+        }
+        
+        // Handle form submission
+        document.addEventListener('DOMContentLoaded', function() {
+            const financingForm = document.getElementById('financingForm');
+            if (financingForm) {
+                financingForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    addScenarioFinancing();
+                });
+            }
+        });
+        
+        function addScenarioFinancing() {
+            const form = document.getElementById('financingForm');
+            const formData = new FormData(form);
+            
+            const financing = {
+                id: 'scenario_' + Date.now(),
+                type: document.getElementById('financingType').value,
+                amount: parseInt(document.getElementById('financingAmount').value),
+                term: parseInt(document.getElementById('financingTerm').value),
+                rate: parseFloat(document.getElementById('financingRate').value),
+                purpose: document.getElementById('financingPurpose').value,
+                availableDate: document.getElementById('financingAvailableDate').value,
+                addedAt: new Date().toISOString()
+            };
+            
+            // Add to scenario list
+            scenarioFinancingItems.push(financing);
+            
+            // Update displays
+            renderScenarioFinancingList();
+            calculateScenarioImpact();
+            
+            // Close modal
+            closeFinancingModal();
+            
+            console.log('Added scenario financing:', financing);
+        }
+        
+        function renderScenarioFinancingList() {
+            const container = document.getElementById('scenarioFinancingList');
+            
+            if (scenarioFinancingItems.length === 0) {
+                container.innerHTML = `
+                    <div class="no-scenarios">
+                        <i class="fas fa-plus-circle"></i>
+                        <p>No financing scenarios added yet</p>
+                        <p class="text-muted">Add financing options above to see their impact on cash flow</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const itemsHTML = scenarioFinancingItems.map(item => `
+                <div class="scenario-financing-item">
+                    <div class="financing-icon">
+                        ${getFinancingIcon(item.type)}
+                    </div>
+                    <div class="financing-details">
+                        <div class="financing-header">
+                            <h5>${getFinancingTypeName(item.type)}</h5>
+                            <span class="financing-amount">${formatCurrencyFull(item.amount, 'IDR')}</span>
+                        </div>
+                        <div class="financing-terms">
+                            <span class="term-item">Term: ${item.term} months</span>
+                            <span class="term-item">Rate: ${item.rate}%</span>
+                            <span class="term-item">Available: ${new Date(item.availableDate).toLocaleDateString()}</span>
+                        </div>
+                        <div class="financing-purpose">${item.purpose}</div>
+                    </div>
+                    <button class="remove-scenario-btn" onclick="removeScenarioFinancing('${item.id}')">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `).join('');
+            
+            container.innerHTML = itemsHTML;
+        }
+        
+        function getFinancingIcon(type) {
+            const icons = {
+                'loan': '<i class="fas fa-building-columns"></i>',
+                'credit_line': '<i class="fas fa-credit-card"></i>',
+                'invoice_factoring': '<i class="fas fa-file-invoice-dollar"></i>',
+                'equity': '<i class="fas fa-chart-pie"></i>'
+            };
+            return icons[type] || '<i class="fas fa-dollar-sign"></i>';
+        }
+        
+        function getFinancingTypeName(type) {
+            const names = {
+                'loan': 'Bank Loan',
+                'credit_line': 'Credit Line',
+                'invoice_factoring': 'Invoice Factoring', 
+                'equity': 'Equity Injection'
+            };
+            return names[type] || 'Financing';
+        }
+        
+        function removeScenarioFinancing(id) {
+            scenarioFinancingItems = scenarioFinancingItems.filter(item => item.id !== id);
+            renderScenarioFinancingList();
+            calculateScenarioImpact();
+        }
+        
+        function calculateScenarioImpact() {
+            let totalCashIncrease = 0;
+            let totalMonthlyCost = 0;
+            
+            scenarioFinancingItems.forEach(item => {
+                // Add immediate cash
+                totalCashIncrease += item.amount;
+                
+                // Calculate monthly payment (for loans/credit lines)
+                if (item.type !== 'equity' && item.term > 0) {
+                    const monthlyRate = item.rate / 100 / 12;
+                    const monthlyPayment = (item.amount * monthlyRate * Math.pow(1 + monthlyRate, item.term)) / 
+                                         (Math.pow(1 + monthlyRate, item.term) - 1);
+                    totalMonthlyCost += monthlyPayment;
+                }
+            });
+            
+            // Calculate runway extension (simplified)
+            const currentMonthlyBurn = 10000000; // 10M IDR average (you can make this dynamic)
+            const netMonthlyImprovement = totalCashIncrease / 12 - totalMonthlyCost; // Spread cash over 12 months
+            const runwayExtensionDays = netMonthlyImprovement > 0 ? 
+                Math.floor((netMonthlyImprovement / currentMonthlyBurn) * 30) : 0;
+            
+            // Update display
+            document.getElementById('cashImprovementAmount').textContent = 
+                formatCurrencyFull(totalCashIncrease, 'IDR');
+            document.getElementById('runwayExtension').textContent = 
+                `+${runwayExtensionDays} days`;
+            
+            scenarioCashImpact = totalCashIncrease;
+        }
+        
+        // Initialize scenario financing when scenarios tab is opened
+        function initializeScenarioFinancing() {
+            renderScenarioFinancingList();
+            calculateScenarioImpact();
+        }
         
         // Close panel when clicking outside
         document.addEventListener('click', function(e) {
@@ -14770,6 +15257,62 @@
                 <div style="display: flex; gap: 1rem; margin-top: 2rem;">
                     <button type="button" class="btn btn-secondary" onclick="closeUploadModal()" style="flex: 1;">Cancel</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Financing Modal -->
+    <div id="financingModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="financingModalTitle">Add Financing Option</h3>
+                <button class="close-btn" onclick="closeFinancingModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="financingForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="financingType">Financing Type</label>
+                            <select id="financingType" required>
+                                <option value="loan">Bank Loan</option>
+                                <option value="credit_line">Credit Line</option>
+                                <option value="invoice_factoring">Invoice Factoring</option>
+                                <option value="equity">Equity Injection</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="financingAmount">Amount (IDR)</label>
+                            <input type="number" id="financingAmount" step="1000000" min="1000000" required placeholder="50000000">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="financingTerm">Term (months)</label>
+                            <input type="number" id="financingTerm" min="1" max="120" required placeholder="12">
+                        </div>
+                        <div class="form-group">
+                            <label for="financingRate">Interest Rate (%)</label>
+                            <input type="number" id="financingRate" step="0.1" min="0" max="50" required placeholder="8.5">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="financingPurpose">Purpose</label>
+                            <input type="text" id="financingPurpose" required placeholder="Working capital, expansion, etc.">
+                        </div>
+                        <div class="form-group">
+                            <label for="financingAvailableDate">Available Date</label>
+                            <input type="date" id="financingAvailableDate" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeFinancingModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Add to Scenario</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
