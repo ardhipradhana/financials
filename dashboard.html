@@ -13957,12 +13957,35 @@
         function renderRevenueWaterfallChart() {
             console.log('=== RENDERING D3 REVENUE WATERFALL ===');
             const { current, previous } = comparisonData;
-            const revenueChange = current.netRevenue - previous.netRevenue;
+            
+            // Debug the actual data
+            console.log('Current data:', current);
+            console.log('Previous data:', previous);
+            console.log('Current netRevenue:', current?.netRevenue);
+            console.log('Previous netRevenue:', previous?.netRevenue);
+            
+            if (!current) {
+                console.log('ERROR: No current data');
+                showNoDataMessage('revenueWaterfallChart', 'No current data available');
+                return;
+            }
+            
+            if (!previous) {
+                console.log('ERROR: No previous data');
+                showNoDataMessage('revenueWaterfallChart', 'No previous data available');
+                return;
+            }
             
             if (current.netRevenue === 0) {
+                console.log('ERROR: Current netRevenue is 0');
                 showNoDataMessage('revenueWaterfallChart', 'Insufficient revenue data for analysis');
                 return;
             }
+            
+            console.log('✅ Data validation passed, creating waterfall data...');
+            
+            const revenueChange = current.netRevenue - previous.netRevenue;
+            console.log('Revenue change:', revenueChange);
             
             const waterfallData = [
                 { label: 'Previous', value: previous.netRevenue, type: 'base' },
@@ -13975,6 +13998,9 @@
                 { label: 'Seasonal', value: revenueChange * 0.25, type: revenueChange > 0 ? 'positive' : 'negative' },
                 { label: 'Current', value: current.netRevenue, type: 'total' }
             ];
+            
+            console.log('Waterfall data:', waterfallData);
+            console.log('Calling createWaterfallChart...');
             
             createWaterfallChart('revenueWaterfallChart', waterfallData, 'Revenue Bridge Analysis');
         }
