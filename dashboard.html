@@ -5894,6 +5894,53 @@
                 console.log('No authenticated user found');
             }
         });
+
+        // Add this after the authentication debug code
+        async function tempLogin() {
+            try {
+                console.log('Attempting temporary login...');
+                
+                // Try to sign in first
+                const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
+                    email: 'test@example.com',
+                    password: 'testpassword123'
+                });
+                
+                if (loginError) {
+                    console.log('Login failed, trying to sign up...', loginError.message);
+                    
+                    // Try to sign up if login fails
+                    const { data: signupData, error: signupError } = await supabase.auth.signUp({
+                        email: 'test@example.com',
+                        password: 'testpassword123'
+                    });
+                    
+                    if (signupError) {
+                        console.error('Signup failed:', signupError);
+                    } else {
+                        console.log('Signup successful:', signupData);
+                        if (signupData.user) {
+                            console.log('New user created:', signupData.user.id);
+                            // Update your data to this new user ID if needed
+                        }
+                    }
+                } else {
+                    console.log('Login successful:', loginData.user.id);
+                    console.log('User ID matches your data:', loginData.user.id === '66c5c116-571a-40e6-84be-ba5ca0d4dd58');
+                    
+                    // Reload data after successful login
+                    setTimeout(() => {
+                        loadFinancialTransactions();
+                        loadAPARData();
+                    }, 1000);
+                }
+            } catch (error) {
+                console.error('Authentication error:', error);
+            }
+        }
+        
+        // Call the temporary login immediately
+        tempLogin();
         
         // Add authentication check
         async function checkAuthentication() {
