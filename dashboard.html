@@ -5783,23 +5783,35 @@
                     <div id="waterfallChartsSection" class="waterfall-section" style="display: none;">
                         <div class="charts-grid">
                             <div class="chart-container">
-                                <div class="chart-header">
-                                    <h4><i class="fas fa-chart-waterfall"></i> Revenue Bridge Analysis</h4>
+                                <div class="chart-header-top">
+                                    <h4>Revenue Bridge Analysis</h4>
                                     <p>Key drivers of revenue change</p>
                                 </div>
-                                <div id="revenueWaterfallChart" class="waterfall-chart">
-                                    <!-- Chart will be rendered here -->
-                                </div>
+                                <canvas id="revenueWaterfallChart" class="waterfall-chart" width="400" height="300"></canvas>
                             </div>
                             
                             <div class="chart-container">
-                                <div class="chart-header">
-                                    <h4><i class="fas fa-chart-bar"></i> Profit Margin Analysis</h4>
-                                    <p>Margin variance breakdown</p>
+                                <div class="chart-header-top">
+                                    <h4>Gross Profit Bridge</h4>
+                                    <p>COGS impact on gross profit</p>
                                 </div>
-                                <div id="profitWaterfallChart" class="waterfall-chart">
-                                    <!-- Chart will be rendered here -->
+                                <canvas id="grossProfitWaterfallChart" class="waterfall-chart" width="400" height="300"></canvas>
+                            </div>
+                            
+                            <div class="chart-container">
+                                <div class="chart-header-top">
+                                    <h4>OPEX Bridge</h4>
+                                    <p>Operating expense breakdown</p>
                                 </div>
+                                <canvas id="opexWaterfallChart" class="waterfall-chart" width="400" height="300"></canvas>
+                            </div>
+                            
+                            <div class="chart-container">
+                                <div class="chart-header-top">
+                                    <h4>EBITDA Bridge</h4>
+                                    <p>Path to EBITDA performance</p>
+                                </div>
+                                <canvas id="ebitdaWaterfallChart" class="waterfall-chart" width="400" height="300"></canvas>
                             </div>
                         </div>
                     </div>
