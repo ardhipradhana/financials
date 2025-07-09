@@ -5909,18 +5909,6 @@
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJyYXdxenlsZnl1b3RneHFtdG94Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg1MTU0NTUsImV4cCI6MjA2NDA5MTQ1NX0.P4qazlzBHk66eItqBRK-6k2ll2I1d754ke5_r_hNxos'
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
-        console.log('=== AUTHENTICATION DEBUG ===');
-        supabase.auth.getUser().then(({ data: { user }, error }) => {
-            if (error) {
-                console.error('Auth error:', error);
-            } else if (user) {
-                console.log('Authenticated user found:', user.id, user.email);
-                console.log('User ID matches your data:', user.id === '66c5c116-571a-40e6-84be-ba5ca0d4dd58');
-            } else {
-                console.log('No authenticated user found');
-            }
-        });
-
         // Add this after the authentication debug code
         async function tempLogin() {
             try {
@@ -5990,6 +5978,47 @@
         
         // AP/AR Data Management
         let aparTransactions = [];
+
+        // Add this function globally (outside any other function)
+        function assignOverdueToRealisticWeek(transaction, dueDate) {
+            if (!dueDate) return 'parked'; // No due date - still use parked
+            
+            const today = new Date();
+            const transactionDueDate = new Date(dueDate);
+            
+            // If transaction is not overdue, calculate which week it falls in
+            if (transactionDueDate >= today) {
+                const diffTime = transactionDueDate - today;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                const week = Math.ceil(diffDays / 7);
+                
+                // If it falls within 13 weeks, use that week
+                if (week <= 13) {
+                    return week;
+                } else {
+                    // Too far in future, place in week 13
+                    return 13;
+                }
+            }
+            
+            // For overdue transactions, use realistic collection/payment assumptions
+            const weeksOverdue = Math.floor((today - transactionDueDate) / (7 * 24 * 60 * 60 * 1000));
+            
+            if (transaction.type === 'AR') {
+                // Overdue AR: Spread across weeks 1-4 based on how overdue
+                if (weeksOverdue <= 2) return 1;      // Recently overdue
+                else if (weeksOverdue <= 4) return 2; // Moderately overdue  
+                else if (weeksOverdue <= 8) return 3; // Quite overdue
+                else return 4;                        // Very overdue
+            } else if (transaction.type === 'AP') {
+                // Overdue AP: Spread across weeks 1-2 (we need to pay sooner)
+                if (weeksOverdue <= 4) return 1;      // Pay soon
+                else return 2;                        // Pay very soon
+            }
+            
+            // Default fallback for edge cases
+            return 1;
+        }
 
         // AP/AR to GL Linking Functions - GLOBAL SCOPE
         function linkAPARToGL(aparId) {
@@ -7892,35 +7921,43 @@
         }
         
         function calculateWeeklyFlows(weekDate) {
-            // For overdue items, assume they'll be collected/paid in next 4 weeks
-            // For future items, use actual due dates
+            let inflows = 0;
+            let outflows = 0;
             
-            const weekStart = new Date(weekDate);
-            const weekEnd = new Date(weekDate);
-            weekEnd.setDate(weekEnd.getDate() + 6);
+            // Calculate which week this date represents (1-13)
+            const today = new Date();
+            const diffTime = weekDate - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            const week = Math.ceil(diffDays / 7) + 1;
             
+            if (!aparTransactions || aparTransactions.length === 0) {
+                return { inflows, outflows };
+            }
+            
+            // Use the SAME logic as scenarios - filter unpaid and use realistic assignment
             const unpaid = aparTransactions.filter(t => t.status !== 'Paid');
-            let inflows = 0, outflows = 0;
             
             unpaid.forEach(transaction => {
-                let expectedPaymentDate;
-                const dueDate = new Date(transaction.due_date);
-                const today = new Date();
+                // Calculate due date (same logic as scenarios)
+                let dueDate = transaction.due_date;
                 
-                if (dueDate < today) {
-                    // Overdue: assume payment in next 1-4 weeks based on aging
-                    const weeksOverdue = Math.floor((today - dueDate) / (7 * 24 * 60 * 60 * 1000));
-                    const assumedWeeksToCollect = Math.min(weeksOverdue + 2, 4); // Max 4 weeks
-                    expectedPaymentDate = new Date(today);
-                    expectedPaymentDate.setDate(today.getDate() + (assumedWeeksToCollect * 7));
-                } else {
-                    // Future: use actual due date
-                    expectedPaymentDate = dueDate;
+                if (!dueDate && transaction.payment_terms && transaction.invoice_date) {
+                    const invoiceDate = new Date(transaction.invoice_date);
+                    const calculatedDueDate = new Date(invoiceDate);
+                    calculatedDueDate.setDate(calculatedDueDate.getDate() + (transaction.payment_terms || 30));
+                    dueDate = calculatedDueDate.toISOString().split('T')[0];
                 }
                 
-                if (expectedPaymentDate >= weekStart && expectedPaymentDate <= weekEnd) {
-                    if (transaction.type === 'AR') inflows += transaction.amount;
-                    else if (transaction.type === 'AP') outflows += transaction.amount;
+                // Use the SAME realistic week assignment as scenarios
+                const assignedWeek = assignOverdueToRealisticWeek(transaction, dueDate);
+                
+                // Only count this transaction if it's assigned to this week
+                if (assignedWeek === week) {
+                    if (transaction.type === 'AR') {
+                        inflows += transaction.amount;
+                    } else if (transaction.type === 'AP') {
+                        outflows += transaction.amount;
+                    }
                 }
             });
             
