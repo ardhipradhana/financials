@@ -4669,6 +4669,20 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <div class="forecast-assumptions" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem;">
+                                <div style="display: flex; align-items: flex-start; gap: 0.5rem;">
+                                    <i class="fas fa-info-circle" style="color: #3b82f6; margin-top: 0.2rem;"></i>
+                                    <div>
+                                        <strong style="color: #1e293b;">Forecast Assumptions:</strong>
+                                        <ul style="margin: 0.5rem 0 0 0; padding-left: 1.2rem; font-size: 0.875rem; color: #475569;">
+                                            <li>Overdue AR assumed will be collected within 4 weeks</li>
+                                            <li>Overdue AP assumed will be paid within 2 weeks</li>
+                                            <li>Future transactions use actual due dates</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
                         
                             <!-- Controls Below -->
                             <div class="forecast-actions">
@@ -5026,6 +5040,18 @@
                                 <div class="scenarios-header">
                                     <h4 class="scenarios-title">13-Week Cash Flow Impact</h4>
                                     <p class="scenarios-subtitle">Real-time scenario analysis • Drag transactions between weeks</p>
+
+                                    <!-- Add realistic assumptions explanation -->
+                                    <div class="scenario-assumptions" style="background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 6px; padding: 0.75rem; margin: 0.5rem 0; font-size: 0.8rem;">
+                                        <div style="display: flex; align-items: flex-start; gap: 0.5rem;">
+                                            <i class="fas fa-lightbulb" style="color: #0ea5e9; margin-top: 0.1rem;"></i>
+                                            <div style="color: #0c4a6e;">
+                                                <strong>Default Placement Logic:</strong>
+                                                <span style="margin-left: 0.5rem;">Overdue AR → Weeks 1-4 based on aging • Overdue AP → Weeks 1-2 • Future items → Actual due dates</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
                                     <div class="color-legend" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; padding: 0.75rem; margin: 0.5rem 0;">
                                         <div style="display: flex; align-items: center; gap: 1.5rem; font-size: 0.8rem; color: #475569;">
                                             <div style="display: flex; align-items: center; gap: 0.5rem;">
@@ -7866,32 +7892,35 @@
         }
         
         function calculateWeeklyFlows(weekDate) {
-            let inflows = 0;
-            let outflows = 0;
+            // For overdue items, assume they'll be collected/paid in next 4 weeks
+            // For future items, use actual due dates
             
-            // Calculate which week this date represents (1-13)
-            const today = new Date();
-            const diffTime = weekDate - today;
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            const week = Math.ceil(diffDays / 7) + 1;
+            const weekStart = new Date(weekDate);
+            const weekEnd = new Date(weekDate);
+            weekEnd.setDate(weekEnd.getDate() + 6);
             
-            if (!aparTransactions || aparTransactions.length === 0) {
-                return { inflows, outflows };
-            }
-            
-            // Use the same spread logic as scenarios (which works correctly)
             const unpaid = aparTransactions.filter(t => t.status !== 'Paid');
+            let inflows = 0, outflows = 0;
             
-            // Spread overdue transactions across 13 weeks (same as scenarios)
-            unpaid.forEach((transaction, index) => {
-                const assignedWeek = (index % 13) + 1;
+            unpaid.forEach(transaction => {
+                let expectedPaymentDate;
+                const dueDate = new Date(transaction.due_date);
+                const today = new Date();
                 
-                if (assignedWeek === week) {
-                    if (transaction.type === 'AR') {
-                        inflows += transaction.amount;
-                    } else if (transaction.type === 'AP') {
-                        outflows += transaction.amount;
-                    }
+                if (dueDate < today) {
+                    // Overdue: assume payment in next 1-4 weeks based on aging
+                    const weeksOverdue = Math.floor((today - dueDate) / (7 * 24 * 60 * 60 * 1000));
+                    const assumedWeeksToCollect = Math.min(weeksOverdue + 2, 4); // Max 4 weeks
+                    expectedPaymentDate = new Date(today);
+                    expectedPaymentDate.setDate(today.getDate() + (assumedWeeksToCollect * 7));
+                } else {
+                    // Future: use actual due date
+                    expectedPaymentDate = dueDate;
+                }
+                
+                if (expectedPaymentDate >= weekStart && expectedPaymentDate <= weekEnd) {
+                    if (transaction.type === 'AR') inflows += transaction.amount;
+                    else if (transaction.type === 'AP') outflows += transaction.amount;
                 }
             });
             
@@ -8777,12 +8806,11 @@
             
             console.log('Found', unpaidTransactions.length, 'unpaid transactions');
             
-            // Convert to scenario format and assign to weeks
+            // Convert to scenario format and assign to realistic weeks
             originalData = unpaidTransactions.map(transaction => {
-                // Calculate which week this transaction falls into
+                // Calculate due date if not provided (same logic as before)
                 let dueDate = transaction.due_date;
                 
-                // Calculate due date if not provided (same logic as Transaction tab)
                 if (!dueDate && transaction.payment_terms && transaction.invoice_date) {
                     const invoiceDate = new Date(transaction.invoice_date);
                     const calculatedDueDate = new Date(invoiceDate);
@@ -8790,24 +8818,8 @@
                     dueDate = calculatedDueDate.toISOString().split('T')[0];
                 }
                 
-                let weekNumber;
-                
-                // Check if transaction is overdue - if so, put in Parked bucket
-                if (transaction.status === 'Overdue') {
-                    weekNumber = 'parked';
-                } else if (dueDate) {
-                    const daysFromNow = Math.ceil((new Date(dueDate) - new Date()) / (1000 * 60 * 60 * 24));
-                    
-                    // If days are negative (past due) but status isn't "Overdue", also put in Parked
-                    if (daysFromNow <= 0) {
-                        weekNumber = 'parked';
-                    } else {
-                        weekNumber = Math.max(1, Math.min(13, Math.ceil(daysFromNow / 7)));
-                    }
-                } else {
-                    // No due date - default to parked
-                    weekNumber = 'parked';
-                }
+                // NEW: Use realistic week assignment instead of parked
+                let weekNumber = assignOverdueToRealisticWeek(transaction, dueDate);
                 
                 return {
                     id: transaction.id,
@@ -8826,6 +8838,48 @@
             scenarioData = [...originalData];
             console.log('Final scenario data:', scenarioData.length, 'transactions');
             console.log('Parked transactions:', scenarioData.filter(t => t.currentWeek === 'parked').length);
+            console.log('Realistically placed transactions:', scenarioData.filter(t => t.currentWeek !== 'parked').length);
+        }
+        
+        // NEW: Realistic week assignment function
+        function assignOverdueToRealisticWeek(transaction, dueDate) {
+            if (!dueDate) return 'parked'; // No due date - still use parked
+            
+            const today = new Date();
+            const transactionDueDate = new Date(dueDate);
+            
+            // If transaction is not overdue, calculate which week it falls in
+            if (transactionDueDate >= today) {
+                const diffTime = transactionDueDate - today;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                const week = Math.ceil(diffDays / 7);
+                
+                // If it falls within 13 weeks, use that week
+                if (week <= 13) {
+                    return week;
+                } else {
+                    // Too far in future, place in week 13
+                    return 13;
+                }
+            }
+            
+            // For overdue transactions, use realistic collection/payment assumptions
+            const weeksOverdue = Math.floor((today - transactionDueDate) / (7 * 24 * 60 * 60 * 1000));
+            
+            if (transaction.type === 'AR') {
+                // Overdue AR: Spread across weeks 1-4 based on how overdue
+                if (weeksOverdue <= 2) return 1;      // Recently overdue
+                else if (weeksOverdue <= 4) return 2; // Moderately overdue  
+                else if (weeksOverdue <= 8) return 3; // Quite overdue
+                else return 4;                        // Very overdue
+            } else if (transaction.type === 'AP') {
+                // Overdue AP: Spread across weeks 1-2 (we need to pay sooner)
+                if (weeksOverdue <= 4) return 1;      // Pay soon
+                else return 2;                        // Pay very soon
+            }
+            
+            // Default fallback for edge cases
+            return 1;
         }
         
         // Function to get real AP/AR data (connects to existing system)
