@@ -6536,10 +6536,33 @@
             }
         }
         
+        // Store period selections before navigation
+        let storedPeriodSelections = {
+            current: null,
+            previous: null,
+            includeYoY: false
+        };
+        
         // Navigation handling
         document.querySelectorAll('.nav-link').forEach(link => {
             link.addEventListener('click', function(e) {
                 e.preventDefault();
+                
+                // Store current report settings before leaving
+                if (document.querySelector('.nav-link.active')?.dataset.section === 'reports') {
+                    const currentSelect = document.getElementById('currentPeriod');
+                    const previousSelect = document.getElementById('previousPeriod');
+                    const includeYoYCheck = document.getElementById('includeYoY');
+                    
+                    if (currentSelect && previousSelect) {
+                        storedPeriodSelections = {
+                            current: currentSelect.value,
+                            previous: previousSelect.value,
+                            includeYoY: includeYoYCheck ? includeYoYCheck.checked : false
+                        };
+                        console.log('Stored period selections:', storedPeriodSelections);
+                    }
+                }
                 
                 // Remove active class from all links
                 document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
@@ -6569,7 +6592,7 @@
                     'benchmarking': 'Industry Benchmarking',
                     'scenarios': 'Scenario Analysis'
                 };
-
+        
                 const subtitles = {
                     'dashboard': 'Real-time financial insights and cash flow management',
                     'ap-ar': 'Track overdue payments and manage cash cycles',
@@ -6592,7 +6615,7 @@
                         updateDashboardWithRealData();
                     }, 100);
                 }
-
+        
                 if (this.dataset.section === 'ap-ar') {
                     setTimeout(() => {
                         updateOverdueStatuses();
@@ -6611,9 +6634,37 @@
                         if (dateToFilter) dateToFilter.addEventListener('change', renderAPARTable);
                     }, 100);
                 }
+                
                 if (this.dataset.section === 'reports') {
                     setTimeout(() => {
-                        initializeReportsAnalytics();
+                        // Check if we have stored period selections to restore
+                        if (storedPeriodSelections.current) {
+                            console.log('Restoring period selections:', storedPeriodSelections);
+                            
+                            // First initialize normally
+                            initializeReportsAnalytics();
+                            
+                            // Then restore stored selections after a brief delay
+                            setTimeout(() => {
+                                const currentSelect = document.getElementById('currentPeriod');
+                                const previousSelect = document.getElementById('previousPeriod');
+                                const includeYoYCheck = document.getElementById('includeYoY');
+                                
+                                if (currentSelect && previousSelect) {
+                                    currentSelect.value = storedPeriodSelections.current;
+                                    previousSelect.value = storedPeriodSelections.previous;
+                                    if (includeYoYCheck) includeYoYCheck.checked = storedPeriodSelections.includeYoY;
+                                    
+                                    console.log('Applied stored selections, regenerating report...');
+                                    
+                                    // Regenerate report with restored settings
+                                    generateComparisonReport();
+                                }
+                            }, 200);
+                        } else {
+                            // First time visiting reports, initialize normally
+                            initializeReportsAnalytics();
+                        }
                     }, 100);
                 }
             });
