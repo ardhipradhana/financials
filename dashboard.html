@@ -9427,7 +9427,10 @@
         }
 
         function calculateCashFlowHealth() {
+            console.log('=== CALCULATING CASH FLOW HEALTH ===');
+            
             if (!aparTransactions || aparTransactions.length === 0) {
+                console.log('No aparTransactions available');
                 return {
                     trend: 'stable',
                     biggestPayment: 0,
@@ -9443,76 +9446,93 @@
             const midPointCash = forecastData[Math.floor(forecastData.length / 2)]?.cashPosition || 0;
             
             let trend = 'stable';
-
-            console.log('=== DEBUGGING CALCULATE CASH FLOW HEALTH ===');
-            console.log('Total aparTransactions:', aparTransactions.length);
-            console.log('Date range:', today.toDateString(), 'to', thirteenWeeksLater.toDateString());
-            
-            // Add this right before the forEach loop:
-            const eligibleTransactions = aparTransactions.filter(t => t.status === 'Unpaid' || t.status === 'Overdue');
-            console.log('Eligible transactions:', eligibleTransactions.length);
-            console.log('Sample transactions:', eligibleTransactions.slice(0, 3).map(t => ({
-                type: t.type,
-                company: t.company,
-                amount: t.amount,
-                due_date: t.due_date,
-                status: t.status
-            })));
-            
-            // Check if cash goes negative (immediate declining trend)
-            const goesNegative = forecastData.some(week => week.cashPosition < 0);
-            
-            if (goesNegative) {
-                trend = 'declining';
-            } else {
-                // Compare overall trajectory
-                const overallChange = (lastWeekCash - firstWeekCash) / firstWeekCash;
-                
-                if (overallChange > 0.1) { // More than 10% improvement
-                    trend = 'improving';
-                } else if (overallChange < -0.1) { // More than 10% decline
-                    trend = 'declining';
-                } else {
-                    trend = 'stable';
-                }
+    
+    // Check if cash goes negative (immediate declining trend)
+    const goesNegative = forecastData.some(week => week.cashPosition < 0);
+    
+    if (goesNegative) {
+        trend = 'declining';
+    } else {
+        // Compare overall trajectory
+        const overallChange = (lastWeekCash - firstWeekCash) / firstWeekCash;
+        
+        if (overallChange > 0.1) { // More than 10% improvement
+            trend = 'improving';
+        } else if (overallChange < -0.1) { // More than 10% decline
+            trend = 'declining';
+        } else {
+            trend = 'stable';
+        }
+    }
+    
+    // Find biggest upcoming payment and largest expected collection
+    let biggestPayment = 0;
+    let largestCollection = 0;
+    let biggestPaymentRef = '';
+    let largestCollectionRef = '';
+    
+    // Properly declare date variables
+    const today = new Date();
+    const thirteenWeeksLater = new Date();
+    thirteenWeeksLater.setDate(today.getDate() + (13 * 7));
+    
+    console.log('Date range:', today.toDateString(), 'to', thirteenWeeksLater.toDateString());
+    console.log('Total aparTransactions:', aparTransactions.length);
+    
+    const eligibleTransactions = aparTransactions.filter(t => t.status === 'Unpaid' || t.status === 'Overdue');
+    console.log('Eligible transactions:', eligibleTransactions.length);
+    
+    eligibleTransactions.forEach(transaction => {
+        console.log('Processing transaction:', {
+            type: transaction.type,
+            company: transaction.company,
+            amount: transaction.amount,
+            due_date: transaction.due_date,
+            status: transaction.status
+        });
+        
+        // Handle missing due_date
+        if (!transaction.due_date) {
+            console.log('Transaction has no due_date, skipping:', transaction.company);
+            return;
+        }
+        
+        const dueDate = new Date(transaction.due_date);
+        
+        // Check if date is valid
+        if (isNaN(dueDate.getTime())) {
+            console.log('Invalid due_date for transaction:', transaction.company, transaction.due_date);
+            return;
+        }
+        
+        console.log('Due date:', dueDate.toDateString(), 'Within range:', dueDate >= today && dueDate <= thirteenWeeksLater);
+        
+        if (dueDate >= today && dueDate <= thirteenWeeksLater) {
+            if (transaction.type === 'AP' && parseFloat(transaction.amount) > biggestPayment) {
+                biggestPayment = parseFloat(transaction.amount);
+                biggestPaymentRef = transaction.company || transaction.reference;
+                console.log('New biggest payment:', biggestPayment, 'to', biggestPaymentRef);
             }
             
-            // Find biggest upcoming payment and largest expected collection
-            let biggestPayment = 0;
-            let largestCollection = 0;
-            let biggestPaymentRef = '';
-            let largestCollectionRef = '';
-            
-            const today = new Date();
-            const thirteenWeeksLater = new Date();
-            thirteenWeeksLater.setDate(today.getDate() + (13 * 7));
-            
-            aparTransactions.forEach(transaction => {
-                if (transaction.status === 'Unpaid' || transaction.status === 'Overdue') {
-                    const dueDate = new Date(transaction.due_date);
-                    
-                    if (dueDate >= today && dueDate <= thirteenWeeksLater) {
-                        if (transaction.type === 'AP' && transaction.amount > biggestPayment) {
-                            biggestPayment = transaction.amount;
-                            biggestPaymentRef = transaction.reference || transaction.company;
-                        }
-                        
-                        if (transaction.type === 'AR' && transaction.amount > largestCollection) {
-                            largestCollection = transaction.amount;
-                            largestCollectionRef = transaction.reference || transaction.company;
-                        }
-                    }
-                }
-            });
-            
-            return {
-                trend,
-                biggestPayment,
-                largestCollection,
-                biggestPaymentRef,
-                largestCollectionRef
-            };
+            if (transaction.type === 'AR' && parseFloat(transaction.amount) > largestCollection) {
+                largestCollection = parseFloat(transaction.amount);
+                largestCollectionRef = transaction.company || transaction.reference;
+                console.log('New largest collection:', largestCollection, 'from', largestCollectionRef);
+            }
         }
+    });
+    
+    const result = {
+        trend,
+        biggestPayment,
+        largestCollection,
+        biggestPaymentRef,
+        largestCollectionRef
+    };
+    
+    console.log('Final cash flow health result:', result);
+    return result;
+}
 
         // Starting Cash Supabase Functions
         async function loadStartingCash() {
