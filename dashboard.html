@@ -4720,6 +4720,49 @@
         .action-btn.remove:hover {
             background: #fef2f2;
         }
+
+        /* Financing item styling in timeline */
+        [data-financing="true"] {
+            border-left: 4px solid #10b981 !important;
+            background: linear-gradient(90deg, #ecfdf5 0%, #f0fdf4 100%) !important;
+        }
+        
+        [data-financing="true"] .company-name::before {
+            content: "💰 ";
+            margin-right: 0.25rem;
+        }
+        
+        /* Financing items in parked section */
+        .scenario-transaction[data-financing="true"] {
+            border-left: 4px solid #10b981;
+            background: linear-gradient(90deg, #ecfdf5 0%, #f0fdf4 100%);
+        }
+        
+        .scenario-transaction[data-financing="true"] .transaction-type {
+            background: #10b981;
+            color: white;
+        }
+
+        /* Financing transaction cards */
+        .financing-transaction {
+            border-left: 4px solid #10b981 !important;
+            background: linear-gradient(90deg, #ecfdf5 0%, #f0fdf4 100%) !important;
+        }
+        
+        .financing-type {
+            background: #10b981 !important;
+            color: white !important;
+        }
+        
+        .financing-amount {
+            color: #059669 !important;
+            font-weight: 600 !important;
+        }
+        
+        .financing-transaction:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2) !important;
+        }
         
     </style>
 </head>
@@ -5505,19 +5548,7 @@
                                 </button>
                             </div>
                             
-                            <!-- Parked Financing Items -->
-                            <div class="parked-financing-section">
-                                <h5><i class="fas fa-parking"></i> Parked Financing Items</h5>
-                                <div id="parkedFinancingList" class="parked-items-container">
-                                    <div class="no-scenarios">
-                                        <i class="fas fa-plus-circle"></i>
-                                        <p>No financing items parked yet</p>
-                                        <p class="text-muted">Add financing options above to park them for scenario planning</p>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Impact Summary -->
+                            <!-- Impact Summary only -->
                             <div class="scenario-impact-summary">
                                 <h5>Projected Impact</h5>
                                 <div class="impact-metrics">
@@ -9395,6 +9426,10 @@
             document.querySelectorAll('.week-bucket').forEach(bucket => {
                 bucket.classList.add('highlight');
             });
+
+            if (e.target.dataset.financing === 'true') {
+                e.target.classList.add('dragging-financing');
+            }
         }
         
         function handleBucketDragOver(e) {
@@ -9452,6 +9487,10 @@
                 populateTransactionBuckets();
                 updateScenarioChart();
                 updateImpactAnalysis();
+
+                if (transaction.isFinancing) {
+                    calculateScenarioImpact();
+                }
             }
         }
         
@@ -9465,6 +9504,12 @@
             document.querySelectorAll('.week-bucket').forEach(bucket => {
                 bucket.classList.remove('highlight', 'drag-over');
             });
+
+            if (e.target.dataset.financing === 'true') {
+                calculateScenarioImpact();
+            }
+            
+            draggedElement = null;
         }
         
         function addToChangeLog(transaction, oldWeek, newWeek) {
@@ -15055,28 +15100,115 @@
         
         function addParkedFinancing() {
             const financing = {
-                id: 'parked_' + Date.now(),
+                id: 'financing_' + Date.now(),
                 type: document.getElementById('financingType').value,
                 amount: parseInt(document.getElementById('financingAmount').value),
                 term: parseInt(document.getElementById('financingTerm').value),
                 rate: parseFloat(document.getElementById('financingRate').value),
                 purpose: document.getElementById('financingPurpose').value,
                 availableDate: document.getElementById('financingAvailableDate').value,
-                isActive: false, // Parked, not active in timeline yet
                 addedAt: new Date().toISOString()
             };
             
-            // Add to parked list
+            // Create financing transaction compatible with your existing system
+            const financingTransaction = {
+                id: financing.id,
+                type: 'AR', // Positive cash flow
+                company: `${getFinancingTypeName(financing.type)}`,
+                reference: financing.type.toUpperCase() + '-' + Date.now().toString().slice(-6),
+                description: financing.purpose,
+                amount: financing.amount,
+                invoice_date: financing.availableDate,
+                due_date: financing.availableDate,
+                payment_terms: 0,
+                status: 'Unpaid',
+                currency: 'IDR',
+                isScenario: true,
+                isFinancing: true,
+                currentWeek: 'parked', // Start in parked section
+                originalData: financing
+            };
+            
+            // Add to scenario data
+            if (typeof scenarioData !== 'undefined') {
+                scenarioData.push(financingTransaction);
+            } else {
+                // Initialize if doesn't exist
+                window.scenarioData = [financingTransaction];
+            }
+            
+            // Add to financing items for impact calculation
             scenarioFinancingItems.push(financing);
             
-            // Update displays
-            renderParkedFinancingList();
+            // Create and append the card directly to parked bucket
+            createFinancingCard(financingTransaction);
+            
+            // Calculate impact
             calculateScenarioImpact();
             
             // Close modal
             closeFinancingModal();
             
-            console.log('Parked financing item:', financing);
+            console.log('Added financing to parked bucket:', financingTransaction);
+        }
+
+        function createFinancingCard(transaction) {
+            const card = document.createElement('div');
+            card.className = 'scenario-transaction financing-transaction';
+            card.draggable = true;
+            card.dataset.id = transaction.id;
+            card.dataset.financing = 'true';
+            
+            // Format amount for display
+            const formattedAmount = formatCurrencyFull(transaction.amount, 'IDR');
+            
+            card.innerHTML = `
+                <div class="transaction-header">
+                    <div class="transaction-type financing-type">💰 ${transaction.company}</div>
+                    <div class="transaction-amount financing-amount">${formattedAmount}</div>
+                </div>
+                <div class="transaction-details">
+                    <div class="company-name">${transaction.description}</div>
+                    <div class="reference-date">
+                        <span class="reference">${transaction.reference}</span>
+                        <span class="date">${new Date(transaction.due_date).toLocaleDateString()}</span>
+                    </div>
+                </div>
+                <div class="transaction-actions">
+                    <button class="remove-transaction" onclick="removeFinancingTransaction('${transaction.id}')" title="Remove financing">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `;
+            
+            // No need to add individual drag listeners - your bucket system handles it
+            
+            // Add to parked bucket
+            const parkedBucket = document.getElementById('bucket-week-parked');
+            if (parkedBucket) {
+                parkedBucket.appendChild(card);
+            }
+            
+            return card;
+        }
+
+        function removeFinancingTransaction(id) {
+            // Remove from scenario data
+            if (typeof scenarioData !== 'undefined') {
+                window.scenarioData = scenarioData.filter(item => item.id !== id);
+            }
+            
+            // Remove from financing items
+            scenarioFinancingItems = scenarioFinancingItems.filter(item => item.id !== id);
+            
+            // Remove card from DOM
+            const card = document.querySelector(`[data-id="${id}"]`);
+            if (card) {
+                card.remove();
+            }
+            
+            // Recalculate impact
+            calculateScenarioImpact();
         }
         
         function renderParkedFinancingList() {
@@ -15144,12 +15276,19 @@
         function calculateScenarioImpact() {
             let totalCashIncrease = 0;
             
-            // Only count active items
-            const activeItems = scenarioFinancingItems.filter(item => item.isActive);
-            
-            activeItems.forEach(item => {
-                totalCashIncrease += item.amount;
-            });
+            // Check all weeks for financing transactions
+            for (let week = 1; week <= 13; week++) {
+                const weekBucket = document.getElementById(`bucket-week-${week}`);
+                if (weekBucket) {
+                    const financingItems = weekBucket.querySelectorAll('[data-financing="true"]');
+                    financingItems.forEach(item => {
+                        const transaction = scenarioData.find(t => t.id === item.dataset.id);
+                        if (transaction) {
+                            totalCashIncrease += transaction.amount;
+                        }
+                    });
+                }
+            }
             
             // Simple runway calculation
             const currentMonthlyBurn = 10000000; // 10M IDR average
