@@ -15155,7 +15155,7 @@
             const financingTransaction = {
                 id: financing.id,
                 type: 'AR', // Positive cash flow
-                company: `${getFinancingTypeName(financing.type)}`,
+                vendor: `${getFinancingTypeName(financing.type)}`,
                 reference: financing.type.toUpperCase() + '-' + Date.now().toString().slice(-6),
                 description: financing.purpose,
                 amount: financing.amount,
@@ -15317,23 +15317,46 @@
         function calculateScenarioImpact() {
             let totalCashIncrease = 0;
             
-            // Check all weeks for financing transactions
+            // Check all financing items that are active in the scenario
+            if (typeof scenarioData !== 'undefined') {
+                scenarioData.forEach(transaction => {
+                    if (transaction.isFinancing && transaction.currentWeek !== 'parked' && transaction.currentWeek <= 13) {
+                        totalCashIncrease += transaction.amount;
+                    }
+                });
+            }
+            
+            // Also check for any financing items in the buckets
             for (let week = 1; week <= 13; week++) {
                 const weekBucket = document.getElementById(`bucket-week-${week}`);
                 if (weekBucket) {
                     const financingItems = weekBucket.querySelectorAll('[data-financing="true"]');
                     financingItems.forEach(item => {
-                        const transaction = scenarioData.find(t => t.id === item.dataset.id);
-                        if (transaction) {
-                            totalCashIncrease += transaction.amount;
+                        const transactionId = item.dataset.transactionId || item.dataset.id;
+                        const transaction = scenarioData.find(t => t.id === transactionId);
+                        if (transaction && transaction.isFinancing) {
+                            // Avoid double counting
+                            if (!transaction.counted) {
+                                totalCashIncrease += transaction.amount;
+                                transaction.counted = true;
+                            }
                         }
                     });
                 }
             }
             
-            // Simple runway calculation
-            const currentMonthlyBurn = 10000000; // 10M IDR average
-            const runwayExtensionDays = totalCashIncrease > 0 ? 
+            // Reset counted flag for next calculation
+            if (typeof scenarioData !== 'undefined') {
+                scenarioData.forEach(transaction => {
+                    if (transaction.isFinancing) {
+                        transaction.counted = false;
+                    }
+                });
+            }
+            
+            // Calculate runway extension more accurately
+            const currentMonthlyBurn = getCurrentMonthlyBurn();
+            const runwayExtensionDays = totalCashIncrease > 0 && currentMonthlyBurn > 0 ?
                 Math.floor((totalCashIncrease / currentMonthlyBurn) * 30) : 0;
             
             // Update display
@@ -15341,6 +15364,19 @@
                 formatCurrencyFull(totalCashIncrease, 'IDR');
             document.getElementById('runwayExtension').textContent = 
                 `+${runwayExtensionDays} days`;
+        }
+        
+        function getCurrentMonthlyBurn() {
+            // Calculate average monthly burn from AP data
+            if (aparTransactions && aparTransactions.length > 0) {
+                const monthlyExpenses = aparTransactions
+                    .filter(t => t.type === 'AP' && t.status === 'Unpaid' || t.status === 'Overdue')
+                    .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+                
+                return monthlyExpenses / 3; // Rough monthly average
+            }
+            
+            return 10000000; // Default 10M IDR if no data
         }
         
         // Initialize
