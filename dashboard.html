@@ -6862,70 +6862,385 @@
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJyYXdxenlsZnl1b3RneHFtdG94Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg1MTU0NTUsImV4cCI6MjA2NDA5MTQ1NX0.P4qazlzBHk66eItqBRK-6k2ll2I1d754ke5_r_hNxos'
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
-        // Add this after the authentication debug code
-        async function tempLogin() {
+        // User access levels and navigation control
+        let userProfile = null;
+        
+        const ACCESS_LEVELS = {
+            basic: {
+                name: 'Basic',
+                allowedSections: ['dashboard', 'ap-ar'],
+                features: ['Dashboard Overview', 'AP/AR Tracking']
+            },
+            pro: {
+                name: 'Pro',
+                allowedSections: ['dashboard', 'ap-ar', 'statements', 'reports'],
+                features: ['Everything in Basic', 'Financial Statements', 'Reports & Analytics']
+            },
+            enterprise: {
+                name: 'Enterprise',
+                allowedSections: ['dashboard', 'ap-ar', 'statements', 'reports', 'forecasting', 'scenarios', 'benchmarking'],
+                features: ['Everything in Pro', 'Forecasting', 'Scenario Analysis', 'Industry Benchmarking']
+            }
+        };
+        
+        // Load user profile and access level
+        async function loadUserProfile() {
             try {
-                console.log('Attempting temporary login...');
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) return null;
+        
+                const { data, error } = await supabase
+                    .from('user_profiles_meridash')
+                    .select('*')
+                    .eq('user_id', user.id)
+                    .single();
+        
+                if (error) throw error;
                 
-                // Try to sign in first
-                const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
-                    email: 'test@example.com',
-                    password: 'testpassword123'
-                });
+                userProfile = data;
+                updateNavigationAccess();
+                return data;
                 
-                if (loginError) {
-                    console.log('Login failed, trying to sign up...', loginError.message);
-                    
-                    // Try to sign up if login fails
-                    const { data: signupData, error: signupError } = await supabase.auth.signUp({
-                        email: 'test@example.com',
-                        password: 'testpassword123'
-                    });
-                    
-                    if (signupError) {
-                        console.error('Signup failed:', signupError);
-                    } else {
-                        console.log('Signup successful:', signupData);
-                        if (signupData.user) {
-                            console.log('New user created:', signupData.user.id);
-                            // Update your data to this new user ID if needed
-                        }
-                    }
-                } else {
-                    console.log('Login successful:', loginData.user.id);
-                    console.log('User ID matches your data:', loginData.user.id === '66c5c116-571a-40e6-84be-ba5ca0d4dd58');
-                    
-                    // Reload data after successful login
-                    setTimeout(() => {
-                        loadFinancialTransactions();
-                        loadAPARData();
-                    }, 1000);
-                }
             } catch (error) {
-                console.error('Authentication error:', error);
+                console.error('Error loading user profile:', error);
+                return null;
             }
         }
         
-        // Call the temporary login immediately
-        tempLogin();
+        // Update navigation based on access level
+        function updateNavigationAccess() {
+            if (!userProfile) return;
+            
+            const allowedSections = ACCESS_LEVELS[userProfile.access_level].allowedSections;
+            const navItems = document.querySelectorAll('.nav-item');
+            
+            navItems.forEach(item => {
+                const link = item.querySelector('.nav-link');
+                const section = link.getAttribute('data-section');
+                
+                if (!allowedSections.includes(section)) {
+                    // Disable restricted sections
+                    item.style.opacity = '0.5';
+                    item.style.pointerEvents = 'none';
+                    link.style.cursor = 'not-allowed';
+                    
+                    // Add upgrade tooltip
+                    const upgradeTooltip = document.createElement('div');
+                    upgradeTooltip.innerHTML = '🔒 Upgrade to Pro';
+                    upgradeTooltip.style.cssText = `
+                        position: absolute;
+                        background: #1e293b;
+                        color: white;
+                        padding: 0.5rem;
+                        border-radius: 4px;
+                        font-size: 0.75rem;
+                        pointer-events: none;
+                        opacity: 0;
+                        transition: opacity 0.2s;
+                        z-index: 1000;
+                        top: 0;
+                        left: 100%;
+                        margin-left: 0.5rem;
+                        white-space: nowrap;
+                    `;
+                    
+                    item.style.position = 'relative';
+                    item.appendChild(upgradeTooltip);
+                    
+                    item.addEventListener('mouseenter', () => {
+                        upgradeTooltip.style.opacity = '1';
+                    });
+                    
+                    item.addEventListener('mouseleave', () => {
+                        upgradeTooltip.style.opacity = '0';
+                    });
+                    
+                    // Show upgrade modal on click
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        showUpgradeModal();
+                    });
+                }
+            });
+            
+            // Update user info in header
+            updateUserInfo();
+        }
         
-        // Add authentication check
-        async function checkAuthentication() {
+        // Show upgrade modal
+        function showUpgradeModal() {
+            const modalHTML = `
+                <div id="upgradeModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; display: flex; align-items: center; justify-content: center;">
+                    <div style="background: white; padding: 2rem; border-radius: 12px; max-width: 500px; width: 90%;">
+                        <h2 style="color: #1e293b; margin-bottom: 1rem;">Upgrade to Pro</h2>
+                        <p style="color: #6b7280; margin-bottom: 1.5rem;">Unlock advanced financial analysis tools and reporting features.</p>
+                        
+                        <div style="background: #f8fafc; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                            <h3 style="color: #1e293b; margin-bottom: 0.5rem;">Pro Features:</h3>
+                            <ul style="color: #374151; margin: 0; padding-left: 1.5rem;">
+                                <li>Financial Statements Generation</li>
+                                <li>Advanced Reports & Analytics</li>
+                                <li>Credit Analysis Tools</li>
+                                <li>Export & PDF Reports</li>
+                            </ul>
+                        </div>
+                        
+                        <div style="display: flex; gap: 1rem;">
+                            <button onclick="closeUpgradeModal()" style="flex: 1; background: #e5e7eb; color: #374151; padding: 0.75rem; border: none; border-radius: 6px; cursor: pointer;">Maybe Later</button>
+                            <button onclick="upgradeAccount()" style="flex: 1; background: #fbbf24; color: #1e293b; padding: 0.75rem; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">Upgrade Now</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+        }
+        
+        function closeUpgradeModal() {
+            const modal = document.getElementById('upgradeModal');
+            if (modal) modal.remove();
+        }
+        
+        async function upgradeAccount() {
+            try {
+                // For now, just upgrade to Pro automatically
+                // In production, you'd integrate with payment processing
+                const { data, error } = await supabase
+                    .from('user_profiles_meridash')
+                    .update({ access_level: 'pro', updated_at: new Date().toISOString() })
+                    .eq('user_id', userProfile.user_id);
+        
+                if (error) throw error;
+        
+                // Refresh profile and navigation
+                await loadUserProfile();
+                closeUpgradeModal();
+                
+                // Show success message
+                const successDiv = document.createElement('div');
+                successDiv.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: #10b981;
+                    color: white;
+                    padding: 1rem;
+                    border-radius: 8px;
+                    z-index: 1000;
+                `;
+                successDiv.textContent = '🎉 Upgraded to Pro! All features unlocked.';
+                document.body.appendChild(successDiv);
+                
+                setTimeout(() => successDiv.remove(), 3000);
+                
+            } catch (error) {
+                alert('Upgrade failed: ' + error.message);
+            }
+        }
+        
+        // Update user info in header
+        function updateUserInfo() {
+            const topBarRight = document.querySelector('.top-bar-right');
+            
+            // Remove existing user info
+            const existingUserInfo = document.getElementById('userInfo');
+            if (existingUserInfo) existingUserInfo.remove();
+            
+            if (userProfile) {
+                const userInfoHTML = `
+                    <div id="userInfo" style="display: flex; align-items: center; gap: 1rem; margin-right: 1rem;">
+                        <div style="text-align: right;">
+                            <div style="font-size: 0.875rem; font-weight: 500; color: #1e293b;">${userProfile.email}</div>
+                            <div style="font-size: 0.75rem; color: #6b7280;">
+                                ${ACCESS_LEVELS[userProfile.access_level].name} Plan
+                                ${userProfile.access_level === 'basic' ? '<button onclick="showUpgradeModal()" style="margin-left: 0.5rem; background: #fbbf24; color: #1e293b; border: none; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; cursor: pointer;">Upgrade</button>' : ''}
+                            </div>
+                        </div>
+                        <button onclick="handleLogout()" style="background: #ef4444; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.875rem;">Logout</button>
+                    </div>
+                `;
+                
+                topBarRight.insertAdjacentHTML('afterbegin', userInfoHTML);
+            }
+        }
+        
+        // Logout function
+        async function handleLogout() {
+            try {
+                const { error } = await supabase.auth.signOut();
+                if (error) throw error;
+                
+                // Clear user data
+                userProfile = null;
+                financialTransactions = [];
+                aparTransactions = [];
+                
+                // Show login form
+                showLoginForm();
+                
+            } catch (error) {
+                console.error('Logout failed:', error);
+            }
+        }
+
+        // Updated initialization with profile loading
+        async function initializeApp() {
             try {
                 const { data: { user }, error } = await supabase.auth.getUser();
                 
                 if (error || !user) {
-                    console.log('No authenticated user found');
-                    // For now, we'll continue without auth for testing
-                    // Later you can redirect to login page
-                    return false;
+                    // No user logged in, show login form
+                    showLoginForm();
+                    return;
                 }
                 
-                console.log('Authenticated user:', user.email);
-                return true;
+                // User is logged in, load their profile and data
+                console.log('User logged in:', user.email);
+                
+                await loadUserProfile();
+                await loadFinancialTransactions();
+                await loadAPARData();
+                
             } catch (error) {
-                console.error('Authentication check failed:', error);
-                return false;
+                console.error('Auth check failed:', error);
+                showLoginForm();
+            }
+        }
+        
+        // Updated login handler to load profile
+        async function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
+                
+                if (error) throw error;
+                
+                // Remove login modal
+                document.getElementById('loginModal').remove();
+                
+                // Load user profile and data
+                await loadUserProfile();
+                await loadFinancialTransactions();
+                await loadAPARData();
+                
+                console.log('Login successful:', data.user.email);
+                
+            } catch (error) {
+                alert('Login failed: ' + error.message);
+            }
+        }
+        
+        async function showLoginForm() {
+            const loginHTML = `
+                <div id="loginModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; display: flex; align-items: center; justify-content: center;">
+                    <div style="background: white; padding: 2rem; border-radius: 12px; max-width: 400px; width: 90%;">
+                        <h2 style="color: #1e293b; margin-bottom: 1.5rem; text-align: center;">Login to MontPro</h2>
+                        <form id="loginForm">
+                            <div style="margin-bottom: 1rem;">
+                                <label style="display: block; margin-bottom: 0.5rem; color: #374151;">Email:</label>
+                                <input type="email" id="loginEmail" required style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px;">
+                            </div>
+                            <div style="margin-bottom: 1.5rem;">
+                                <label style="display: block; margin-bottom: 0.5rem; color: #374151;">Password:</label>
+                                <input type="password" id="loginPassword" required style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px;">
+                            </div>
+                            <button type="submit" style="width: 100%; background: #fbbf24; color: #1e293b; padding: 0.75rem; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">Login</button>
+                        </form>
+                        <p style="text-align: center; margin-top: 1rem; color: #6b7280; font-size: 0.875rem;">
+                            Don't have an account? <a href="#" id="showSignup" style="color: #fbbf24;">Sign up</a>
+                        </p>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', loginHTML);
+            
+            document.getElementById('loginForm').addEventListener('submit', handleLogin);
+            document.getElementById('showSignup').addEventListener('click', showSignupForm);
+        }
+
+        initializeApp();
+
+        async function showSignupForm() {
+            document.getElementById('loginModal').remove();
+            
+            const signupHTML = `
+                <div id="signupModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; display: flex; align-items: center; justify-content: center;">
+                    <div style="background: white; padding: 2rem; border-radius: 12px; max-width: 400px; width: 90%;">
+                        <h2 style="color: #1e293b; margin-bottom: 1.5rem; text-align: center;">Sign Up for MontPro</h2>
+                        <form id="signupForm">
+                            <div style="margin-bottom: 1rem;">
+                                <label style="display: block; margin-bottom: 0.5rem; color: #374151;">Email:</label>
+                                <input type="email" id="signupEmail" required style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px;">
+                            </div>
+                            <div style="margin-bottom: 1.5rem;">
+                                <label style="display: block; margin-bottom: 0.5rem; color: #374151;">Password:</label>
+                                <input type="password" id="signupPassword" required style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px;">
+                            </div>
+                            <button type="submit" style="width: 100%; background: #10b981; color: white; padding: 0.75rem; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">Create Account</button>
+                        </form>
+                        <p style="text-align: center; margin-top: 1rem; color: #6b7280; font-size: 0.875rem;">
+                            Already have an account? <a href="#" id="showLogin" style="color: #fbbf24;">Login</a>
+                        </p>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', signupHTML);
+            
+            document.getElementById('signupForm').addEventListener('submit', handleSignup);
+            document.getElementById('showLogin').addEventListener('click', () => {
+                document.getElementById('signupModal').remove();
+                showLoginForm();
+            });
+        }
+        
+        async function handleSignup(e) {
+            e.preventDefault();
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+            
+            try {
+                const { data, error } = await supabase.auth.signUp({
+                    email: email,
+                    password: password
+                });
+                
+                if (error) throw error;
+                
+                // Remove signup modal
+                document.getElementById('signupModal').remove();
+                
+                // Show success message
+                const successDiv = document.createElement('div');
+                successDiv.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: #10b981;
+                    color: white;
+                    padding: 1rem;
+                    border-radius: 8px;
+                    z-index: 1000;
+                `;
+                successDiv.textContent = '✅ Account created! You can now login.';
+                document.body.appendChild(successDiv);
+                
+                setTimeout(() => {
+                    successDiv.remove();
+                    showLoginForm();
+                }, 2000);
+                
+                console.log('Signup successful:', data.user.email);
+                
+            } catch (error) {
+                alert('Signup failed: ' + error.message);
             }
         }
         
