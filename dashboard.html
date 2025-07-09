@@ -7875,43 +7875,18 @@
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
             const week = Math.ceil(diffDays / 7) + 1;
             
-            console.log('Dashboard forecast - Week:', week, 'Date:', weekDate.toDateString());
-            
             if (!aparTransactions || aparTransactions.length === 0) {
-                console.log('No aparTransactions available');
                 return { inflows, outflows };
             }
             
-            // Use the same logic as scenarios (which works correctly)
-            const unpaidTransactions = aparTransactions.filter(transaction => 
-                transaction.status !== 'Paid'
-            );
+            // Use the same spread logic as scenarios (which works correctly)
+            const unpaid = aparTransactions.filter(t => t.status !== 'Paid');
             
-            console.log('Found', unpaidTransactions.length, 'unpaid transactions');
-            
-            // Calculate based on due dates falling in this week
-            const weekStart = new Date(weekDate);
-            const weekEnd = new Date(weekDate);
-            weekEnd.setDate(weekEnd.getDate() + 6);
-            
-            let processedCount = 0;
-            unpaidTransactions.forEach(transaction => {
-                let dueDate;
+            // Spread overdue transactions across 13 weeks (same as scenarios)
+            unpaid.forEach((transaction, index) => {
+                const assignedWeek = (index % 13) + 1;
                 
-                // Handle due date parsing (same as scenarios)
-                if (transaction.due_date) {
-                    dueDate = new Date(transaction.due_date);
-                } else if (transaction.invoice_date && transaction.payment_terms) {
-                    const invoiceDate = new Date(transaction.invoice_date);
-                    dueDate = new Date(invoiceDate);
-                    dueDate.setDate(dueDate.getDate() + (transaction.payment_terms || 30));
-                } else {
-                    return; // Skip if no due date
-                }
-                
-                // Check if due date falls in this week
-                if (dueDate >= weekStart && dueDate <= weekEnd) {
-                    processedCount++;
+                if (assignedWeek === week) {
                     if (transaction.type === 'AR') {
                         inflows += transaction.amount;
                     } else if (transaction.type === 'AP') {
@@ -7920,7 +7895,6 @@
                 }
             });
             
-            console.log(`Week ${week} flows:`, { inflows, outflows, processedCount });
             return { inflows, outflows };
         }
         
