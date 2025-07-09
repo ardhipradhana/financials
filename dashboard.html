@@ -5883,6 +5883,18 @@
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJyYXdxenlsZnl1b3RneHFtdG94Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg1MTU0NTUsImV4cCI6MjA2NDA5MTQ1NX0.P4qazlzBHk66eItqBRK-6k2ll2I1d754ke5_r_hNxos'
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
+        console.log('=== AUTHENTICATION DEBUG ===');
+        supabase.auth.getUser().then(({ data: { user }, error }) => {
+            if (error) {
+                console.error('Auth error:', error);
+            } else if (user) {
+                console.log('Authenticated user found:', user.id, user.email);
+                console.log('User ID matches your data:', user.id === '66c5c116-571a-40e6-84be-ba5ca0d4dd58');
+            } else {
+                console.log('No authenticated user found');
+            }
+        });
+        
         // Add authentication check
         async function checkAuthentication() {
             try {
@@ -9858,12 +9870,19 @@
         // Load Financial Transactions from Supabase
         async function loadFinancialTransactions() {
             try {
+                console.log('=== LOADING FINANCIAL TRANSACTIONS DEBUG ===');
+                
                 const { data, error } = await supabase
                     .from('financial_transactions_meridash')
                     .select('*')
                     .order('transaction_date', { ascending: false });
                 
-                if (error) throw error;
+                console.log('Financial query result:', { data, error });
+                
+                if (error) {
+                    console.error('Financial transactions error details:', error);
+                    throw error;
+                }
                 
                 financialTransactions = data || [];
                 console.log('Loaded financial transactions:', financialTransactions.length);
@@ -9872,7 +9891,12 @@
                 updateTrialBalance();
             } catch (error) {
                 console.error('Error loading financial transactions:', error);
-                alert('Error loading financial transactions: ' + error.message);
+                console.error('Error code:', error.code);
+                console.error('Error message:', error.message);
+                
+                financialTransactions = [];
+                renderFinancialTable();
+                updateTrialBalance();
             }
         }
         
