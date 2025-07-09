@@ -13959,7 +13959,7 @@
             const { current, previous } = comparisonData;
             const revenueChange = current.netRevenue - previous.netRevenue;
             
-            if (current.netRevenue === 0 && previous.netRevenue === 0) {
+            if (current.netRevenue === 0) {
                 showNoDataMessage('revenueWaterfallChart', 'Insufficient revenue data for analysis');
                 return;
             }
@@ -13982,7 +13982,7 @@
         function renderGrossProfitWaterfallChart() {
             const { current, previous } = comparisonData;
             
-            if (current.grossProfit === 0 && previous.grossProfit === 0) {
+            if (current.grossProfit === 0) {
                 showNoDataMessage('grossProfitWaterfallChart', 'Insufficient gross profit data for analysis');
                 return;
             }
@@ -14007,8 +14007,8 @@
         function renderOpexWaterfallChart() {
             const { current, previous } = comparisonData;
             
-            if (current.opex === 0 && previous.opex === 0) {
-                showNoDataMessage('opexWaterfallChart', 'Insufficient OPEX data for analysis');
+            if (current.netRevenue === 0) {
+                showNoDataMessage('opexWaterfallChart', 'Insufficient data for analysis');
                 return;
             }
             
@@ -14032,7 +14032,7 @@
         function renderEbitdaWaterfallChart() {
             const { current, previous } = comparisonData;
             
-            if (current.ebitda === 0 && previous.ebitda === 0) {
+            if (current.ebitda === 0) {
                 showNoDataMessage('ebitdaWaterfallChart', 'Insufficient EBITDA data for analysis');
                 return;
             }
