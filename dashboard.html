@@ -5267,13 +5267,16 @@
                     <p class="page-subtitle">Real-time financial insights and cash flow management</p>
                 </div>
                 <div class="top-bar-right">
-                    <div class="date-display">
-                        <span id="currentDate"></span>
-                    </div>
-                    <div class="connection-status" id="connectionStatus">
-                        <i class="fas fa-database"></i>
-                        <span id="connectionText">Connecting...</span>
-                        <div class="connection-dot" id="connectionDot"></div>
+                    <!-- Date and Connection Status in same line -->
+                    <div style="display: flex; align-items: center; gap: 1rem; margin-right: 1rem;">
+                        <div class="date-display">
+                            <span id="currentDate"></span>
+                        </div>
+                        <div class="connection-status" id="connectionStatus">
+                            <i class="fas fa-database"></i>
+                            <span id="connectionText">Connecting...</span>
+                            <div class="connection-dot" id="connectionDot"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -7145,75 +7148,66 @@
             
             if (userProfile) {
                 const userInfoHTML = `
-                    <div id="userInfo" style="display: flex; align-items: center; gap: 1.5rem;">
-                        <!-- User Profile Section -->
-                        <div class="user-profile-section" style="display: flex; align-items: center; gap: 1rem; padding: 0.75rem 1rem; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0;">
-                            <!-- Avatar -->
-                            <div class="user-avatar" style="width: 40px; height: 40px; background: linear-gradient(135deg, #3b82f6, #1e40af); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 0.875rem;">
-                                ${userProfile.email.charAt(0).toUpperCase()}
+                    <div id="userInfo" style="display: flex; align-items: center; gap: 1rem;">
+                        <!-- Compact User Info -->
+                        <div class="user-profile-compact" style="
+                            padding: 0.5rem 0.75rem; 
+                            background: #f8fafc; 
+                            border-radius: 8px; 
+                            border: 1px solid #e2e8f0;
+                        ">
+                            <!-- Line 1: Email and Plan -->
+                            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.25rem;">
+                                <span style="font-size: 0.875rem; font-weight: 600; color: #1e293b;">
+                                    ${userProfile.email}
+                                </span>
+                                <span style="
+                                    padding: 0.125rem 0.5rem; 
+                                    background: ${userProfile.access_level === 'basic' ? '#f3f4f6' : '#d1fae5'}; 
+                                    color: ${userProfile.access_level === 'basic' ? '#6b7280' : '#065f46'}; 
+                                    border-radius: 4px; 
+                                    font-size: 0.75rem; 
+                                    font-weight: 500;
+                                    border: 1px solid ${userProfile.access_level === 'basic' ? '#d1d5db' : '#10b981'};
+                                ">
+                                    ${ACCESS_LEVELS[userProfile.access_level].name}
+                                </span>
                             </div>
                             
-                            <!-- User Details -->
-                            <div class="user-details" style="display: flex; flex-direction: column; gap: 0.25rem;">
-                                <div class="user-email" style="font-size: 0.875rem; font-weight: 600; color: #1e293b; line-height: 1.2;">
-                                    ${userProfile.email}
-                                </div>
-                                <div class="user-plan-container" style="display: flex; align-items: center; gap: 0.75rem;">
-                                    <span class="user-plan-badge" style="
-                                        display: inline-flex; 
-                                        align-items: center; 
-                                        gap: 0.25rem;
+                            <!-- Line 2: Upgrade button (only for basic users) -->
+                            ${userProfile.access_level === 'basic' ? `
+                                <div style="display: flex; justify-content: flex-start;">
+                                    <button onclick="showUpgradeModal()" style="
+                                        background: #fbbf24; 
+                                        color: #1e293b; 
+                                        border: none; 
                                         padding: 0.25rem 0.5rem; 
-                                        background: ${userProfile.access_level === 'basic' ? '#fef3c7' : '#d1fae5'}; 
-                                        color: ${userProfile.access_level === 'basic' ? '#92400e' : '#065f46'}; 
-                                        border-radius: 6px; 
+                                        border-radius: 4px; 
                                         font-size: 0.75rem; 
-                                        font-weight: 600;
-                                        border: 1px solid ${userProfile.access_level === 'basic' ? '#fbbf24' : '#10b981'};
-                                    ">
-                                        ${userProfile.access_level === 'basic' ? '⭐' : '💎'} ${ACCESS_LEVELS[userProfile.access_level].name} Plan
-                                    </span>
-                                    ${userProfile.access_level === 'basic' ? `
-                                        <button onclick="showUpgradeModal()" class="upgrade-btn-mini" style="
-                                            background: linear-gradient(135deg, #fbbf24, #f59e0b); 
-                                            color: #1e293b; 
-                                            border: none; 
-                                            padding: 0.25rem 0.5rem; 
-                                            border-radius: 6px; 
-                                            font-size: 0.75rem; 
-                                            font-weight: 600; 
-                                            cursor: pointer;
-                                            transition: all 0.2s ease;
-                                            box-shadow: 0 2px 4px rgba(251, 191, 36, 0.2);
-                                        " onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 8px rgba(251, 191, 36, 0.3)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(251, 191, 36, 0.2)'">
-                                            ⚡ Upgrade
-                                        </button>
-                                    ` : ''}
+                                        font-weight: 600; 
+                                        cursor: pointer;
+                                        transition: all 0.2s ease;
+                                    " onmouseover="this.style.background='#f59e0b'" onmouseout="this.style.background='#fbbf24'">
+                                        Upgrade to Pro
+                                    </button>
                                 </div>
-                            </div>
+                            ` : `
+                                <div style="height: 20px;"></div>
+                            `}
                         </div>
                         
                         <!-- Logout Button -->
-                        <button onclick="handleLogout()" class="logout-btn-enhanced" style="
+                        <button onclick="handleLogout()" style="
                             background: #ef4444; 
                             color: white; 
                             border: none; 
-                            padding: 0.75rem 1rem; 
-                            border-radius: 8px; 
+                            padding: 0.5rem 0.75rem; 
+                            border-radius: 6px; 
                             cursor: pointer; 
                             font-size: 0.875rem;
                             font-weight: 500;
                             transition: all 0.2s ease;
-                            display: flex;
-                            align-items: center;
-                            gap: 0.5rem;
-                            box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
-                        " onmouseover="this.style.background='#dc2626'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='#ef4444'; this.style.transform='translateY(0)'">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                                <polyline points="16,17 21,12 16,7"/>
-                                <line x1="21" y1="12" x2="9" y2="12"/>
-                            </svg>
+                        " onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='#ef4444'">
                             Logout
                         </button>
                     </div>
