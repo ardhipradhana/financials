@@ -15046,24 +15046,28 @@
 
         // Financing Modal Functions
         function openFinancingModal() {
-            // Close any other open modals first
-            const otherModals = [
-                'addFinancialModal', 'newAccountModal', 'uploadFinancialModal', 
-                'glAccountSelectionModal', 'aparCreationModal', 'addModal', 'uploadModal'
-            ];
+            // Close all other modals
+            document.getElementById('addFinancialModal').style.display = 'none';
+            document.getElementById('newAccountModal').style.display = 'none';
+            document.getElementById('uploadFinancialModal').style.display = 'none';
+            document.getElementById('glAccountSelectionModal').style.display = 'none';
+            document.getElementById('aparCreationModal').style.display = 'none';
+            document.getElementById('addModal').style.display = 'none';
+            document.getElementById('uploadModal').style.display = 'none';
             
-            otherModals.forEach(modalId => {
-                const modal = document.getElementById(modalId);
-                if (modal) {
-                    modal.style.display = 'none';
-                }
-            });
-            
-            // Now open the financing modal with proper styling
+            // Open financing modal with the exact styles that worked in console
             const modal = document.getElementById('financingModal');
             modal.style.display = 'flex';
             modal.style.justifyContent = 'center';
             modal.style.alignItems = 'center';
+            modal.style.background = 'rgba(0, 0, 0, 0.5)';
+            modal.style.position = 'fixed';
+            modal.style.top = '0';
+            modal.style.left = '0';
+            modal.style.width = '100%';
+            modal.style.height = '100%';
+            modal.style.zIndex = '9999';
+            
             document.body.style.overflow = 'hidden';
             
             // Set default available date to today
