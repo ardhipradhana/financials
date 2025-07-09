@@ -14057,6 +14057,8 @@
         
         // D3.js Waterfall Chart Implementation
         function createWaterfallChart(containerId, data, title) {
+            console.log('Creating waterfall chart for:', containerId, data);
+            
             // Clear any existing chart
             d3.select(`#${containerId}`).selectAll("*").remove();
             
