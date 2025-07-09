@@ -13797,19 +13797,22 @@
             console.log('=== CALCULATING DASHBOARD METRICS FROM REAL DATA ===');
             console.log('AP/AR transactions:', aparTransactions.length);
             
-            // 1. Calculate current cash position from starting cash and AP/AR data
-            let currentCash = 10000000; // Default starting cash - you can make this dynamic
+            // 1. Calculate current cash position using the same logic as AP/AR tab
+            // Get all unpaid transactions (both Unpaid and Overdue status)
+            const allUnpaidAR = aparTransactions.filter(t => 
+                t.type === 'AR' && (t.status === 'Unpaid' || t.status === 'Overdue')
+            );
+            const allUnpaidAP = aparTransactions.filter(t => 
+                t.type === 'AP' && (t.status === 'Unpaid' || t.status === 'Overdue')
+            );
             
-            // Add paid AR (money received)
-            const paidAR = aparTransactions.filter(t => t.type === 'AR' && t.status === 'Paid');
-            paidAR.forEach(t => currentCash += parseFloat(t.amount || 0));
+            const totalARAll = allUnpaidAR.reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+            const totalAPAll = allUnpaidAP.reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
             
-            // Subtract paid AP (money spent)
-            const paidAP = aparTransactions.filter(t => t.type === 'AP' && t.status === 'Paid');
-            paidAP.forEach(t => currentCash -= parseFloat(t.amount || 0));
+            // Current cash = same as netCashImpact calculation
+            const currentCash = totalARAll - totalAPAll;
             
             // 2. Calculate overdue positions
-            const today = new Date();
             const overdueAR = aparTransactions
                 .filter(t => t.type === 'AR' && t.status === 'Overdue')
                 .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
@@ -13820,45 +13823,52 @@
             
             const netOverduePosition = overdueAR - overdueAP;
             
-            // 3. Calculate revenue from AR transactions (simplified)
-            const selectedPeriod = document.getElementById('dashboardPeriodFilter')?.value || 'MTD';
+            // 3. Calculate revenue from AR transactions
+            const selectedPeriod = document.getElementById('dashboardPeriodFilter')?.value || 'YTD';
             const periodRevenue = calculateARRevenue(selectedPeriod);
-            
-            // 4. Calculate basic health indicators
-            const totalAR = aparTransactions
-                .filter(t => t.type === 'AR' && t.status !== 'Paid')
-                .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
-            
-            const totalAP = aparTransactions
-                .filter(t => t.type === 'AP' && t.status !== 'Paid')
-                .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
             
             const metrics = {
                 currentCash,
                 netOverduePosition,
-                fullAR: totalAR,
-                fullAP: totalAP,
+                fullAR: totalARAll,
+                fullAP: totalAPAll,
                 overdueAR,
                 overdueAP,
                 periodRevenue,
                 selectedPeriod,
-                healthScore: 2.45, // Static for now - will be dynamic with financial data
+                healthScore: 2.45,
                 altmanRating: 'Good',
                 riskLevel: 'Low Risk',
                 recommendation: 'Upgrade to Pro for full financial analysis'
             };
             
             console.log('Final calculated metrics:', metrics);
+            console.log('Current cash (totalARAll - totalAPAll):', formatCurrencyFull(currentCash, 'IDR'));
+            console.log('Net overdue position:', formatCurrencyFull(netOverduePosition, 'IDR'));
+            console.log('Period revenue:', formatCurrencyFull(periodRevenue, 'IDR'));
+            
             return metrics;
         }
         
         function calculateARRevenue(periodFilter) {
             console.log('=== CALCULATING AR REVENUE FOR PERIOD ===');
+            console.log('Period filter:', periodFilter);
             
             if (!aparTransactions || aparTransactions.length === 0) {
                 return 0;
             }
             
+            // For YTD, include ALL AR transactions regardless of status
+            if (periodFilter === 'YTD') {
+                const allARRevenue = aparTransactions
+                    .filter(t => t.type === 'AR')
+                    .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+                
+                console.log('YTD AR Revenue (all transactions):', allARRevenue);
+                return allARRevenue;
+            }
+            
+            // For other periods, filter by date
             const today = new Date();
             let startDate;
             
@@ -13870,11 +13880,14 @@
                     const quarter = Math.floor(today.getMonth() / 3);
                     startDate = new Date(today.getFullYear(), quarter * 3, 1);
                     break;
-                case 'YTD':
-                    startDate = new Date(today.getFullYear(), 0, 1);
+                case 'L30D':
+                    startDate = new Date(today.getTime() - (30 * 24 * 60 * 60 * 1000));
+                    break;
+                case 'L90D':
+                    startDate = new Date(today.getTime() - (90 * 24 * 60 * 60 * 1000));
                     break;
                 default:
-                    startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+                    startDate = new Date(today.getFullYear(), 0, 1); // YTD fallback
             }
             
             const arTransactions = aparTransactions.filter(t => {
@@ -13885,7 +13898,9 @@
             
             const revenue = arTransactions.reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
             
-            console.log(`${periodFilter} AR Revenue:`, revenue);
+            console.log(`${periodFilter} AR Revenue (filtered):`, revenue);
+            console.log(`Filtered transactions:`, arTransactions.length);
+            
             return revenue;
         }
         
