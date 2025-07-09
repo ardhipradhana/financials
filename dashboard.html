@@ -11,6 +11,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-waterfall@2.0.1/dist/chartjs-chart-waterfall.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -13936,47 +13937,17 @@
             return 'change-neutral';
         }
         
-        // Render waterfall charts
+        // Enhanced waterfall charts using Chart.js
         function renderWaterfallCharts() {
             const { current, previous } = comparisonData;
             
-            if (!current || !previous) return;
+            if (!current || !previous) {
+                hideWaterfallCharts();
+                return;
+            }
             
-            // Update the charts grid to show 4 cards with titles at top
-            const chartsGrid = document.querySelector('.charts-grid');
-            chartsGrid.innerHTML = `
-                <div class="chart-container">
-                    <div class="chart-header-top">
-                        <h4>Revenue Bridge Analysis</h4>
-                        <p>Key drivers of revenue change</p>
-                    </div>
-                    <div id="revenueWaterfallChart" class="waterfall-chart"></div>
-                </div>
-                
-                <div class="chart-container">
-                    <div class="chart-header-top">
-                        <h4>Gross Profit Bridge</h4>
-                        <p>COGS impact on gross profit</p>
-                    </div>
-                    <div id="grossProfitWaterfallChart" class="waterfall-chart"></div>
-                </div>
-                
-                <div class="chart-container">
-                    <div class="chart-header-top">
-                        <h4>OPEX Bridge</h4>
-                        <p>Operating expense breakdown</p>
-                    </div>
-                    <div id="opexWaterfallChart" class="waterfall-chart"></div>
-                </div>
-                
-                <div class="chart-container">
-                    <div class="chart-header-top">
-                        <h4>EBITDA Bridge</h4>
-                        <p>Path to EBITDA performance</p>
-                    </div>
-                    <div id="ebitdaWaterfallChart" class="waterfall-chart"></div>
-                </div>
-            `;
+            // Show the charts section
+            document.getElementById('waterfallChartsSection').style.display = 'block';
             
             // Render each waterfall chart
             renderRevenueWaterfallChart();
@@ -13985,25 +13956,42 @@
             renderEbitdaWaterfallChart();
         }
         
+        function hideWaterfallCharts() {
+            document.getElementById('waterfallChartsSection').style.display = 'none';
+        }
+        
         // Revenue Bridge Analysis
         function renderRevenueWaterfallChart() {
             const { current, previous } = comparisonData;
             const revenueChange = current.netRevenue - previous.netRevenue;
             
-            // Generate 7 revenue drivers
+            // Check if there's meaningful data
+            if (revenueChange === 0 && current.netRevenue === 0) {
+                showNoDataMessage('revenueWaterfallChart', 'Insufficient revenue data for analysis');
+                return;
+            }
+            
+            const ctx = document.getElementById('revenueWaterfallChart');
+            if (!ctx) return;
+            
+            // Destroy existing chart
+            if (window.revenueWaterfallChartInstance) {
+                window.revenueWaterfallChartInstance.destroy();
+            }
+            
             const waterfallData = [
                 { label: 'Previous Revenue', value: previous.netRevenue, type: 'base' },
-                { label: 'New Customers', value: revenueChange * 0.25, type: 'positive' },
-                { label: 'Customer Growth', value: revenueChange * 0.20, type: 'positive' },
-                { label: 'Price Changes', value: revenueChange * 0.15, type: 'positive' },
-                { label: 'Product Mix', value: revenueChange * 0.10, type: 'positive' },
-                { label: 'Market Expansion', value: revenueChange * 0.15, type: 'positive' },
+                { label: 'New Customers', value: revenueChange * 0.25, type: revenueChange > 0 ? 'positive' : 'negative' },
+                { label: 'Customer Growth', value: revenueChange * 0.20, type: revenueChange > 0 ? 'positive' : 'negative' },
+                { label: 'Price Changes', value: revenueChange * 0.15, type: revenueChange > 0 ? 'positive' : 'negative' },
+                { label: 'Product Mix', value: revenueChange * 0.10, type: revenueChange > 0 ? 'positive' : 'negative' },
+                { label: 'Market Expansion', value: revenueChange * 0.15, type: revenueChange > 0 ? 'positive' : 'negative' },
                 { label: 'Customer Churn', value: revenueChange * -0.10, type: 'negative' },
                 { label: 'Seasonal Impact', value: revenueChange * 0.25, type: revenueChange > 0 ? 'positive' : 'negative' },
                 { label: 'Current Revenue', value: current.netRevenue, type: 'total' }
             ];
             
-            document.getElementById('revenueWaterfallChart').innerHTML = createWaterfallHTML(waterfallData);
+            window.revenueWaterfallChartInstance = createWaterfallChart(ctx, waterfallData, 'Revenue Bridge Analysis');
         }
         
         // Gross Profit Bridge Analysis  
@@ -14012,6 +14000,18 @@
             const grossProfitChange = current.grossProfit - previous.grossProfit;
             const revenueImpact = current.netRevenue - previous.netRevenue;
             const cogsImpact = -(current.cogs - previous.cogs);
+            
+            if (grossProfitChange === 0 && current.grossProfit === 0) {
+                showNoDataMessage('grossProfitWaterfallChart', 'Insufficient gross profit data for analysis');
+                return;
+            }
+            
+            const ctx = document.getElementById('grossProfitWaterfallChart');
+            if (!ctx) return;
+            
+            if (window.grossProfitWaterfallChartInstance) {
+                window.grossProfitWaterfallChartInstance.destroy();
+            }
             
             const waterfallData = [
                 { label: 'Previous Gross Profit', value: previous.grossProfit, type: 'base' },
@@ -14024,13 +14024,25 @@
                 { label: 'Current Gross Profit', value: current.grossProfit, type: 'total' }
             ];
             
-            document.getElementById('grossProfitWaterfallChart').innerHTML = createWaterfallHTML(waterfallData);
+            window.grossProfitWaterfallChartInstance = createWaterfallChart(ctx, waterfallData, 'Gross Profit Bridge');
         }
         
         // OPEX Bridge Analysis
         function renderOpexWaterfallChart() {
             const { current, previous } = comparisonData;
             const opexChange = current.opex - previous.opex;
+            
+            if (opexChange === 0 && current.opex === 0) {
+                showNoDataMessage('opexWaterfallChart', 'Insufficient OPEX data for analysis');
+                return;
+            }
+            
+            const ctx = document.getElementById('opexWaterfallChart');
+            if (!ctx) return;
+            
+            if (window.opexWaterfallChartInstance) {
+                window.opexWaterfallChartInstance.destroy();
+            }
             
             const waterfallData = [
                 { label: 'Previous OPEX', value: previous.opex, type: 'base' },
@@ -14044,7 +14056,7 @@
                 { label: 'Current OPEX', value: current.opex, type: 'total' }
             ];
             
-            document.getElementById('opexWaterfallChart').innerHTML = createWaterfallHTML(waterfallData);
+            window.opexWaterfallChartInstance = createWaterfallChart(ctx, waterfallData, 'OPEX Bridge');
         }
         
         // EBITDA Bridge Analysis
@@ -14053,6 +14065,18 @@
             const revenueImpact = current.netRevenue - previous.netRevenue;
             const cogsImpact = -(current.cogs - previous.cogs);
             const opexImpact = -(current.opex - previous.opex);
+            
+            if (current.ebitda === 0 && previous.ebitda === 0) {
+                showNoDataMessage('ebitdaWaterfallChart', 'Insufficient EBITDA data for analysis');
+                return;
+            }
+            
+            const ctx = document.getElementById('ebitdaWaterfallChart');
+            if (!ctx) return;
+            
+            if (window.ebitdaWaterfallChartInstance) {
+                window.ebitdaWaterfallChartInstance.destroy();
+            }
             
             const waterfallData = [
                 { label: 'Previous EBITDA', value: previous.ebitda, type: 'base' },
@@ -14065,81 +14089,95 @@
                 { label: 'Current EBITDA', value: current.ebitda, type: 'total' }
             ];
             
-            document.getElementById('ebitdaWaterfallChart').innerHTML = createWaterfallHTML(waterfallData);
+            window.ebitdaWaterfallChartInstance = createWaterfallChart(ctx, waterfallData, 'EBITDA Bridge');
         }
         
-        // Create waterfall HTML visualization
-        function createWaterfallHTML(data) {
-            const maxValue = Math.max(...data.map(d => Math.abs(d.value)));
-            const minValue = Math.min(...data.map(d => d.value));
-            const range = maxValue - minValue;
-            
-            // Calculate cumulative positions for proper waterfall flow
-            let runningTotal = 0;
-            const processedData = data.map((item, index) => {
-                if (index === 0) {
-                    // Starting value
-                    runningTotal = item.value;
-                    return {
-                        ...item,
-                        cumulativeStart: 0,
-                        cumulativeEnd: item.value,
-                        displayValue: item.value
-                    };
-                } else if (index === data.length - 1) {
-                    // Ending value (total)
-                    return {
-                        ...item,
-                        cumulativeStart: 0,
-                        cumulativeEnd: item.value,
-                        displayValue: item.value
-                    };
-                } else {
-                    // Middle values (changes)
-                    const prevTotal = runningTotal;
-                    runningTotal += item.value;
-                    return {
-                        ...item,
-                        cumulativeStart: Math.min(prevTotal, runningTotal),
-                        cumulativeEnd: Math.max(prevTotal, runningTotal),
-                        displayValue: item.value
-                    };
+        // Generic waterfall chart creator using Chart.js
+        function createWaterfallChart(ctx, data, title) {
+            const labels = data.map(d => d.label);
+            const values = data.map(d => d.value);
+            const colors = data.map(d => {
+                switch(d.type) {
+                    case 'base': return '#64748b';
+                    case 'positive': return '#10b981';
+                    case 'negative': return '#ef4444';
+                    case 'total': return '#f59e0b';
+                    default: return '#64748b';
                 }
             });
             
-            return `
-                <div class="waterfall-container">
-                    <div class="waterfall-chart-area">
-                        ${processedData.map((item, index) => {
-                            const isFirstOrLast = index === 0 || index === processedData.length - 1;
-                            const height = isFirstOrLast 
-                                ? Math.abs(item.value) / range * 80
-                                : Math.abs(item.displayValue) / range * 80;
-                            const bottom = isFirstOrLast 
-                                ? 0 
-                                : (item.cumulativeStart - minValue) / range * 80;
-                            
-                            return `
-                                <div class="waterfall-column">
-                                    <div class="waterfall-bar-container" style="height: 100%; position: relative;">
-                                        <div class="waterfall-bar waterfall-${item.type}" 
-                                             style="height: ${Math.max(height, 8)}%; bottom: ${bottom}%; position: absolute; width: 100%;"
-                                             title="${item.label}: ${formatCurrency(item.displayValue)}">
-                                        </div>
-                                        ${index > 0 && index < processedData.length - 1 ? `
-                                            <div class="waterfall-connector-line" 
-                                                 style="position: absolute; right: 100%; top: ${item.value > 0 ? bottom : bottom + height}%; 
-                                                        width: 20px; height: 2px; background: #d1d5db;"></div>
-                                        ` : ''}
-                                    </div>
-                                    <div class="waterfall-labels">
-                                        <div class="waterfall-label">${item.label}</div>
-                                        <div class="waterfall-value ${item.value >= 0 ? 'positive' : 'negative'}">${formatCurrency(item.displayValue, true)}</div>
-                                    </div>
-                                </div>
-                            `;
-                        }).join('')}
-                    </div>
+            return new Chart(ctx, {
+                type: 'waterfall',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: title,
+                        data: values,
+                        backgroundColor: colors,
+                        borderColor: colors,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: title,
+                            font: {
+                                size: 14,
+                                weight: 'bold'
+                            },
+                            color: '#1e293b'
+                        },
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.label + ': ' + formatCurrency(context.parsed.y);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            display: false, // Remove grid lines
+                            ticks: {
+                                callback: function(value) {
+                                    return formatCurrency(value);
+                                }
+                            }
+                        },
+                        x: {
+                            display: true,
+                            grid: {
+                                display: false // Remove grid lines
+                            },
+                            ticks: {
+                                maxRotation: 45,
+                                font: {
+                                    size: 10
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Show "no data" message
+        function showNoDataMessage(canvasId, message) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            
+            const container = canvas.parentElement;
+            container.innerHTML = `
+                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 300px; color: #6b7280;">
+                    <i class="fas fa-chart-bar" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;"></i>
+                    <p style="margin: 0; font-style: italic;">${message}</p>
                 </div>
             `;
         }
