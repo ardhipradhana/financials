@@ -7149,57 +7149,53 @@
             if (userProfile) {
                 const userInfoHTML = `
                     <div id="userInfo" style="display: flex; align-items: center; gap: 1rem;">
-                        <!-- Compact User Info -->
-                        <div class="user-profile-compact" style="
+                        <!-- Single line: Email + Plan + Upgrade -->
+                        <div style="
+                            display: flex; 
+                            align-items: center; 
+                            gap: 0.75rem; 
                             padding: 0.5rem 0.75rem; 
                             background: #f8fafc; 
                             border-radius: 8px; 
                             border: 1px solid #e2e8f0;
-                            height: 60px;
-                            display: flex;
-                            flex-direction: column;
-                            justify-content: center;
                         ">
-                            <!-- Line 1: Email -->
-                            <div style="margin-bottom: 0.25rem;">
-                                <span style="font-size: 0.875rem; font-weight: 600; color: #1e293b;">
-                                    ${userProfile.email}
-                                </span>
-                            </div>
+                            <!-- Email -->
+                            <span style="font-size: 0.875rem; font-weight: 600; color: #1e293b;">
+                                ${userProfile.email}
+                            </span>
                             
-                            <!-- Line 2: Plan badge and Upgrade button side by side -->
-                            <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                <span style="
-                                    padding: 0.125rem 0.5rem; 
-                                    background: ${userProfile.access_level === 'basic' ? '#f3f4f6' : '#d1fae5'}; 
-                                    color: ${userProfile.access_level === 'basic' ? '#6b7280' : '#065f46'}; 
+                            <!-- Plan Badge -->
+                            <span style="
+                                padding: 0.25rem 0.5rem; 
+                                background: ${userProfile.access_level === 'basic' ? '#f3f4f6' : '#d1fae5'}; 
+                                color: ${userProfile.access_level === 'basic' ? '#6b7280' : '#065f46'}; 
+                                border-radius: 4px; 
+                                font-size: 0.75rem; 
+                                font-weight: 500;
+                                border: 1px solid ${userProfile.access_level === 'basic' ? '#d1d5db' : '#10b981'};
+                            ">
+                                ${ACCESS_LEVELS[userProfile.access_level].name}
+                            </span>
+                            
+                            <!-- Upgrade Button (only for basic users) -->
+                            ${userProfile.access_level === 'basic' ? `
+                                <button onclick="showUpgradeModal()" style="
+                                    background: #fbbf24; 
+                                    color: #1e293b; 
+                                    border: none; 
+                                    padding: 0.25rem 0.5rem; 
                                     border-radius: 4px; 
                                     font-size: 0.75rem; 
-                                    font-weight: 500;
-                                    border: 1px solid ${userProfile.access_level === 'basic' ? '#d1d5db' : '#10b981'};
-                                ">
-                                    ${ACCESS_LEVELS[userProfile.access_level].name}
-                                </span>
-                                
-                                ${userProfile.access_level === 'basic' ? `
-                                    <button onclick="showUpgradeModal()" style="
-                                        background: #fbbf24; 
-                                        color: #1e293b; 
-                                        border: none; 
-                                        padding: 0.125rem 0.5rem; 
-                                        border-radius: 4px; 
-                                        font-size: 0.75rem; 
-                                        font-weight: 600; 
-                                        cursor: pointer;
-                                        transition: all 0.2s ease;
-                                    " onmouseover="this.style.background='#f59e0b'" onmouseout="this.style.background='#fbbf24'">
-                                        Upgrade to Pro
-                                    </button>
-                                ` : ''}
-                            </div>
+                                    font-weight: 600; 
+                                    cursor: pointer;
+                                    transition: all 0.2s ease;
+                                " onmouseover="this.style.background='#f59e0b'" onmouseout="this.style.background='#fbbf24'">
+                                    Upgrade to Pro
+                                </button>
+                            ` : ''}
                         </div>
                         
-                        <!-- Logout Button - Same height as user banner -->
+                        <!-- Logout Button - Normal height -->
                         <button onclick="handleLogout()" style="
                             background: #ef4444; 
                             color: white; 
@@ -7210,9 +7206,6 @@
                             font-size: 0.875rem;
                             font-weight: 500;
                             transition: all 0.2s ease;
-                            height: 60px;
-                            display: flex;
-                            align-items: center;
                         " onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='#ef4444'">
                             Logout
                         </button>
