@@ -7800,6 +7800,14 @@
                 });
             }
             
+            // Generate forecast data using real AP/AR data
+            generateForecastData();
+            createCashFlowChart();
+        }
+        
+        // Make sure this function is called when forecast is refreshed
+        function refreshForecast() {
+            console.log('Refreshing forecast with real AP/AR data...');
             generateForecastData();
             createCashFlowChart();
         }
@@ -7936,41 +7944,62 @@
                 runwayDays = runwayWeeks = runwayMonths = '∞';
             }
             
-            // Update runway displays (using compact format)
-            document.getElementById('cashRunwayDays').textContent = runwayDays === '∞' ? 'Indefinite' : formatCompactNumber(runwayDays);
-            document.getElementById('cashRunwayWeeks').textContent = runwayWeeks === '∞' ? 'Indefinite' : formatCompactNumber(runwayWeeks);
-            document.getElementById('cashRunwayMonths').textContent = runwayMonths === '∞' ? 'Indefinite' : formatCompactNumber(runwayMonths);
+            // Update runway displays (keep your existing compact format)
+            const cashRunwayDaysEl = document.getElementById('cashRunwayDays');
+            const cashRunwayWeeksEl = document.getElementById('cashRunwayWeeks');
+            const cashRunwayMonthsEl = document.getElementById('cashRunwayMonths');
             
-            // Update burn rate displays (using compact currency format)
-            document.getElementById('dailyBurn').textContent = formatCompactCurrency(Math.abs(dailyBurn), 'IDR');
-            document.getElementById('weeklyBurn').textContent = formatCompactCurrency(Math.abs(weeklyBurn), 'IDR');
-            document.getElementById('monthlyBurn').textContent = formatCompactCurrency(Math.abs(monthlyBurn), 'IDR');
+            if (cashRunwayDaysEl) cashRunwayDaysEl.textContent = runwayDays === '∞' ? 'Indefinite' : formatCompactNumber(runwayDays);
+            if (cashRunwayWeeksEl) cashRunwayWeeksEl.textContent = runwayWeeks === '∞' ? 'Indefinite' : formatCompactNumber(runwayWeeks);
+            if (cashRunwayMonthsEl) cashRunwayMonthsEl.textContent = runwayMonths === '∞' ? 'Indefinite' : formatCompactNumber(runwayMonths);
             
-            // Update cash flow health indicators
+            // Update burn rate displays (keep your existing compact currency format)
+            const dailyBurnEl = document.getElementById('dailyBurn');
+            const weeklyBurnEl = document.getElementById('weeklyBurn');
+            const monthlyBurnEl = document.getElementById('monthlyBurn');
+            
+            if (dailyBurnEl) dailyBurnEl.textContent = formatCompactCurrency(Math.abs(dailyBurn), 'IDR');
+            if (weeklyBurnEl) weeklyBurnEl.textContent = formatCompactCurrency(Math.abs(weeklyBurn), 'IDR');
+            if (monthlyBurnEl) monthlyBurnEl.textContent = formatCompactCurrency(Math.abs(monthlyBurn), 'IDR');
+            
+            // Update cash flow health indicators (keep your existing logic)
             const health = calculateCashFlowHealth();
             
             const trendElement = document.getElementById('cashFlowTrend');
-            trendElement.className = `trend-indicator-large ${health.trend}`;
-            
-            let trendIcon = 'fas fa-arrow-right';
-            let trendText = 'Stable';
-            
-            if (health.trend === 'improving') {
-                trendIcon = 'fas fa-arrow-up';
-                trendText = 'Improving';
-            } else if (health.trend === 'declining') {
-                trendIcon = 'fas fa-arrow-down';
-                trendText = 'Declining';
+            if (trendElement) {
+                trendElement.className = `trend-indicator-large ${health.trend}`;
+                
+                let trendIcon = 'fas fa-arrow-right';
+                let trendText = 'Stable';
+                
+                if (health.trend === 'improving') {
+                    trendIcon = 'fas fa-arrow-up';
+                    trendText = 'Improving';
+                } else if (health.trend === 'declining') {
+                    trendIcon = 'fas fa-arrow-down';
+                    trendText = 'Declining';
+                }
+                
+                trendElement.innerHTML = `<i class="${trendIcon}"></i> ${trendText}`;
             }
             
-            trendElement.innerHTML = `<i class="${trendIcon}"></i> ${trendText}`;
+            // Update payment info (keep your existing compact currency format)
+            const biggestPaymentEl = document.getElementById('biggestPayment');
+            const largestCollectionEl = document.getElementById('largestCollection');
             
-            // Update payment info (using compact currency format)
-            document.getElementById('biggestPayment').textContent = 
-                health.biggestPayment > 0 ? formatCompactCurrency(health.biggestPayment, 'IDR') : 'No payments due';
+            if (biggestPaymentEl) {
+                biggestPaymentEl.textContent = health.biggestPayment > 0 ? formatCompactCurrency(health.biggestPayment, 'IDR') : 'No payments due';
+            }
             
-            document.getElementById('largestCollection').textContent = 
-                health.largestCollection > 0 ? formatCompactCurrency(health.largestCollection, 'IDR') : 'No collections due';
+            if (largestCollectionEl) {
+                largestCollectionEl.textContent = health.largestCollection > 0 ? formatCompactCurrency(health.largestCollection, 'IDR') : 'No collections due';
+            }
+            
+            console.log('=== FORECAST SUMMARY UPDATED ===');
+            console.log('Total inflows:', totalInflows);
+            console.log('Total outflows:', totalOutflows);
+            console.log('Runway days:', runwayDays);
+            console.log('Health data:', health);
         }
         
         function createCashFlowChart() {
