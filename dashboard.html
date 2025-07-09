@@ -9443,7 +9443,6 @@
             // Calculate cash flow trend based on actual cash position trajectory
             const firstWeekCash = forecastData[0]?.cashPosition || 0;
             const lastWeekCash = forecastData[forecastData.length - 1]?.cashPosition || 0;
-            const midPointCash = forecastData[Math.floor(forecastData.length / 2)]?.cashPosition || 0;
             
             let trend = 'stable';
             
@@ -9465,79 +9464,57 @@
                 }
             }
             
-            // Find biggest upcoming payment and largest expected collection
+            // Find biggest payment and largest collection from ALL unpaid transactions
             let biggestPayment = 0;
             let largestCollection = 0;
             let biggestPaymentRef = '';
             let largestCollectionRef = '';
             
-            // Properly declare date variables
+            // Date range for filtering
             const today = new Date();
             const thirteenWeeksLater = new Date();
             thirteenWeeksLater.setDate(today.getDate() + (13 * 7));
             
             console.log('Date range:', today.toDateString(), 'to', thirteenWeeksLater.toDateString());
-            console.log('Total aparTransactions:', aparTransactions.length);
             
             const eligibleTransactions = aparTransactions.filter(t => t.status === 'Unpaid' || t.status === 'Overdue');
             console.log('Eligible transactions:', eligibleTransactions.length);
-
-            console.log('=== DEBUGGING NEW TRANSACTIONS ===');
-            console.log('All aparTransactions:', aparTransactions.length);
-            
-            // Look for your specific new transactions
-            const adobeTransaction = aparTransactions.find(t => t.company === 'Adobe');
-            const fictionTransaction = aparTransactions.find(t => t.company === 'Fiction');
-            
-            console.log('Adobe transaction found:', adobeTransaction);
-            console.log('Fiction transaction found:', fictionTransaction);
-            
-            // Check transactions with August 2025 due dates
-            const augustTransactions = aparTransactions.filter(t => {
-                if (!t.due_date) return false;
-                const dueDate = new Date(t.due_date);
-                return dueDate.getMonth() === 7 && dueDate.getFullYear() === 2025; // August = month 7
-            });
-            
-            console.log('August 2025 transactions:', augustTransactions);
-            console.log('=== END DEBUGGING ===');
             
             eligibleTransactions.forEach(transaction => {
-                console.log('Processing transaction:', {
-                    type: transaction.type,
-                    company: transaction.company,
-                    amount: transaction.amount,
-                    due_date: transaction.due_date,
-                    status: transaction.status
-                });
+                const amount = parseFloat(transaction.amount) || 0;
                 
-                // Handle missing due_date
-                if (!transaction.due_date) {
-                    console.log('Transaction has no due_date, skipping:', transaction.company);
-                    return;
+                // Calculate due date if missing
+                let dueDate = null;
+                
+                if (transaction.due_date) {
+                    dueDate = new Date(transaction.due_date);
+                } else if (transaction.invoice_date && transaction.payment_terms) {
+                    // Calculate due date: invoice_date + payment_terms
+                    const invoiceDate = new Date(transaction.invoice_date);
+                    dueDate = new Date(invoiceDate);
+                    dueDate.setDate(invoiceDate.getDate() + parseInt(transaction.payment_terms));
+                    console.log(`Calculated due date for ${transaction.company}: ${dueDate.toDateString()}`);
                 }
                 
-                const dueDate = new Date(transaction.due_date);
+                // Check if transaction is within our date range OR just take the largest regardless
+                let isWithinRange = true; // For now, let's include all transactions
                 
-                // Check if date is valid
-                if (isNaN(dueDate.getTime())) {
-                    console.log('Invalid due_date for transaction:', transaction.company, transaction.due_date);
-                    return;
+                if (dueDate && !isNaN(dueDate.getTime())) {
+                    isWithinRange = dueDate >= today && dueDate <= thirteenWeeksLater;
+                    console.log(`${transaction.company}: Due ${dueDate.toDateString()}, Within range: ${isWithinRange}`);
                 }
                 
-                console.log('Due date:', dueDate.toDateString(), 'Within range:', dueDate >= today && dueDate <= thirteenWeeksLater);
-                
-                if (dueDate >= today && dueDate <= thirteenWeeksLater) {
-                    if (transaction.type === 'AP' && parseFloat(transaction.amount) > biggestPayment) {
-                        biggestPayment = parseFloat(transaction.amount);
-                        biggestPaymentRef = transaction.company || transaction.reference;
-                        console.log('New biggest payment:', biggestPayment, 'to', biggestPaymentRef);
+                if (isWithinRange || !dueDate) { // Include if within range OR no due date
+                    if (transaction.type === 'AP' && amount > biggestPayment) {
+                        biggestPayment = amount;
+                        biggestPaymentRef = transaction.company || transaction.reference || 'Unknown';
+                        console.log('New biggest payment:', formatCurrencyFull(biggestPayment, 'IDR'), 'to', biggestPaymentRef);
                     }
                     
-                    if (transaction.type === 'AR' && parseFloat(transaction.amount) > largestCollection) {
-                        largestCollection = parseFloat(transaction.amount);
-                        largestCollectionRef = transaction.company || transaction.reference;
-                        console.log('New largest collection:', largestCollection, 'from', largestCollectionRef);
+                    if (transaction.type === 'AR' && amount > largestCollection) {
+                        largestCollection = amount;
+                        largestCollectionRef = transaction.company || transaction.reference || 'Unknown';
+                        console.log('New largest collection:', formatCurrencyFull(largestCollection, 'IDR'), 'from', largestCollectionRef);
                     }
                 }
             });
