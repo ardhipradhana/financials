@@ -15195,34 +15195,18 @@
 
         function createFinancingCard(transaction) {
             const card = document.createElement('div');
-            card.className = 'scenario-transaction financing-transaction';
+            card.className = 'bucket-transaction-card ar-card';
             card.draggable = true;
-            card.dataset.id = transaction.id;
+            card.dataset.transactionId = transaction.id; // Changed from dataset.id
             card.dataset.financing = 'true';
             
-            // Format amount for display
-            const formattedAmount = formatCurrencyFull(transaction.amount, 'IDR');
-            
             card.innerHTML = `
-                <div class="transaction-header">
-                    <div class="transaction-type financing-type">💰 ${transaction.company}</div>
-                    <div class="transaction-amount financing-amount">${formattedAmount}</div>
+                <div class="bucket-card-header">
+                    <div class="bucket-vendor-name">${transaction.vendor}</div>
+                    <div class="bucket-amount">Rp ${formatAmount(transaction.amount)}</div>
                 </div>
-                <div class="transaction-details">
-                    <div class="company-name">${transaction.description}</div>
-                    <div class="reference-date">
-                        <span class="reference">${transaction.reference}</span>
-                        <span class="date">${new Date(transaction.due_date).toLocaleDateString()}</span>
-                    </div>
-                </div>
-                <div class="transaction-actions">
-                    <button class="remove-transaction" onclick="removeFinancingTransaction('${transaction.id}')" title="Remove financing">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
+                <div class="bucket-description">${transaction.description}</div>
             `;
-            
-            // No need to add individual drag listeners - your bucket system handles it
             
             // Add to parked bucket
             const parkedBucket = document.getElementById('bucket-week-parked');
@@ -15232,7 +15216,6 @@
             
             return card;
         }
-
         function removeFinancingTransaction(id) {
             // Remove from scenario data
             if (typeof scenarioData !== 'undefined') {
