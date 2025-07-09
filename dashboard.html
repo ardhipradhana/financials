@@ -391,7 +391,7 @@
         }     
 
         .summary-amount {
-            font-size: 1.5rem;
+            font-size: 1.75rem;
             font-weight: 700;
             color: #1e293b;
         }
@@ -407,6 +407,60 @@
         
         .summary-change.negative {
             color: #dc2626;
+        }
+
+        .breakdown-analysis-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .analysis-section {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .analysis-header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .analysis-header h4 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .chart-header-top h5 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin: 0 0 0.25rem 0;
+        }
+
+        .metrics-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            padding: 1.5rem 2rem;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .metric-item {
+            text-align: center;
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 8px;
         }
 
         .chart-area {
@@ -4623,12 +4677,6 @@
             border-radius: 6px;
             border: 1px solid #e2e8f0;
         }
-        
-        .metric-label {
-            font-size: 0.875rem;
-            color: #374151;
-            font-weight: 500;
-        }
 
         .metric-sublabel {
             font-size: 0.75rem;
@@ -4641,11 +4689,67 @@
             font-size: 0.9rem;
         }
 
+        .insights-header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .insights-header h4 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .insights-grid {
+            padding: 1.5rem 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+
         .insight-card {
-            padding: 1.5rem;
+            display: flex;
+            gap: 1rem;
+            padding: 1rem;
             background: #f8fafc;
             border-radius: 8px;
-            border-left: 4px solid #3b82f6;
+            border: 1px solid #e2e8f0;
+        }
+
+        .insight-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .insight-icon.revenue {
+            background: linear-gradient(135deg, #059669, #10b981);
+        }
+        
+        .insight-icon.opex {
+            background: linear-gradient(135deg, #dc2626, #ef4444);
+        }
+        
+        .insight-content h5 {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin: 0 0 0.25rem 0;
+        }
+        
+        .insight-content p {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin: 0;
         }
         
         .insight-title {
@@ -4913,10 +5017,32 @@
         
         .breakdown-section {
             background: white;
-    border-radius: 12px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-}
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .breakdown-summary-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .summary-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .summary-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
 
         /* Reports Sub-tabs - follows existing tab-nav pattern */
         .reports-tab-nav {
@@ -6299,6 +6425,20 @@
                 <div class="dashboard-section">
                     <div class="section-header">
                         <h3 class="section-title">Variance, Detailed Breakdown, and Trending Analysis</h3>
+                        <div class="section-actions">
+                            <button class="btn btn-secondary" onclick="exportComparisonToPDF()">
+                                <i class="fas fa-file-pdf"></i>
+                                Export PDF
+                            </button>
+                            <button class="btn btn-secondary" onclick="copyComparisonToClipboard()">
+                                <i class="fas fa-clipboard"></i>
+                                Copy Chart
+                            </button>
+                            <button class="btn btn-primary" onclick="generateComparisonReport()">
+                                <i class="fas fa-chart-line"></i>
+                                Generate Report
+                            </button>
+                        </div>
                     </div>
                 
                     <!-- Sub-tabs within Reports & Analytics -->
@@ -6319,21 +6459,6 @@
                 
                     <!-- Tab Content 1: P&L Comparison (your existing content) -->
                     <div class="reports-tab-content active" id="pnl-comparison-tab">
-                        <div class="section-actions">
-                            <button class="btn btn-secondary" onclick="exportComparisonToPDF()">
-                                <i class="fas fa-file-pdf"></i>
-                                Export PDF
-                            </button>
-                            <button class="btn btn-secondary" onclick="copyComparisonToClipboard()">
-                                <i class="fas fa-clipboard"></i>
-                                Copy Chart
-                            </button>
-                            <button class="btn btn-primary" onclick="generateComparisonReport()">
-                                <i class="fas fa-chart-line"></i>
-                                Generate Report
-                            </button>
-                        </div>
-                
                         <!-- Enhanced Period Selector -->
                         <div class="period-selector-section">
                             <div class="period-selector-card">
@@ -6430,153 +6555,160 @@
                 
                     <!-- Tab Content 2: Revenue & OPEX Breakdown -->
                     <div class="reports-tab-content" id="revenue-opex-breakdown-tab" style="display: none;">
-                        <div class="breakdown-container">
-                            <!-- Period Controls -->
-                            <div class="breakdown-header">
-                                <div class="breakdown-controls">
-                                    <div class="period-selector">
-                                        <button class="period-btn active" data-period="month">Monthly</button>
-                                        <button class="period-btn" data-period="quarter">Quarterly</button>
-                                        <button class="period-btn" data-period="year">Yearly</button>
+                        <!-- Period Controls -->
+                        <div class="period-selector-section">
+                            <div class="period-selector-card">
+                                <div class="selector-header">
+                                    <h4><i class="fas fa-calendar-alt"></i> Analysis Period</h4>
+                                </div>
+                                <div class="period-options">
+                                    <div class="period-type-selector">
+                                        <label class="period-radio">
+                                            <input type="radio" name="breakdownPeriodType" value="month" checked>
+                                            <span>Monthly</span>
+                                        </label>
+                                        <label class="period-radio">
+                                            <input type="radio" name="breakdownPeriodType" value="quarter">
+                                            <span>Quarterly</span>
+                                        </label>
+                                        <label class="period-radio">
+                                            <input type="radio" name="breakdownPeriodType" value="year">
+                                            <span>Yearly</span>
+                                        </label>
                                     </div>
-                                    <button class="export-btn">
+                                    <div class="period-selectors">
+                                        <div class="period-group">
+                                            <label>Select Period:</label>
+                                            <select id="breakdownPeriod" class="form-select">
+                                                <option value="2025-07">July 2025</option>
+                                                <option value="2025-06">June 2025</option>
+                                                <option value="2025-05">May 2025</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    
+                        <!-- Summary Cards Row -->
+                        <div class="breakdown-summary-row">
+                            <div class="summary-card revenue">
+                                <div class="summary-header">
+                                    <h4><i class="fas fa-chart-line"></i> Total Revenue</h4>
+                                    <span class="summary-amount" id="totalRevenue">Rp 0</span>
+                                </div>
+                                <div class="summary-change positive" id="revenueChange">+0% vs previous period</div>
+                            </div>
+                            <div class="summary-card opex">
+                                <div class="summary-header">
+                                    <h4><i class="fas fa-chart-bar"></i> Total OPEX</h4>
+                                    <span class="summary-amount" id="totalOpex">Rp 0</span>
+                                </div>
+                                <div class="summary-change negative" id="opexChange">+0% vs previous period</div>
+                            </div>
+                            <div class="summary-card efficiency">
+                                <div class="summary-header">
+                                    <h4><i class="fas fa-percentage"></i> OPEX Ratio</h4>
+                                    <span class="summary-amount" id="opexRatio">0%</span>
+                                </div>
+                                <div class="summary-change" id="opexRatioChange">of total revenue</div>
+                            </div>
+                        </div>
+                    
+                        <!-- Main Analysis Grid -->
+                        <div class="breakdown-analysis-grid">
+                            <!-- Revenue Analysis Section -->
+                            <div class="analysis-section">
+                                <div class="analysis-header">
+                                    <h4><i class="fas fa-chart-line"></i> Revenue Analysis</h4>
+                                    <button class="btn btn-sm btn-secondary">
                                         <i class="fas fa-download"></i>
                                         Export
                                     </button>
                                 </div>
-                            </div>
-                
-                            <!-- Main Grid -->
-                            <div class="breakdown-grid">
-                                <!-- Revenue Analysis Section -->
-                                <div class="breakdown-section">
-                                    <div class="section-header">
-                                        <h4 class="section-title">
-                                            <i class="fas fa-chart-line section-icon"></i>
-                                            Revenue Analysis
-                                        </h4>
-                                        <div class="section-summary">
-                                            <span class="summary-amount" id="totalRevenue">Rp 0</span>
-                                            <span class="summary-change positive" id="revenueChange">+0%</span>
-                                        </div>
+                                
+                                <!-- Revenue Chart -->
+                                <div class="chart-container">
+                                    <div class="chart-header-top">
+                                        <h5>Revenue by Source</h5>
+                                        <p>Distribution across income streams</p>
                                     </div>
-                                    
-                                    <!-- Revenue by Source Chart -->
-                                    <div class="chart-container">
-                                        <div class="chart-header-top">
-                                            <h4>Revenue by Source</h4>
-                                            <p>Distribution of revenue across different income streams</p>
-                                        </div>
-                                        <div class="chart-area">
-                                            <canvas id="revenueSourceChart" width="400" height="250"></canvas>
-                                        </div>
-                                    </div>
-                
-                                    <!-- Revenue Metrics Cards -->
-                                    <div class="metrics-grid">
-                                        <div class="metric-card">
-                                            <div class="metric-icon revenue">
-                                                <i class="fas fa-percentage"></i>
-                                            </div>
-                                            <div class="metric-content">
-                                                <div class="metric-label">Revenue Concentration</div>
-                                                <div class="metric-value" id="revenueConcentration">0%</div>
-                                                <div class="metric-sublabel">Top 3 sources</div>
-                                            </div>
-                                        </div>
-                                        <div class="metric-card">
-                                            <div class="metric-icon revenue">
-                                                <i class="fas fa-sync-alt"></i>
-                                            </div>
-                                            <div class="metric-content">
-                                                <div class="metric-label">Recurring Revenue</div>
-                                                <div class="metric-value" id="recurringRevenue">0%</div>
-                                                <div class="metric-sublabel">vs one-time</div>
-                                            </div>
-                                        </div>
-                                        <div class="metric-card">
-                                            <div class="metric-icon revenue">
-                                                <i class="fas fa-calculator"></i>
-                                            </div>
-                                            <div class="metric-content">
-                                                <div class="metric-label">Avg Transaction</div>
-                                                <div class="metric-value" id="avgTransaction">Rp 0</div>
-                                                <div class="metric-sublabel">per sale</div>
-                                            </div>
-                                        </div>
+                                    <div class="chart-area">
+                                        <canvas id="revenueSourceChart" width="400" height="250"></canvas>
                                     </div>
                                 </div>
-                
-                                <!-- OPEX Analysis Section -->
-                                <div class="breakdown-section">
-                                    <div class="section-header">
-                                        <h4 class="section-title">
-                                            <i class="fas fa-chart-bar section-icon"></i>
-                                            OPEX Analysis
-                                        </h4>
-                                        <div class="section-summary">
-                                            <span class="summary-amount" id="totalOpex">Rp 0</span>
-                                            <span class="summary-change negative" id="opexChange">+0%</span>
-                                        </div>
+                    
+                                <!-- Revenue Metrics -->
+                                <div class="metrics-row">
+                                    <div class="metric-item">
+                                        <div class="metric-label">Revenue Concentration</div>
+                                        <div class="metric-value" id="revenueConcentration">0%</div>
+                                        <div class="metric-sublabel">from top 3 sources</div>
                                     </div>
-                
-                                    <!-- OPEX by Category Chart -->
-                                    <div class="chart-container">
-                                        <div class="chart-header-top">
-                                            <h4>OPEX by Category</h4>
-                                            <p>Operating expenses breakdown by department</p>
-                                        </div>
-                                        <div class="chart-area">
-                                            <canvas id="opexCategoryChart" width="400" height="300"></canvas>
-                                        </div>
-                                    </div>
-                
-                                    <!-- OPEX Metrics Cards -->
-                                    <div class="metrics-grid">
-                                        <div class="metric-card">
-                                            <div class="metric-icon opex">
-                                                <i class="fas fa-users"></i>
-                                            </div>
-                                            <div class="metric-content">
-                                                <div class="metric-label">OPEX per Employee</div>
-                                                <div class="metric-value" id="opexPerEmployee">Rp 0</div>
-                                                <div class="metric-sublabel">monthly avg</div>
-                                            </div>
-                                        </div>
-                                        <div class="metric-card">
-                                            <div class="metric-icon opex">
-                                                <i class="fas fa-percentage"></i>
-                                            </div>
-                                            <div class="metric-content">
-                                                <div class="metric-label">OPEX to Revenue</div>
-                                                <div class="metric-value" id="opexToRevenue">0%</div>
-                                                <div class="metric-sublabel">efficiency ratio</div>
-                                            </div>
-                                        </div>
-                                        <div class="metric-card">
-                                            <div class="metric-icon opex">
-                                                <i class="fas fa-chart-line"></i>
-                                            </div>
-                                            <div class="metric-content">
-                                                <div class="metric-label">Fixed vs Variable</div>
-                                                <div class="metric-value" id="fixedVsVariable">0% / 0%</div>
-                                                <div class="metric-sublabel">cost structure</div>
-                                            </div>
-                                        </div>
+                                    <div class="metric-item">
+                                        <div class="metric-label">Avg Transaction</div>
+                                        <div class="metric-value" id="avgTransaction">Rp 0</div>
+                                        <div class="metric-sublabel">per sale</div>
                                     </div>
                                 </div>
                             </div>
-                
-                            <!-- Optimization Insights -->
-                            <div class="insights-section">
-                                <div class="section-header">
-                                    <h4 class="section-title">
-                                        <i class="fas fa-lightbulb section-icon"></i>
-                                        Optimization Insights
-                                    </h4>
+                    
+                            <!-- OPEX Analysis Section -->
+                            <div class="analysis-section">
+                                <div class="analysis-header">
+                                    <h4><i class="fas fa-chart-bar"></i> OPEX Analysis</h4>
+                                    <button class="btn btn-sm btn-secondary">
+                                        <i class="fas fa-download"></i>
+                                        Export
+                                    </button>
                                 </div>
-                                <div class="insights-grid" id="optimizationInsights">
-                                    <!-- Insights will be populated by JavaScript -->
+                    
+                                <!-- OPEX Chart -->
+                                <div class="chart-container">
+                                    <div class="chart-header-top">
+                                        <h5>OPEX by Category</h5>
+                                        <p>Operating expenses by department</p>
+                                    </div>
+                                    <div class="chart-area">
+                                        <canvas id="opexCategoryChart" width="400" height="300"></canvas>
+                                    </div>
+                                </div>
+                    
+                                <!-- OPEX Metrics -->
+                                <div class="metrics-row">
+                                    <div class="metric-item">
+                                        <div class="metric-label">OPEX per Employee</div>
+                                        <div class="metric-value" id="opexPerEmployee">Rp 0</div>
+                                        <div class="metric-sublabel">monthly average</div>
+                                    </div>
+                                    <div class="metric-item">
+                                        <div class="metric-label">Cost Efficiency</div>
+                                        <div class="metric-value" id="costEfficiency">0%</div>
+                                        <div class="metric-sublabel">vs industry avg</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    
+                        <!-- Insights Section -->
+                        <div class="insights-section">
+                            <div class="insights-header">
+                                <h4><i class="fas fa-lightbulb"></i> Key Insights & Recommendations</h4>
+                            </div>
+                            <div class="insights-grid" id="optimizationInsights">
+                                <div class="insight-card">
+                                    <div class="insight-icon revenue"><i class="fas fa-arrow-up"></i></div>
+                                    <div class="insight-content">
+                                        <h5>Revenue Optimization</h5>
+                                        <p>Analysis shows potential for revenue diversification in Q4</p>
+                                    </div>
+                                </div>
+                                <div class="insight-card">
+                                    <div class="insight-icon opex"><i class="fas fa-cut"></i></div>
+                                    <div class="insight-content">
+                                        <h5>Cost Reduction</h5>
+                                        <p>Marketing expenses can be optimized by 15% without impact</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -14446,6 +14578,16 @@
         
         // Update period selection and trigger comparison
         function updatePeriodSelection() {
+            const currentPeriod = document.getElementById('currentPeriod').value;
+            const previousPeriod = document.getElementById('previousPeriod').value;
+            const periodType = document.querySelector('input[name="periodType"]:checked')?.value || 'mom';
+            
+            console.log('Period Selection Debug:', {
+                currentPeriod,
+                previousPeriod, 
+                periodType
+            });
+            
             updateYoYDisplay();
             generateComparisonReport();
         }
@@ -14455,8 +14597,18 @@
             const currentPeriod = document.getElementById('currentPeriod').value;
             const previousPeriod = document.getElementById('previousPeriod').value;
             const includeYoY = document.getElementById('includeYoY').checked;
+            const periodType = document.querySelector('input[name="periodType"]:checked')?.value || 'custom';
+            
+            // Debug logging
+            console.log('Generating comparison report:', {
+                currentPeriod,
+                previousPeriod,
+                periodType,
+                includeYoY
+            });
             
             if (!currentPeriod || !previousPeriod) {
+                console.warn('Periods not selected:', { currentPeriod, previousPeriod });
                 return;
             }
             
@@ -14470,11 +14622,21 @@
                     includeYoY ? fetchFinancialDataForComparisonPeriod(getLastYearPeriod(currentPeriod)) : null
                 ]);
                 
+                // Store global comparison data with period info
                 comparisonData = {
                     current: currentData,
                     previous: previousData,
-                    lastYear: lastYearData
+                    lastYear: lastYearData,
+                    // Add period information for header display
+                    currentPeriod: currentPeriod,
+                    previousPeriod: previousPeriod,
+                    periodType: periodType,
+                    currentPeriodName: formatPeriodName(currentPeriod, periodType),
+                    previousPeriodName: formatPeriodName(previousPeriod, periodType),
+                    lastYearPeriodName: lastYearData ? formatPeriodName(getLastYearPeriod(currentPeriod), periodType) : null
                 };
+                
+                console.log('Comparison data prepared:', comparisonData);
                 
                 renderComparisonTable();
                 renderWaterfallCharts();
@@ -14698,7 +14860,25 @@
         
         // Format period name with type context
         function formatPeriodName(period, periodType = 'mom') {
+            // Handle undefined or empty period
+            if (!period || period === '') {
+                return 'Select Period';
+            }
+            
+            // Handle period format validation
+            if (!period.includes('-')) {
+                console.warn('Invalid period format:', period);
+                return period; // Return as-is if not in expected format
+            }
+            
             const [year, month] = period.split('-').map(Number);
+            
+            // Validate year and month
+            if (!year || !month || month < 1 || month > 12) {
+                console.warn('Invalid year/month:', { year, month, period });
+                return period;
+            }
+            
             const date = new Date(year, month - 1);
             const monthName = date.toLocaleDateString('en-US', { month: 'short' });
             
@@ -14807,7 +14987,7 @@
         
         // Update table rendering to remove Margins column
         function renderComparisonTable() {
-            const { current, previous, lastYear } = comparisonData;
+            const { current, previous, lastYear, currentPeriodName, previousPeriodName, lastYearPeriodName } = comparisonData;
             
             if (!current || !previous) {
                 document.getElementById('comparisonTableContent').innerHTML = 
@@ -14820,11 +15000,11 @@
                     <thead>
                         <tr>
                             <th>Line Item</th>
-                            <th>${current.periodName}<br>(Current)</th>
-                            <th>${previous.periodName}<br>(Previous)</th>
+                            <th>${currentPeriodName || 'Current'}<br>(Current)</th>
+                            <th>${previousPeriodName || 'Previous'}<br>(Previous)</th>
                             <th>MoM Value<br>Change</th>
                             <th>MoM %<br>Change</th>
-                            ${lastYear ? `<th>${lastYear.periodName}<br>(Last Year)</th>` : '<th>Last Year<br>(N/A)</th>'}
+                            ${lastYear ? `<th>${lastYearPeriodName || 'Last Year'}<br>(Last Year)</th>` : '<th>Last Year<br>(N/A)</th>'}
                             ${lastYear ? `<th>YoY Value<br>Change</th>` : '<th>YoY Value<br>(N/A)</th>'}
                             ${lastYear ? `<th>YoY %<br>Change</th>` : '<th>YoY %<br>(N/A)</th>'}
                         </tr>
