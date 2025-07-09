@@ -14181,9 +14181,26 @@
         
         // Process financial data with period type context
         function processFinancialDataForComparison(transactions, period, periodType = 'mom') {
+            if (!transactions || transactions.length === 0) {
+                return {
+                    grossRevenue: 0,
+                    discounts: 0,
+                    netRevenue: 0,
+                    cogs: 0,
+                    grossProfit: 0,
+                    opex: 0,
+                    ebitda: 0,
+                    ebit: 0,
+                    depreciation: 0,
+                    interestExpense: 0,
+                    incomeTaxExpense: 0,
+                    extraordinaryItems: 0,
+                    netIncome: 0
+                };
+            }
+        
+            // Initialize P&L data structure
             const pnlData = {
-                period: period,
-                periodName: formatPeriodName(period, periodType),
                 grossRevenue: 0,
                 discounts: 0,
                 netRevenue: 0,
@@ -14192,36 +14209,104 @@
                 opex: 0,
                 ebitda: 0,
                 ebit: 0,
+                depreciation: 0,
+                interestExpense: 0,
+                incomeTaxExpense: 0,
+                extraordinaryItems: 0,
                 netIncome: 0
             };
-            
+        
             // Process transactions into categories
             transactions.forEach(transaction => {
-                const amount = Math.abs(transaction.debit_amount || 0) - Math.abs(transaction.credit_amount || 0);
+                const debitAmount = Math.abs(parseFloat(transaction.debit_amount) || parseFloat(transaction.debit) || 0);
+                const creditAmount = Math.abs(parseFloat(transaction.credit_amount) || parseFloat(transaction.credit) || 0);
                 const accountCode = transaction.account_code || '';
                 const accountName = (transaction.account_name || '').toLowerCase();
                 
-                // Categorize based on account patterns
-                if (accountCode.startsWith('4') || accountName.includes('revenue') || accountName.includes('sales')) {
-                    if (accountName.includes('discount') || accountName.includes('return')) {
+                // Calculate net amount based on account type
+                let amount = 0;
+                
+                if (accountCode.toString().startsWith('4')) {
+                    // Revenue accounts: Credits increase revenue
+                    amount = creditAmount - debitAmount;
+                } else if (accountCode.toString().startsWith('5') || accountCode.toString().startsWith('6')) {
+                    // Expense accounts: Debits increase expenses
+                    amount = debitAmount - creditAmount;
+                }
+        
+                // Categorize based on account code ranges
+                if (accountCode.toString().startsWith('4')) {
+                    // 4xxx = Revenue accounts
+                    if (accountName.includes('return') || accountName.includes('allowance') || 
+                        accountName.includes('discount') || accountCode === 4070) {
                         pnlData.discounts += Math.abs(amount);
                     } else {
                         pnlData.grossRevenue += Math.abs(amount);
                     }
-                } else if (accountCode.startsWith('5') || accountName.includes('cost') || accountName.includes('cogs')) {
+                    
+                } else if (accountCode >= 5010 && accountCode <= 5030) {
+                    // 5010-5030 = Cost of Goods Sold
                     pnlData.cogs += Math.abs(amount);
-                } else if (accountCode.startsWith('6') || accountName.includes('expense') || accountName.includes('opex')) {
+                    
+                } else if (accountCode >= 5100 && accountCode <= 5599) {
+                    // 5100-5599 = Operating Expenses (excluding depreciation and interest)
+                    if (accountCode === 5600 || accountCode === 5610) {
+                        // Depreciation and Amortization
+                        pnlData.depreciation += Math.abs(amount);
+                    } else {
+                        pnlData.opex += Math.abs(amount);
+                    }
+                    
+                } else if (accountCode >= 5700 && accountCode <= 5720) {
+                    // 5700-5720 = Interest and Financial Expenses
+                    if (accountCode === 5700) {
+                        pnlData.interestExpense += Math.abs(amount);
+                    } else {
+                        pnlData.opex += Math.abs(amount); // Other financial expenses as OPEX
+                    }
+                    
+                } else if (accountCode >= 5800 && accountCode <= 5970) {
+                    // 5800-5970 = Other Operating Expenses
+                    pnlData.opex += Math.abs(amount);
+                    
+                } else if (accountCode >= 6010 && accountCode <= 6030) {
+                    // 6xxx = Non-operating expenses
+                    if (accountCode === 6010) {
+                        pnlData.incomeTaxExpense += Math.abs(amount);
+                    } else {
+                        pnlData.extraordinaryItems += Math.abs(amount);
+                    }
+                    
+                } else if (accountName.includes('expense') || accountName.includes('opex')) {
+                    // Catch any other expenses by name
                     pnlData.opex += Math.abs(amount);
                 }
             });
-            
+        
             // Calculate derived metrics
             pnlData.netRevenue = pnlData.grossRevenue - pnlData.discounts;
             pnlData.grossProfit = pnlData.netRevenue - pnlData.cogs;
             pnlData.ebitda = pnlData.grossProfit - pnlData.opex;
-            pnlData.ebit = pnlData.ebitda; // Simplified
-            pnlData.netIncome = pnlData.ebit; // Simplified
-            
+            pnlData.ebit = pnlData.ebitda - pnlData.depreciation;
+            pnlData.netIncome = pnlData.ebit - pnlData.interestExpense - pnlData.incomeTaxExpense - pnlData.extraordinaryItems;
+        
+            // Debug logging
+            console.log(`P&L for period ${period}:`, {
+                grossRevenue: pnlData.grossRevenue,
+                discounts: pnlData.discounts,
+                netRevenue: pnlData.netRevenue,
+                cogs: pnlData.cogs,
+                grossProfit: pnlData.grossProfit,
+                opex: pnlData.opex,
+                ebitda: pnlData.ebitda,
+                depreciation: pnlData.depreciation,
+                ebit: pnlData.ebit,
+                interestExpense: pnlData.interestExpense,
+                incomeTaxExpense: pnlData.incomeTaxExpense,
+                extraordinaryItems: pnlData.extraordinaryItems,
+                netIncome: pnlData.netIncome
+            });
+        
             return pnlData;
         }
         
