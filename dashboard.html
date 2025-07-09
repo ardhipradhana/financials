@@ -5882,6 +5882,26 @@
         const SUPABASE_URL = 'https://brawqzylfyuotgxqmtox.supabase.co'
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJyYXdxenlsZnl1b3RneHFtdG94Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg1MTU0NTUsImV4cCI6MjA2NDA5MTQ1NX0.P4qazlzBHk66eItqBRK-6k2ll2I1d754ke5_r_hNxos'
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+
+        // Add authentication check
+        async function checkAuthentication() {
+            try {
+                const { data: { user }, error } = await supabase.auth.getUser();
+                
+                if (error || !user) {
+                    console.log('No authenticated user found');
+                    // For now, we'll continue without auth for testing
+                    // Later you can redirect to login page
+                    return false;
+                }
+                
+                console.log('Authenticated user:', user.email);
+                return true;
+            } catch (error) {
+                console.error('Authentication check failed:', error);
+                return false;
+            }
+        }
         
         // AP/AR Data Management
         let aparTransactions = [];
@@ -6078,6 +6098,9 @@
         document.addEventListener('DOMContentLoaded', async function() {
             console.log('Dashboard initializing...');
             
+            // Check authentication (optional for now)
+            await checkAuthentication();
+            
             // Initialize date display
             initializeDateDisplay();
             
@@ -6157,34 +6180,72 @@
             } catch (error) {
                 console.error('Error during dashboard initialization:', error);
                 
-                // Show user-friendly error message
-                const errorDiv = document.createElement('div');
-                errorDiv.style.cssText = `
-                    position: fixed;
-                    top: 20px;
-                    right: 20px;
-                    background: #fee2e2;
-                    color: #991b1b;
-                    padding: 1rem;
-                    border-radius: 8px;
-                    border: 1px solid #fecaca;
-                    z-index: 1000;
-                    max-width: 300px;
-                `;
-                errorDiv.innerHTML = `
-                    <strong>Initialization Error</strong><br>
-                    Some features may not work properly.<br>
-                    <small>${error.message}</small>
-                `;
-                document.body.appendChild(errorDiv);
-                
-                // Auto-remove error message after 10 seconds
-                setTimeout(() => {
-                    if (errorDiv.parentNode) {
-                        errorDiv.parentNode.removeChild(errorDiv);
-                    }
-                }, 10000);
+                // Handle authentication errors specifically
+                if (error.message?.includes('JWT') || error.code === 'PGRST116') {
+                    console.log('Authentication required - RLS blocking access');
+                    
+                    // Show authentication error message
+                    const authErrorDiv = document.createElement('div');
+                    authErrorDiv.style.cssText = `
+                        position: fixed;
+                        top: 20px;
+                        right: 20px;
+                        background: #fef3c7;
+                        color: #92400e;
+                        padding: 1rem;
+                        border-radius: 8px;
+                        border: 1px solid #fde68a;
+                        z-index: 1000;
+                        max-width: 350px;
+                    `;
+                    authErrorDiv.innerHTML = `
+                        <strong>Authentication Required</strong><br>
+                        Please log in to access your financial data.<br>
+                        <small>Row Level Security is protecting your data.</small>
+                    `;
+                    document.body.appendChild(authErrorDiv);
+                    
+                    // Auto-remove after 15 seconds
+                    setTimeout(() => {
+                        if (authErrorDiv.parentNode) {
+                            authErrorDiv.parentNode.removeChild(authErrorDiv);
+                        }
+                    }, 15000);
+                    
+                    // You can add login redirect here later
+                    // window.location.href = 'login.html';
+                    
+                } else {
+                    // Show general error message
+                    const errorDiv = document.createElement('div');
+                    errorDiv.style.cssText = `
+                        position: fixed;
+                        top: 20px;
+                        right: 20px;
+                        background: #fee2e2;
+                        color: #991b1b;
+                        padding: 1rem;
+                        border-radius: 8px;
+                        border: 1px solid #fecaca;
+                        z-index: 1000;
+                        max-width: 300px;
+                    `;
+                    errorDiv.innerHTML = `
+                        <strong>Initialization Error</strong><br>
+                        Some features may not work properly.<br>
+                        <small>${error.message}</small>
+                    `;
+                    document.body.appendChild(errorDiv);
+                    
+                    // Auto-remove error message after 10 seconds
+                    setTimeout(() => {
+                        if (errorDiv.parentNode) {
+                            errorDiv.parentNode.removeChild(errorDiv);
+                        }
+                    }, 10000);
+                }
             }
+            
             setTimeout(() => {
                 console.log('=== DEBUGGING REVENUE AFTER LOAD ===');
                 console.log('Financial transactions loaded:', financialTransactions?.length || 0);
@@ -6863,9 +6924,15 @@
         
         async function saveTransaction(transaction) {
             try {
+                // Add user_id to the transaction
+                const transactionWithUser = {
+                    ...transaction,
+                    user_id: (await supabase.auth.getUser()).data.user?.id
+                };
+        
                 const { data, error } = await supabase
                     .from('ap_ar_transactions_meridash')
-                    .insert([transaction])
+                    .insert([transactionWithUser])
                     .select();
                 
                 if (error) throw error;
@@ -7247,9 +7314,14 @@
                     }
                     
                     // Insert all transactions
+                    const transactionsWithUser = newTransactions.map(transaction => ({
+                        ...transaction,
+                        user_id: (await supabase.auth.getUser()).data.user?.id
+                    }));
+                    
                     const { data, error } = await supabase
                         .from('ap_ar_transactions_meridash')
-                        .insert(newTransactions)
+                        .insert(transactionsWithUser)
                         .select();
                     
                     if (error) throw error;
@@ -10171,9 +10243,15 @@
         // Save transaction to Supabase
         async function saveFinancialTransaction(transaction) {
             try {
+                // Add user_id to the transaction
+                const transactionWithUser = {
+                    ...transaction,
+                    user_id: (await supabase.auth.getUser()).data.user?.id
+                };
+        
                 const { data, error } = await supabase
                     .from('financial_transactions_meridash')
-                    .insert([transaction])
+                    .insert([transactionWithUser])
                     .select();
                 
                 if (error) throw error;
@@ -11453,7 +11531,8 @@
                                 account_code: transaction.Account_Code,
                                 account_name: transaction.Account_Name,
                                 category: category,
-                                is_custom: true
+                                is_custom: true,
+                                user_id: (await supabase.auth.getUser()).data.user?.id
                             };
                             
                             try {
@@ -11476,9 +11555,14 @@
                     }
                     
                     // Insert all transactions
+                    const transactionsWithUser = validTransactions.map(transaction => ({
+                        ...transaction,
+                        user_id: (await supabase.auth.getUser()).data.user?.id
+                    }));
+                    
                     const { data, error } = await supabase
                         .from('financial_transactions_meridash')
-                        .insert(newTransactions)
+                        .insert(transactionsWithUser)
                         .select();
                     
                     if (error) throw error;
@@ -13172,7 +13256,8 @@
                     action: action,
                     old_values: oldValues,
                     new_values: newValues,
-                    user_info: 'System User' // You can enhance this with actual user info
+                    user_info: 'System User',
+                    user_id: (await supabase.auth.getUser()).data.user?.id
                 };
                 
                 const { error } = await supabase
@@ -13182,7 +13267,6 @@
                 if (error) throw error;
             } catch (error) {
                 console.error('Error logging audit trail:', error);
-                // Don't throw error as this shouldn't stop the main operation
             }
         }
 
