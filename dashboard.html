@@ -415,26 +415,62 @@
             color: #dc2626;
         }
 
+        /* Replace the previous breakdown CSS with this */
         .breakdown-analysis-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 2rem;
             margin-bottom: 2rem;
         }
-
-        .analysis-section {
-            background: white;
-            border-radius: 12px;
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        
+        .analysis-section-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
         }
         
         .analysis-header {
+            background: white;
             padding: 1.5rem 2rem;
-            border-bottom: 1px solid #e2e8f0;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .analysis-chart-container {
+            background: white;
+            padding: 2rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .analysis-metrics-container {
+            background: white;
+            padding: 1.5rem 2rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .chart-header-simple {
+            margin-bottom: 1.5rem;
+        }
+        
+        .chart-header-simple h5 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin: 0 0 0.25rem 0;
+        }
+        
+        .chart-header-simple p {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin: 0;
         }
         
         .analysis-header h4 {
@@ -445,13 +481,6 @@
             display: flex;
             align-items: center;
             gap: 0.75rem;
-        }
-
-        .chart-header-top h5 {
-            font-size: 1rem;
-            font-weight: 600;
-            color: #1e293b;
-            margin: 0 0 0.25rem 0;
         }
 
         .metrics-row {
@@ -6626,7 +6655,8 @@
                         <!-- Main Analysis Grid -->
                         <div class="breakdown-analysis-grid">
                             <!-- Revenue Analysis Section -->
-                            <div class="analysis-section">
+                            <div class="analysis-section-container">
+                                <!-- Revenue Header -->
                                 <div class="analysis-header">
                                     <h4><i class="fas fa-chart-line"></i> Revenue Analysis</h4>
                                     <button class="btn btn-sm btn-secondary">
@@ -6636,8 +6666,8 @@
                                 </div>
                                 
                                 <!-- Revenue Chart -->
-                                <div class="chart-container">
-                                    <div class="chart-header-top">
+                                <div class="analysis-chart-container">
+                                    <div class="chart-header-simple">
                                         <h5>Revenue by Source</h5>
                                         <p>Distribution across income streams</p>
                                     </div>
@@ -6647,22 +6677,25 @@
                                 </div>
                     
                                 <!-- Revenue Metrics -->
-                                <div class="metrics-row">
-                                    <div class="metric-item">
-                                        <div class="metric-label">Revenue Concentration</div>
-                                        <div class="metric-value" id="revenueConcentration">0%</div>
-                                        <div class="metric-sublabel">from top 3 sources</div>
-                                    </div>
-                                    <div class="metric-item">
-                                        <div class="metric-label">Avg Transaction</div>
-                                        <div class="metric-value" id="avgTransaction">Rp 0</div>
-                                        <div class="metric-sublabel">per sale</div>
+                                <div class="analysis-metrics-container">
+                                    <div class="metrics-row">
+                                        <div class="metric-item">
+                                            <div class="metric-label">Revenue Concentration</div>
+                                            <div class="metric-value" id="revenueConcentration">0%</div>
+                                            <div class="metric-sublabel">from top 3 sources</div>
+                                        </div>
+                                        <div class="metric-item">
+                                            <div class="metric-label">Avg Transaction</div>
+                                            <div class="metric-value" id="avgTransaction">Rp 0</div>
+                                            <div class="metric-sublabel">per sale</div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                     
                             <!-- OPEX Analysis Section -->
-                            <div class="analysis-section">
+                            <div class="analysis-section-container">
+                                <!-- OPEX Header -->
                                 <div class="analysis-header">
                                     <h4><i class="fas fa-chart-bar"></i> OPEX Analysis</h4>
                                     <button class="btn btn-sm btn-secondary">
@@ -6672,8 +6705,8 @@
                                 </div>
                     
                                 <!-- OPEX Chart -->
-                                <div class="chart-container">
-                                    <div class="chart-header-top">
+                                <div class="analysis-chart-container">
+                                    <div class="chart-header-simple">
                                         <h5>OPEX by Category</h5>
                                         <p>Operating expenses by department</p>
                                     </div>
@@ -6683,16 +6716,18 @@
                                 </div>
                     
                                 <!-- OPEX Metrics -->
-                                <div class="metrics-row">
-                                    <div class="metric-item">
-                                        <div class="metric-label">OPEX per Employee</div>
-                                        <div class="metric-value" id="opexPerEmployee">Rp 0</div>
-                                        <div class="metric-sublabel">monthly average</div>
-                                    </div>
-                                    <div class="metric-item">
-                                        <div class="metric-label">Cost Efficiency</div>
-                                        <div class="metric-value" id="costEfficiency">0%</div>
-                                        <div class="metric-sublabel">vs industry avg</div>
+                                <div class="analysis-metrics-container">
+                                    <div class="metrics-row">
+                                        <div class="metric-item">
+                                            <div class="metric-label">OPEX per Employee</div>
+                                            <div class="metric-value" id="opexPerEmployee">Rp 0</div>
+                                            <div class="metric-sublabel">monthly average</div>
+                                        </div>
+                                        <div class="metric-item">
+                                            <div class="metric-label">Cost Efficiency</div>
+                                            <div class="metric-value" id="costEfficiency">0%</div>
+                                            <div class="metric-sublabel">vs industry avg</div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
