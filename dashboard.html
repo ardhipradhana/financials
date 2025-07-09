@@ -3500,6 +3500,7 @@
             border: 1px solid #e2e8f0;
             border-radius: 8px;
             background: white;
+            white-space: nowrap;
         }
         
         .data-table-full {
@@ -4896,9 +4897,14 @@
             transition: all 0.2s ease;
             width: 32px;
             height: 32px;
-            display: flex;
+            display: inline-block;
+            margin-right: 0.25rem;
             align-items: center;
             justify-content: center;
+        }
+
+        .action-btn:last-child {
+            margin-right: 0;
         }
         
         .action-btn.activate {
