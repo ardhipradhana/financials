@@ -13966,7 +13966,7 @@
             const revenueChange = current.netRevenue - previous.netRevenue;
             
             // Check if there's meaningful data
-            if (revenueChange === 0 && current.netRevenue === 0) {
+            if (current.netRevenue === 0 && previous.netRevenue === 0) {
                 showNoDataMessage('revenueWaterfallChart', 'Insufficient revenue data for analysis');
                 return;
             }
@@ -14001,7 +14001,7 @@
             const revenueImpact = current.netRevenue - previous.netRevenue;
             const cogsImpact = -(current.cogs - previous.cogs);
             
-            if (grossProfitChange === 0 && current.grossProfit === 0) {
+            if (current.grossProfit === 0 && previous.grossProfit === 0) {
                 showNoDataMessage('grossProfitWaterfallChart', 'Insufficient gross profit data for analysis');
                 return;
             }
@@ -14032,7 +14032,7 @@
             const { current, previous } = comparisonData;
             const opexChange = current.opex - previous.opex;
             
-            if (opexChange === 0 && current.opex === 0) {
+            if (current.opex === 0 && previous.opex === 0) {
                 showNoDataMessage('opexWaterfallChart', 'Insufficient OPEX data for analysis');
                 return;
             }
