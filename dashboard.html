@@ -15107,6 +15107,26 @@
                     break;
             }
         }
+
+        function getFinancingTypeName(type) {
+            const names = {
+                'loan': 'Bank Loan',
+                'credit_line': 'Credit Line',
+                'invoice_factoring': 'Invoice Factoring',
+                'equity': 'Equity Injection'
+            };
+            return names[type] || 'Financing';
+        }
+        
+        function getFinancingIcon(type) {
+            const icons = {
+                'loan': '<i class="fas fa-building-columns"></i>',
+                'credit_line': '<i class="fas fa-credit-card"></i>',
+                'invoice_factoring': '<i class="fas fa-file-invoice-dollar"></i>',
+                'equity': '<i class="fas fa-chart-pie"></i>'
+            };
+            return icons[type] || '<i class="fas fa-dollar-sign"></i>';
+        }
         
         // Handle form submission
         document.addEventListener('DOMContentLoaded', function() {
