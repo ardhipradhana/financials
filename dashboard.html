@@ -14659,19 +14659,40 @@
         
         // Add this function to update cash flow forecast metrics
         function updateCashFlowMetrics(metrics) {
-            console.log('=== UPDATING CASH FLOW METRICS ===');
+            console.log('=== UPDATING CASH FLOW METRICS WITH REAL DATA ===');
             
-            // Calculate cash runway from current position
-            const currentCash = metrics.currentCash;
-            const monthlyBurnRate = 25500000; // You can calculate this from AP data
+            // Calculate realistic burn rate from your actual AP data
+            const monthlyAP = aparTransactions
+                .filter(t => t.type === 'AP' && (t.status === 'Unpaid' || t.status === 'Overdue'))
+                .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+            
+            // Spread AP payments over 3 months for realistic burn rate
+            const monthlyBurnRate = monthlyAP / 3;
+            const weeklyBurnRate = monthlyBurnRate / 4.33; // Average weeks per month
             const dailyBurnRate = monthlyBurnRate / 30;
             
-            // Calculate runway
-            const runwayDays = Math.max(0, Math.floor(currentCash / dailyBurnRate));
-            const runwayWeeks = Math.floor(runwayDays / 7);
-            const runwayMonths = Math.floor(runwayDays / 30);
+            // Calculate realistic runway based on current cash and burn rate
+            const currentCash = metrics.currentCash;
+            let runwayDays, runwayWeeks, runwayMonths;
             
-            // Update cash runway display
+            if (currentCash <= 0 || monthlyBurnRate <= 0) {
+                runwayDays = 0;
+                runwayWeeks = 0;
+                runwayMonths = 0;
+            } else {
+                runwayDays = Math.floor(currentCash / dailyBurnRate);
+                runwayWeeks = Math.floor(runwayDays / 7);
+                runwayMonths = Math.floor(runwayDays / 30);
+            }
+            
+            console.log('Calculated runway:', {
+                currentCash: formatCurrencyFull(currentCash, 'IDR'),
+                monthlyBurn: formatCurrencyFull(monthlyBurnRate, 'IDR'),
+                dailyBurn: formatCurrencyFull(dailyBurnRate, 'IDR'),
+                runwayDays
+            });
+            
+            // Update runway display
             const cashRunwayDays = document.getElementById('cashRunwayDays');
             const cashRunwayWeeks = document.getElementById('cashRunwayWeeks');
             const cashRunwayMonths = document.getElementById('cashRunwayMonths');
@@ -14680,20 +14701,35 @@
             if (cashRunwayWeeks) cashRunwayWeeks.textContent = runwayWeeks;
             if (cashRunwayMonths) cashRunwayMonths.textContent = runwayMonths;
             
-            // Update burn rates
+            // Update burn rates with realistic calculations
             const dailyBurnElement = document.getElementById('dailyBurn');
             const weeklyBurnElement = document.getElementById('weeklyBurn');
             const monthlyBurnElement = document.getElementById('monthlyBurn');
             
             if (dailyBurnElement) dailyBurnElement.textContent = formatCurrencyFull(dailyBurnRate, 'IDR');
-            if (weeklyBurnElement) weeklyBurnElement.textContent = formatCurrencyFull(dailyBurnRate * 7, 'IDR');
+            if (weeklyBurnElement) weeklyBurnElement.textContent = formatCurrencyFull(weeklyBurnRate, 'IDR');
             if (monthlyBurnElement) monthlyBurnElement.textContent = formatCurrencyFull(monthlyBurnRate, 'IDR');
             
-            // Update cash flow health indicators
+            // Update cash flow health indicators with REAL upcoming payments
             updateCashFlowHealthIndicators(metrics);
             
-            console.log('Cash flow metrics updated:', {
-                runway: `${runwayDays} days`,
+            // Update cash flow trend
+            const trendElement = document.getElementById('cashFlowTrend');
+            if (trendElement) {
+                if (currentCash > 0 && runwayMonths > 6) {
+                    trendElement.textContent = 'Improving';
+                    trendElement.className = 'trend-indicator improving';
+                } else if (currentCash > 0 && runwayMonths > 3) {
+                    trendElement.textContent = 'Stable';
+                    trendElement.className = 'trend-indicator stable';
+                } else {
+                    trendElement.textContent = 'Declining';
+                    trendElement.className = 'trend-indicator declining';
+                }
+            }
+            
+            console.log('Updated cash flow metrics:', {
+                runway: `${runwayDays} days / ${runwayWeeks} weeks / ${runwayMonths} months`,
                 dailyBurn: formatCurrencyFull(dailyBurnRate, 'IDR'),
                 monthlyBurn: formatCurrencyFull(monthlyBurnRate, 'IDR')
             });
@@ -14701,39 +14737,58 @@
         
         // Add this function to update cash flow health indicators
         function updateCashFlowHealthIndicators(metrics) {
-            // Find next payment due
+            console.log('=== UPDATING CASH FLOW HEALTH INDICATORS ===');
+            
             const today = new Date();
+            const thirteenWeeksFromNow = new Date();
+            thirteenWeeksFromNow.setDate(today.getDate() + (13 * 7));
+            
+            // Find next payments due (AP)
             const upcomingPayments = aparTransactions
-                .filter(t => t.type === 'AP' && t.status === 'Unpaid')
-                .filter(t => new Date(t.due_date) > today)
-                .sort((a, b) => new Date(a.due_date) - new Date(b.due_date));
+                .filter(t => t.type === 'AP' && (t.status === 'Unpaid' || t.status === 'Overdue'))
+                .filter(t => {
+                    if (!t.due_date) return false;
+                    const dueDate = new Date(t.due_date);
+                    return dueDate <= thirteenWeeksFromNow;
+                })
+                .sort((a, b) => parseFloat(b.amount) - parseFloat(a.amount)); // Sort by amount (largest first)
             
+            // Find next collections due (AR)
+            const upcomingCollections = aparTransactions
+                .filter(t => t.type === 'AR' && (t.status === 'Unpaid' || t.status === 'Overdue'))
+                .filter(t => {
+                    if (!t.due_date) return false;
+                    const dueDate = new Date(t.due_date);
+                    return dueDate <= thirteenWeeksFromNow;
+                })
+                .sort((a, b) => parseFloat(b.amount) - parseFloat(a.amount)); // Sort by amount (largest first)
+            
+            console.log('Upcoming payments:', upcomingPayments.length);
+            console.log('Upcoming collections:', upcomingCollections.length);
+            
+            // Update largest payment
             const biggestPaymentElement = document.getElementById('biggestPayment');
-            const largestCollectionElement = document.getElementById('largestCollection');
-            
             if (biggestPaymentElement) {
                 if (upcomingPayments.length > 0) {
-                    const nextPayment = upcomingPayments[0];
-                    biggestPaymentElement.textContent = `${formatCurrencyFull(nextPayment.amount, 'IDR')} to ${nextPayment.company}`;
+                    const largestPayment = upcomingPayments[0];
+                    biggestPaymentElement.textContent = `${formatCurrencyFull(largestPayment.amount, 'IDR')} to ${largestPayment.company}`;
                 } else {
                     biggestPaymentElement.textContent = 'No payments due';
                 }
             }
             
-            // Find next collection due
-            const upcomingCollections = aparTransactions
-                .filter(t => t.type === 'AR' && t.status === 'Unpaid')
-                .filter(t => new Date(t.due_date) > today)
-                .sort((a, b) => new Date(a.due_date) - new Date(b.due_date));
-            
+            // Update largest collection
+            const largestCollectionElement = document.getElementById('largestCollection');
             if (largestCollectionElement) {
                 if (upcomingCollections.length > 0) {
-                    const nextCollection = upcomingCollections[0];
-                    largestCollectionElement.textContent = `${formatCurrencyFull(nextCollection.amount, 'IDR')} from ${nextCollection.company}`;
+                    const largestCollection = upcomingCollections[0];
+                    largestCollectionElement.textContent = `${formatCurrencyFull(largestCollection.amount, 'IDR')} from ${largestCollection.company}`;
                 } else {
                     largestCollectionElement.textContent = 'No collections due';
                 }
             }
+            
+            console.log('Updated cash flow health indicators');
         }
 
         function getRiskClass(riskLevel) {
