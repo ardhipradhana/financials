@@ -9443,6 +9443,21 @@
             const midPointCash = forecastData[Math.floor(forecastData.length / 2)]?.cashPosition || 0;
             
             let trend = 'stable';
+
+            console.log('=== DEBUGGING CALCULATE CASH FLOW HEALTH ===');
+            console.log('Total aparTransactions:', aparTransactions.length);
+            console.log('Date range:', today.toDateString(), 'to', thirteenWeeksLater.toDateString());
+            
+            // Add this right before the forEach loop:
+            const eligibleTransactions = aparTransactions.filter(t => t.status === 'Unpaid' || t.status === 'Overdue');
+            console.log('Eligible transactions:', eligibleTransactions.length);
+            console.log('Sample transactions:', eligibleTransactions.slice(0, 3).map(t => ({
+                type: t.type,
+                company: t.company,
+                amount: t.amount,
+                due_date: t.due_date,
+                status: t.status
+            })));
             
             // Check if cash goes negative (immediate declining trend)
             const goesNegative = forecastData.some(week => week.cashPosition < 0);
@@ -14738,64 +14753,45 @@
         // Add this function to update cash flow health indicators
         function updateCashFlowHealthIndicators(metrics) {
             console.log('=== UPDATING CASH FLOW HEALTH INDICATORS ===');
-            console.log('Total AP/AR transactions:', aparTransactions.length);
             
-            const today = new Date();
-            const thirteenWeeksFromNow = new Date();
-            thirteenWeeksFromNow.setDate(today.getDate() + (13 * 7));
+            // Use the existing calculateCashFlowHealth function
+            const healthData = calculateCashFlowHealth();
             
-            console.log('Date range:', today.toDateString(), 'to', thirteenWeeksFromNow.toDateString());
+            console.log('Cash flow health data:', healthData);
             
-            // Debug: Log all unpaid transactions with their due dates
-            const allUnpaid = aparTransactions.filter(t => t.status === 'Unpaid' || t.status === 'Overdue');
-            console.log('All unpaid transactions:', allUnpaid.map(t => ({
-                type: t.type,
-                company: t.company,
-                amount: t.amount,
-                due_date: t.due_date,
-                status: t.status
-            })));
-            
-            // Find upcoming payments (AP) - include ALL unpaid AP regardless of due date initially
-            const allAPTransactions = aparTransactions
-                .filter(t => t.type === 'AP' && (t.status === 'Unpaid' || t.status === 'Overdue'))
-                .sort((a, b) => parseFloat(b.amount) - parseFloat(a.amount));
-            
-            console.log('All AP transactions:', allAPTransactions.length);
-            
-            // Find upcoming collections (AR) - include ALL unpaid AR regardless of due date initially  
-            const allARTransactions = aparTransactions
-                .filter(t => t.type === 'AR' && (t.status === 'Unpaid' || t.status === 'Overdue'))
-                .sort((a, b) => parseFloat(b.amount) - parseFloat(a.amount));
-            
-            console.log('All AR transactions:', allARTransactions.length);
-            
-            // Update largest payment (just take the largest AP transaction)
+            // Update largest payment
             const biggestPaymentElement = document.getElementById('biggestPayment');
             if (biggestPaymentElement) {
-                if (allAPTransactions.length > 0) {
-                    const largestPayment = allAPTransactions[0];
-                    const paymentText = `${formatCurrencyFull(largestPayment.amount, 'IDR')} to ${largestPayment.company}`;
+                if (healthData.biggestPayment > 0) {
+                    const paymentText = `${formatCurrencyFull(healthData.biggestPayment, 'IDR')} to ${healthData.biggestPaymentRef}`;
                     biggestPaymentElement.textContent = paymentText;
                     console.log('Updated largest payment:', paymentText);
                 } else {
                     biggestPaymentElement.textContent = 'No payments due';
-                    console.log('No AP transactions found');
+                    console.log('No payments due');
                 }
             }
             
-            // Update largest collection (just take the largest AR transaction)
+            // Update largest collection
             const largestCollectionElement = document.getElementById('largestCollection');
             if (largestCollectionElement) {
-                if (allARTransactions.length > 0) {
-                    const largestCollection = allARTransactions[0];
-                    const collectionText = `${formatCurrencyFull(largestCollection.amount, 'IDR')} from ${largestCollection.company}`;
+                if (healthData.largestCollection > 0) {
+                    const collectionText = `${formatCurrencyFull(healthData.largestCollection, 'IDR')} from ${healthData.largestCollectionRef}`;
                     largestCollectionElement.textContent = collectionText;
                     console.log('Updated largest collection:', collectionText);
                 } else {
                     largestCollectionElement.textContent = 'No collections due';
-                    console.log('No AR transactions found');
+                    console.log('No collections due');
                 }
+            }
+            
+            // Update trend indicator
+            const trendElement = document.getElementById('cashFlowTrend');
+            if (trendElement) {
+                let trendText = healthData.trend.charAt(0).toUpperCase() + healthData.trend.slice(1);
+                trendElement.textContent = trendText;
+                trendElement.className = `trend-indicator ${healthData.trend}`;
+                console.log('Updated trend:', trendText);
             }
             
             console.log('=== CASH FLOW HEALTH INDICATORS UPDATE COMPLETE ===');
