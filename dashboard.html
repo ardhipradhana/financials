@@ -4159,7 +4159,7 @@
             background: white;
             border: 1px solid #e2e8f0;
             border-radius: 12px;
-            padding: 1.5rem;
+            padding: 1rem;  /* Reduced padding */
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
             display: flex;
             flex-direction: column;
@@ -4229,7 +4229,7 @@
         
         .waterfall-chart {
             flex: 1;
-            min-height: 280px;
+            min-height: 400px;
         }
 
         .waterfall-labels {
@@ -14081,16 +14081,29 @@
             createWaterfallChart('ebitdaWaterfallChart', waterfallData, 'EBITDA Bridge');
         }
         
-        // D3.js Waterfall Chart Implementation
+        // D3.js Waterfall Chart Implementation - Improved Layout
         function createWaterfallChart(containerId, data, title) {
             console.log('Creating waterfall chart for:', containerId, data);
+            
+            if (typeof d3 === 'undefined') {
+                console.error('D3.js is not loaded!');
+                showNoDataMessage(containerId, 'D3.js library not loaded');
+                return;
+            }
+            
+            const container = document.getElementById(containerId);
+            if (!container) {
+                console.error('Container not found:', containerId);
+                return;
+            }
             
             // Clear any existing chart
             d3.select(`#${containerId}`).selectAll("*").remove();
             
-            const margin = { top: 40, right: 20, bottom: 60, left: 60 };
-            const width = 400 - margin.left - margin.right;
-            const height = 300 - margin.top - margin.bottom;
+            // Improved dimensions - wider and taller
+            const margin = { top: 40, right: 20, bottom: 80, left: 50 };
+            const width = 500 - margin.left - margin.right;  // Increased from 400
+            const height = 350 - margin.top - margin.bottom;  // Increased from 300
             
             // Create SVG
             const svg = d3.select(`#${containerId}`)
@@ -14118,12 +14131,10 @@
                 let start, end;
                 
                 if (i === 0 || d.type === 'total') {
-                    // First and last bars start from 0
                     start = 0;
                     end = d.value;
                     cumulative = d.value;
                 } else {
-                    // Middle bars start from previous cumulative
                     start = cumulative;
                     end = cumulative + d.value;
                     cumulative += d.value;
@@ -14141,7 +14152,7 @@
             const xScale = d3.scaleBand()
                 .domain(processedData.map(d => d.label))
                 .range([0, width])
-                .padding(0.2);
+                .padding(0.15);  // Reduced padding for more space
             
             const yScale = d3.scaleLinear()
                 .domain(d3.extent(processedData.flatMap(d => [d.start, d.end])))
@@ -14189,7 +14200,7 @@
                 .attr("stroke", d => getColor(d.type))
                 .attr("stroke-width", 1);
             
-            // Add value labels on bars
+            // Add value labels on bars - Improved formatting (no "Rp")
             g.selectAll(".label")
                 .data(processedData)
                 .enter().append("text")
@@ -14197,25 +14208,45 @@
                 .attr("x", d => xScale(d.label) + xScale.bandwidth() / 2)
                 .attr("y", d => yScale(d.end) - 5)
                 .attr("text-anchor", "middle")
-                .style("font-size", "10px")
+                .style("font-size", "9px")  // Smaller font
                 .style("font-weight", "bold")
                 .style("fill", "#374151")
-                .text(d => formatCompactCurrency(d.value, 'IDR'));
+                .text(d => {
+                    // Remove "Rp" prefix and make more compact
+                    const absAmount = Math.abs(d.value);
+                    if (absAmount >= 1000000) {
+                        return `${(absAmount / 1000000).toFixed(1)}M`;
+                    } else if (absAmount >= 1000) {
+                        return `${(absAmount / 1000).toFixed(1)}K`;
+                    } else {
+                        return absAmount.toString();
+                    }
+                });
             
-            // Add x-axis
+            // Add x-axis with rotated labels
             g.append("g")
                 .attr("transform", `translate(0,${height})`)
                 .call(d3.axisBottom(xScale))
                 .selectAll("text")
-                .style("font-size", "9px")
+                .style("font-size", "8px")  // Smaller font
                 .attr("transform", "rotate(-45)")
                 .style("text-anchor", "end");
             
             // Add y-axis
             g.append("g")
-                .call(d3.axisLeft(yScale).tickFormat(d => formatCompactCurrency(d, 'IDR')))
+                .call(d3.axisLeft(yScale).tickFormat(d => {
+                    // Compact y-axis labels
+                    const absAmount = Math.abs(d);
+                    if (absAmount >= 1000000) {
+                        return `${d >= 0 ? '' : '-'}${(absAmount / 1000000).toFixed(0)}M`;
+                    } else if (absAmount >= 1000) {
+                        return `${d >= 0 ? '' : '-'}${(absAmount / 1000).toFixed(0)}K`;
+                    } else {
+                        return d.toString();
+                    }
+                }))
                 .selectAll("text")
-                .style("font-size", "10px");
+                .style("font-size", "9px");
             
             // Add tooltips
             bars.on("mouseover", function(event, d) {
