@@ -14738,57 +14738,67 @@
         // Add this function to update cash flow health indicators
         function updateCashFlowHealthIndicators(metrics) {
             console.log('=== UPDATING CASH FLOW HEALTH INDICATORS ===');
+            console.log('Total AP/AR transactions:', aparTransactions.length);
             
             const today = new Date();
             const thirteenWeeksFromNow = new Date();
             thirteenWeeksFromNow.setDate(today.getDate() + (13 * 7));
             
-            // Find next payments due (AP)
-            const upcomingPayments = aparTransactions
+            console.log('Date range:', today.toDateString(), 'to', thirteenWeeksFromNow.toDateString());
+            
+            // Debug: Log all unpaid transactions with their due dates
+            const allUnpaid = aparTransactions.filter(t => t.status === 'Unpaid' || t.status === 'Overdue');
+            console.log('All unpaid transactions:', allUnpaid.map(t => ({
+                type: t.type,
+                company: t.company,
+                amount: t.amount,
+                due_date: t.due_date,
+                status: t.status
+            })));
+            
+            // Find upcoming payments (AP) - include ALL unpaid AP regardless of due date initially
+            const allAPTransactions = aparTransactions
                 .filter(t => t.type === 'AP' && (t.status === 'Unpaid' || t.status === 'Overdue'))
-                .filter(t => {
-                    if (!t.due_date) return false;
-                    const dueDate = new Date(t.due_date);
-                    return dueDate <= thirteenWeeksFromNow;
-                })
-                .sort((a, b) => parseFloat(b.amount) - parseFloat(a.amount)); // Sort by amount (largest first)
+                .sort((a, b) => parseFloat(b.amount) - parseFloat(a.amount));
             
-            // Find next collections due (AR)
-            const upcomingCollections = aparTransactions
+            console.log('All AP transactions:', allAPTransactions.length);
+            
+            // Find upcoming collections (AR) - include ALL unpaid AR regardless of due date initially  
+            const allARTransactions = aparTransactions
                 .filter(t => t.type === 'AR' && (t.status === 'Unpaid' || t.status === 'Overdue'))
-                .filter(t => {
-                    if (!t.due_date) return false;
-                    const dueDate = new Date(t.due_date);
-                    return dueDate <= thirteenWeeksFromNow;
-                })
-                .sort((a, b) => parseFloat(b.amount) - parseFloat(a.amount)); // Sort by amount (largest first)
+                .sort((a, b) => parseFloat(b.amount) - parseFloat(a.amount));
             
-            console.log('Upcoming payments:', upcomingPayments.length);
-            console.log('Upcoming collections:', upcomingCollections.length);
+            console.log('All AR transactions:', allARTransactions.length);
             
-            // Update largest payment
+            // Update largest payment (just take the largest AP transaction)
             const biggestPaymentElement = document.getElementById('biggestPayment');
             if (biggestPaymentElement) {
-                if (upcomingPayments.length > 0) {
-                    const largestPayment = upcomingPayments[0];
-                    biggestPaymentElement.textContent = `${formatCurrencyFull(largestPayment.amount, 'IDR')} to ${largestPayment.company}`;
+                if (allAPTransactions.length > 0) {
+                    const largestPayment = allAPTransactions[0];
+                    const paymentText = `${formatCurrencyFull(largestPayment.amount, 'IDR')} to ${largestPayment.company}`;
+                    biggestPaymentElement.textContent = paymentText;
+                    console.log('Updated largest payment:', paymentText);
                 } else {
                     biggestPaymentElement.textContent = 'No payments due';
+                    console.log('No AP transactions found');
                 }
             }
             
-            // Update largest collection
+            // Update largest collection (just take the largest AR transaction)
             const largestCollectionElement = document.getElementById('largestCollection');
             if (largestCollectionElement) {
-                if (upcomingCollections.length > 0) {
-                    const largestCollection = upcomingCollections[0];
-                    largestCollectionElement.textContent = `${formatCurrencyFull(largestCollection.amount, 'IDR')} from ${largestCollection.company}`;
+                if (allARTransactions.length > 0) {
+                    const largestCollection = allARTransactions[0];
+                    const collectionText = `${formatCurrencyFull(largestCollection.amount, 'IDR')} from ${largestCollection.company}`;
+                    largestCollectionElement.textContent = collectionText;
+                    console.log('Updated largest collection:', collectionText);
                 } else {
                     largestCollectionElement.textContent = 'No collections due';
+                    console.log('No AR transactions found');
                 }
             }
             
-            console.log('Updated cash flow health indicators');
+            console.log('=== CASH FLOW HEALTH INDICATORS UPDATE COMPLETE ===');
         }
 
         function getRiskClass(riskLevel) {
