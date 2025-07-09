@@ -7856,11 +7856,19 @@
             let inflows = 0;
             let outflows = 0;
             
+            console.log('=== CALCULATE WEEKLY FLOWS DEBUG ===');
+            console.log('Week date:', weekDate);
+            console.log('aparTransactions available:', typeof aparTransactions !== 'undefined');
+            console.log('aparTransactions length:', aparTransactions?.length || 0);
+            
             if (typeof aparTransactions !== 'undefined' && aparTransactions.length > 0) {
                 const weekStart = new Date(weekDate);
                 const weekEnd = new Date(weekDate);
                 weekEnd.setDate(weekEnd.getDate() + 6);
                 
+                console.log('Week range:', weekStart, 'to', weekEnd);
+                
+                let processedCount = 0;
                 aparTransactions.forEach(transaction => {
                     // Handle different date formats and ensure proper date parsing
                     let dueDate;
@@ -7871,22 +7879,34 @@
                         dueDate = new Date(invoiceDate);
                         dueDate.setDate(dueDate.getDate() + (transaction.payment_terms || 30));
                     } else {
+                        console.log('Skipping transaction - no due date:', transaction);
                         return; // Skip if no due date can be determined
                     }
                     
-                    // Debug log to check what's happening
-                    console.log('Transaction:', transaction.reference, 'Due:', dueDate, 'Week:', weekStart, '-', weekEnd);
+                    console.log('Processing transaction:', {
+                        reference: transaction.reference,
+                        type: transaction.type,
+                        status: transaction.status,
+                        amount: transaction.amount,
+                        dueDate: dueDate,
+                        inRange: dueDate >= weekStart && dueDate <= weekEnd
+                    });
                     
                     if (dueDate >= weekStart && dueDate <= weekEnd) {
+                        processedCount++;
                         if (transaction.type === 'AR' && (transaction.status === 'Unpaid' || transaction.status === 'Overdue')) {
                             inflows += transaction.amount;
-                            console.log('Adding AR inflow:', transaction.amount);
+                            console.log('Added AR inflow:', transaction.amount);
                         } else if (transaction.type === 'AP' && (transaction.status === 'Unpaid' || transaction.status === 'Overdue')) {
                             outflows += transaction.amount;
-                            console.log('Adding AP outflow:', transaction.amount);
+                            console.log('Added AP outflow:', transaction.amount);
                         }
                     }
                 });
+                
+                console.log('Week flows result:', { inflows, outflows, processedCount });
+            } else {
+                console.log('No aparTransactions available for forecast calculation');
             }
             
             return { inflows, outflows };
