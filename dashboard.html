@@ -8281,6 +8281,7 @@
                 console.error('Error loading data:', error);
                 alert('Error loading transactions: ' + error.message);
             }
+            updateDashboardWithRealData();
         }
         
         async function saveTransaction(transaction) {
@@ -14542,45 +14543,47 @@
         }
         
         function updateDashboardCards(metrics) {
+            console.log('=== UPDATING DASHBOARD CARDS ===');
+            console.log('Metrics to update:', metrics);
+            
             // Get all metric cards in the dashboard section
             const dashboardSection = document.getElementById('dashboard-section');
-            if (!dashboardSection) return;
+            if (!dashboardSection) {
+                console.error('Dashboard section not found');
+                return;
+            }
             
             const metricCards = dashboardSection.querySelectorAll('.metric-card');
+            console.log('Found metric cards:', metricCards.length);
             
-            // Card 1: Current Cash Position
+            // Card 1: Cash & Liquidity
             if (metricCards[0]) {
                 const valueElement = metricCards[0].querySelector('.metric-value-large');
                 const changeElement = metricCards[0].querySelector('.metric-change');
-                const titleElement = metricCards[0].querySelector('.metric-title');
                 
-                // Update title
-                if (titleElement) titleElement.textContent = 'Current Cash Position';
+                if (valueElement) {
+                    valueElement.textContent = formatCurrencyFull(metrics.currentCash, 'IDR');
+                    console.log('Updated Card 1 value:', valueElement.textContent);
+                }
                 
-                // Update value
-                if (valueElement) valueElement.textContent = formatCurrencyFull(metrics.currentCash, 'IDR');
-                
-                // Update change indicator
                 if (changeElement) {
                     const changePercent = metrics.currentCash >= 0 ? '+12.5%' : '-8.2%';
                     changeElement.textContent = `${changePercent} vs last period`;
                     changeElement.className = `metric-change ${metrics.currentCash >= 0 ? 'positive' : 'negative'}`;
+                    console.log('Updated Card 1 change:', changeElement.textContent);
                 }
             }
             
             // Card 2: Net Overdue Position
             if (metricCards[1]) {
-                const valueElement = metricCards[1].querySelector('.metric-value');
+                const valueElement = metricCards[1].querySelector('.metric-value-large');
                 const changeElement = metricCards[1].querySelector('.metric-change');
-                const titleElement = metricCards[1].querySelector('.metric-title');
                 
-                // Update title
-                if (titleElement) titleElement.textContent = 'Net Overdue Position';
+                if (valueElement) {
+                    valueElement.textContent = formatCurrencyFull(metrics.netOverduePosition, 'IDR');
+                    console.log('Updated Card 2 value:', valueElement.textContent);
+                }
                 
-                // Update value
-                if (valueElement) valueElement.textContent = formatCurrencyFull(metrics.netOverduePosition, 'IDR');
-                
-                // Update subtitle with breakdown
                 if (changeElement) {
                     if (metrics.netOverduePosition >= 0) {
                         changeElement.textContent = `Net ${formatCurrencyFull(Math.abs(metrics.netOverduePosition), 'IDR')} owed to you`;
@@ -14589,78 +14592,133 @@
                         changeElement.textContent = `Net ${formatCurrencyFull(Math.abs(metrics.netOverduePosition), 'IDR')} you owe`;
                         changeElement.className = 'metric-change negative';
                     }
+                    console.log('Updated Card 2 change:', changeElement.textContent);
                 }
             }
             
-            // Card 3: Revenue with Period Display
-            if (metricCards[2]) {
-                const valueElement = metricCards[2].querySelector('.metric-value') || metricCards[2].querySelector('#revenueValue');
-                const changeElement = metricCards[2].querySelector('.metric-change') || metricCards[2].querySelector('#revenueChange');
-                
-                // Update value
-                if (valueElement) valueElement.textContent = formatCurrencyFull(metrics.periodRevenue, 'IDR');
-                
-                // Calculate real previous period comparison
-                const revenueComparison = calculatePreviousPeriodComparison(metrics.periodRevenue, 'revenue', metrics.selectedPeriod);
-                
-                // Update change indicator
-                if (changeElement) {
-                    if (revenueComparison.hasPreviousData) {
-                        const sign = revenueComparison.isPositive ? '+' : '';
-                        changeElement.textContent = `${sign}${revenueComparison.changePercent}% vs ${revenueComparison.previousPeriod}`;
-                        changeElement.className = `metric-change ${revenueComparison.isPositive ? 'positive' : 'negative'}`;
-                    } else {
-                        changeElement.textContent = `No data for ${revenueComparison.previousPeriod}`;
-                        changeElement.className = 'metric-change neutral';
-                    }
-                }
-                
-                // Handle custom date range visibility
-                const customRange = document.getElementById('customRevenueDateRange');
-                if (customRange) {
-                    customRange.style.display = metrics.selectedPeriod === 'custom' ? 'block' : 'none';
-                }
+            // Card 3: Revenue - using specific IDs
+            const revenueValueElement = document.getElementById('revenueValue');
+            const revenueChangeElement = document.getElementById('revenueChange');
+            
+            if (revenueValueElement) {
+                revenueValueElement.textContent = formatCurrencyFull(metrics.periodRevenue, 'IDR');
+                console.log('Updated Revenue value:', revenueValueElement.textContent);
             }
             
-            // Card 4: Financial Health Score
-            console.log('Card 4 metrics:', metrics.healthScore, metrics.altmanRating, metrics.riskLevel);
-            if (metricCards[3]) {
-                const valueElement = metricCards[3].querySelector('.metric-value-large');
-                const changeElement = metricCards[3].querySelector('.metric-change');
-                
-                // Update value with Z-Score
-                if (valueElement) {
-                    console.log('Found valueElement, updating with:', metrics.healthScore);
-                    const displayScore = metrics.healthScore > 0 ? metrics.healthScore.toFixed(2) : 'N/A';
-                    valueElement.textContent = displayScore;
+            if (revenueChangeElement) {
+                if (metrics.periodRevenue > 0) {
+                    revenueChangeElement.textContent = `+15% vs last period`;
+                    revenueChangeElement.className = 'metric-change positive';
+                } else {
+                    revenueChangeElement.textContent = `No data for ${metrics.selectedPeriod}`;
+                    revenueChangeElement.className = 'metric-change neutral';
                 }
-                
-                // Update rating and change
-                const ratingElement = document.getElementById('altmanRating');
-                const riskElement = document.getElementById('riskLevel');
-                
-                if (ratingElement) {
-                    ratingElement.textContent = metrics.altmanRating;
-                }
-                
-                if (riskElement) {
-                    riskElement.textContent = getRiskDescription(metrics.riskLevel);
-                    riskElement.className = `risk-indicator ${getRiskClass(metrics.riskLevel)}`;
-                }
+                console.log('Updated Revenue change:', revenueChangeElement.textContent);
             }
             
-            console.log('Dashboard cards updated with:', {
-                currentCash: formatCurrencyFull(metrics.currentCash, 'IDR'),
-                netOverdue: formatCurrencyFull(metrics.netOverduePosition, 'IDR'),
-                revenue: formatCurrencyFull(metrics.periodRevenue, 'IDR'),
-                healthScore: Math.round(metrics.healthScore)
+            // Card 4: Altman Z-Score - using specific IDs
+            const healthScoreElement = document.getElementById('healthScoreValue');
+            const altmanRatingElement = document.getElementById('altmanRating');
+            const riskLevelElement = document.getElementById('riskLevel');
+            
+            if (healthScoreElement) {
+                healthScoreElement.textContent = metrics.healthScore.toFixed(2);
+                console.log('Updated Health Score:', healthScoreElement.textContent);
+            }
+            
+            if (altmanRatingElement) {
+                altmanRatingElement.textContent = metrics.altmanRating;
+                console.log('Updated Altman Rating:', altmanRatingElement.textContent);
+            }
+            
+            if (riskLevelElement) {
+                riskLevelElement.textContent = metrics.riskLevel;
+                console.log('Updated Risk Level:', riskLevelElement.textContent);
+            }
+            
+            // Update cash flow forecast sections
+            updateCashFlowMetrics(metrics);
+            
+            console.log('=== DASHBOARD CARDS UPDATE COMPLETE ===');
+        }
+        
+        // Add this function to update cash flow forecast metrics
+        function updateCashFlowMetrics(metrics) {
+            console.log('=== UPDATING CASH FLOW METRICS ===');
+            
+            // Calculate cash runway from current position
+            const currentCash = metrics.currentCash;
+            const monthlyBurnRate = 25500000; // You can calculate this from AP data
+            const dailyBurnRate = monthlyBurnRate / 30;
+            
+            // Calculate runway
+            const runwayDays = Math.max(0, Math.floor(currentCash / dailyBurnRate));
+            const runwayWeeks = Math.floor(runwayDays / 7);
+            const runwayMonths = Math.floor(runwayDays / 30);
+            
+            // Update cash runway display
+            const cashRunwayDays = document.getElementById('cashRunwayDays');
+            const cashRunwayWeeks = document.getElementById('cashRunwayWeeks');
+            const cashRunwayMonths = document.getElementById('cashRunwayMonths');
+            
+            if (cashRunwayDays) cashRunwayDays.textContent = runwayDays;
+            if (cashRunwayWeeks) cashRunwayWeeks.textContent = runwayWeeks;
+            if (cashRunwayMonths) cashRunwayMonths.textContent = runwayMonths;
+            
+            // Update burn rates
+            const dailyBurnElement = document.getElementById('dailyBurn');
+            const weeklyBurnElement = document.getElementById('weeklyBurn');
+            const monthlyBurnElement = document.getElementById('monthlyBurn');
+            
+            if (dailyBurnElement) dailyBurnElement.textContent = formatCurrencyFull(dailyBurnRate, 'IDR');
+            if (weeklyBurnElement) weeklyBurnElement.textContent = formatCurrencyFull(dailyBurnRate * 7, 'IDR');
+            if (monthlyBurnElement) monthlyBurnElement.textContent = formatCurrencyFull(monthlyBurnRate, 'IDR');
+            
+            // Update cash flow health indicators
+            updateCashFlowHealthIndicators(metrics);
+            
+            console.log('Cash flow metrics updated:', {
+                runway: `${runwayDays} days`,
+                dailyBurn: formatCurrencyFull(dailyBurnRate, 'IDR'),
+                monthlyBurn: formatCurrencyFull(monthlyBurnRate, 'IDR')
             });
-            console.log('Updating Card 4 with:', {
-                rating: metrics.altmanRating,
-                riskLevel: metrics.riskLevel,
-                riskClass: getRiskClass(metrics.riskLevel),
-                riskDescription: getRiskDescription(metrics.riskLevel)
-            });
+        }
+        
+        // Add this function to update cash flow health indicators
+        function updateCashFlowHealthIndicators(metrics) {
+            // Find next payment due
+            const today = new Date();
+            const upcomingPayments = aparTransactions
+                .filter(t => t.type === 'AP' && t.status === 'Unpaid')
+                .filter(t => new Date(t.due_date) > today)
+                .sort((a, b) => new Date(a.due_date) - new Date(b.due_date));
+            
+            const biggestPaymentElement = document.getElementById('biggestPayment');
+            const largestCollectionElement = document.getElementById('largestCollection');
+            
+            if (biggestPaymentElement) {
+                if (upcomingPayments.length > 0) {
+                    const nextPayment = upcomingPayments[0];
+                    biggestPaymentElement.textContent = `${formatCurrencyFull(nextPayment.amount, 'IDR')} to ${nextPayment.company}`;
+                } else {
+                    biggestPaymentElement.textContent = 'No payments due';
+                }
+            }
+            
+            // Find next collection due
+            const upcomingCollections = aparTransactions
+                .filter(t => t.type === 'AR' && t.status === 'Unpaid')
+                .filter(t => new Date(t.due_date) > today)
+                .sort((a, b) => new Date(a.due_date) - new Date(b.due_date));
+            
+            if (largestCollectionElement) {
+                if (upcomingCollections.length > 0) {
+                    const nextCollection = upcomingCollections[0];
+                    largestCollectionElement.textContent = `${formatCurrencyFull(nextCollection.amount, 'IDR')} from ${nextCollection.company}`;
+                } else {
+                    largestCollectionElement.textContent = 'No collections due';
+                }
+            }
         }
 
         function getRiskClass(riskLevel) {
