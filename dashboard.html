@@ -14721,16 +14721,17 @@
             if (!periodData || !periodData.transactions) return 0;
             
             return periodData.transactions
-                .filter(t => parseInt(t.account_code) === accountCode)
+                .filter(t => parseInt(t.account_code) === accountCode || parseInt(t.Account_Code) === accountCode)
                 .reduce((sum, t) => {
-                    const debit = parseFloat(t.debit || 0);
-                    const credit = parseFloat(t.credit || 0);
+                    // Handle both field naming conventions
+                    const debit = parseFloat(t.debit_amount || t.Debit || 0);
+                    const credit = parseFloat(t.credit_amount || t.Credit || 0);
                     
-                    // For revenue accounts (4000s), credits are positive
+                    // For revenue accounts (4000s), credits increase the balance
                     if (accountCode >= 4000 && accountCode < 5000) {
                         return sum + (credit - debit);
                     }
-                    // For expense accounts (5000s), debits are positive
+                    // For expense accounts (5000s), debits increase the balance
                     else if (accountCode >= 5000) {
                         return sum + (debit - credit);
                     }
@@ -15432,9 +15433,10 @@
             
             // Filter transactions by date range
             const filteredTransactions = financialTransactions.filter(transaction => {
-                if (!transaction.transaction_date) return false;
+                // Handle both field naming conventions
+                const transactionDate = new Date(transaction.transaction_date || transaction.Date);
+                if (!transactionDate || isNaN(transactionDate)) return false;
                 
-                const transactionDate = new Date(transaction.transaction_date);
                 return transactionDate >= startDate && transactionDate <= endDate;
             });
             
@@ -15871,7 +15873,20 @@
             const impacts = calculateRealWaterfallImpacts(current, previous);
             const revenueImpacts = impacts.revenue;
             
-            const waterfallData = [
+            // For periods where previous is 0, show absolute values for current period
+            const showAbsolute = previous.netRevenue === 0;
+            
+            const waterfallData = showAbsolute ? [
+                // Show absolute values when starting from zero
+                { label: 'Sales Revenue', value: getAccountBalance(current, 4010), type: 'positive' },
+                { label: 'Service Revenue', value: getAccountBalance(current, 4020), type: 'positive' },
+                { label: 'Other Income', value: getAccountBalance(current, 4050), type: 'positive' },
+                { label: 'Interest Income', value: getAccountBalance(current, 4030), type: 'positive' },
+                { label: 'Sales Discounts', value: -getAccountBalance(current, 4060), type: 'negative' },
+                { label: 'Returns & Allowances', value: -getAccountBalance(current, 4070), type: 'negative' },
+                { label: 'Current Total', value: current.netRevenue, type: 'total' }
+            ] : [
+                // Show changes when comparing periods
                 { label: 'Previous', value: previous.netRevenue, type: 'base' },
                 { label: 'Sales Revenue', value: revenueImpacts.salesRevenue, type: revenueImpacts.salesRevenue >= 0 ? 'positive' : 'negative' },
                 { label: 'Service Revenue', value: revenueImpacts.serviceRevenue, type: revenueImpacts.serviceRevenue >= 0 ? 'positive' : 'negative' },
