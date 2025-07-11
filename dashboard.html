@@ -5066,6 +5066,58 @@
             margin-bottom: 2rem;
         }
 
+        .breakdown-metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .breakdown-sections {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+        
+        .breakdown-section {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .section-subtitle {
+            color: #64748b;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+        
+        .breakdown-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+        
+        .breakdown-table th,
+        .breakdown-table td {
+            padding: 0.75rem 0.5rem;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .breakdown-table th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #374151;
+        }
+
         .summary-card {
             background: white;
             border-radius: 12px;
@@ -16265,6 +16317,279 @@
             
             return `Key focus areas: ${recommendations.join(", ")}. Consider quarterly OKRs targeting these priorities.`;
         }
+
+        // Revenue & OPEX Breakdown Functions
+        function switchReportsTab(tabName) {
+            // Remove active class from all tab buttons
+            document.querySelectorAll('.reports-tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Add active class to clicked button
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+            
+            // Hide all tab contents
+            document.querySelectorAll('.reports-tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+            
+            // Load content for the selected tab
+            if (tabName === 'revenue-opex-breakdown') {
+                renderRevenueOpexBreakdown();
+            }
+        }
+        
+        function renderRevenueOpexBreakdown() {
+            const { current, previous } = comparisonData;
+            if (!current || !previous) {
+                document.getElementById('revenue-opex-breakdown-tab').innerHTML = 
+                    '<div class="no-data-message">Please generate a comparison report first.</div>';
+                return;
+            }
+            
+            // Calculate metrics
+            const revenueGrowth = ((current.netRevenue - previous.netRevenue) / previous.netRevenue) * 100;
+            const opexGrowth = ((current.opex - previous.opex) / previous.opex) * 100;
+            const opexRatio = (current.opex / current.netRevenue) * 100;
+            
+            // Update the top metrics
+            document.getElementById('revenue-opex-breakdown-tab').innerHTML = `
+                <!-- Top Metrics Cards -->
+                <div class="breakdown-metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-icon">📈</div>
+                        <div class="metric-label">Total Revenue</div>
+                        <div class="metric-value">Rp ${(current.netRevenue / 1000000).toFixed(1)}M</div>
+                        <div class="metric-change ${revenueGrowth >= 0 ? 'positive' : 'negative'}">
+                            ${revenueGrowth >= 0 ? '+' : ''}${revenueGrowth.toFixed(1)}% vs previous period
+                        </div>
+                    </div>
+                    
+                    <div class="metric-card">
+                        <div class="metric-icon">📊</div>
+                        <div class="metric-label">Total OPEX</div>
+                        <div class="metric-value">Rp ${(current.opex / 1000000).toFixed(1)}M</div>
+                        <div class="metric-change ${opexGrowth >= 0 ? 'negative' : 'positive'}">
+                            ${opexGrowth >= 0 ? '+' : ''}${opexGrowth.toFixed(1)}% vs previous period
+                        </div>
+                    </div>
+                    
+                    <div class="metric-card">
+                        <div class="metric-icon">⚖️</div>
+                        <div class="metric-label">OPEX Ratio</div>
+                        <div class="metric-value">${opexRatio.toFixed(1)}%</div>
+                        <div class="metric-subtitle">of total revenue</div>
+                    </div>
+                </div>
+                
+                <!-- Analysis Sections -->
+                <div class="breakdown-sections">
+                    <div class="breakdown-section">
+                        <div class="section-header">
+                            <h4><i class="fas fa-chart-line"></i> Revenue Analysis</h4>
+                            <button class="btn btn-secondary btn-sm" onclick="exportRevenueBreakdown()">
+                                <i class="fas fa-download"></i> Export
+                            </button>
+                        </div>
+                        <div class="section-subtitle">Distribution across income streams</div>
+                        <div id="revenueAnalysisTable" class="analysis-table">
+                            <!-- Table will be populated here -->
+                        </div>
+                    </div>
+                    
+                    <div class="breakdown-section">
+                        <div class="section-header">
+                            <h4><i class="fas fa-chart-bar"></i> OPEX Analysis</h4>
+                            <button class="btn btn-secondary btn-sm" onclick="exportOpexBreakdown()">
+                                <i class="fas fa-download"></i> Export
+                            </button>
+                        </div>
+                        <div class="section-subtitle">Operating expenses by department</div>
+                        <div id="opexAnalysisTable" class="analysis-table">
+                            <!-- Table will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Generate the detailed tables
+            generateRevenueAnalysisTable();
+            generateOpexAnalysisTable();
+        }
+        
+        function generateRevenueAnalysisTable() {
+            const { current, previous } = comparisonData;
+            
+            // Calculate revenue by account
+            const revenueAccounts = [
+                { code: 4010, name: 'Sales Revenue' },
+                { code: 4020, name: 'Service Revenue' },
+                { code: 4030, name: 'Interest Income' },
+                { code: 4050, name: 'Other Income' },
+                { code: 4060, name: 'Sales Discounts', isNegative: true },
+                { code: 4070, name: 'Sales Returns', isNegative: true }
+            ];
+            
+            let tableHTML = `
+                <table class="breakdown-table">
+                    <thead>
+                        <tr>
+                            <th>Revenue Source</th>
+                            <th>Current Period</th>
+                            <th>Previous Period</th>
+                            <th>Change</th>
+                            <th>% of Total</th>
+                            <th>Customer/Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            revenueAccounts.forEach(account => {
+                const currentAmount = getAccountBalance(current, account.code);
+                const previousAmount = getAccountBalance(previous, account.code);
+                const change = currentAmount - previousAmount;
+                const changePercent = previousAmount !== 0 ? (change / Math.abs(previousAmount)) * 100 : 0;
+                const percentOfTotal = (Math.abs(currentAmount) / current.netRevenue) * 100;
+                
+                // Get customer info from transactions
+                const customerInfo = getCustomerInfoForAccount(current, account.code);
+                
+                if (currentAmount !== 0 || previousAmount !== 0) {
+                    tableHTML += `
+                        <tr>
+                            <td><strong>${account.name}</strong></td>
+                            <td>Rp ${(currentAmount / 1000000).toFixed(2)}M</td>
+                            <td>Rp ${(previousAmount / 1000000).toFixed(2)}M</td>
+                            <td class="${change >= 0 ? 'positive' : 'negative'}">
+                                ${change >= 0 ? '+' : ''}${(change / 1000000).toFixed(2)}M (${changePercent.toFixed(1)}%)
+                            </td>
+                            <td>${percentOfTotal.toFixed(1)}%</td>
+                            <td>${customerInfo}</td>
+                        </tr>
+                    `;
+                }
+            });
+            
+            tableHTML += `
+                    </tbody>
+                </table>
+            `;
+            
+            document.getElementById('revenueAnalysisTable').innerHTML = tableHTML;
+        }
+        
+        function generateOpexAnalysisTable() {
+            const { current, previous } = comparisonData;
+            
+            // OPEX categories based on your GL structure
+            const opexCategories = [
+                { name: 'Facilities', codes: [5200, 5210, 5220, 5230, 5240, 5250] },
+                { name: 'Marketing', codes: [5300, 5310, 5320, 5330] },
+                { name: 'Professional Services', codes: [5400, 5410, 5420, 5430] },
+                { name: 'Operations', codes: [5500, 5600, 5700, 5800] }
+            ];
+            
+            let tableHTML = `
+                <table class="breakdown-table">
+                    <thead>
+                        <tr>
+                            <th>OPEX Category</th>
+                            <th>Current Period</th>
+                            <th>Previous Period</th>
+                            <th>Change</th>
+                            <th>% of Total OPEX</th>
+                            <th>Vendor/Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            opexCategories.forEach(category => {
+                let currentTotal = 0;
+                let previousTotal = 0;
+                let vendorInfo = [];
+                
+                category.codes.forEach(code => {
+                    const currentAmount = getAccountBalance(current, code);
+                    const previousAmount = getAccountBalance(previous, code);
+                    currentTotal += currentAmount;
+                    previousTotal += previousAmount;
+                    
+                    if (currentAmount > 0) {
+                        const accountName = getAccountNameByCode(code);
+                        const vendor = getVendorInfoForAccount(current, code);
+                        vendorInfo.push(`${accountName}: ${vendor}`);
+                    }
+                });
+                
+                if (currentTotal > 0 || previousTotal > 0) {
+                    const change = currentTotal - previousTotal;
+                    const changePercent = previousTotal !== 0 ? (change / previousTotal) * 100 : 0;
+                    const percentOfTotal = (currentTotal / current.opex) * 100;
+                    
+                    tableHTML += `
+                        <tr>
+                            <td><strong>${category.name}</strong></td>
+                            <td>Rp ${(currentTotal / 1000000).toFixed(2)}M</td>
+                            <td>Rp ${(previousTotal / 1000000).toFixed(2)}M</td>
+                            <td class="${change >= 0 ? 'negative' : 'positive'}">
+                                ${change >= 0 ? '+' : ''}${(change / 1000000).toFixed(2)}M (${changePercent.toFixed(1)}%)
+                            </td>
+                            <td>${percentOfTotal.toFixed(1)}%</td>
+                            <td>${vendorInfo.slice(0, 2).join('; ')}</td>
+                        </tr>
+                    `;
+                }
+            });
+            
+            tableHTML += `
+                    </tbody>
+                </table>
+            `;
+            
+            document.getElementById('opexAnalysisTable').innerHTML = tableHTML;
+        }
+        
+        // Helper functions
+        function getCustomerInfoForAccount(periodData, accountCode) {
+            const transactions = periodData.transactions?.filter(t => 
+                parseInt(t.account_code) === accountCode && parseFloat(t.credit_amount || 0) > 0
+            ) || [];
+            
+            if (transactions.length === 0) return 'N/A';
+            
+            const customers = transactions.map(t => t.description || t.reference || 'Unknown').slice(0, 2);
+            return customers.join(', ');
+        }
+        
+        function getVendorInfoForAccount(periodData, accountCode) {
+            const transactions = periodData.transactions?.filter(t => 
+                parseInt(t.account_code) === accountCode && parseFloat(t.debit_amount || 0) > 0
+            ) || [];
+            
+            if (transactions.length === 0) return 'N/A';
+            
+            const vendors = transactions.map(t => t.description || t.reference || 'Unknown').slice(0, 1);
+            return vendors.join(', ');
+        }
+        
+        function getAccountNameByCode(accountCode) {
+            const account = glAccounts.find(acc => acc.account_code === accountCode);
+            return account ? account.account_name : `Account ${accountCode}`;
+        }
+        
+        // Export functions (placeholders)
+        function exportRevenueBreakdown() {
+            alert('Revenue breakdown export feature - to be implemented');
+        }
+        
+        function exportOpexBreakdown() {
+            alert('OPEX breakdown export feature - to be implemented');
+        }
         
         // Export functions
         function exportComparisonToPDF() {
@@ -16304,79 +16629,6 @@
             }
         }
 
-        // Add this to the revenue-opex-breakdown tab content
-        function renderRevenueOpexBreakdown() {
-            const { current, previous } = comparisonData;
-            if (!current || !previous) return;
-            
-            const breakdownContainer = document.getElementById('revenue-opex-breakdown-tab');
-            
-            breakdownContainer.innerHTML = `
-                <!-- Top Metrics Cards -->
-                <div class="breakdown-metrics-grid">
-                    <div class="metric-card">
-                        <div class="metric-header">Revenue Concentration</div>
-                        <div class="metric-value" id="revenueConcentration">0%</div>
-                        <div class="metric-subtitle">from top 3 sources</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-header">Avg Transaction</div>
-                        <div class="metric-value" id="avgTransaction">Rp 0</div>
-                        <div class="metric-subtitle">per sale</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-header">OPEX per Employee</div>
-                        <div class="metric-value" id="opexPerEmployee">Rp 0</div>
-                        <div class="metric-subtitle">monthly average</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-header">Cost Efficiency</div>
-                        <div class="metric-value" id="costEfficiency">0%</div>
-                        <div class="metric-subtitle">vs industry avg</div>
-                    </div>
-                </div>
-                
-                <!-- Revenue & OPEX Tables -->
-                <div class="breakdown-tables-container">
-                    <div class="breakdown-section">
-                        <h4>Revenue Breakdown</h4>
-                        <div id="revenueBreakdownTable"></div>
-                    </div>
-                    <div class="breakdown-section">
-                        <h4>OPEX Breakdown</h4>
-                        <div id="opexBreakdownTable"></div>
-                    </div>
-                </div>
-                
-                <!-- Key Insights -->
-                <div class="breakdown-insights">
-                    <h4><i class="fas fa-lightbulb"></i> Key Insights & Recommendations</h4>
-                    <div class="insights-grid">
-                        <div class="insight-item positive">
-                            <div class="insight-icon">📈</div>
-                            <div class="insight-content">
-                                <h5>Revenue Optimization</h5>
-                                <p id="revenueInsight">Analysis shows potential for revenue diversification in Q4</p>
-                            </div>
-                        </div>
-                        <div class="insight-item negative">
-                            <div class="insight-icon">✂️</div>
-                            <div class="insight-content">
-                                <h5>Cost Reduction</h5>
-                                <p id="costInsight">Marketing expenses can be optimized by 15% without impact</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            // Calculate and populate the data
-            calculateBreakdownMetrics();
-            generateRevenueBreakdownTable();
-            generateOpexBreakdownTable();
-            generateBreakdownInsights();
-        }
-        
         // Initialize when reports section is accessed
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize when the reports section becomes active
