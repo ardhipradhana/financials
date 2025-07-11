@@ -15385,23 +15385,21 @@
             let startDate, endDate;
             
             if (periodType === 'monthly') {
-                // Format: "2024-12" or "Dec 2024"
+                // Handle formats like "2025-02" or "2025-01"
                 let year, month;
                 
                 if (periodKey.includes('-')) {
                     [year, month] = periodKey.split('-');
+                    year = parseInt(year);
                     month = parseInt(month);
                 } else {
-                    // Parse "Dec 2024" format
-                    const parts = periodKey.split(' ');
-                    year = parseInt(parts[1]);
-                    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
-                                     'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                    month = monthNames.indexOf(parts[0]) + 1;
+                    console.warn('Unexpected period format:', periodKey);
+                    return financialTransactions;
                 }
                 
-                startDate = new Date(year, month - 1, 1);
-                endDate = new Date(year, month, 0); // Last day of month
+                // Create date range for the specific month
+                startDate = new Date(year, month - 1, 1); // month - 1 because Date months are 0-based
+                endDate = new Date(year, month, 0); // Last day of the month
                 
             } else if (periodType === 'quarterly') {
                 // Format: "Q1 2024", "Q2 2024", etc.
@@ -15421,22 +15419,32 @@
                 
             } else {
                 // Custom period - assume periodKey is in a date format
-                // You may need to adjust this based on your custom period format
                 console.warn('Custom period filtering not fully implemented for:', periodKey);
                 return financialTransactions;
             }
             
             console.log(`Filtering transactions for period ${periodKey}:`, {
-                startDate: startDate.toISOString(),
-                endDate: endDate.toISOString()
+                startDate: startDate.toISOString().split('T')[0],
+                endDate: endDate.toISOString().split('T')[0]
             });
             
-            // Filter transactions by date range
+            // Filter transactions by date range using manual month/year comparison
             const filteredTransactions = financialTransactions.filter(transaction => {
-                // Handle both field naming conventions
-                const transactionDate = new Date(transaction.transaction_date || transaction.Date);
-                if (!transactionDate || isNaN(transactionDate)) return false;
+                if (!transaction.transaction_date) return false;
                 
+                const transactionDate = new Date(transaction.transaction_date);
+                const transactionYear = transactionDate.getFullYear();
+                const transactionMonth = transactionDate.getMonth(); // 0-based
+                
+                const startYear = startDate.getFullYear();
+                const startMonth = startDate.getMonth(); // 0-based
+                
+                // Simple month/year match for monthly periods
+                if (periodType === 'monthly') {
+                    return transactionYear === startYear && transactionMonth === startMonth;
+                }
+                
+                // Date range comparison for other period types
                 return transactionDate >= startDate && transactionDate <= endDate;
             });
             
