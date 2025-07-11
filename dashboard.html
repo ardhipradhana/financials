@@ -7113,8 +7113,8 @@
                                 <div class="metric-header">
                                     <div class="card-main">
                                         <div class="metric-title-group">
-                                            <div class="metric-title">Revenue Trend</div>
-                                            <div class="metric-subtitle">6-Month Growth</div>
+                                            <div class="metric-title">Revenue CMGR</div>
+                                            <div class="metric-subtitle">Monthly Growth Rate</div>
                                         </div>
                                         <div class="metric-primary-group">
                                             <span class="metric-value-large" id="revenueTrendValue">+0%</span>
@@ -7134,8 +7134,8 @@
                                 <div class="metric-header">
                                     <div class="card-main">
                                         <div class="metric-title-group">
-                                            <div class="metric-title">OPEX Trend</div>
-                                            <div class="metric-subtitle">6-Month Change</div>
+                                            <div class="metric-title">OPEX CMGR</div>
+                                            <div class="metric-subtitle">Monthly Growth Rate</div>
                                         </div>
                                         <div class="metric-primary-group">
                                             <span class="metric-value-large" id="opexTrendValue">+0%</span>
@@ -17324,7 +17324,7 @@
             // Render the main chart
             renderTrendingChart(trendingData);
             
-            // Generate insights
+            // Generate insights (THIS WAS MISSING THE CALL!)
             generateTrendingInsights(trendingData);
         }
         
@@ -17362,7 +17362,7 @@
                 trendingData.periods.push(monthName);
                 trendingData.revenue.push(financialData.netRevenue / 1000000); // Convert to millions
                 trendingData.opex.push(financialData.opex / 1000000);
-                trendingData.margins.push(financialData.netRevenue > 0 ? (financialData.grossProfit / financialData.netRevenue) * 100 : 0);
+                trendingData.margins.push(financialData.netRevenue > 0 ? ((financialData.netRevenue - financialData.opex) / financialData.netRevenue) * 100 : 0);
             }
             
             // Add current month (split into MTD + Projected)
@@ -17544,55 +17544,198 @@
         function updateTrendingSummaryCards(data) {
             if (data.revenue.length < 2) return;
             
-            // Revenue trend (first vs last historical month)
             const revenueStart = data.revenue[0];
-            const revenueEnd = data.revenue[data.revenue.length - 2]; // Exclude current month
-            const revenueTrend = revenueStart > 0 ? ((revenueEnd - revenueStart) / revenueStart) * 100 : 0;
+            const revenueEnd = data.revenue[data.revenue.length - 1];
+            const totalMonths = data.revenue.length - 1;
             
-            document.getElementById('revenueTrendValue').textContent = `${revenueTrend >= 0 ? '+' : ''}${revenueTrend.toFixed(1)}%`;
-            document.getElementById('revenueVelocity').textContent = revenueTrend > 10 ? 'Accelerating' : revenueTrend > 0 ? 'Growing' : 'Declining';
+            let revenueCMGR = 0;
+            if (revenueStart > 0 && revenueEnd > 0 && totalMonths > 0) {
+                revenueCMGR = (Math.pow(revenueEnd / revenueStart, 1 / totalMonths) - 1) * 100;
+            } else if (revenueStart === 0 && revenueEnd > 0) {
+                // Handle starting from zero case
+                document.getElementById('revenueTrendValue').textContent = 'New Revenue';
+                document.getElementById('revenueVelocity').textContent = 'Starting';
+                return;
+            }
             
-            // OPEX trend
+            // Ensure the result is not NaN or Infinity
+            if (!isFinite(revenueCMGR)) {
+                revenueCMGR = 0;
+            }
+            
+            document.getElementById('revenueTrendValue').textContent = `${revenueCMGR >= 0 ? '+' : ''}${revenueCMGR.toFixed(1)}%`;
+            
+            // Velocity based on CMGR
+            document.getElementById('revenueVelocity').textContent = 
+                revenueCMGR > 15 ? 'Exceptional' :    // >15% monthly is extraordinary
+                revenueCMGR > 8 ? 'Accelerating' :    // >8% monthly is very strong  
+                revenueCMGR > 3 ? 'Growing' :         // >3% monthly is healthy
+                revenueCMGR > 0 ? 'Slow Growth' :     // Positive but <3% monthly
+                'Declining';
+            
+            // OPEX CMGR: Same logic
             const opexStart = data.opex[0];
-            const opexEnd = data.opex[data.opex.length - 2];
-            const opexTrend = opexStart > 0 ? ((opexEnd - opexStart) / opexStart) * 100 : 0;
+            const opexEnd = data.opex[data.opex.length - 1];
             
-            document.getElementById('opexTrendValue').textContent = `${opexTrend >= 0 ? '+' : ''}${opexTrend.toFixed(1)}%`;
-            document.getElementById('opexEfficiency').textContent = opexTrend < revenueTrend ? 'Improving' : 'Declining';
+            let opexCMGR = 0;
+            if (opexStart > 0 && totalMonths > 0) {
+                opexCMGR = (Math.pow(opexEnd / opexStart, 1 / totalMonths) - 1) * 100;
+            }
             
-            // Current month progress
-            const progressPercent = (data.currentMonthMTD / (data.currentMonthMTD + data.currentMonthProjected)) * 100;
+            document.getElementById('opexTrendValue').textContent = `${opexCMGR >= 0 ? '+' : ''}${opexCMGR.toFixed(1)}%`;
+            document.getElementById('opexEfficiency').textContent = 
+                opexCMGR < revenueCMGR - 2 ? 'Improving' :
+                opexCMGR < revenueCMGR + 2 ? 'Stable' : 'Declining';
+            
+            // Margin trend: Calculate margin CMGR if we have margin data
+            if (data.margins && data.margins.length > 1) {
+                const marginStart = data.margins[0];
+                const marginEnd = data.margins[data.margins.length - 2]; // Exclude current month projection
+                const marginDifference = marginEnd - marginStart;
+                
+                document.getElementById('marginTrendValue').textContent = `${marginEnd.toFixed(1)}%`;
+                document.getElementById('marginDirection').textContent = 
+                    marginDifference > 2 ? 'Improving' :
+                    marginDifference > -2 ? 'Stable' : 'Declining';
+            } else {
+                // Current margin calculation
+                const currentMargin = revenueEnd > 0 ? ((revenueEnd - opexEnd) / revenueEnd) * 100 : 0;
+                document.getElementById('marginTrendValue').textContent = `${currentMargin.toFixed(1)}%`;
+                document.getElementById('marginDirection').textContent = 'Current';
+            }
+            
+            // Current month progress: Days passed / Total days in month
+            const today = new Date();
+            const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+            const daysPassed = today.getDate();
+            const progressPercent = (daysPassed / daysInMonth) * 100;
+            
             document.getElementById('currentMonthProgress').textContent = `${progressPercent.toFixed(0)}%`;
             document.getElementById('currentMonthProjected').textContent = `Rp ${(data.currentMonthMTD + data.currentMonthProjected).toFixed(1)}M`;
+            
+            console.log('CMGR Calculation Debug:', {
+                revenueStart,
+                revenueEnd,
+                totalMonths,
+                revenueCMGR: revenueCMGR.toFixed(2) + '%',
+                opexCMGR: opexCMGR.toFixed(2) + '%'
+            });
         }
         
         function generateTrendingInsights(data) {
+            if (!data || data.revenue.length < 2) {
+                document.getElementById('trendingInsights').innerHTML = `
+                    <div class="ro-insight-card-full warning">
+                        <div class="ro-insight-icon-full"></div>
+                        <div class="ro-insight-content-full">
+                            <div class="ro-insight-title-full">Insufficient Data</div>
+                            <div class="ro-insight-description-full">More historical data is needed to generate meaningful trend insights. Continue using the system to build trend analysis.</div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+            
             let insightsHTML = '';
             
-            // Revenue trend insight
-            const revenueGrowth = data.revenue.length > 1 ? ((data.revenue[data.revenue.length - 2] - data.revenue[0]) / data.revenue[0]) * 100 : 0;
+            // Calculate CMGR for insights
+            const revenueStart = data.revenue[0];
+            const revenueEnd = data.revenue[data.revenue.length - 1];
+            const totalMonths = data.revenue.length - 1;
             
-            if (revenueGrowth > 20) {
+            let revenueCMGR = 0;
+            if (revenueStart > 0 && totalMonths > 0) {
+                revenueCMGR = (Math.pow(revenueEnd / revenueStart, 1 / totalMonths) - 1) * 100;
+            }
+            
+            // Revenue CMGR insight (updated thresholds for monthly rates)
+            if (revenueCMGR > 10) { // 10% monthly = very strong
                 insightsHTML += `
                     <div class="ro-insight-card-full positive">
-                        <div class="ro-insight-icon-full">📈</div>
+                        <div class="ro-insight-icon-full"></div>
                         <div class="ro-insight-content-full">
-                            <div class="ro-insight-title-full">Strong Growth Trajectory</div>
-                            <div class="ro-insight-description-full">Revenue has grown ${revenueGrowth.toFixed(1)}% over the trending period, indicating strong business momentum. This growth rate suggests successful market expansion and operational scaling.</div>
+                            <div class="ro-insight-title-full">Exceptional Growth Rate</div>
+                            <div class="ro-insight-description-full">Revenue CMGR of ${revenueCMGR.toFixed(1)}% indicates exceptional monthly growth. This ${(Math.pow(1 + revenueCMGR/100, 12) - 1)*100 > 100 ? 'extraordinary' : 'strong'} pace suggests excellent market traction and scaling opportunities.</div>
+                        </div>
+                    </div>
+                `;
+            } else if (revenueCMGR < -5) { // -5% monthly = concerning decline
+                insightsHTML += `
+                    <div class="ro-insight-card-full negative">
+                        <div class="ro-insight-icon-full"></div>
+                        <div class="ro-insight-content-full">
+                            <div class="ro-insight-title-full">Declining Growth Trend</div>
+                            <div class="ro-insight-description-full">Revenue CMGR of ${revenueCMGR.toFixed(1)}% indicates declining performance. Immediate strategic review needed to reverse this ${(Math.pow(1 + revenueCMGR/100, 12) - 1)*100 < -50 ? 'critical' : 'concerning'} trend.</div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                insightsHTML += `
+                    <div class="ro-insight-card-full positive">
+                        <div class="ro-insight-icon-full"></div>
+                        <div class="ro-insight-content-full">
+                            <div class="ro-insight-title-full">Steady Performance</div>
+                            <div class="ro-insight-description-full">Revenue CMGR shows ${revenueCMGR >= 0 ? 'growth' : 'decline'} of ${revenueCMGR.toFixed(1)}% monthly. Consider strategies to accelerate growth while maintaining operational efficiency.</div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Calculate OPEX CMGR for comparison
+            const opexStart = data.opex[0];
+            const opexEnd = data.opex[data.opex.length - 1];
+            
+            let opexCMGR = 0;
+            if (opexStart > 0 && totalMonths > 0) {
+                opexCMGR = (Math.pow(opexEnd / opexStart, 1 / totalMonths) - 1) * 100;
+            }
+            
+            // OPEX efficiency insight using CMGR
+            if (opexCMGR > revenueCMGR + 5) { // 5% monthly difference is significant
+                insightsHTML += `
+                    <div class="ro-insight-card-full negative">
+                        <div class="ro-insight-icon-full"></div>
+                        <div class="ro-insight-content-full">
+                            <div class="ro-insight-title-full">OPEX Growing Too Fast</div>
+                            <div class="ro-insight-description-full">OPEX CMGR of ${opexCMGR.toFixed(1)}% exceeds revenue CMGR of ${revenueCMGR.toFixed(1)}% by ${(opexCMGR - revenueCMGR).toFixed(1)}pp monthly. This threatens profitability - implement cost discipline measures immediately.</div>
+                        </div>
+                    </div>
+                `;
+            } else if (opexCMGR < revenueCMGR - 2) { // 2% monthly difference shows good leverage
+                insightsHTML += `
+                    <div class="ro-insight-card-full positive">
+                        <div class="ro-insight-icon-full"></div>
+                        <div class="ro-insight-content-full">
+                            <div class="ro-insight-title-full">Excellent Operational Leverage</div>
+                            <div class="ro-insight-description-full">OPEX CMGR (${opexCMGR.toFixed(1)}%) is lower than revenue CMGR (${revenueCMGR.toFixed(1)}%), creating ${(revenueCMGR - opexCMGR).toFixed(1)}pp monthly operational leverage. This efficient scaling should be maintained.</div>
                         </div>
                     </div>
                 `;
             }
             
             // Seasonality insight
-            const monthlyVariation = calculateVariation(data.revenue.slice(0, -1)); // Exclude current month
-            if (monthlyVariation > 25) {
+            const monthlyVariation = calculateVariation(data.revenue.slice(0, -1)); // Exclude current month projection
+            if (monthlyVariation > 25 && data.revenue.length > 3) {
                 insightsHTML += `
                     <div class="ro-insight-card-full warning">
-                        <div class="ro-insight-icon-full">📊</div>
+                        <div class="ro-insight-icon-full"></div>
                         <div class="ro-insight-content-full">
-                            <div class="ro-insight-title-full">Seasonal Patterns Detected</div>
-                            <div class="ro-insight-description-full">Revenue shows ${monthlyVariation.toFixed(1)}% monthly variation, suggesting seasonal patterns. Consider implementing more predictable revenue streams or adjusting forecasting models.</div>
+                            <div class="ro-insight-title-full">High Revenue Volatility</div>
+                            <div class="ro-insight-description-full">Revenue shows ${monthlyVariation.toFixed(1)}% monthly variation, indicating high volatility. Consider diversifying revenue streams or implementing more predictable recurring revenue models.</div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Current month projection insight
+            const projectionAccuracy = (data.currentMonthMTD / (data.currentMonthMTD + data.currentMonthProjected)) * 100;
+            if (projectionAccuracy > 80) {
+                insightsHTML += `
+                    <div class="ro-insight-card-full positive">
+                        <div class="ro-insight-icon-full"></div>
+                        <div class="ro-insight-content-full">
+                            <div class="ro-insight-title-full">Strong Month Performance</div>
+                            <div class="ro-insight-description-full">Current month is ${projectionAccuracy.toFixed(0)}% complete with strong performance. Projected to reach Rp ${(data.currentMonthMTD + data.currentMonthProjected).toFixed(1)}M by month end.</div>
                         </div>
                     </div>
                 `;
