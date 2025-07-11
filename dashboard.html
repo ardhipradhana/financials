@@ -16186,65 +16186,84 @@
         
         // Render executive summary
         function renderExecutiveSummary() {
-            const { current, previous, lastYear } = comparisonData;
-            
+            const { current, previous } = comparisonData;
             if (!current || !previous) return;
             
-            const summaryItems = generateExecutiveInsights(current, previous, lastYear);
-            const summaryContainer = document.getElementById('executiveSummaryContent');
+            const summaryContainer = document.getElementById('executiveSummary');
+            if (!summaryContainer) return;
             
-            summaryContainer.innerHTML = summaryItems.map(item => `
-                <div class="summary-item">
-                    <h5>${item.title}</h5>
-                    <p>${item.description}</p>
+            // Calculate key insights
+            const revenueGrowth = ((current.netRevenue - previous.netRevenue) / previous.netRevenue) * 100;
+            const grossMarginCurrent = (current.grossProfit / current.netRevenue) * 100;
+            const grossMarginPrevious = (previous.grossProfit / previous.netRevenue) * 100;
+            const grossMarginChange = grossMarginCurrent - grossMarginPrevious;
+            
+            const opexGrowth = ((current.opex - previous.opex) / previous.opex) * 100;
+            const ebitdaMarginCurrent = (current.ebitda / current.netRevenue) * 100;
+            const ebitdaMarginPrevious = (previous.ebitda / previous.netRevenue) * 100;
+            
+            const revenuePerRupiah = current.netRevenue / current.opex; // Revenue efficiency
+            const burnMultiple = current.opex / (current.netRevenue - previous.netRevenue || 1); // Capital efficiency
+            
+            summaryContainer.innerHTML = `
+                <div class="executive-summary">
+                    <div class="summary-header">
+                        <h4><i class="fas fa-chart-line"></i> Executive Summary</h4>
+                    </div>
+                    <div class="summary-content">
+                        
+                        <div class="summary-item ${revenueGrowth > 15 ? 'positive' : revenueGrowth > 5 ? 'neutral' : 'negative'}">
+                            <h5>🚀 Growth Momentum</h5>
+                            <p>${revenueGrowth.toFixed(1)}% revenue growth ${revenueGrowth > 20 ? 'indicates strong market traction' : revenueGrowth > 10 ? 'shows healthy expansion' : 'suggests need for growth acceleration'}. ${revenueGrowth > 15 ? 'Consider scaling successful channels.' : 'Focus on customer acquisition and retention strategies.'}</p>
+                        </div>
+                        
+                        <div class="summary-item ${grossMarginChange > 2 ? 'positive' : grossMarginChange > 0 ? 'neutral' : 'negative'}">
+                            <h5>💰 Margin Excellence</h5>
+                            <p>Gross margin ${grossMarginChange > 0 ? 'improved' : 'declined'} by ${Math.abs(grossMarginChange).toFixed(1)}pp to ${grossMarginCurrent.toFixed(1)}%. ${grossMarginCurrent > 70 ? 'Strong pricing power maintained.' : grossMarginCurrent > 50 ? 'Healthy margins with room for optimization.' : 'Focus on cost reduction and pricing strategy.'} ${grossMarginChange < -2 ? 'Investigate cost pressures immediately.' : ''}</p>
+                        </div>
+                        
+                        <div class="summary-item ${opexGrowth < revenueGrowth ? 'positive' : opexGrowth < revenueGrowth * 1.5 ? 'neutral' : 'negative'}">
+                            <h5>⚡ Operational Leverage</h5>
+                            <p>${opexGrowth < revenueGrowth ? 'Positive operating leverage achieved' : 'Operating expenses growing faster than revenue'}. OPEX increased ${opexGrowth.toFixed(1)}% vs ${revenueGrowth.toFixed(1)}% revenue growth. ${opexGrowth > revenueGrowth * 1.2 ? 'Urgent cost discipline needed.' : opexGrowth < revenueGrowth ? 'Maintain this efficient scaling.' : 'Monitor expense growth closely.'}</p>
+                        </div>
+                        
+                        <div class="summary-item ${ebitdaMarginCurrent > 15 ? 'positive' : ebitdaMarginCurrent > 5 ? 'neutral' : 'negative'}">
+                            <h5>📊 Profitability Outlook</h5>
+                            <p>EBITDA margin of ${ebitdaMarginCurrent.toFixed(1)}% ${ebitdaMarginCurrent > ebitdaMarginPrevious ? 'expanded' : 'contracted'} ${Math.abs(ebitdaMarginCurrent - ebitdaMarginPrevious).toFixed(1)}pp. ${ebitdaMarginCurrent > 20 ? 'Excellent profitability profile.' : ebitdaMarginCurrent > 10 ? 'Solid path to profitability.' : ebitdaMarginCurrent > 0 ? 'Focus on margin expansion.' : 'Prioritize unit economics improvement.'}</p>
+                        </div>
+                        
+                        <div class="summary-item">
+                            <h5>🎯 Strategic Priorities</h5>
+                            <p>${generateStrategicRecommendations(revenueGrowth, grossMarginChange, opexGrowth, ebitdaMarginCurrent)}</p>
+                        </div>
+                        
+                    </div>
                 </div>
-            `).join('');
+            `;
         }
         
-        // Generate executive insights
-        function generateExecutiveInsights(current, previous, lastYear) {
-            const insights = [];
+        // Add helper function for strategic recommendations
+        function generateStrategicRecommendations(revenueGrowth, marginChange, opexGrowth, ebitdaMargin) {
+            const recommendations = [];
             
-            // Revenue insight
-            const revenueChange = current.netRevenue - previous.netRevenue;
-            const revenuePercent = previous.netRevenue !== 0 ? (revenueChange / previous.netRevenue) * 100 : 0;
-            const revenueYoY = lastYear ? ((current.netRevenue - lastYear.netRevenue) / lastYear.netRevenue) * 100 : null;
+            if (revenueGrowth < 10) {
+                recommendations.push("accelerate customer acquisition");
+            }
+            if (marginChange < -1) {
+                recommendations.push("address cost pressures");
+            }
+            if (opexGrowth > revenueGrowth * 1.2) {
+                recommendations.push("implement cost discipline");
+            }
+            if (ebitdaMargin < 10) {
+                recommendations.push("optimize unit economics");
+            }
             
-            insights.push({
-                title: 'Revenue Performance',
-                description: `Revenue ${revenuePercent >= 0 ? 'grew' : 'declined'} ${Math.abs(revenuePercent).toFixed(1)}% MoM${revenueYoY ? `, ${Math.abs(revenueYoY).toFixed(1)}% YoY` : ''}`
-            });
+            if (recommendations.length === 0) {
+                return "Strong performance across all metrics. Focus on scaling successful strategies and maintaining operational efficiency.";
+            }
             
-            // Margin insight
-            const currentGrossMargin = current.netRevenue !== 0 ? (current.grossProfit / current.netRevenue) * 100 : 0;
-            const previousGrossMargin = previous.netRevenue !== 0 ? (previous.grossProfit / previous.netRevenue) * 100 : 0;
-            const marginChange = currentGrossMargin - previousGrossMargin;
-            
-            insights.push({
-                title: 'Gross Margin Analysis',
-                description: `Gross margin ${marginChange >= 0 ? 'improved' : 'declined'} to ${currentGrossMargin.toFixed(1)}% (${marginChange >= 0 ? '+' : ''}${marginChange.toFixed(1)}pp)`
-            });
-            
-            // EBITDA insight
-            const currentEBITDAMargin = current.netRevenue !== 0 ? (current.ebitda / current.netRevenue) * 100 : 0;
-            const previousEBITDAMargin = previous.netRevenue !== 0 ? (previous.ebitda / previous.netRevenue) * 100 : 0;
-            const ebitdaMarginChange = currentEBITDAMargin - previousEBITDAMargin;
-            
-            insights.push({
-                title: 'Profitability Trends',
-                description: `EBITDA margin ${ebitdaMarginChange >= 0 ? 'expanded' : 'contracted'} to ${currentEBITDAMargin.toFixed(1)}% (${ebitdaMarginChange >= 0 ? '+' : ''}${ebitdaMarginChange.toFixed(1)}pp)`
-            });
-            
-            // Cost control insight
-            const opexChange = current.opex - previous.opex;
-            const opexPercent = previous.opex !== 0 ? (opexChange / previous.opex) * 100 : 0;
-            
-            insights.push({
-                title: 'Cost Management',
-                description: `Operating expenses ${opexPercent >= 0 ? 'increased' : 'decreased'} ${Math.abs(opexPercent).toFixed(1)}% to ${formatCurrency(current.opex)}`
-            });
-            
-            return insights;
+            return `Key focus areas: ${recommendations.join(", ")}. Consider quarterly OKRs targeting these priorities.`;
         }
         
         // Export functions
