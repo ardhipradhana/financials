@@ -16213,27 +16213,27 @@
                     <div class="summary-content">
                         
                         <div class="summary-item ${revenueGrowth > 15 ? 'positive' : revenueGrowth > 5 ? 'neutral' : 'negative'}">
-                            <h5>🚀 Growth Momentum</h5>
+                            <h5>Growth Momentum</h5>
                             <p>${revenueGrowth.toFixed(1)}% revenue growth ${revenueGrowth > 20 ? 'indicates strong market traction' : revenueGrowth > 10 ? 'shows healthy expansion' : 'suggests need for growth acceleration'}. ${revenueGrowth > 15 ? 'Consider scaling successful channels.' : 'Focus on customer acquisition and retention strategies.'}</p>
                         </div>
                         
                         <div class="summary-item ${grossMarginChange > 2 ? 'positive' : grossMarginChange > 0 ? 'neutral' : 'negative'}">
-                            <h5>💰 Margin Excellence</h5>
+                            <h5>Margin Excellence</h5>
                             <p>Gross margin ${grossMarginChange > 0 ? 'improved' : 'declined'} by ${Math.abs(grossMarginChange).toFixed(1)}pp to ${grossMarginCurrent.toFixed(1)}%. ${grossMarginCurrent > 70 ? 'Strong pricing power maintained.' : grossMarginCurrent > 50 ? 'Healthy margins with room for optimization.' : 'Focus on cost reduction and pricing strategy.'} ${grossMarginChange < -2 ? 'Investigate cost pressures immediately.' : ''}</p>
                         </div>
                         
                         <div class="summary-item ${opexGrowth < revenueGrowth ? 'positive' : opexGrowth < revenueGrowth * 1.5 ? 'neutral' : 'negative'}">
-                            <h5>⚡ Operational Leverage</h5>
+                            <h5>Operational Leverage</h5>
                             <p>${opexGrowth < revenueGrowth ? 'Positive operating leverage achieved' : 'Operating expenses growing faster than revenue'}. OPEX increased ${opexGrowth.toFixed(1)}% vs ${revenueGrowth.toFixed(1)}% revenue growth. ${opexGrowth > revenueGrowth * 1.2 ? 'Urgent cost discipline needed.' : opexGrowth < revenueGrowth ? 'Maintain this efficient scaling.' : 'Monitor expense growth closely.'}</p>
                         </div>
                         
                         <div class="summary-item ${ebitdaMarginCurrent > 15 ? 'positive' : ebitdaMarginCurrent > 5 ? 'neutral' : 'negative'}">
-                            <h5>📊 Profitability Outlook</h5>
+                            <h5>Profitability Outlook</h5>
                             <p>EBITDA margin of ${ebitdaMarginCurrent.toFixed(1)}% ${ebitdaMarginCurrent > ebitdaMarginPrevious ? 'expanded' : 'contracted'} ${Math.abs(ebitdaMarginCurrent - ebitdaMarginPrevious).toFixed(1)}pp. ${ebitdaMarginCurrent > 20 ? 'Excellent profitability profile.' : ebitdaMarginCurrent > 10 ? 'Solid path to profitability.' : ebitdaMarginCurrent > 0 ? 'Focus on margin expansion.' : 'Prioritize unit economics improvement.'}</p>
                         </div>
                         
                         <div class="summary-item">
-                            <h5>🎯 Strategic Priorities</h5>
+                            <h5>Strategic Priorities</h5>
                             <p>${generateStrategicRecommendations(revenueGrowth, grossMarginChange, opexGrowth, ebitdaMarginCurrent)}</p>
                         </div>
                         
@@ -16302,6 +16302,79 @@
             } else {
                 loading.style.display = 'none';
             }
+        }
+
+        // Add this to the revenue-opex-breakdown tab content
+        function renderRevenueOpexBreakdown() {
+            const { current, previous } = comparisonData;
+            if (!current || !previous) return;
+            
+            const breakdownContainer = document.getElementById('revenue-opex-breakdown-tab');
+            
+            breakdownContainer.innerHTML = `
+                <!-- Top Metrics Cards -->
+                <div class="breakdown-metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-header">Revenue Concentration</div>
+                        <div class="metric-value" id="revenueConcentration">0%</div>
+                        <div class="metric-subtitle">from top 3 sources</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-header">Avg Transaction</div>
+                        <div class="metric-value" id="avgTransaction">Rp 0</div>
+                        <div class="metric-subtitle">per sale</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-header">OPEX per Employee</div>
+                        <div class="metric-value" id="opexPerEmployee">Rp 0</div>
+                        <div class="metric-subtitle">monthly average</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-header">Cost Efficiency</div>
+                        <div class="metric-value" id="costEfficiency">0%</div>
+                        <div class="metric-subtitle">vs industry avg</div>
+                    </div>
+                </div>
+                
+                <!-- Revenue & OPEX Tables -->
+                <div class="breakdown-tables-container">
+                    <div class="breakdown-section">
+                        <h4>Revenue Breakdown</h4>
+                        <div id="revenueBreakdownTable"></div>
+                    </div>
+                    <div class="breakdown-section">
+                        <h4>OPEX Breakdown</h4>
+                        <div id="opexBreakdownTable"></div>
+                    </div>
+                </div>
+                
+                <!-- Key Insights -->
+                <div class="breakdown-insights">
+                    <h4><i class="fas fa-lightbulb"></i> Key Insights & Recommendations</h4>
+                    <div class="insights-grid">
+                        <div class="insight-item positive">
+                            <div class="insight-icon">📈</div>
+                            <div class="insight-content">
+                                <h5>Revenue Optimization</h5>
+                                <p id="revenueInsight">Analysis shows potential for revenue diversification in Q4</p>
+                            </div>
+                        </div>
+                        <div class="insight-item negative">
+                            <div class="insight-icon">✂️</div>
+                            <div class="insight-content">
+                                <h5>Cost Reduction</h5>
+                                <p id="costInsight">Marketing expenses can be optimized by 15% without impact</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Calculate and populate the data
+            calculateBreakdownMetrics();
+            generateRevenueBreakdownTable();
+            generateOpexBreakdownTable();
+            generateBreakdownInsights();
         }
         
         // Initialize when reports section is accessed
