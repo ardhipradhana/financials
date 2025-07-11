@@ -16416,7 +16416,7 @@
             summaryContainer.innerHTML = `
                 <div class="executive-summary">
                     <div class="summary-header">
-                        <h4><i class="fas fa-chart-line"></i> Executive Summary</h4>
+                        <h4>Executive Summary</h4>
                     </div>
                     <div class="summary-content">
                         
@@ -16639,7 +16639,7 @@
                                 <th style="width: 18%;">Current</th>
                                 <th style="width: 18%;">Previous</th>
                                 <th style="width: 18%;">Change</th>
-                                <th style="width: 16%;">% of Total</th>
+                                <th style="width: 16%;">% Cont.</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -16702,7 +16702,7 @@
             if (revenueGrowth > 15) {
                 insightsHTML += `
                     <div class="ro-insight-card-full positive">
-                        <div class="ro-insight-icon-full">🚀</div>
+                        <div class="ro-insight-icon-full"></div>
                         <div class="ro-insight-content-full">
                             <div class="ro-insight-title-full">Strong Revenue Growth</div>
                             <div class="ro-insight-description-full">${revenueGrowth.toFixed(1)}% revenue growth indicates excellent market traction. Consider scaling successful revenue channels and expanding market reach to capitalize on this momentum.</div>
@@ -16712,7 +16712,7 @@
             } else if (revenueGrowth < 5) {
                 insightsHTML += `
                     <div class="ro-insight-card-full warning">
-                        <div class="ro-insight-icon-full">📈</div>
+                        <div class="ro-insight-icon-full"></div>
                         <div class="ro-insight-content-full">
                             <div class="ro-insight-title-full">Revenue Growth Opportunity</div>
                             <div class="ro-insight-description-full">Revenue growth of ${revenueGrowth.toFixed(1)}% suggests need for acceleration. Focus on customer acquisition, pricing optimization, and developing new revenue streams.</div>
@@ -16722,7 +16722,7 @@
             } else {
                 insightsHTML += `
                     <div class="ro-insight-card-full positive">
-                        <div class="ro-insight-icon-full">📊</div>
+                        <div class="ro-insight-icon-full"></div>
                         <div class="ro-insight-content-full">
                             <div class="ro-insight-title-full">Steady Revenue Growth</div>
                             <div class="ro-insight-description-full">${revenueGrowth.toFixed(1)}% revenue growth shows healthy business expansion. Maintain current strategies while exploring new growth opportunities.</div>
@@ -16735,7 +16735,7 @@
             if (opexGrowth > revenueGrowth + 10) {
                 insightsHTML += `
                     <div class="ro-insight-card-full negative">
-                        <div class="ro-insight-icon-full">✂️</div>
+                        <div class="ro-insight-icon-full">✂</div>
                         <div class="ro-insight-content-full">
                             <div class="ro-insight-title-full">Cost Discipline Needed</div>
                             <div class="ro-insight-description-full">OPEX grew ${opexGrowth.toFixed(1)}% vs ${revenueGrowth.toFixed(1)}% revenue growth. Implement immediate cost controls and review all non-essential expenses to improve operational efficiency.</div>
@@ -16745,7 +16745,7 @@
             } else if (opexGrowth < revenueGrowth) {
                 insightsHTML += `
                     <div class="ro-insight-card-full positive">
-                        <div class="ro-insight-icon-full">⚡</div>
+                        <div class="ro-insight-icon-full"></div>
                         <div class="ro-insight-content-full">
                             <div class="ro-insight-title-full">Operational Leverage Achieved</div>
                             <div class="ro-insight-description-full">Positive operating leverage with OPEX growing slower than revenue (${opexGrowth.toFixed(1)}% vs ${revenueGrowth.toFixed(1)}%). This efficient scaling model should be maintained and replicated.</div>
@@ -16755,7 +16755,7 @@
             } else {
                 insightsHTML += `
                     <div class="ro-insight-card-full warning">
-                        <div class="ro-insight-icon-full">⚖️</div>
+                        <div class="ro-insight-icon-full">⚖</div>
                         <div class="ro-insight-content-full">
                             <div class="ro-insight-title-full">Monitor Cost Growth</div>
                             <div class="ro-insight-description-full">OPEX growth (${opexGrowth.toFixed(1)}%) is tracking close to revenue growth. Monitor expenses closely to maintain profitability as you scale.</div>
@@ -16768,7 +16768,7 @@
             if (opexRatio > 50) {
                 insightsHTML += `
                     <div class="ro-insight-card-full negative">
-                        <div class="ro-insight-icon-full">🎯</div>
+                        <div class="ro-insight-icon-full"></div>
                         <div class="ro-insight-content-full">
                             <div class="ro-insight-title-full">High OPEX Ratio Alert</div>
                             <div class="ro-insight-description-full">OPEX ratio of ${opexRatio.toFixed(1)}% indicates room for optimization. Target reducing this to below 40% through automation, process improvements, and strategic cost management.</div>
@@ -16778,7 +16778,7 @@
             } else if (opexRatio < 25) {
                 insightsHTML += `
                     <div class="ro-insight-card-full positive">
-                        <div class="ro-insight-icon-full">💎</div>
+                        <div class="ro-insight-icon-full"></div>
                         <div class="ro-insight-content-full">
                             <div class="ro-insight-title-full">Excellent Cost Control</div>
                             <div class="ro-insight-description-full">OPEX ratio of ${opexRatio.toFixed(1)}% demonstrates exceptional operational efficiency. This lean cost structure provides competitive advantage and investment flexibility.</div>
@@ -16805,8 +16805,8 @@
             ];
             
             let tableHTML = `
-                <div class="table-container-full">
-                    <table class="financial-table-full">
+                <div class="ro-table-container-full">
+                    <table class="ro-financial-table-full">
                         <thead>
                             <tr>
                                 <th style="width: 30%;">OPEX Category</th>
@@ -16834,13 +16834,13 @@
                     
                     tableHTML += `
                         <tr>
-                            <td class="account-name-cell"><strong>${category.name}</strong></td>
-                            <td class="amount-cell">Rp ${(currentTotal / 1000000).toFixed(2)}M</td>
-                            <td class="amount-cell">Rp ${(previousTotal / 1000000).toFixed(2)}M</td>
-                            <td class="change-cell ${change >= 0 ? 'negative' : 'positive'}">
+                            <td class="ro-account-name-cell"><strong>${category.name}</strong></td>
+                            <td class="ro-amount-cell">Rp ${(currentTotal / 1000000).toFixed(2)}M</td>
+                            <td class="ro-amount-cell">Rp ${(previousTotal / 1000000).toFixed(2)}M</td>
+                            <td class="ro-change-cell ${change >= 0 ? 'negative' : 'positive'}">
                                 ${change >= 0 ? '+' : ''}${(change / 1000000).toFixed(2)}M
                             </td>
-                            <td class="percent-cell">${percentOfTotal.toFixed(1)}%</td>
+                            <td class="ro-percent-cell">${percentOfTotal.toFixed(1)}%</td>
                         </tr>
                     `;
                 }
@@ -16848,14 +16848,14 @@
             
             // Single total row that matches system total
             tableHTML += `
-                    <tr class="total-row-single">
-                        <td class="account-name-cell"><strong>Total OPEX</strong></td>
-                        <td class="amount-cell total-amount"><strong>Rp ${(current.opex / 1000000).toFixed(1)}M</strong></td>
-                        <td class="amount-cell total-amount"><strong>Rp ${(previous.opex / 1000000).toFixed(1)}M</strong></td>
-                        <td class="change-cell total-change ${(current.opex - previous.opex) >= 0 ? 'negative' : 'positive'}">
+                    <tr class="ro-total-row-single">
+                        <td class="ro-account-name-cell"><strong>Total OPEX</strong></td>
+                        <td class="ro-amount-cell ro-total-amount"><strong>Rp ${(current.opex / 1000000).toFixed(1)}M</strong></td>
+                        <td class="ro-amount-cell ro-total-amount"><strong>Rp ${(previous.opex / 1000000).toFixed(1)}M</strong></td>
+                        <td class="ro-change-cell ro-total-change ${(current.opex - previous.opex) >= 0 ? 'negative' : 'positive'}">
                             <strong>${(current.opex - previous.opex) >= 0 ? '+' : ''}${((current.opex - previous.opex) / 1000000).toFixed(1)}M</strong>
                         </td>
-                        <td class="percent-cell"><strong>100.0%</strong></td>
+                        <td class="ro-percent-cell"><strong>100.0%</strong></td>
                     </tr>
                 </tbody></table>
                 </div>
@@ -16883,7 +16883,7 @@
                             <th>Current Period</th>
                             <th>Previous Period</th>
                             <th>Change</th>
-                            <th>% of Total OPEX</th>
+                            <th>% Cont. OPEX</th>
                             <th>Vendor/Details</th>
                         </tr>
                     </thead>
