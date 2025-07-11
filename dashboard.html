@@ -5281,6 +5281,30 @@
             transform: translateY(-2px);
             box-shadow: 0 6px 16px rgba(251, 191, 36, 0.4);
         }
+
+        /* Revenue OPEX Breakdown - New unique classes only */
+        .insights-section-rodb {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+        
+        .table-footer {
+            background: #f8fafc;
+            border-top: 2px solid #e2e8f0;
+            font-weight: 600;
+        }
+        
+        .amount-positive {
+            color: #059669;
+        }
+        
+        .amount-negative {
+            color: #dc2626;
+        }
         
     </style>
 </head>
@@ -16369,69 +16393,124 @@
             const opexRatio = (current.opex / current.netRevenue) * 100;
             
             container.innerHTML = `
-                <!-- Top Metrics -->
+                <!-- Top Metrics - Using existing metrics-grid and metric-card -->
                 <div class="metrics-grid" style="margin-bottom: 2rem;">
-                    <div class="metric-card">
+                    <div class="metric-card enhanced-card">
+                        <div class="card-accent accent-blue"></div>
                         <div class="metric-header">
-                            <div class="metric-title">Total Revenue</div>
-                            <div class="metric-icon icon-revenue"><i class="fas fa-chart-line"></i></div>
-                        </div>
-                        <div class="metric-value-large">Rp ${(current.netRevenue / 1000000).toFixed(1)}M</div>
-                        <div class="metric-change ${revenueGrowth >= 0 ? 'positive' : 'negative'}">
-                            ${revenueGrowth >= 0 ? '+' : ''}${revenueGrowth.toFixed(1)}% vs previous period
+                            <div class="card-main">
+                                <div class="metric-title-group">
+                                    <div class="metric-title">Total Revenue</div>
+                                    <div class="metric-subtitle">Current Period</div>
+                                </div>
+                                <div class="metric-primary-group">
+                                    <span class="metric-value-large">Rp ${(current.netRevenue / 1000000).toFixed(1)}M</span>
+                                    <div class="metric-breakdown">
+                                        <span class="breakdown-item">
+                                            <span class="breakdown-label">Change: </span>
+                                            <span class="breakdown-value ${revenueGrowth >= 0 ? 'positive' : 'negative'}">
+                                                ${revenueGrowth >= 0 ? '+' : ''}${revenueGrowth.toFixed(1)}%
+                                            </span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     
-                    <div class="metric-card">
+                    <div class="metric-card enhanced-card">
+                        <div class="card-accent accent-orange"></div>
                         <div class="metric-header">
-                            <div class="metric-title">Total OPEX</div>
-                            <div class="metric-icon icon-opex"><i class="fas fa-chart-bar"></i></div>
-                        </div>
-                        <div class="metric-value-large">Rp ${(current.opex / 1000000).toFixed(1)}M</div>
-                        <div class="metric-change ${opexGrowth <= 0 ? 'positive' : 'negative'}">
-                            ${opexGrowth >= 0 ? '+' : ''}${opexGrowth.toFixed(1)}% vs previous period
+                            <div class="card-main">
+                                <div class="metric-title-group">
+                                    <div class="metric-title">Total OPEX</div>
+                                    <div class="metric-subtitle">Operating Expenses</div>
+                                </div>
+                                <div class="metric-primary-group">
+                                    <span class="metric-value-large">Rp ${(current.opex / 1000000).toFixed(1)}M</span>
+                                    <div class="metric-breakdown">
+                                        <span class="breakdown-item">
+                                            <span class="breakdown-label">Change: </span>
+                                            <span class="breakdown-value ${opexGrowth <= 0 ? 'positive' : 'negative'}">
+                                                ${opexGrowth >= 0 ? '+' : ''}${opexGrowth.toFixed(1)}%
+                                            </span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     
-                    <div class="metric-card">
+                    <div class="metric-card enhanced-card">
+                        <div class="card-accent accent-green"></div>
                         <div class="metric-header">
-                            <div class="metric-title">OPEX Ratio</div>
-                            <div class="metric-icon icon-ratio"><i class="fas fa-percentage"></i></div>
+                            <div class="card-main">
+                                <div class="metric-title-group">
+                                    <div class="metric-title">OPEX Ratio</div>
+                                    <div class="metric-subtitle">of Total Revenue</div>
+                                </div>
+                                <div class="metric-primary-group">
+                                    <span class="metric-value-large">${opexRatio.toFixed(1)}%</span>
+                                    <div class="metric-breakdown">
+                                        <span class="breakdown-item">
+                                            <span class="breakdown-label">Efficiency: </span>
+                                            <span class="breakdown-value">${opexRatio < 30 ? 'Good' : opexRatio < 50 ? 'Fair' : 'Poor'}</span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="metric-value-large">${opexRatio.toFixed(1)}%</div>
-                        <div class="metric-subtitle">of total revenue</div>
                     </div>
                 </div>
                 
-                <!-- Analysis Tables -->
-                <div class="breakdown-container">
-                    <div class="breakdown-panel">
-                        <div class="panel-header">
+                <!-- Analysis Tables - Using existing breakdown-analysis-grid -->
+                <div class="breakdown-analysis-grid">
+                    <div class="analysis-section-container">
+                        <div class="analysis-header">
                             <h4><i class="fas fa-chart-line"></i> Revenue Analysis</h4>
-                            <button class="btn btn-secondary btn-sm" onclick="exportRevenueBreakdown()">
+                            <button class="btn btn-secondary" onclick="exportRevenueBreakdown()">
                                 <i class="fas fa-download"></i> Export
                             </button>
                         </div>
-                        <div class="panel-subtitle">Distribution across income streams</div>
-                        <div id="revenueBreakdownTable"></div>
+                        <div class="analysis-chart-container">
+                            <div class="chart-header-simple">
+                                <p>Distribution across income streams</p>
+                            </div>
+                            <div id="revenueBreakdownTable"></div>
+                        </div>
                     </div>
                     
-                    <div class="breakdown-panel">
-                        <div class="panel-header">
+                    <div class="analysis-section-container">
+                        <div class="analysis-header">
                             <h4><i class="fas fa-chart-bar"></i> OPEX Analysis</h4>
-                            <button class="btn btn-secondary btn-sm" onclick="exportOpexBreakdown()">
+                            <button class="btn btn-secondary" onclick="exportOpexBreakdown()">
                                 <i class="fas fa-download"></i> Export
                             </button>
                         </div>
-                        <div class="panel-subtitle">Operating expenses by department</div>
-                        <div id="opexBreakdownTable"></div>
+                        <div class="analysis-chart-container">
+                            <div class="chart-header-simple">
+                                <p>Operating expenses by department</p>
+                            </div>
+                            <div id="opexBreakdownTable"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Insights Section - Using existing insights classes -->
+                <div class="insights-section-rodb">
+                    <div class="insights-header">
+                        <h4><i class="fas fa-lightbulb"></i> Key Insights & Recommendations</h4>
+                    </div>
+                    <div class="insights-grid" id="revenueOpexInsights">
+                        <!-- Insights will be populated here -->
                     </div>
                 </div>
             `;
             
-            // Generate tables
+            // Generate tables and insights
             generateRevenueBreakdownTable();
             generateOpexBreakdownTable();
+            generateRevenueOpexInsights();
         }
         
         function generateRevenueAnalysisTable() {
@@ -16451,7 +16530,7 @@
             ];
             
             let tableHTML = `
-                <table class="data-table">
+                <table class="financial-table">
                     <thead>
                         <tr>
                             <th>Revenue Source</th>
@@ -16464,20 +16543,28 @@
                     <tbody>
             `;
             
+            let totalCurrentCalculated = 0;
+            
             revenueAccounts.forEach(account => {
                 const currentAmount = getAccountBalance(current, account.code);
                 const previousAmount = getAccountBalance(previous, account.code);
-                const change = currentAmount - previousAmount;
-                const changePercent = previousAmount !== 0 ? (change / Math.abs(previousAmount)) * 100 : 0;
-                const percentOfTotal = (Math.abs(currentAmount) / current.netRevenue) * 100;
                 
-                if (currentAmount !== 0 || previousAmount !== 0) {
+                // For negative accounts (discounts, returns), show as negative values
+                const displayCurrentAmount = account.isNegative ? -Math.abs(currentAmount) : currentAmount;
+                const displayPreviousAmount = account.isNegative ? -Math.abs(previousAmount) : previousAmount;
+                
+                totalCurrentCalculated += displayCurrentAmount;
+                
+                const change = displayCurrentAmount - displayPreviousAmount;
+                const percentOfTotal = current.netRevenue > 0 ? (Math.abs(displayCurrentAmount) / current.netRevenue) * 100 : 0;
+                
+                if (displayCurrentAmount !== 0 || displayPreviousAmount !== 0) {
                     tableHTML += `
                         <tr>
                             <td><strong>${account.name}</strong></td>
-                            <td>Rp ${(currentAmount / 1000000).toFixed(2)}M</td>
-                            <td>Rp ${(previousAmount / 1000000).toFixed(2)}M</td>
-                            <td class="${change >= 0 ? 'positive' : 'negative'}">
+                            <td class="amount-positive">Rp ${(displayCurrentAmount / 1000000).toFixed(2)}M</td>
+                            <td class="amount-positive">Rp ${(displayPreviousAmount / 1000000).toFixed(2)}M</td>
+                            <td class="${change >= 0 ? 'amount-positive' : 'amount-negative'}">
                                 ${change >= 0 ? '+' : ''}${(change / 1000000).toFixed(2)}M
                             </td>
                             <td>${percentOfTotal.toFixed(1)}%</td>
@@ -16486,8 +16573,103 @@
                 }
             });
             
-            tableHTML += `</tbody></table>`;
+            // Add verification total row
+            tableHTML += `
+                    <tr class="table-footer">
+                        <td><strong>Calculated Total</strong></td>
+                        <td class="amount-positive"><strong>Rp ${(totalCurrentCalculated / 1000000).toFixed(2)}M</strong></td>
+                        <td><strong>-</strong></td>
+                        <td><strong>-</strong></td>
+                        <td><strong>100.0%</strong></td>
+                    </tr>
+                    <tr class="table-footer">
+                        <td><strong>System Total</strong></td>
+                        <td class="amount-positive"><strong>Rp ${(current.netRevenue / 1000000).toFixed(2)}M</strong></td>
+                        <td><strong>-</strong></td>
+                        <td><strong>-</strong></td>
+                        <td><strong>-</strong></td>
+                    </tr>
+                </tbody></table>
+            `;
+            
             document.getElementById('revenueBreakdownTable').innerHTML = tableHTML;
+            
+            // Log for debugging
+            console.log('Revenue breakdown verification:', {
+                calculatedTotal: totalCurrentCalculated,
+                systemTotal: current.netRevenue,
+                difference: Math.abs(totalCurrentCalculated - current.netRevenue)
+            });
+        }
+
+        function generateRevenueOpexInsights() {
+            const { current, previous } = comparisonData;
+            
+            const revenueGrowth = ((current.netRevenue - previous.netRevenue) / previous.netRevenue) * 100;
+            const opexGrowth = ((current.opex - previous.opex) / previous.opex) * 100;
+            const opexRatio = (current.opex / current.netRevenue) * 100;
+            
+            // Generate insights based on data
+            const insights = [];
+            
+            // Revenue insights
+            if (revenueGrowth > 15) {
+                insights.push({
+                    type: 'positive',
+                    icon: '🚀',
+                    title: 'Strong Revenue Growth',
+                    content: `${revenueGrowth.toFixed(1)}% revenue growth indicates excellent market traction. Consider scaling successful revenue channels and expanding market reach.`
+                });
+            } else if (revenueGrowth < 5) {
+                insights.push({
+                    type: 'negative',
+                    icon: '📈',
+                    title: 'Revenue Growth Opportunity',
+                    content: `Revenue growth of ${revenueGrowth.toFixed(1)}% suggests need for acceleration. Focus on customer acquisition, pricing optimization, and new revenue streams.`
+                });
+            }
+            
+            // OPEX insights
+            if (opexGrowth > revenueGrowth + 10) {
+                insights.push({
+                    type: 'negative',
+                    icon: '✂️',
+                    title: 'Cost Discipline Needed',
+                    content: `OPEX grew ${opexGrowth.toFixed(1)}% vs ${revenueGrowth.toFixed(1)}% revenue growth. Implement cost controls and improve operational efficiency.`
+                });
+            } else if (opexGrowth < revenueGrowth) {
+                insights.push({
+                    type: 'positive',
+                    icon: '⚡',
+                    title: 'Operational Leverage',
+                    content: `Positive operating leverage achieved with OPEX growing slower than revenue. Maintain this efficient scaling model.`
+                });
+            }
+            
+            // OPEX ratio insights
+            if (opexRatio > 40) {
+                insights.push({
+                    type: 'warning',
+                    icon: '⚖️',
+                    title: 'High OPEX Ratio',
+                    content: `OPEX ratio of ${opexRatio.toFixed(1)}% is elevated. Review non-essential expenses and optimize cost structure for better profitability.`
+                });
+            }
+            
+            let insightsHTML = '';
+            insights.forEach(insight => {
+                insightsHTML += `
+                    <div class="insight-card ${insight.type}">
+                        <div class="insight-icon">${insight.icon}</div>
+                        <div class="insight-content">
+                            <div class="insight-title">${insight.title}</div>
+                            <div class="insight-description">${insight.content}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            document.getElementById('revenueOpexInsights').innerHTML = insightsHTML;
         }
         
         function generateOpexAnalysisTable() {
