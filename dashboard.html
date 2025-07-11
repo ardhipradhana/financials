@@ -13180,7 +13180,7 @@
                     const { data: { user } } = await supabase.auth.getUser();
                     const userId = user?.id;
                     
-                    const transactionsWithUser = validTransactions.map(transaction => ({
+                    const transactionsWithUser = newTransactions.map(transaction => ({  // CHANGED FROM validTransactions
                         ...transaction,
                         user_id: userId
                     }));
@@ -14656,6 +14656,88 @@
                 return 'Critical financial distress. Immediate professional financial consultation recommended. Consider debt restructuring or capital injection.';
             }
         }
+
+        // Real waterfall impact calculation functions
+        function calculateRealWaterfallImpacts(currentPeriodData, previousPeriodData) {
+            const impacts = {
+                revenue: calculateRevenueImpacts(currentPeriodData, previousPeriodData),
+                cogs: calculateCogsImpacts(currentPeriodData, previousPeriodData),
+                opex: calculateOpexImpacts(currentPeriodData, previousPeriodData)
+            };
+            return impacts;
+        }
+        
+        function calculateRevenueImpacts(current, previous) {
+            const impacts = {
+                salesRevenue: getAccountChange(current, previous, 4010),
+                serviceRevenue: getAccountChange(current, previous, 4020),
+                otherIncome: getAccountChange(current, previous, 4050),
+                salesDiscounts: getAccountChange(current, previous, 4060) * -1, // Negative impact
+                returnsAllowances: getAccountChange(current, previous, 4070) * -1, // Negative impact
+                interestIncome: getAccountChange(current, previous, 4030)
+            };
+            return impacts;
+        }
+        
+        function calculateCogsImpacts(current, previous) {
+            const impacts = {
+                directCogs: getAccountChange(current, previous, 5010),
+                purchaseDiscounts: getAccountChange(current, previous, 5020) * -1, // Savings
+                freightIn: getAccountChange(current, previous, 5030),
+                directLabor: getAccountRangeChange(current, previous, 5100, 5130)
+            };
+            return impacts;
+        }
+        
+        function calculateOpexImpacts(current, previous) {
+            const impacts = {
+                facilities: getAccountRangeChange(current, previous, 5200, 5250),
+                marketing: getAccountRangeChange(current, previous, 5300, 5330),
+                professional: getAccountRangeChange(current, previous, 5400, 5430),
+                operations: getAccountRangeChange(current, previous, 5500, 5999)
+            };
+            return impacts;
+        }
+        
+        function getAccountChange(currentData, previousData, accountCode) {
+            const current = getAccountBalance(currentData, accountCode);
+            const previous = getAccountBalance(previousData, accountCode);
+            return current - previous;
+        }
+        
+        function getAccountRangeChange(currentData, previousData, startCode, endCode) {
+            let currentTotal = 0;
+            let previousTotal = 0;
+            
+            for (let code = startCode; code <= endCode; code++) {
+                currentTotal += getAccountBalance(currentData, code);
+                previousTotal += getAccountBalance(previousData, code);
+            }
+            
+            return currentTotal - previousTotal;
+        }
+        
+        function getAccountBalance(periodData, accountCode) {
+            if (!periodData || !periodData.transactions) return 0;
+            
+            return periodData.transactions
+                .filter(t => parseInt(t.account_code) === accountCode)
+                .reduce((sum, t) => {
+                    const debit = parseFloat(t.debit || 0);
+                    const credit = parseFloat(t.credit || 0);
+                    
+                    // For revenue accounts (4000s), credits are positive
+                    if (accountCode >= 4000 && accountCode < 5000) {
+                        return sum + (credit - debit);
+                    }
+                    // For expense accounts (5000s), debits are positive
+                    else if (accountCode >= 5000) {
+                        return sum + (debit - credit);
+                    }
+                    
+                    return sum + (debit - credit);
+                }, 0);
+        }
         
         // Helper functions for period-based calculations
         function calculatePeriodExpenses(period) {
@@ -15244,11 +15326,25 @@
                     includeYoY ? fetchFinancialDataForComparisonPeriod(getLastYearPeriod(currentPeriod)) : null
                 ]);
                 
-                // Store global comparison data with period info
+                // Get detailed transactions for waterfall analysis
+                const currentPeriodTransactions = getTransactionsForPeriod(currentPeriod, periodType);
+                const previousPeriodTransactions = getTransactionsForPeriod(previousPeriod, periodType);
+                const lastYearTransactions = includeYoY ? getTransactionsForPeriod(getLastYearPeriod(currentPeriod), periodType) : null;
+                
+                // Store global comparison data with period info and transactions
                 comparisonData = {
-                    current: currentData,
-                    previous: previousData,
-                    lastYear: lastYearData,
+                    current: {
+                        ...currentData,
+                        transactions: currentPeriodTransactions
+                    },
+                    previous: {
+                        ...previousData,
+                        transactions: previousPeriodTransactions
+                    },
+                    lastYear: lastYearData ? {
+                        ...lastYearData,
+                        transactions: lastYearTransactions
+                    } : null,
                     // Add period information for header display
                     currentPeriod: currentPeriod,
                     previousPeriod: previousPeriod,
@@ -15258,7 +15354,7 @@
                     lastYearPeriodName: lastYearData ? formatPeriodName(getLastYearPeriod(currentPeriod), periodType) : null
                 };
                 
-                console.log('Comparison data prepared:', comparisonData);
+                console.log('Comparison data prepared with transactions:', comparisonData);
                 
                 renderComparisonTable();
                 renderWaterfallCharts();
@@ -15275,6 +15371,76 @@
             } finally {
                 showComparisonLoadingState(false);
             }
+        }
+        
+        // Helper function to get transactions for a specific period
+        function getTransactionsForPeriod(periodKey, periodType) {
+            if (!financialTransactions || financialTransactions.length === 0) {
+                console.log('No financial transactions available');
+                return [];
+            }
+            
+            // Parse the period key to get date range
+            let startDate, endDate;
+            
+            if (periodType === 'monthly') {
+                // Format: "2024-12" or "Dec 2024"
+                let year, month;
+                
+                if (periodKey.includes('-')) {
+                    [year, month] = periodKey.split('-');
+                    month = parseInt(month);
+                } else {
+                    // Parse "Dec 2024" format
+                    const parts = periodKey.split(' ');
+                    year = parseInt(parts[1]);
+                    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                                     'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                    month = monthNames.indexOf(parts[0]) + 1;
+                }
+                
+                startDate = new Date(year, month - 1, 1);
+                endDate = new Date(year, month, 0); // Last day of month
+                
+            } else if (periodType === 'quarterly') {
+                // Format: "Q1 2024", "Q2 2024", etc.
+                const parts = periodKey.split(' ');
+                const quarter = parseInt(parts[0].replace('Q', ''));
+                const year = parseInt(parts[1]);
+                
+                const quarterMonth = (quarter - 1) * 3;
+                startDate = new Date(year, quarterMonth, 1);
+                endDate = new Date(year, quarterMonth + 3, 0);
+                
+            } else if (periodType === 'yearly') {
+                // Format: "2024"
+                const year = parseInt(periodKey);
+                startDate = new Date(year, 0, 1);
+                endDate = new Date(year, 11, 31);
+                
+            } else {
+                // Custom period - assume periodKey is in a date format
+                // You may need to adjust this based on your custom period format
+                console.warn('Custom period filtering not fully implemented for:', periodKey);
+                return financialTransactions;
+            }
+            
+            console.log(`Filtering transactions for period ${periodKey}:`, {
+                startDate: startDate.toISOString(),
+                endDate: endDate.toISOString()
+            });
+            
+            // Filter transactions by date range
+            const filteredTransactions = financialTransactions.filter(transaction => {
+                if (!transaction.transaction_date) return false;
+                
+                const transactionDate = new Date(transaction.transaction_date);
+                return transactionDate >= startDate && transactionDate <= endDate;
+            });
+            
+            console.log(`Found ${filteredTransactions.length} transactions for period ${periodKey}`);
+            
+            return filteredTransactions;
         }
         
         // Get last year period
@@ -15694,52 +15860,27 @@
         
         // Revenue Bridge Analysis
         function renderRevenueWaterfallChart() {
-            console.log('=== RENDERING D3 REVENUE WATERFALL ===');
             const { current, previous } = comparisonData;
             
-            // Debug the actual data
-            console.log('Current data:', current);
-            console.log('Previous data:', previous);
-            console.log('Current netRevenue:', current?.netRevenue);
-            console.log('Previous netRevenue:', previous?.netRevenue);
-            
-            if (!current) {
-                console.log('ERROR: No current data');
-                showNoDataMessage('revenueWaterfallChart', 'No current data available');
+            if (!current || !previous) {
+                showNoDataMessage('revenueWaterfallChart', 'No comparison data available');
                 return;
             }
             
-            if (!previous) {
-                console.log('ERROR: No previous data');
-                showNoDataMessage('revenueWaterfallChart', 'No previous data available');
-                return;
-            }
-            
-            if (current.netRevenue === 0) {
-                console.log('ERROR: Current netRevenue is 0');
-                showNoDataMessage('revenueWaterfallChart', 'Insufficient revenue data for analysis');
-                return;
-            }
-            
-            console.log('✅ Data validation passed, creating waterfall data...');
-            
-            const revenueChange = current.netRevenue - previous.netRevenue;
-            console.log('Revenue change:', revenueChange);
+            // Calculate real impacts
+            const impacts = calculateRealWaterfallImpacts(current, previous);
+            const revenueImpacts = impacts.revenue;
             
             const waterfallData = [
                 { label: 'Previous', value: previous.netRevenue, type: 'base' },
-                { label: 'New Customers', value: revenueChange * 0.25, type: revenueChange > 0 ? 'positive' : 'negative' },
-                { label: 'Growth', value: revenueChange * 0.20, type: revenueChange > 0 ? 'positive' : 'negative' },
-                { label: 'Pricing', value: revenueChange * 0.15, type: revenueChange > 0 ? 'positive' : 'negative' },
-                { label: 'Mix', value: revenueChange * 0.10, type: revenueChange > 0 ? 'positive' : 'negative' },
-                { label: 'Expansion', value: revenueChange * 0.15, type: revenueChange > 0 ? 'positive' : 'negative' },
-                { label: 'Churn', value: revenueChange * -0.10, type: 'negative' },
-                { label: 'Seasonal', value: revenueChange * 0.25, type: revenueChange > 0 ? 'positive' : 'negative' },
+                { label: 'Sales Revenue', value: revenueImpacts.salesRevenue, type: revenueImpacts.salesRevenue >= 0 ? 'positive' : 'negative' },
+                { label: 'Service Revenue', value: revenueImpacts.serviceRevenue, type: revenueImpacts.serviceRevenue >= 0 ? 'positive' : 'negative' },
+                { label: 'Other Income', value: revenueImpacts.otherIncome, type: revenueImpacts.otherIncome >= 0 ? 'positive' : 'negative' },
+                { label: 'Interest Income', value: revenueImpacts.interestIncome, type: revenueImpacts.interestIncome >= 0 ? 'positive' : 'negative' },
+                { label: 'Sales Discounts', value: revenueImpacts.salesDiscounts, type: 'negative' },
+                { label: 'Returns & Allowances', value: revenueImpacts.returnsAllowances, type: 'negative' },
                 { label: 'Current', value: current.netRevenue, type: 'total' }
             ];
-            
-            console.log('Waterfall data:', waterfallData);
-            console.log('Calling createWaterfallChart...');
             
             createWaterfallChart('revenueWaterfallChart', waterfallData, 'Revenue Bridge Analysis');
         }
@@ -15747,22 +15888,25 @@
         function renderGrossProfitWaterfallChart() {
             const { current, previous } = comparisonData;
             
-            if (current.grossProfit === 0) {
-                showNoDataMessage('grossProfitWaterfallChart', 'Insufficient gross profit data for analysis');
+            if (!current || !previous) {
+                showNoDataMessage('grossProfitWaterfallChart', 'No comparison data available');
                 return;
             }
             
-            const revenueImpact = current.netRevenue - previous.netRevenue;
-            const cogsImpact = -(current.cogs - previous.cogs);
+            const impacts = calculateRealWaterfallImpacts(current, previous);
+            const revenueImpacts = impacts.revenue;
+            const cogsImpacts = impacts.cogs;
+            
+            // Revenue impact (positive)
+            const totalRevenueImpact = Object.values(revenueImpacts).reduce((sum, val) => sum + val, 0);
             
             const waterfallData = [
                 { label: 'Previous', value: previous.grossProfit, type: 'base' },
-                { label: 'Revenue Volume', value: revenueImpact * 0.6, type: revenueImpact > 0 ? 'positive' : 'negative' },
-                { label: 'Revenue Price', value: revenueImpact * 0.4, type: revenueImpact > 0 ? 'positive' : 'negative' },
-                { label: 'Material Cost', value: cogsImpact * 0.4, type: cogsImpact > 0 ? 'positive' : 'negative' },
-                { label: 'Labor Cost', value: cogsImpact * 0.3, type: cogsImpact > 0 ? 'positive' : 'negative' },
-                { label: 'Overhead', value: cogsImpact * 0.2, type: cogsImpact > 0 ? 'positive' : 'negative' },
-                { label: 'Efficiency', value: cogsImpact * 0.1, type: cogsImpact > 0 ? 'positive' : 'negative' },
+                { label: 'Revenue Growth', value: totalRevenueImpact, type: totalRevenueImpact >= 0 ? 'positive' : 'negative' },
+                { label: 'Direct COGS', value: -cogsImpacts.directCogs, type: cogsImpacts.directCogs <= 0 ? 'positive' : 'negative' },
+                { label: 'Purchase Savings', value: cogsImpacts.purchaseDiscounts, type: 'positive' },
+                { label: 'Freight Costs', value: -cogsImpacts.freightIn, type: cogsImpacts.freightIn <= 0 ? 'positive' : 'negative' },
+                { label: 'Direct Labor', value: -cogsImpacts.directLabor, type: cogsImpacts.directLabor <= 0 ? 'positive' : 'negative' },
                 { label: 'Current', value: current.grossProfit, type: 'total' }
             ];
             
@@ -15772,22 +15916,20 @@
         function renderOpexWaterfallChart() {
             const { current, previous } = comparisonData;
             
-            if (current.netRevenue === 0) {
-                showNoDataMessage('opexWaterfallChart', 'Insufficient data for analysis');
+            if (!current || !previous) {
+                showNoDataMessage('opexWaterfallChart', 'No comparison data available');
                 return;
             }
             
-            const opexChange = current.opex - previous.opex;
+            const impacts = calculateRealWaterfallImpacts(current, previous);
+            const opexImpacts = impacts.opex;
             
             const waterfallData = [
                 { label: 'Previous', value: previous.opex, type: 'base' },
-                { label: 'Salaries', value: opexChange * 0.30, type: 'negative' },
-                { label: 'Marketing', value: opexChange * 0.20, type: 'negative' },
-                { label: 'Office', value: opexChange * 0.15, type: 'negative' },
-                { label: 'Professional', value: opexChange * 0.10, type: 'negative' },
-                { label: 'Technology', value: opexChange * 0.10, type: 'negative' },
-                { label: 'Travel', value: opexChange * 0.08, type: 'negative' },
-                { label: 'Optimization', value: opexChange * -0.07, type: 'positive' },
+                { label: 'Facilities', value: opexImpacts.facilities, type: 'negative' },
+                { label: 'Marketing', value: opexImpacts.marketing, type: 'negative' },
+                { label: 'Professional Services', value: opexImpacts.professional, type: 'negative' },
+                { label: 'Operations', value: opexImpacts.operations, type: 'negative' },
                 { label: 'Current', value: current.opex, type: 'total' }
             ];
             
