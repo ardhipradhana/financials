@@ -15507,40 +15507,86 @@
 
         // Generate P&L comparison report
         async function generateComparisonReport() {
-            const currentPeriod = document.getElementById('currentPeriod').value;
-            const previousPeriod = document.getElementById('previousPeriod').value;
-            const includeYoY = document.getElementById('includeYoY').checked;
             const periodType = document.querySelector('input[name="periodType"]:checked')?.value || 'custom';
+            const includeYoY = document.getElementById('includeYoY').checked;
             
-            // Debug logging
+            let currentPeriod, previousPeriod;
+            
+            // Auto-calculate periods for MoM, QoQ, YoY
+            if (periodType === 'mom') {
+                const today = new Date();
+                const currentMonth = today.getMonth() + 1; // 1-based
+                const currentYear = today.getFullYear();
+                
+                currentPeriod = `${currentYear}-${String(currentMonth).padStart(2, '0')}`;
+                
+                // Previous month
+                let prevMonth = currentMonth - 1;
+                let prevYear = currentYear;
+                if (prevMonth === 0) {
+                    prevMonth = 12;
+                    prevYear = currentYear - 1;
+                }
+                previousPeriod = `${prevYear}-${String(prevMonth).padStart(2, '0')}`;
+                
+            } else if (periodType === 'qoq') {
+                const today = new Date();
+                const currentMonth = today.getMonth() + 1;
+                const currentYear = today.getFullYear();
+                
+                // Current quarter to date
+                const currentQuarter = Math.ceil(currentMonth / 3);
+                const currentQuarterStart = (currentQuarter - 1) * 3 + 1;
+                currentPeriod = `${currentYear}-${String(currentMonth).padStart(2, '0')}`;
+                
+                // Previous quarter (same month in previous quarter)
+                let prevQuarter = currentQuarter - 1;
+                let prevYear = currentYear;
+                if (prevQuarter === 0) {
+                    prevQuarter = 4;
+                    prevYear = currentYear - 1;
+                }
+                const prevQuarterMonth = (prevQuarter - 1) * 3 + (currentMonth - currentQuarterStart + 1);
+                previousPeriod = `${prevYear}-${String(prevQuarterMonth).padStart(2, '0')}`;
+                
+            } else if (periodType === 'yoy') {
+                const today = new Date();
+                const currentMonth = today.getMonth() + 1;
+                const currentYear = today.getFullYear();
+                
+                currentPeriod = `${currentYear}-${String(currentMonth).padStart(2, '0')}`;
+                previousPeriod = `${currentYear - 1}-${String(currentMonth).padStart(2, '0')}`;
+                
+            } else {
+                // Custom: use manually selected periods
+                currentPeriod = document.getElementById('currentPeriod').value;
+                previousPeriod = document.getElementById('previousPeriod').value;
+            }
+            
             console.log('Generating comparison report:', {
+                periodType,
                 currentPeriod,
                 previousPeriod,
-                periodType,
                 includeYoY
             });
             
             if (!currentPeriod || !previousPeriod) {
-                console.warn('Periods not selected:', { currentPeriod, previousPeriod });
+                console.warn('Periods not calculated:', { currentPeriod, previousPeriod });
                 return;
             }
             
             showComparisonLoadingState(true);
             
             try {
-                // Fetch data for all periods
-                const [currentData, previousData, lastYearData] = await Promise.all([
-                    fetchFinancialDataForComparisonPeriod(currentPeriod),
-                    fetchFinancialDataForComparisonPeriod(previousPeriod),
-                    includeYoY ? fetchFinancialDataForComparisonPeriod(getLastYearPeriod(currentPeriod)) : null
-                ]);
-                
                 // Get detailed transactions for waterfall analysis
-                const currentPeriodTransactions = getTransactionsForPeriod(currentPeriod, periodType);
-                const previousPeriodTransactions = getTransactionsForPeriod(previousPeriod, periodType);
-                const lastYearTransactions = includeYoY ? getTransactionsForPeriod(getLastYearPeriod(currentPeriod), periodType) : null;
+                const currentPeriodTransactions = getTransactionsForPeriodFixed(currentPeriod, periodType);
+                const previousPeriodTransactions = getTransactionsForPeriodFixed(previousPeriod, periodType);
                 
-                // Store global comparison data with period info and transactions
+                // Calculate financial data from transactions
+                const currentData = calculateFinancialDataFromTransactions(currentPeriodTransactions, currentPeriod, periodType);
+                const previousData = calculateFinancialDataFromTransactions(previousPeriodTransactions, previousPeriod, periodType);
+                
+                // Store global comparison data
                 comparisonData = {
                     current: {
                         ...currentData,
@@ -15550,26 +15596,19 @@
                         ...previousData,
                         transactions: previousPeriodTransactions
                     },
-                    lastYear: lastYearData ? {
-                        ...lastYearData,
-                        transactions: lastYearTransactions
-                    } : null,
-                    // Add period information for header display
                     currentPeriod: currentPeriod,
                     previousPeriod: previousPeriod,
                     periodType: periodType,
                     currentPeriodName: formatPeriodName(currentPeriod, periodType),
-                    previousPeriodName: formatPeriodName(previousPeriod, periodType),
-                    lastYearPeriodName: lastYearData ? formatPeriodName(getLastYearPeriod(currentPeriod), periodType) : null
+                    previousPeriodName: formatPeriodName(previousPeriod, periodType)
                 };
                 
-                console.log('Comparison data prepared with transactions:', comparisonData);
+                console.log('Comparison data prepared:', comparisonData);
                 
                 renderComparisonTable();
                 renderWaterfallCharts();
                 renderExecutiveSummary();
                 
-                // Show charts and summary
                 document.getElementById('waterfallChartsSection').style.display = 'block';
                 document.getElementById('executiveSummary').style.display = 'block';
                 
@@ -15580,6 +15619,94 @@
             } finally {
                 showComparisonLoadingState(false);
             }
+        }
+
+        function getTransactionsForPeriodFixed(periodKey, periodType) {
+            if (!financialTransactions || financialTransactions.length === 0) {
+                console.log('No financial transactions available');
+                return [];
+            }
+            
+            const [year, month] = periodKey.split('-').map(Number);
+            let startDate, endDate;
+            
+            if (periodType === 'mom') {
+                // Month-over-Month: Just the specific month
+                startDate = new Date(year, month - 1, 1);
+                endDate = new Date(year, month, 0);
+                
+            } else if (periodType === 'qoq') {
+                // Quarter-to-Date: From start of quarter to end of specified month
+                const quarterStartMonth = Math.floor((month - 1) / 3) * 3;
+                startDate = new Date(year, quarterStartMonth, 1);
+                endDate = new Date(year, month, 0);
+                
+            } else if (periodType === 'yoy') {
+                // Year-to-Date: From January to end of specified month
+                startDate = new Date(year, 0, 1);
+                endDate = new Date(year, month, 0);
+                
+            } else {
+                // Custom: Just the specific month
+                startDate = new Date(year, month - 1, 1);
+                endDate = new Date(year, month, 0);
+            }
+            
+            console.log(`Filtering transactions for ${periodKey} (${periodType}):`, {
+                startDate: startDate.toISOString().split('T')[0],
+                endDate: endDate.toISOString().split('T')[0]
+            });
+            
+            const filteredTransactions = financialTransactions.filter(transaction => {
+                if (!transaction.transaction_date) return false;
+                
+                const transactionDate = new Date(transaction.transaction_date);
+                return transactionDate >= startDate && transactionDate <= endDate;
+            });
+            
+            console.log(`Found ${filteredTransactions.length} transactions for period ${periodKey}`);
+            return filteredTransactions;
+        }
+
+        function calculateFinancialDataFromTransactions(transactions, period, periodType) {
+            const data = {
+                grossRevenue: 0,
+                discounts: 0,
+                netRevenue: 0,
+                cogs: 0,
+                grossProfit: 0,
+                opex: 0,
+                ebitda: 0
+            };
+            
+            transactions.forEach(transaction => {
+                const accountCode = parseInt(transaction.account_code) || 0;
+                const debit = parseFloat(transaction.debit_amount || transaction.Debit || 0);
+                const credit = parseFloat(transaction.credit_amount || transaction.Credit || 0);
+                
+                if (accountCode >= 4000 && accountCode < 5000) {
+                    // Revenue accounts
+                    if (accountCode === 4060 || accountCode === 4070) {
+                        // Discounts and returns (negative revenue)
+                        data.discounts += debit;
+                    } else {
+                        // Regular revenue
+                        data.grossRevenue += credit;
+                    }
+                } else if (accountCode >= 5000 && accountCode < 5200) {
+                    // COGS accounts
+                    data.cogs += debit;
+                } else if (accountCode >= 5200) {
+                    // OPEX accounts
+                    data.opex += debit;
+                }
+            });
+            
+            data.netRevenue = data.grossRevenue - data.discounts;
+            data.grossProfit = data.netRevenue - data.cogs;
+            data.ebitda = data.grossProfit - data.opex;
+            
+            return data;
         }
         
         // Helper function to get transactions for a specific period
