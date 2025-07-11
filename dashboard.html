@@ -5479,6 +5479,41 @@
         
         #trendingChart {
             max-height: 400px;
+            width: 100% !important;
+        }
+
+        .trending-chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 1.5rem 2rem 1rem;
+        }
+        
+        .trending-title-section h4 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin: 0 0 0.25rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .trending-subtitle {
+            color: #64748b;
+            font-size: 0.875rem;
+            margin: 0;
+        }
+        
+        .trending-chart-divider {
+            height: 1px;
+            background: linear-gradient(90deg, #e2e8f0 0%, #cbd5e1 50%, #e2e8f0 100%);
+            margin: 0 2rem;
+        }
+        
+        .trending-chart-container {
+            padding: 2rem;
+            height: 450px;
         }
         
     </style>
@@ -7160,17 +7195,18 @@
                     
                         <!-- Main Trending Chart -->
                         <div class="ro-analysis-panel-full">
-                            <div class="analysis-header">
-                                <h4><i class="fas fa-chart-line"></i> Revenue & OPEX Trending Analysis</h4>
+                            <div class="trending-chart-header">
+                                <div class="trending-title-section">
+                                    <h4><i class="fas fa-chart-line"></i> Revenue & OPEX Trending Analysis</h4>
+                                    <p class="trending-subtitle">Historical performance with current month projection</p>
+                                </div>
                                 <button class="btn btn-secondary" onclick="exportTrendingChart()">
                                     <i class="fas fa-download"></i> Export
                                 </button>
                             </div>
-                            <div class="ro-analysis-content-full">
-                                <p class="ro-analysis-subtitle">Historical performance with current month projection</p>
-                                <div class="trending-chart-container">
-                                    <canvas id="trendingChart" width="800" height="400"></canvas>
-                                </div>
+                            <div class="trending-chart-divider"></div>
+                            <div class="trending-chart-container">
+                                <canvas id="trendingChart" width="800" height="400"></canvas>
                             </div>
                         </div>
                     
@@ -17372,23 +17408,25 @@
                         data: data.revenue,
                         backgroundColor: data.periods.map((period, index) => {
                             if (index === data.periods.length - 1) {
-                                // Current month - different color
-                                return 'rgba(59, 130, 246, 0.6)';
+                                // Current month - different color (blue with transparency)
+                                return 'rgba(59, 130, 246, 0.7)';
                             }
-                            return 'rgba(16, 185, 129, 0.6)';
+                            return 'rgba(16, 185, 129, 0.7)';
                         }),
-                        borderColor: 'rgba(16, 185, 129, 1)',
-                        borderWidth: 1,
-                        yAxisID: 'y',
+                        borderWidth: 0, // Remove borders
                         type: 'bar'
                     },
                     {
                         label: 'OPEX (Millions)',
                         data: data.opex,
-                        backgroundColor: 'rgba(239, 68, 68, 0.6)',
-                        borderColor: 'rgba(239, 68, 68, 1)',
-                        borderWidth: 1,
-                        yAxisID: 'y1',
+                        backgroundColor: data.periods.map((period, index) => {
+                            if (index === data.periods.length - 1) {
+                                // Current month - different color (red with transparency)
+                                return 'rgba(239, 68, 68, 0.7)';
+                            }
+                            return 'rgba(239, 68, 68, 0.6)';
+                        }),
+                        borderWidth: 0, // Remove borders
                         type: 'bar'
                     },
                     {
@@ -17400,7 +17438,9 @@
                         type: 'line',
                         tension: 0.4,
                         pointRadius: 4,
-                        yAxisID: 'y'
+                        pointBackgroundColor: 'rgba(16, 185, 129, 1)',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2
                     },
                     {
                         label: 'OPEX Trend',
@@ -17411,7 +17451,9 @@
                         type: 'line',
                         tension: 0.4,
                         pointRadius: 4,
-                        yAxisID: 'y1'
+                        pointBackgroundColor: 'rgba(239, 68, 68, 1)',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2
                     }
                 ]
             };
@@ -17421,22 +17463,22 @@
                 data: chartData,
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
                     interaction: {
                         mode: 'index',
                         intersect: false,
                     },
                     plugins: {
-                        title: {
-                            display: true,
-                            text: 'Revenue & OPEX Trending Analysis',
-                            font: {
-                                size: 16,
-                                weight: 'bold'
-                            }
-                        },
                         legend: {
                             display: true,
-                            position: 'top'
+                            position: 'top',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 20,
+                                font: {
+                                    size: 12
+                                }
+                            }
                         },
                         tooltip: {
                             callbacks: {
@@ -17445,6 +17487,14 @@
                                         return '* Current month includes projection';
                                     }
                                     return '';
+                                },
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    label += 'Rp ' + context.parsed.y.toFixed(1) + 'M';
+                                    return label;
                                 }
                             }
                         }
@@ -17454,32 +17504,35 @@
                             display: true,
                             title: {
                                 display: true,
-                                text: 'Month (* = includes projection)'
+                                text: 'Month (* = includes projection)',
+                                font: {
+                                    size: 12,
+                                    weight: 'bold'
+                                }
+                            },
+                            grid: {
+                                display: false
                             }
                         },
                         y: {
-                            type: 'linear',
                             display: true,
-                            position: 'left',
                             title: {
                                 display: true,
-                                text: 'Revenue (Millions Rp)'
+                                text: 'Amount (Millions Rp)',
+                                font: {
+                                    size: 12,
+                                    weight: 'bold'
+                                }
                             },
                             grid: {
-                                drawOnChartArea: false,
+                                color: 'rgba(0, 0, 0, 0.1)',
+                                lineWidth: 1
                             },
-                        },
-                        y1: {
-                            type: 'linear',
-                            display: true,
-                            position: 'right',
-                            title: {
-                                display: true,
-                                text: 'OPEX (Millions Rp)'
-                            },
-                            grid: {
-                                drawOnChartArea: false,
-                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return 'Rp ' + value + 'M';
+                                }
+                            }
                         }
                     }
                 }
@@ -18094,6 +18147,9 @@
                 // Load content for specific tabs
                 if (tabName === 'revenue-opex-breakdown') {
                     renderRevenueOpexBreakdown();
+                } else if (tabName === 'trending-analysis') {
+                    // Auto-initialize trending analysis
+                    generateTrendingAnalysis();
                 }
             }
         }
