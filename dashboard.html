@@ -5471,6 +5471,15 @@
             line-height: 1.5;
             font-size: 0.875rem;
         }
+
+        .trending-chart-container {
+            padding: 2rem 0;
+            height: 450px;
+        }
+        
+        #trendingChart {
+            max-height: 400px;
+        }
         
     </style>
 </head>
@@ -7041,10 +7050,139 @@
                 
                     <!-- Tab Content 3: Trending Analysis -->
                     <div class="reports-tab-content" id="trending-analysis-tab" style="display: none;">
-                        <div class="feature-placeholder">
-                            <i class="placeholder-icon fas fa-trending-up"></i>
-                            <div class="placeholder-text">Trending Analysis</div>
-                            <div class="placeholder-subtext">Revenue and OPEX trends over time • Coming soon</div>
+                        <!-- Period Control -->
+                        <div class="period-selector-section">
+                            <div class="period-selector-card">
+                                <div class="selector-header">
+                                    <h4><i class="fas fa-chart-line"></i> Trending Period</h4>
+                                </div>
+                                <div class="period-options">
+                                    <div class="period-selectors">
+                                        <div class="period-group">
+                                            <label>Months to Include:</label>
+                                            <select id="trendingMonths" class="form-select" onchange="generateTrendingAnalysis()">
+                                                <option value="3">3 months + current</option>
+                                                <option value="6" selected>6 months + current</option>
+                                                <option value="12">12 months + current</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    
+                        <!-- Summary Cards -->
+                        <div class="metrics-grid" style="margin-bottom: 2rem;">
+                            <div class="metric-card enhanced-card">
+                                <div class="card-accent accent-blue"></div>
+                                <div class="metric-header">
+                                    <div class="card-main">
+                                        <div class="metric-title-group">
+                                            <div class="metric-title">Revenue Trend</div>
+                                            <div class="metric-subtitle">6-Month Growth</div>
+                                        </div>
+                                        <div class="metric-primary-group">
+                                            <span class="metric-value-large" id="revenueTrendValue">+0%</span>
+                                            <div class="metric-breakdown">
+                                                <span class="breakdown-item">
+                                                    <span class="breakdown-label">Velocity: </span>
+                                                    <span class="breakdown-value" id="revenueVelocity">Steady</span>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="metric-card enhanced-card">
+                                <div class="card-accent accent-orange"></div>
+                                <div class="metric-header">
+                                    <div class="card-main">
+                                        <div class="metric-title-group">
+                                            <div class="metric-title">OPEX Trend</div>
+                                            <div class="metric-subtitle">6-Month Change</div>
+                                        </div>
+                                        <div class="metric-primary-group">
+                                            <span class="metric-value-large" id="opexTrendValue">+0%</span>
+                                            <div class="metric-breakdown">
+                                                <span class="breakdown-item">
+                                                    <span class="breakdown-label">Efficiency: </span>
+                                                    <span class="breakdown-value" id="opexEfficiency">Stable</span>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="metric-card enhanced-card">
+                                <div class="card-accent accent-green"></div>
+                                <div class="metric-header">
+                                    <div class="card-main">
+                                        <div class="metric-title-group">
+                                            <div class="metric-title">Margin Trend</div>
+                                            <div class="metric-subtitle">Gross Margin</div>
+                                        </div>
+                                        <div class="metric-primary-group">
+                                            <span class="metric-value-large" id="marginTrendValue">0%</span>
+                                            <div class="metric-breakdown">
+                                                <span class="breakdown-item">
+                                                    <span class="breakdown-label">Direction: </span>
+                                                    <span class="breakdown-value" id="marginDirection">Stable</span>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="metric-card enhanced-card">
+                                <div class="card-accent accent-blue"></div>
+                                <div class="metric-header">
+                                    <div class="card-main">
+                                        <div class="metric-title-group">
+                                            <div class="metric-title">Current Month</div>
+                                            <div class="metric-subtitle">July 2025 Progress</div>
+                                        </div>
+                                        <div class="metric-primary-group">
+                                            <span class="metric-value-large" id="currentMonthProgress">0%</span>
+                                            <div class="metric-breakdown">
+                                                <span class="breakdown-item">
+                                                    <span class="breakdown-label">Projected: </span>
+                                                    <span class="breakdown-value" id="currentMonthProjected">Rp 0M</span>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    
+                        <!-- Main Trending Chart -->
+                        <div class="ro-analysis-panel-full">
+                            <div class="analysis-header">
+                                <h4><i class="fas fa-chart-line"></i> Revenue & OPEX Trending Analysis</h4>
+                                <button class="btn btn-secondary" onclick="exportTrendingChart()">
+                                    <i class="fas fa-download"></i> Export
+                                </button>
+                            </div>
+                            <div class="ro-analysis-content-full">
+                                <p class="ro-analysis-subtitle">Historical performance with current month projection</p>
+                                <div class="trending-chart-container">
+                                    <canvas id="trendingChart" width="800" height="400"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    
+                        <!-- Full Width Insights Section -->
+                        <div class="ro-insights-section-full">
+                            <div class="ro-insights-header-full">
+                                <i class="fas fa-chart-line"></i>
+                                <span>Trending Insights & Analysis</span>
+                            </div>
+                            <div class="ro-insights-content-full" id="trendingInsights">
+                                <!-- Insights will be populated here -->
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -17136,6 +17274,289 @@
             } else {
                 loading.style.display = 'none';
             }
+        }
+
+        function generateTrendingAnalysis() {
+            const monthsToInclude = parseInt(document.getElementById('trendingMonths').value) || 6;
+            
+            // Calculate the trending data
+            const trendingData = calculateTrendingData(monthsToInclude);
+            
+            // Update summary cards
+            updateTrendingSummaryCards(trendingData);
+            
+            // Render the main chart
+            renderTrendingChart(trendingData);
+            
+            // Generate insights
+            generateTrendingInsights(trendingData);
+        }
+        
+        function calculateTrendingData(monthsToInclude) {
+            const today = new Date();
+            const currentYear = today.getFullYear();
+            const currentMonth = today.getMonth() + 1;
+            
+            const trendingData = {
+                periods: [],
+                revenue: [],
+                opex: [],
+                margins: [],
+                currentMonthMTD: 0,
+                currentMonthProjected: 0
+            };
+            
+            // Calculate historical months
+            for (let i = monthsToInclude - 1; i >= 0; i--) {
+                let year = currentYear;
+                let month = currentMonth - i;
+                
+                if (month <= 0) {
+                    month += 12;
+                    year -= 1;
+                }
+                
+                const periodKey = `${year}-${String(month).padStart(2, '0')}`;
+                const monthName = new Date(year, month - 1).toLocaleDateString('en-US', { month: 'short' });
+                
+                // Get transactions for this period
+                const transactions = getTransactionsForPeriodFixed(periodKey, 'custom');
+                const financialData = calculateFinancialDataFromTransactions(transactions, periodKey, 'custom');
+                
+                trendingData.periods.push(monthName);
+                trendingData.revenue.push(financialData.netRevenue / 1000000); // Convert to millions
+                trendingData.opex.push(financialData.opex / 1000000);
+                trendingData.margins.push(financialData.netRevenue > 0 ? (financialData.grossProfit / financialData.netRevenue) * 100 : 0);
+            }
+            
+            // Add current month (split into MTD + Projected)
+            const currentPeriodKey = `${currentYear}-${String(currentMonth).padStart(2, '0')}`;
+            const currentTransactions = getTransactionsForPeriodFixed(currentPeriodKey, 'custom');
+            const currentData = calculateFinancialDataFromTransactions(currentTransactions, currentPeriodKey, 'custom');
+            
+            // Calculate MTD and projection
+            const daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
+            const daysPassed = today.getDate();
+            const progressPercent = daysPassed / daysInMonth;
+            
+            trendingData.currentMonthMTD = currentData.netRevenue / 1000000;
+            
+            // Simple projection based on daily average
+            if (progressPercent > 0) {
+                const projectedTotal = trendingData.currentMonthMTD / progressPercent;
+                trendingData.currentMonthProjected = projectedTotal - trendingData.currentMonthMTD;
+            }
+            
+            // Add current month to trending data
+            const currentMonthName = new Date(currentYear, currentMonth - 1).toLocaleDateString('en-US', { month: 'short' });
+            trendingData.periods.push(currentMonthName + '*');
+            trendingData.revenue.push(trendingData.currentMonthMTD + trendingData.currentMonthProjected);
+            trendingData.opex.push(currentData.opex / 1000000 / progressPercent); // Project OPEX too
+            
+            return trendingData;
+        }
+        
+        function renderTrendingChart(data) {
+            const ctx = document.getElementById('trendingChart').getContext('2d');
+            
+            // Destroy existing chart if it exists
+            if (window.trendingChartInstance) {
+                window.trendingChartInstance.destroy();
+            }
+            
+            const chartData = {
+                labels: data.periods,
+                datasets: [
+                    {
+                        label: 'Revenue (Millions)',
+                        data: data.revenue,
+                        backgroundColor: data.periods.map((period, index) => {
+                            if (index === data.periods.length - 1) {
+                                // Current month - different color
+                                return 'rgba(59, 130, 246, 0.6)';
+                            }
+                            return 'rgba(16, 185, 129, 0.6)';
+                        }),
+                        borderColor: 'rgba(16, 185, 129, 1)',
+                        borderWidth: 1,
+                        yAxisID: 'y',
+                        type: 'bar'
+                    },
+                    {
+                        label: 'OPEX (Millions)',
+                        data: data.opex,
+                        backgroundColor: 'rgba(239, 68, 68, 0.6)',
+                        borderColor: 'rgba(239, 68, 68, 1)',
+                        borderWidth: 1,
+                        yAxisID: 'y1',
+                        type: 'bar'
+                    },
+                    {
+                        label: 'Revenue Trend',
+                        data: data.revenue,
+                        borderColor: 'rgba(16, 185, 129, 1)',
+                        backgroundColor: 'transparent',
+                        borderWidth: 3,
+                        type: 'line',
+                        tension: 0.4,
+                        pointRadius: 4,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'OPEX Trend',
+                        data: data.opex,
+                        borderColor: 'rgba(239, 68, 68, 1)',
+                        backgroundColor: 'transparent',
+                        borderWidth: 3,
+                        type: 'line',
+                        tension: 0.4,
+                        pointRadius: 4,
+                        yAxisID: 'y1'
+                    }
+                ]
+            };
+            
+            const config = {
+                type: 'bar',
+                data: chartData,
+                options: {
+                    responsive: true,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Revenue & OPEX Trending Analysis',
+                            font: {
+                                size: 16,
+                                weight: 'bold'
+                            }
+                        },
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                afterLabel: function(context) {
+                                    if (context.label.includes('*')) {
+                                        return '* Current month includes projection';
+                                    }
+                                    return '';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Month (* = includes projection)'
+                            }
+                        },
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Revenue (Millions Rp)'
+                            },
+                            grid: {
+                                drawOnChartArea: false,
+                            },
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'OPEX (Millions Rp)'
+                            },
+                            grid: {
+                                drawOnChartArea: false,
+                            },
+                        }
+                    }
+                }
+            };
+            
+            window.trendingChartInstance = new Chart(ctx, config);
+        }
+        
+        function updateTrendingSummaryCards(data) {
+            if (data.revenue.length < 2) return;
+            
+            // Revenue trend (first vs last historical month)
+            const revenueStart = data.revenue[0];
+            const revenueEnd = data.revenue[data.revenue.length - 2]; // Exclude current month
+            const revenueTrend = revenueStart > 0 ? ((revenueEnd - revenueStart) / revenueStart) * 100 : 0;
+            
+            document.getElementById('revenueTrendValue').textContent = `${revenueTrend >= 0 ? '+' : ''}${revenueTrend.toFixed(1)}%`;
+            document.getElementById('revenueVelocity').textContent = revenueTrend > 10 ? 'Accelerating' : revenueTrend > 0 ? 'Growing' : 'Declining';
+            
+            // OPEX trend
+            const opexStart = data.opex[0];
+            const opexEnd = data.opex[data.opex.length - 2];
+            const opexTrend = opexStart > 0 ? ((opexEnd - opexStart) / opexStart) * 100 : 0;
+            
+            document.getElementById('opexTrendValue').textContent = `${opexTrend >= 0 ? '+' : ''}${opexTrend.toFixed(1)}%`;
+            document.getElementById('opexEfficiency').textContent = opexTrend < revenueTrend ? 'Improving' : 'Declining';
+            
+            // Current month progress
+            const progressPercent = (data.currentMonthMTD / (data.currentMonthMTD + data.currentMonthProjected)) * 100;
+            document.getElementById('currentMonthProgress').textContent = `${progressPercent.toFixed(0)}%`;
+            document.getElementById('currentMonthProjected').textContent = `Rp ${(data.currentMonthMTD + data.currentMonthProjected).toFixed(1)}M`;
+        }
+        
+        function generateTrendingInsights(data) {
+            let insightsHTML = '';
+            
+            // Revenue trend insight
+            const revenueGrowth = data.revenue.length > 1 ? ((data.revenue[data.revenue.length - 2] - data.revenue[0]) / data.revenue[0]) * 100 : 0;
+            
+            if (revenueGrowth > 20) {
+                insightsHTML += `
+                    <div class="ro-insight-card-full positive">
+                        <div class="ro-insight-icon-full">📈</div>
+                        <div class="ro-insight-content-full">
+                            <div class="ro-insight-title-full">Strong Growth Trajectory</div>
+                            <div class="ro-insight-description-full">Revenue has grown ${revenueGrowth.toFixed(1)}% over the trending period, indicating strong business momentum. This growth rate suggests successful market expansion and operational scaling.</div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Seasonality insight
+            const monthlyVariation = calculateVariation(data.revenue.slice(0, -1)); // Exclude current month
+            if (monthlyVariation > 25) {
+                insightsHTML += `
+                    <div class="ro-insight-card-full warning">
+                        <div class="ro-insight-icon-full">📊</div>
+                        <div class="ro-insight-content-full">
+                            <div class="ro-insight-title-full">Seasonal Patterns Detected</div>
+                            <div class="ro-insight-description-full">Revenue shows ${monthlyVariation.toFixed(1)}% monthly variation, suggesting seasonal patterns. Consider implementing more predictable revenue streams or adjusting forecasting models.</div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            document.getElementById('trendingInsights').innerHTML = insightsHTML;
+        }
+        
+        function calculateVariation(values) {
+            if (values.length === 0) return 0;
+            const mean = values.reduce((sum, val) => sum + val, 0) / values.length;
+            const variance = values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / values.length;
+            return (Math.sqrt(variance) / mean) * 100;
+        }
+        
+        function exportTrendingChart() {
+            alert('Trending chart export feature - to be implemented');
         }
 
         // Initialize when reports section is accessed
