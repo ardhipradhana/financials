@@ -23550,15 +23550,19 @@
             const totalRevenueCell = document.querySelector('#totalRevenue-total');
             const totalRevenueTotalCell = totalRevenueCell;
             
+            let revenueCMGR = 0; // Declare outside the if block
+            let revenueJan = 0;
+            let revenueDec = 0;
+            
             // Get first and last month revenue for CMGR calculation
             const totalRevenueRow = totalRevenueCell?.closest('tr');
             if (totalRevenueRow) {
                 const cells = totalRevenueRow.querySelectorAll('td');
-                const revenueJan = parseFloat(cells[1]?.textContent.replace(/,/g, '')) || 0;
-                const revenueDec = parseFloat(cells[12]?.textContent.replace(/,/g, '')) || 0;
+                revenueJan = parseFloat(cells[1]?.textContent.replace(/,/g, '')) || 0;
+                revenueDec = parseFloat(cells[12]?.textContent.replace(/,/g, '')) || 0;
                 
                 // Calculate CMGR (Compound Monthly Growth Rate)
-                const revenueCMGR = revenueJan > 0 ? (Math.pow(revenueDec / revenueJan, 1/11) - 1) * 100 : 0;
+                revenueCMGR = revenueJan > 0 ? (Math.pow(revenueDec / revenueJan, 1/11) - 1) * 100 : 0;
                 
                 document.getElementById('forecastRevenueGrowth').textContent = `${revenueCMGR > 0 ? '+' : ''}${revenueCMGR.toFixed(1)}%`;
                 document.getElementById('revenueGrowthDirection').textContent = 'CMGR (Jan-Dec)';
