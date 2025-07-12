@@ -21241,23 +21241,29 @@
                         cogs: 0,
                         opex: 0,
                         total_transactions: 0,
-                        is_complete_month: true // You can adjust this logic based on your needs
+                        is_complete_month: true
                     };
                 }
                 
                 const amount = parseFloat(transaction.amount) || 0;
+                const accountCode = parseInt(transaction.account_code) || 0; // Convert to number
                 
-                // Categorize based on account code
-                if (transaction.account_code?.startsWith('4')) {
-                    // Revenue accounts
-                    monthlyData[monthKey].revenue += amount;
-                } else if (transaction.account_code?.startsWith('5') && 
-                           (transaction.account_code.includes('5010') || transaction.account_code.includes('5020'))) {
-                    // COGS accounts
-                    monthlyData[monthKey].cogs += amount;
-                } else if (transaction.account_code?.startsWith('5')) {
-                    // Other expense accounts (OPEX)
-                    monthlyData[monthKey].opex += amount;
+                // Categorize based on account code ranges
+                if (accountCode >= 4000 && accountCode < 5000) {
+                    // Revenue accounts (4000-4999)
+                    // For revenue, we typically use credit amounts
+                    const revenueAmount = parseFloat(transaction.credit_amount || transaction.Credit || 0);
+                    monthlyData[monthKey].revenue += revenueAmount;
+                } else if (accountCode >= 5000 && accountCode < 5200) {
+                    // COGS accounts (5000-5199)
+                    // For expenses, we typically use debit amounts
+                    const cogsAmount = parseFloat(transaction.debit_amount || transaction.Debit || amount);
+                    monthlyData[monthKey].cogs += cogsAmount;
+                } else if (accountCode >= 5200) {
+                    // OPEX accounts (5200+)
+                    // For expenses, we typically use debit amounts
+                    const opexAmount = parseFloat(transaction.debit_amount || transaction.Debit || amount);
+                    monthlyData[monthKey].opex += opexAmount;
                 }
                 
                 monthlyData[monthKey].total_transactions++;
@@ -21272,7 +21278,10 @@
                 totalMonths: monthlyArray.length,
                 dateRange: monthlyArray.length > 0 ? 
                     `${monthlyArray[0].month} to ${monthlyArray[monthlyArray.length - 1].month}` : 'No data',
-                sampleMonth: monthlyArray[0]
+                sampleMonth: monthlyArray[0],
+                totalRevenue: monthlyArray.reduce((sum, m) => sum + m.revenue, 0),
+                totalCogs: monthlyArray.reduce((sum, m) => sum + m.cogs, 0),
+                totalOpex: monthlyArray.reduce((sum, m) => sum + m.opex, 0)
             });
             
             return monthlyArray;
