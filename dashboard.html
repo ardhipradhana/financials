@@ -6982,6 +6982,133 @@
             background: #fde047 !important;
             font-weight: 700;
         }
+
+        /* AI Insights Container Styling */
+        .ai-insights-container {
+            margin-top: 2rem;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-radius: 12px;
+            padding: 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .insights-header {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px 12px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .insights-header h4 {
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+        }
+        
+        .insights-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .confidence-badge {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            font-weight: 600;
+        }
+        
+        .forecast-date {
+            color: #cbd5e1;
+        }
+        
+        .insights-content {
+            padding: 1.5rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            .insights-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .insight-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.25rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            border: 1px solid #f1f5f9;
+            transition: all 0.2s ease;
+        }
+        
+        .insight-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .insight-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        
+        .insight-icon {
+            font-size: 1.1rem;
+        }
+        
+        .key-trends-card .insight-icon { color: #3b82f6; }
+        .risk-factors-card .insight-icon { color: #f59e0b; }
+        .opportunities-card .insight-icon { color: #10b981; }
+        .methodology-card .insight-icon { color: #8b5cf6; }
+        
+        .insight-header h5 {
+            margin: 0;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .insight-text {
+            color: #475569;
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+        
+        .insights-actions {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+        
+        .btn.btn-outline {
+            background: transparent;
+            border: 1px solid #cbd5e1;
+            color: #64748b;
+        }
+        
+        .btn.btn-outline:hover {
+            background: #f1f5f9;
+            border-color: #94a3b8;
+        }
         
     </style>
 </head>
@@ -8796,6 +8923,71 @@
                                     </tr>
                                 </tbody>
                             </table>
+                        </div>
+                    </div>
+
+                    <!-- AI Insights Section - Add this after the P&L forecast table -->
+                    <div class="ai-insights-container" id="aiInsightsContainer" style="display: none;">
+                        <div class="insights-header">
+                            <h4><i class="fas fa-brain"></i> AI Analysis & Insights</h4>
+                            <div class="insights-meta">
+                                <span class="confidence-badge" id="confidenceBadge">Confidence: 85%</span>
+                                <span class="forecast-date" id="forecastDate">Generated: Today</span>
+                            </div>
+                        </div>
+                        
+                        <div class="insights-content">
+                            <div class="insight-card key-trends-card">
+                                <div class="insight-header">
+                                    <i class="fas fa-chart-line insight-icon"></i>
+                                    <h5>Key Trends</h5>
+                                </div>
+                                <div class="insight-text" id="keyTrendsText">
+                                    AI analysis will appear here...
+                                </div>
+                            </div>
+                            
+                            <div class="insight-card risk-factors-card">
+                                <div class="insight-header">
+                                    <i class="fas fa-exclamation-triangle insight-icon"></i>
+                                    <h5>Risk Factors</h5>
+                                </div>
+                                <div class="insight-text" id="riskFactorsText">
+                                    Risk analysis will appear here...
+                                </div>
+                            </div>
+                            
+                            <div class="insight-card opportunities-card">
+                                <div class="insight-header">
+                                    <i class="fas fa-lightbulb insight-icon"></i>
+                                    <h5>Opportunities</h5>
+                                </div>
+                                <div class="insight-text" id="opportunitiesText">
+                                    Growth opportunities will appear here...
+                                </div>
+                            </div>
+                            
+                            <div class="insight-card methodology-card">
+                                <div class="insight-header">
+                                    <i class="fas fa-cogs insight-icon"></i>
+                                    <h5>Methodology</h5>
+                                </div>
+                                <div class="insight-text" id="methodologyText">
+                                    Forecasting methodology will appear here...
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="insights-actions">
+                            <button class="btn btn-secondary" onclick="exportInsightsToPDF()">
+                                <i class="fas fa-file-pdf"></i> Export Insights
+                            </button>
+                            <button class="btn btn-secondary" onclick="copyInsightsToClipboard()">
+                                <i class="fas fa-copy"></i> Copy Analysis
+                            </button>
+                            <button class="btn btn-outline" onclick="hideInsights()">
+                                <i class="fas fa-times"></i> Close
+                            </button>
                         </div>
                     </div>
 
@@ -20160,16 +20352,14 @@
                     // Recalculate everything
                     recalculateEntirePL();
                     
-                    // Enhanced success message with insights
-                    const keyTrends = forecastResponse.insights?.key_trends || 'AI forecast generated successfully';
-                    const riskFactors = forecastResponse.insights?.risk_factors || '';
-                    const opportunities = forecastResponse.insights?.opportunities || '';
+                    // Display AI insights
+                    displayAIInsights(forecastResponse);
                     
+                    // Simple success message
                     alert(`🤖 AI Forecast Generated Successfully!\n\n` + 
-                          `• Period: ${forecastPeriod.start_month_name} - ${forecastPeriod.end_month_name} ${forecastPeriod.current_year}\n` +
-                          `• Confidence: ${forecastResponse.confidence}%\n` +
-                          `• Key Trends: ${keyTrends.substring(0, 100)}...\n\n` +
-                          `• Opportunities: ${opportunities.substring(0, 80)}...`);
+                          `Period: ${forecastPeriod.start_month_name} - ${forecastPeriod.end_month_name} ${forecastPeriod.current_year}\n` +
+                          `Confidence: ${forecastResponse.confidence}%\n\n` +
+                          `Check the AI Analysis & Insights section below for detailed analysis.`);
                 } else {
                     throw new Error('AI forecast failed');
                 }
@@ -20584,6 +20774,117 @@
         
             // Update confidence levels (simulate AI confidence)
             updateConfidenceLevels();
+        }
+
+        // Function to display AI insights
+        function displayAIInsights(forecastResponse) {
+            const insightsContainer = document.getElementById('aiInsightsContainer');
+            const insights = forecastResponse.insights;
+            
+            if (!insightsContainer || !insights) {
+                console.log('Insights container or data not found');
+                return;
+            }
+            
+            // Update confidence badge
+            const confidenceBadge = document.getElementById('confidenceBadge');
+            if (confidenceBadge) {
+                confidenceBadge.textContent = `Confidence: ${forecastResponse.confidence}%`;
+                
+                // Color code confidence level
+                if (forecastResponse.confidence >= 80) {
+                    confidenceBadge.style.background = 'rgba(34, 197, 94, 0.2)';
+                    confidenceBadge.style.color = '#22c55e';
+                    confidenceBadge.style.borderColor = 'rgba(34, 197, 94, 0.3)';
+                } else if (forecastResponse.confidence >= 60) {
+                    confidenceBadge.style.background = 'rgba(245, 158, 11, 0.2)';
+                    confidenceBadge.style.color = '#f59e0b';
+                    confidenceBadge.style.borderColor = 'rgba(245, 158, 11, 0.3)';
+                } else {
+                    confidenceBadge.style.background = 'rgba(239, 68, 68, 0.2)';
+                    confidenceBadge.style.color = '#ef4444';
+                    confidenceBadge.style.borderColor = 'rgba(239, 68, 68, 0.3)';
+                }
+            }
+            
+            // Update forecast date
+            const forecastDate = document.getElementById('forecastDate');
+            if (forecastDate) {
+                const date = new Date(forecastResponse.generated_at || new Date()).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                forecastDate.textContent = `Generated: ${date}`;
+            }
+            
+            // Update insight texts
+            document.getElementById('keyTrendsText').textContent = insights.key_trends || 'No trends analysis available.';
+            document.getElementById('riskFactorsText').textContent = insights.risk_factors || 'No risk factors identified.';
+            document.getElementById('opportunitiesText').textContent = insights.opportunities || 'No opportunities identified.';
+            document.getElementById('methodologyText').textContent = forecastResponse.methodology || 'AI-based analysis methodology.';
+            
+            // Show the insights container with animation
+            insightsContainer.style.display = 'block';
+            
+            // Scroll to insights smoothly
+            setTimeout(() => {
+                insightsContainer.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start' 
+                });
+            }, 100);
+        }
+        
+        // Function to hide insights
+        function hideInsights() {
+            const insightsContainer = document.getElementById('aiInsightsContainer');
+            if (insightsContainer) {
+                insightsContainer.style.display = 'none';
+            }
+        }
+        
+        // Export insights to PDF (placeholder)
+        function exportInsightsToPDF() {
+            alert('Export to PDF functionality - coming soon!');
+        }
+        
+        // Copy insights to clipboard
+        async function copyInsightsToClipboard() {
+            const keyTrends = document.getElementById('keyTrendsText').textContent;
+            const riskFactors = document.getElementById('riskFactorsText').textContent;
+            const opportunities = document.getElementById('opportunitiesText').textContent;
+            const methodology = document.getElementById('methodologyText').textContent;
+            const confidence = document.getElementById('confidenceBadge').textContent;
+            
+            const insightsText = `
+        AI FINANCIAL FORECAST ANALYSIS
+        ${confidence}
+        
+        KEY TRENDS:
+        ${keyTrends}
+        
+        RISK FACTORS:
+        ${riskFactors}
+        
+        OPPORTUNITIES:
+        ${opportunities}
+        
+        METHODOLOGY:
+        ${methodology}
+        
+        Generated by MontPro Financial Intelligence Dashboard
+            `.trim();
+            
+            try {
+                await navigator.clipboard.writeText(insightsText);
+                alert('✅ Insights copied to clipboard!');
+            } catch (error) {
+                console.error('Error copying to clipboard:', error);
+                alert('❌ Failed to copy insights');
+            }
         }
         
         function populate2026Forecast() {
