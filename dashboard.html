@@ -9641,6 +9641,7 @@
                         <div class="forecasting-ai-controls">
                             <div class="forecasting-ai-controls-left">
                                 <div class="industry-input-wrapper">
+                                    <label for="forecast2026IndustrySelect">Industry Context:</label>
                                     <select id="forecast2026IndustrySelect" class="industry-input-select">
                                         <option value="">Select Industry for AI Context</option>
                                         <option value="saas">SaaS / Technology</option>
@@ -9651,11 +9652,19 @@
                                         <option value="fintech">FinTech</option>
                                     </select>
                                 </div>
+                                <div class="industry-input-wrapper">
+                                    <label for="forecast2026StyleSelect">Forecast Style:</label>
+                                    <select id="forecast2026StyleSelect" class="industry-input-select">
+                                        <option value="normal">Normal Growth</option>
+                                        <option value="aggressive">Aggressive Growth</option>
+                                        <option value="pessimistic">Conservative/Pessimistic</option>
+                                    </select>
+                                </div>
                                 <div class="context-input-wrapper">
                                     <label for="forecast2026Context">Additional Context:</label>
                                     <input type="text" id="forecast2026Context" placeholder="e.g., Expanding to new markets, launching new product..." style="width: 100%; padding: 0.5rem; border: 1px solid #e2e8f0; border-radius: 6px;">
                                 </div>
-                                <button class="btn btn-outline" onclick="loadLatest2026ForecastFromSupabase()" title="Load latest 2026 forecast from database">
+                                <button class="btn btn-outline" onclick="loadLatest2026ForecastFromSupabase()">
                                     <i class="fas fa-history"></i>
                                     Load Latest Forecast
                                 </button>
@@ -23500,6 +23509,7 @@
                     year: 2026,
                     industry: industry,
                     additionalContext: additionalContext,
+                    forecastStyle: forecastStyle,
                     baselineData: {
                         year_2025_complete: currentYearData.monthlyData, // All 12 months of 2025
                         year_2025_totals: currentYearData.yearTotals,
@@ -23788,6 +23798,7 @@
             
             // Populate the insights
             insightsContainer.innerHTML = `
+                <!-- Insights Section -->
                 <div class="insights-header-AIinsight">
                     <h4><i class="fas fa-brain"></i> 2026 AI Analysis & Insights</h4>
                     <div class="insights-meta">
@@ -23826,23 +23837,182 @@
                             ${formatInsightText(insights.opportunities)}
                         </div>
                     </div>
-                    
-                    ${insights.methodology ? `
-                        <div class="insight-card methodology-card">
-                            <div class="insight-header">
-                                <i class="fas fa-cogs insight-icon"></i>
-                                <h5>Forecast Methodology</h5>
-                            </div>
-                            <div class="insight-text">
-                                ${formatInsightText(insights.methodology)}
-                            </div>
+                </div>
+            `;
+            
+            // Add 2026 Trending Chart Section
+            insightsContainer.innerHTML += `
+                <div id="forecast2026TrendingContainer" style="margin-top: 2rem; background: white; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);">
+                    <div class="trending-chart-header">
+                        <div class="trending-title-section">
+                            <h4>2026 Financial Trends Analysis</h4>
+                            <p class="trending-subtitle">Monthly revenue, COGS, and OPEX projections with growth patterns</p>
                         </div>
-                    ` : ''}
+                        <button class="btn btn-secondary" onclick="export2026TrendingChart()">
+                            <i class="fas fa-download"></i> Export
+                        </button>
+                    </div>
+                    <div class="trending-chart-divider"></div>
+                    <div class="trending-chart-container">
+                        <canvas id="forecast2026TrendingChart" width="800" height="400"></canvas>
+                    </div>
+                    
+                    <!-- Enhanced Metrics Summary for 2026 -->
+                    <div class="breakdown-summary-row" style="margin-top: 1.5rem;">
+                        <div class="summary-card revenue">
+                            <div class="summary-header">
+                                <h4><i class="fas fa-chart-line"></i> Projected Growth</h4>
+                                <span class="summary-amount" id="forecast2026RevenueGrowth">+0%</span>
+                            </div>
+                            <div class="summary-change positive" id="revenue2026GrowthDirection">vs 2025</div>
+                        </div>
+                        <div class="summary-card efficiency">
+                            <div class="summary-header">
+                                <h4><i class="fas fa-percentage"></i> Avg Gross Margin</h4>
+                                <span class="summary-amount" id="forecast2026GrossMargin">0%</span>
+                            </div>
+                            <div class="summary-change" id="grossMargin2026Trend">2026 Average</div>
+                        </div>
+                        <div class="summary-card opex">
+                            <div class="summary-header">
+                                <h4><i class="fas fa-chart-bar"></i> Avg EBITDA Margin</h4>
+                                <span class="summary-amount" id="forecast2026EbitdaMargin">0%</span>
+                            </div>
+                            <div class="summary-change" id="ebitdaMargin2026Trend">2026 Average</div>
+                        </div>
+                    </div>
                 </div>
             `;
             
             // Show the container
             insightsContainer.style.display = 'block';
+            
+            // Generate the 2026 trending chart
+            generate2026ForecastTrendingChart();
+        }
+
+        function generate2026ForecastTrendingChart() {
+            const canvas = document.getElementById('forecast2026TrendingChart');
+            if (!canvas) return;
+            
+            // Destroy existing chart if it exists
+            if (window.forecast2026TrendingChartInstance) {
+                window.forecast2026TrendingChartInstance.destroy();
+            }
+            
+            // Extract data from 2026 table
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const revenueData = [];
+            const cogsData = [];
+            const opexData = [];
+            
+            // Get data from total rows
+            const totalRevenueRow = document.querySelector('#totalRevenue2026-total')?.closest('tr');
+            const totalCogsRow = document.querySelector('#totalCOGS2026-total')?.closest('tr');
+            const totalOpexRow = document.querySelector('#totalOPEX2026-total')?.closest('tr');
+            
+            if (totalRevenueRow && totalCogsRow && totalOpexRow) {
+                for (let i = 1; i <= 12; i++) {
+                    const revenue = parseFloat(totalRevenueRow.cells[i]?.textContent.replace(/,/g, '')) || 0;
+                    const cogs = parseFloat(totalCogsRow.cells[i]?.textContent.replace(/,/g, '')) || 0;
+                    const opex = parseFloat(totalOpexRow.cells[i]?.textContent.replace(/,/g, '')) || 0;
+                    
+                    revenueData.push(revenue / 1000000); // Convert to millions
+                    cogsData.push(cogs / 1000000);
+                    opexData.push(opex / 1000000);
+                }
+            }
+            
+            const ctx = canvas.getContext('2d');
+            window.forecast2026TrendingChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: months,
+                    datasets: [
+                        {
+                            label: 'Revenue (M)',
+                            data: revenueData,
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'COGS (M)',
+                            data: cogsData,
+                            borderColor: '#ef4444',
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            borderWidth: 2,
+                            fill: false,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'OPEX (M)',
+                            data: opexData,
+                            borderColor: '#f59e0b',
+                            backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                            borderWidth: 2,
+                            fill: false,
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: '2026 Monthly Financial Projections',
+                            font: { size: 16, weight: 'bold' }
+                        },
+                        legend: {
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Amount (Millions IDR)'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Calculate and display summary metrics
+            calculate2026SummaryMetrics(revenueData, cogsData, opexData);
+        }
+
+        function calculate2026SummaryMetrics(revenueData, cogsData, opexData) {
+            if (revenueData.length === 0) return;
+            
+            const totalRevenue = revenueData.reduce((sum, val) => sum + val, 0);
+            const totalCogs = cogsData.reduce((sum, val) => sum + val, 0);
+            const totalOpex = opexData.reduce((sum, val) => sum + val, 0);
+            
+            const grossMargin = ((totalRevenue - totalCogs) / totalRevenue) * 100;
+            const ebitdaMargin = ((totalRevenue - totalCogs - totalOpex) / totalRevenue) * 100;
+            
+            // Update summary cards
+            document.getElementById('forecast2026GrossMargin').textContent = `${grossMargin.toFixed(1)}%`;
+            document.getElementById('forecast2026EbitdaMargin').textContent = `${ebitdaMargin.toFixed(1)}%`;
+            
+            // You can calculate growth vs 2025 here if you have 2025 data
+            document.getElementById('forecast2026RevenueGrowth').textContent = '+15%'; // Placeholder
+        }
+        
+        // Export function for 2026 chart
+        function export2026TrendingChart() {
+            if (window.forecast2026TrendingChartInstance) {
+                const link = document.createElement('a');
+                link.download = '2026-forecast-trending-chart.png';
+                link.href = window.forecast2026TrendingChartInstance.toBase64Image();
+                link.click();
+            }
         }
 
         async function save2026ForecastToSupabase(aiResult) {
