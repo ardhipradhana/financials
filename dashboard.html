@@ -7687,113 +7687,116 @@
             width: 100%;
             border-collapse: collapse;
             font-size: 0.875rem;
-            min-width: 1200px;
-            table-layout: fixed; /* Important for freeze pane */
+            min-width: 1400px;
+            background: white;
         }
         
-        #plForecast2026Table th:first-child,
-        #plForecast2026Table td:first-child {
-            position: sticky;
-            left: 0;
-            z-index: 10;
-            background: #f8fafc;
-            border-right: 2px solid #e2e8f0;
-            min-width: 200px;
-            max-width: 200px;
-            box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
-        }
-        
-        #plForecast2026Table thead th {
-            position: sticky;
-            top: 0;
-            z-index: 5;
-            background: #f9fafb;
-            border-bottom: 2px solid #e2e8f0;
-        }
-        
-        #plForecast2026Table thead th:first-child {
-            z-index: 11; /* Higher than other sticky elements */
-            background: #f1f5f9;
-        }
-        
-        /* Ensure proper scrolling container for 2026 */
-        .pl-table-scroll {
-            overflow-x: auto;
-            overflow-y: auto;
-            max-height: 600px;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-        }
-        
-        /* Month header styling for 2026 */
-        #plForecast2026Table .pl-month-header {
-            min-width: 80px;
+        #plForecast2026Table th,
+        #plForecast2026Table td {
+            border: 1px solid #e5e7eb;
             text-align: center;
-            font-weight: 600;
-            background: #f9fafb;
+            vertical-align: middle;
         }
         
-        #plForecast2026Table .pl-total-header {
-            min-width: 100px;
-            background: #fef3c7;
-            font-weight: 700;
-        }
-        
-        /* Line item styling for 2026 */
         #plForecast2026Table .line-item {
-            text-align: left;
+            text-align: left !important;
             font-weight: 500;
             color: #374151;
-            padding: 0.5rem 1rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            padding: 0.75rem 1rem;
+            background: #f8fafc;
+            border-right: 2px solid #e2e8f0;
         }
         
-        /* Cell styling for 2026 */
-        #plForecast2026Table .forecast-cell,
-        #plForecast2026Table .total-cell,
-        #plForecast2026Table .calculated-cell {
-            text-align: right;
+        #plForecast2026Table .forecast-cell {
             padding: 0.5rem;
-            border-bottom: 1px solid #f3f4f6;
+            text-align: right;
+            font-family: 'SF Mono', 'Monaco', monospace;
+            background: white;
         }
         
         #plForecast2026Table .total-cell {
+            padding: 0.5rem;
+            text-align: right;
+            font-family: 'SF Mono', 'Monaco', monospace;
             background: #fef3c7;
             font-weight: 600;
         }
         
         #plForecast2026Table .calculated-cell {
+            padding: 0.5rem;
+            text-align: right;
+            font-family: 'SF Mono', 'Monaco', monospace;
             background: #dbeafe;
             font-weight: 600;
         }
         
-        #plForecast2026Table .section-header {
-            background: #f8fafc;
-            font-weight: 600;
-            color: #374151;
-            text-align: left;
-            padding: 0.75rem 1rem;
+        #plForecast2026Table .total-prominent {
+            background: #fde047 !important;
+            font-weight: 700;
+            font-size: 0.95rem;
         }
         
-        /* Margin row styling for 2026 */
+        #plForecast2026Table .calculated-prominent {
+            background: #bfdbfe !important;
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+        
+        #plForecast2026Table .section-header {
+            background: #f8fafc !important;
+            font-weight: 600;
+            color: #374151;
+            text-align: left !important;
+            padding: 0.75rem 1rem;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
         #plForecast2026Table .pl-margin-row td {
-            background: #f1f5f9;
+            background: #f1f5f9 !important;
             font-style: italic;
             color: #64748b;
             font-weight: 500;
-            font-family: 'SF Mono', 'Monaco', monospace;
+            padding: 0.5rem;
         }
         
         #plForecast2026Table .pl-margin-cell {
-            text-align: right;
+            text-align: right !important;
+            font-family: 'SF Mono', 'Monaco', monospace;
             font-weight: 600;
             color: #475569;
         }
         
         #plForecast2026Table .pl-margin-prominent {
-            background: #e2e8f0;
+            background: #e2e8f0 !important;
+            font-weight: 700;
+        }
+        
+        /* 2026 table headers */
+        #plForecast2026Table thead th {
+            background: #f9fafb;
+            color: #374151;
+            font-weight: 600;
+            padding: 0.75rem 0.5rem;
+            border-bottom: 2px solid #e2e8f0;
+            position: sticky;
+            top: 0;
+            z-index: 5;
+        }
+        
+        #plForecast2026Table .pl-line-item-header {
+            text-align: left !important;
+            min-width: 200px;
+            background: #f1f5f9 !important;
+        }
+        
+        #plForecast2026Table .pl-month-header {
+            min-width: 80px;
+            background: #f9fafb;
+        }
+        
+        #plForecast2026Table .pl-total-header {
+            min-width: 100px;
+            background: #fef3c7 !important;
             font-weight: 700;
         }
         
@@ -23446,40 +23449,58 @@
         }
 
         function calculateForecastSummaryMetrics(revenueData, grossProfitData, opexData, ebitdaData, forecastMonths) {
-            if (revenueData.length === 0) return;
+            // Don't use the chart data - get from the actual P&L table totals like before
             
-            const totalRevenue = revenueData.reduce((sum, val) => sum + val, 0);
-            const totalGrossProfit = grossProfitData.reduce((sum, val) => sum + val, 0);
-            const totalOpex = opexData.reduce((sum, val) => sum + val, 0);
-            const totalEbitda = ebitdaData.reduce((sum, val) => sum + val, 0);
+            // Revenue Growth - Calculate CMGR from table
+            const totalRevenueCell = document.querySelector('#totalRevenue-total');
+            const totalRevenueTotalCell = totalRevenueCell;
             
-            // Calculate growth (comparing last month to first month if more than 1 month)
-            const revenueGrowth = revenueData.length > 1 ? 
-                ((revenueData[revenueData.length - 1] - revenueData[0]) / revenueData[0] * 100) : 0;
+            // Get first and last month revenue for CMGR calculation
+            const totalRevenueRow = totalRevenueCell?.closest('tr');
+            if (totalRevenueRow) {
+                const cells = totalRevenueRow.querySelectorAll('td');
+                const revenueJan = parseFloat(cells[1]?.textContent.replace(/,/g, '')) || 0;
+                const revenueDec = parseFloat(cells[12]?.textContent.replace(/,/g, '')) || 0;
+                
+                // Calculate CMGR (Compound Monthly Growth Rate)
+                const revenueCMGR = revenueJan > 0 ? (Math.pow(revenueDec / revenueJan, 1/11) - 1) * 100 : 0;
+                
+                document.getElementById('forecastRevenueGrowth').textContent = `${revenueCMGR > 0 ? '+' : ''}${revenueCMGR.toFixed(1)}%`;
+                document.getElementById('revenueGrowthDirection').textContent = 'CMGR (Jan-Dec)';
+            }
             
-            const grossMargin = totalRevenue > 0 ? (totalGrossProfit / totalRevenue) * 100 : 0;
-            const ebitdaMargin = totalRevenue > 0 ? (totalEbitda / totalRevenue) * 100 : 0;
+            // Gross Margin - Get from P&L table "2025 Total" column percentage
+            const grossProfitTotalCell = document.querySelector('#grossProfit-total');
             
-            // Update summary cards
-            document.getElementById('forecastRevenueGrowth').textContent = `${revenueGrowth > 0 ? '+' : ''}${revenueGrowth.toFixed(1)}%`;
-            document.getElementById('forecastGrossMargin').textContent = `${grossMargin.toFixed(1)}%`;
-            document.getElementById('forecastEbitdaMargin').textContent = `${ebitdaMargin.toFixed(1)}%`;
+            let fullYearGrossMargin = 0;
+            if (grossProfitTotalCell && totalRevenueTotalCell) {
+                const totalRevenue = parseFloat(totalRevenueTotalCell.textContent.replace(/,/g, '')) || 0;
+                const totalGrossProfit = parseFloat(grossProfitTotalCell.textContent.replace(/,/g, '')) || 0;
+                fullYearGrossMargin = totalRevenue > 0 ? (totalGrossProfit / totalRevenue) * 100 : 0;
+            }
             
-            // Update trend descriptions based on period length
-            const periodDescription = forecastMonths.length === 1 ? 
-                `${forecastMonths[0]} only` : 
-                `${forecastMonths[0]}-${forecastMonths[forecastMonths.length - 1]} average`;
+            document.getElementById('forecastGrossMargin').textContent = `${fullYearGrossMargin.toFixed(1)}%`;
+            document.getElementById('grossMarginTrend').textContent = 'Full Year Total';
             
-            document.getElementById('revenueGrowthDirection').textContent = 
-                revenueData.length > 1 ? (revenueGrowth > 0 ? 'Growth trend' : 'Decline trend') : 'Single month';
-            document.getElementById('grossMarginTrend').textContent = periodDescription;
-            document.getElementById('ebitdaMarginTrend').textContent = periodDescription;
+            // EBITDA Margin - Get from P&L table "2025 Total" column percentage  
+            const ebitdaTotalCell = document.querySelector('#ebitda-total');
             
-            console.log('📈 2025 Forecast metrics calculated:', {
-                period: periodDescription,
-                revenueGrowth: revenueGrowth.toFixed(1) + '%',
-                grossMargin: grossMargin.toFixed(1) + '%',
-                ebitdaMargin: ebitdaMargin.toFixed(1) + '%'
+            let fullYearEbitdaMargin = 0;
+            if (ebitdaTotalCell && totalRevenueTotalCell) {
+                const totalRevenue = parseFloat(totalRevenueTotalCell.textContent.replace(/,/g, '')) || 0;
+                const totalEbitda = parseFloat(ebitdaTotalCell.textContent.replace(/,/g, '')) || 0;
+                fullYearEbitdaMargin = totalRevenue > 0 ? (totalEbitda / totalRevenue) * 100 : 0;
+            }
+            
+            document.getElementById('forecastEbitdaMargin').textContent = `${fullYearEbitdaMargin.toFixed(1)}%`;
+            document.getElementById('ebitdaMarginTrend').textContent = 'Full Year Total';
+            
+            console.log('Summary Card Calculations (from P&L table):', {
+                revenueCMGR: revenueCMGR.toFixed(1) + '%',
+                revenueJan: revenueJan.toLocaleString(),
+                revenueDec: revenueDec.toLocaleString(),
+                fullYearGrossMargin: fullYearGrossMargin.toFixed(1) + '%',
+                fullYearEbitdaMargin: fullYearEbitdaMargin.toFixed(1) + '%'
             });
         }
         
