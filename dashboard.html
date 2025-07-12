@@ -23322,27 +23322,8 @@
                 window.forecastTrendingChartInstance.destroy();
             }
             
-            // Calculate dynamic forecast period based on current date
-            const now = new Date();
-            const currentMonth = now.getMonth() + 1; // 1-12
-            const currentDay = now.getDate();
-            const includeCurrentMonth = currentDay <= 25;
-            const forecastStartMonth = includeCurrentMonth ? currentMonth : currentMonth + 1;
-            const forecastEndMonth = 12;
-            
-            // Generate dynamic month labels
-            const allMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-            const forecastMonths = [];
-            for (let i = forecastStartMonth; i <= forecastEndMonth; i++) {
-                forecastMonths.push(allMonths[i - 1]);
-            }
-            
-            console.log('📊 Dynamic forecast chart period:', {
-                currentMonth,
-                forecastStartMonth,
-                forecastEndMonth,
-                forecastMonths
-            });
+            // Show FULL YEAR - all 12 months
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
             
             const revenueData = [];
             const grossProfitData = [];
@@ -23356,8 +23337,8 @@
             const ebitdaRow = document.querySelector('#ebitda-total')?.closest('tr');
             
             if (totalRevenueRow && grossProfitRow && totalOpexRow && ebitdaRow) {
-                // Extract data for the dynamic forecast period
-                for (let i = forecastStartMonth; i <= forecastEndMonth; i++) {
+                // Extract data for ALL 12 months (Jan-Dec)
+                for (let i = 1; i <= 12; i++) {
                     const revenue = parseFloat(totalRevenueRow.cells[i]?.textContent.replace(/,/g, '')) || 0;
                     const grossProfit = parseFloat(grossProfitRow.cells[i]?.textContent.replace(/,/g, '')) || 0;
                     const opex = parseFloat(totalOpexRow.cells[i]?.textContent.replace(/,/g, '')) || 0;
@@ -23370,16 +23351,18 @@
                 }
             }
             
-            // Dynamic chart title
-            const chartTitle = forecastMonths.length === 1 ? 
-                `2025 Financial Forecast - ${forecastMonths[0]}` :
-                `2025 Financial Forecast Trends (${forecastMonths[0]}-${forecastMonths[forecastMonths.length - 1]})`;
+            // Determine which months are actuals vs forecast for styling
+            const now = new Date();
+            const currentMonth = now.getMonth() + 1; // 1-12
+            const currentDay = now.getDate();
+            const includeCurrentMonth = currentDay <= 25;
+            const actualEndMonth = includeCurrentMonth ? currentMonth : currentMonth - 1;
             
             const ctx = canvas.getContext('2d');
             window.forecastTrendingChartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: forecastMonths, // Use dynamic months
+                    labels: months, // All 12 months
                     datasets: [
                         {
                             label: 'Revenue (Net)',
@@ -23388,7 +23371,9 @@
                             backgroundColor: 'rgba(59, 130, 246, 0.1)',
                             borderWidth: 3,
                             fill: true,
-                            tension: 0.4
+                            tension: 0.4,
+                            pointBackgroundColor: months.map((_, i) => i < actualEndMonth ? '#1e40af' : '#93c5fd'), // Different colors for actual vs forecast
+                            pointRadius: 4
                         },
                         {
                             label: 'Gross Profit',
@@ -23397,7 +23382,8 @@
                             backgroundColor: 'rgba(16, 185, 129, 0.1)',
                             borderWidth: 2,
                             fill: false,
-                            tension: 0.4
+                            tension: 0.4,
+                            pointBackgroundColor: months.map((_, i) => i < actualEndMonth ? '#047857' : '#6ee7b7')
                         },
                         {
                             label: 'OPEX',
@@ -23406,7 +23392,8 @@
                             backgroundColor: 'rgba(245, 158, 11, 0.1)',
                             borderWidth: 2,
                             fill: false,
-                            tension: 0.4
+                            tension: 0.4,
+                            pointBackgroundColor: months.map((_, i) => i < actualEndMonth ? '#d97706' : '#fcd34d')
                         },
                         {
                             label: 'EBITDA',
@@ -23415,7 +23402,8 @@
                             backgroundColor: 'rgba(139, 92, 246, 0.1)',
                             borderWidth: 2,
                             fill: false,
-                            tension: 0.4
+                            tension: 0.4,
+                            pointBackgroundColor: months.map((_, i) => i < actualEndMonth ? '#7c3aed' : '#c4b5fd')
                         }
                     ]
                 },
@@ -23425,11 +23413,28 @@
                     plugins: {
                         title: {
                             display: true,
-                            text: chartTitle, // Use dynamic title
+                            text: '2025 Full Year Financial Trends (Actuals + Forecast)',
                             font: { size: 16, weight: 'bold' }
                         },
                         legend: {
                             position: 'top'
+                        },
+                        annotation: {
+                            annotations: {
+                                line1: {
+                                    type: 'line',
+                                    xMin: actualEndMonth - 0.5,
+                                    xMax: actualEndMonth - 0.5,
+                                    borderColor: '#ef4444',
+                                    borderWidth: 2,
+                                    borderDash: [5, 5],
+                                    label: {
+                                        content: 'Actuals | Forecast',
+                                        enabled: true,
+                                        position: 'top'
+                                    }
+                                }
+                            }
                         }
                     },
                     scales: {
@@ -23439,13 +23444,26 @@
                                 display: true,
                                 text: 'Amount (Millions IDR)'
                             }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: `Jan-${months[actualEndMonth-1]}: Actuals | ${months[actualEndMonth]}-Dec: Forecast`
+                            }
                         }
                     }
                 }
             });
             
-            // Calculate and display summary metrics
-            calculateForecastSummaryMetrics(revenueData, grossProfitData, opexData, ebitdaData, forecastMonths);
+            // Calculate and display summary metrics using original logic
+            calculateForecastSummaryMetrics();
+            
+            console.log('📊 2025 Full Year Chart Generated:', {
+                totalMonths: 12,
+                actualMonths: actualEndMonth,
+                forecastMonths: 12 - actualEndMonth,
+                revenueRange: `${Math.min(...revenueData).toFixed(1)}M - ${Math.max(...revenueData).toFixed(1)}M`
+            });
         }
 
         function calculateForecastSummaryMetrics(revenueData, grossProfitData, opexData, ebitdaData, forecastMonths) {
