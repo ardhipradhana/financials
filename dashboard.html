@@ -20090,7 +20090,7 @@
             }
         }
         
-        function generateAIForecast() {
+        async function generateAIForecast() {
             const industry = document.getElementById('forecastIndustrySelect').value;
             
             if (!industry) {
@@ -20098,21 +20098,388 @@
                 return;
             }
         
-            // DON'T rebuild structure - just populate forecast cells with AI values
-            const forecastCells = document.querySelectorAll('.pl-forecast-cell[contenteditable="true"]');
-            
-            forecastCells.forEach(cell => {
-                const currentValue = parseFloat(cell.textContent.replace(/,/g, '')) || 0;
-                // Apply AI growth trend (2.5% monthly growth)
-                const growth = 1.025;
-                const newValue = Math.round(currentValue * growth);
-                cell.textContent = newValue.toLocaleString();
-            });
+            // Show loading state
+            const button = document.getElementById('generateAIForecast');
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating AI Forecast...';
+            button.disabled = true;
         
-            // Recalculate everything
-            recalculateEntirePL();
+            try {
+                // Get current date and calculate forecast period dynamically
+                const now = new Date();
+                const currentYear = now.getFullYear();
+                const currentMonth = now.getMonth() + 1; // 1-12
+                const currentDay = now.getDate();
+                
+                // Determine if current month should be included in forecast
+                // If we're before the 25th of the month, include current month in forecast
+                const includeCurrentMonth = currentDay <= 25;
+                
+                const forecastStartMonth = includeCurrentMonth ? currentMonth : currentMonth + 1;
+                const monthsToForecast = 12 - forecastStartMonth + 1;
+                
+                if (monthsToForecast <= 0) {
+                    throw new Error('Cannot generate forecast - already at end of year. Please wait for next year setup.');
+                }
+        
+                // Prepare historical data for AI analysis
+                const historicalData = await prepareHistoricalDataForAI();
+                
+                if (!historicalData || historicalData.length === 0) {
+                    throw new Error('No historical data available for forecasting');
+                }
+        
+                // Get forecast period details
+                const forecastPeriod = getForecastPeriodDetails(currentYear, currentMonth, currentDay, includeCurrentMonth);
+        
+                // Call n8n webhook for AI processing
+                const forecastResponse = await callAIForecastAPI({
+                    historical_data: historicalData,
+                    industry: industry,
+                    forecast_months: monthsToForecast,
+                    forecast_start_month: forecastStartMonth,
+                    forecast_year: currentYear,
+                    forecast_period: forecastPeriod,
+                    include_current_month: includeCurrentMonth,
+                    current_day: currentDay,
+                    company_context: await getCompanyContext()
+                });
+        
+                if (forecastResponse.success) {
+                    // Apply AI forecast to the P&L table
+                    await applyAIForecastToTable(forecastResponse.forecast_data, forecastPeriod);
+                    
+                    // Save forecast to Supabase for future reference
+                    await saveForecastToSupabase(forecastResponse.forecast_data, forecastPeriod);
+                    
+                    // Recalculate everything
+                    recalculateEntirePL();
+                    
+                    const forecastScope = includeCurrentMonth ? 
+                        `Including current month completion + remaining year` : 
+                        `Remaining months only`;
+                    
+                    alert(`🤖 AI Forecast Generated Successfully!\n\n` + 
+                          `• Period: ${forecastPeriod.start_month_name} - ${forecastPeriod.end_month_name} ${currentYear}\n` +
+                          `• Scope: ${forecastScope}\n` +
+                          `• ${forecastResponse.insights.key_trends}\n` +
+                          `• Confidence: ${forecastResponse.confidence}%\n` +
+                          `• Based on ${historicalData.length} months of data`);
+                } else {
+                    throw new Error(forecastResponse.error || 'AI forecast generation failed');
+                }
+        
+            } catch (error) {
+                console.error('Error generating AI forecast:', error);
+                alert('Error generating AI forecast: ' + error.message);
+            } finally {
+                // Restore button state
+                button.innerHTML = originalText;
+                button.disabled = false;
+            }
+        }
+
+        // Call the n8n AI forecast API
+        async function callAIForecastAPI(payload) {
+            try {
+                // Replace this URL with your actual n8n webhook URL
+                const N8N_WEBHOOK_URL = 'https://montpro.app.n8n.cloud/webhook/ai-forecast';
+                
+                console.log('🚀 Sending payload to n8n:', payload);
+                
+                const response = await fetch(N8N_WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload)
+                });
+        
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+        
+                const result = await response.json();
+                console.log('✅ Received response from n8n:', result);
+                
+                return result;
+                
+            } catch (error) {
+                console.error('❌ Error calling n8n API:', error);
+                throw error;
+            }
+        }
+
+        // Get dynamic forecast period based on current date and whether to include current month
+        function getForecastPeriodDetails(currentYear, currentMonth, currentDay, includeCurrentMonth) {
+            const monthNames = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+            const monthNamesDisplay = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
             
-            alert('AI Forecast Generated! Forecast cells updated with trend-based projections.');
+            const startMonth = includeCurrentMonth ? currentMonth : currentMonth + 1;
+            const endMonth = 12; // December
+            
+            // Get array of months to forecast
+            const forecastMonths = [];
+            for (let i = startMonth; i <= endMonth; i++) {
+                const isCurrentMonth = (i === currentMonth && includeCurrentMonth);
+                
+                forecastMonths.push({
+                    month_number: i,
+                    month_key: monthNames[i - 1],
+                    month_name: monthNamesDisplay[i - 1],
+                    year: currentYear,
+                    is_current_month: isCurrentMonth,
+                    is_partial_month: isCurrentMonth,
+                    days_remaining: isCurrentMonth ? getDaysRemainingInMonth(currentYear, currentMonth, currentDay) : null,
+                    completion_percentage: isCurrentMonth ? (currentDay / getDaysInMonth(currentYear, currentMonth)) * 100 : null
+                });
+            }
+            
+            return {
+                start_month: startMonth,
+                end_month: endMonth,
+                start_month_name: monthNamesDisplay[startMonth - 1],
+                end_month_name: monthNamesDisplay[endMonth - 1],
+                forecast_months: forecastMonths,
+                total_months: endMonth - startMonth + 1,
+                current_month: currentMonth,
+                current_year: currentYear,
+                current_day: currentDay,
+                include_current_month: includeCurrentMonth,
+                forecast_type: includeCurrentMonth ? 'current_month_completion' : 'future_months_only'
+            };
+        }
+
+        // Prepare historical data for AI analysis (excluding current partial month)
+        async function prepareHistoricalDataForAI() {
+            try {
+                const now = new Date();
+                const currentYear = now.getFullYear();
+                const currentMonth = now.getMonth() + 1;
+                
+                // Get historical data excluding current partial month
+                const endDate = `${currentYear}-${String(currentMonth).padStart(2, '0')}-01`;
+                
+                // Get last 12-18 months of complete financial data
+                const { data: transactions, error } = await supabase
+                    .from('financial_transactions_meridash')
+                    .select('*')
+                    .gte('transaction_date', '2023-01-01')
+                    .lt('transaction_date', endDate)
+                    .order('transaction_date');
+        
+                if (error) throw error;
+        
+                // Group by month and account category
+                const monthlyData = {};
+                
+                transactions.forEach(transaction => {
+                    const date = new Date(transaction.transaction_date);
+                    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                    
+                    if (!monthlyData[monthKey]) {
+                        monthlyData[monthKey] = {
+                            month: monthKey,
+                            year: date.getFullYear(),
+                            month_number: date.getMonth() + 1,
+                            revenue: 0,
+                            cogs: 0,
+                            opex: 0,
+                            total_transactions: 0,
+                            is_complete_month: true
+                        };
+                    }
+        
+                    const accountCode = transaction.account_code;
+                    const debit = parseFloat(transaction.debit_amount || 0);
+                    const credit = parseFloat(transaction.credit_amount || 0);
+        
+                    // Categorize transactions
+                    if (accountCode >= 4000 && accountCode < 5000) {
+                        monthlyData[monthKey].revenue += (credit - debit);
+                    } else if (accountCode >= 5000 && accountCode < 5100) {
+                        monthlyData[monthKey].cogs += (debit - credit);
+                    } else if (accountCode >= 5100 && accountCode < 6000) {
+                        monthlyData[monthKey].opex += (debit - credit);
+                    }
+                    
+                    monthlyData[monthKey].total_transactions++;
+                });
+        
+                // Convert to array, sort, and get last 12 complete months
+                const historicalArray = Object.values(monthlyData)
+                    .sort((a, b) => a.month.localeCompare(b.month))
+                    .slice(-12); // Get last 12 complete months
+                
+                console.log('Historical data prepared for AI (complete months only):', historicalArray);
+                return historicalArray;
+                
+            } catch (error) {
+                console.error('Error preparing historical data:', error);
+                return [];
+            }
+        }
+        
+        // Helper function to get days remaining in current month
+        function getDaysRemainingInMonth(year, month, currentDay) {
+            const daysInMonth = getDaysInMonth(year, month);
+            return daysInMonth - currentDay;
+        }
+        
+        // Helper function to get total days in a month
+        function getDaysInMonth(year, month) {
+            return new Date(year, month, 0).getDate();
+        }
+
+        // Apply AI forecast data to the P&L table with dynamic period
+        async function applyAIForecastToTable(forecastData, forecastPeriod) {
+            if (!forecastData || !forecastData.monthly_forecasts) {
+                throw new Error('Invalid forecast data structure');
+            }
+        
+            // Apply forecasts to each month in the forecast period
+            forecastData.monthly_forecasts.forEach((monthData, index) => {
+                if (index < forecastPeriod.forecast_months.length) {
+                    const monthInfo = forecastPeriod.forecast_months[index];
+                    const monthKey = monthInfo.month_key; // jan, feb, mar, etc.
+                    
+                    console.log(`Applying forecast for ${monthInfo.month_name} (${monthKey})`);
+                    
+                    // Apply revenue forecasts
+                    if (monthData.revenue_accounts) {
+                        Object.entries(monthData.revenue_accounts).forEach(([accountCode, amount]) => {
+                            updateForecastCell(accountCode, monthKey, amount);
+                        });
+                    }
+                    
+                    // Apply COGS forecasts
+                    if (monthData.cogs_accounts) {
+                        Object.entries(monthData.cogs_accounts).forEach(([accountCode, amount]) => {
+                            updateForecastCell(accountCode, monthKey, amount);
+                        });
+                    }
+                    
+                    // Apply OPEX forecasts
+                    if (monthData.opex_accounts) {
+                        Object.entries(monthData.opex_accounts).forEach(([accountCode, amount]) => {
+                            updateForecastCell(accountCode, monthKey, amount);
+                        });
+                    }
+                }
+            });
+            
+            console.log(`Applied forecasts for ${forecastPeriod.total_months} months: ${forecastPeriod.start_month_name} - ${forecastPeriod.end_month_name}`);
+        }
+
+        // Save forecast to Supabase with dynamic period
+        async function saveForecastToSupabase(forecastData, forecastPeriod) {
+            try {
+                const user = await supabase.auth.getUser();
+                const userId = user?.data?.user?.id;
+                
+                // Create dynamic start and end dates
+                const startDate = `${forecastPeriod.current_year}-${String(forecastPeriod.start_month).padStart(2, '0')}-01`;
+                const endDate = `${forecastPeriod.current_year}-12-31`;
+                
+                // Save forecast metadata
+                const { data: forecastRecord, error: forecastError } = await supabase
+                    .from('ai_forecasts_meridash')
+                    .insert([{
+                        user_id: userId,
+                        forecast_date: new Date().toISOString(),
+                        forecast_period_start: startDate,
+                        forecast_period_end: endDate,
+                        model_version: forecastData.model_version || '1.0',
+                        confidence_score: forecastData.confidence || 0,
+                        industry_context: document.getElementById('forecastIndustrySelect').value,
+                        forecast_data: {
+                            ...forecastData,
+                            period_info: forecastPeriod
+                        }
+                    }])
+                    .select();
+        
+                if (forecastError) throw forecastError;
+        
+                // Save individual forecast transactions
+                const forecastTransactions = [];
+                
+                forecastData.monthly_forecasts.forEach((monthData, index) => {
+                    if (index < forecastPeriod.forecast_months.length) {
+                        const monthInfo = forecastPeriod.forecast_months[index];
+                        const forecastDate = `${monthInfo.year}-${String(monthInfo.month_number).padStart(2, '0')}-15`; // 15th of each month
+                        
+                        // Add revenue forecast transactions
+                        if (monthData.revenue_accounts) {
+                            Object.entries(monthData.revenue_accounts).forEach(([accountCode, amount]) => {
+                                forecastTransactions.push({
+                                    user_id: userId,
+                                    transaction_date: forecastDate,
+                                    account_code: parseInt(accountCode),
+                                    account_name: getAccountName(accountCode),
+                                    description: `AI Forecast - ${monthInfo.month_name} ${monthInfo.year}`,
+                                    debit_amount: 0,
+                                    credit_amount: Math.abs(amount),
+                                    source: 'AI_Forecast',
+                                    category: 'Revenue',
+                                    forecast_id: forecastRecord[0].id
+                                });
+                            });
+                        }
+                        
+                        // Add COGS forecast transactions
+                        if (monthData.cogs_accounts) {
+                            Object.entries(monthData.cogs_accounts).forEach(([accountCode, amount]) => {
+                                forecastTransactions.push({
+                                    user_id: userId,
+                                    transaction_date: forecastDate,
+                                    account_code: parseInt(accountCode),
+                                    account_name: getAccountName(accountCode),
+                                    description: `AI Forecast - ${monthInfo.month_name} ${monthInfo.year}`,
+                                    debit_amount: Math.abs(amount),
+                                    credit_amount: 0,
+                                    source: 'AI_Forecast',
+                                    category: 'Expense',
+                                    forecast_id: forecastRecord[0].id
+                                });
+                            });
+                        }
+                        
+                        // Add OPEX forecast transactions
+                        if (monthData.opex_accounts) {
+                            Object.entries(monthData.opex_accounts).forEach(([accountCode, amount]) => {
+                                forecastTransactions.push({
+                                    user_id: userId,
+                                    transaction_date: forecastDate,
+                                    account_code: parseInt(accountCode),
+                                    account_name: getAccountName(accountCode),
+                                    description: `AI Forecast - ${monthInfo.month_name} ${monthInfo.year}`,
+                                    debit_amount: Math.abs(amount),
+                                    credit_amount: 0,
+                                    source: 'AI_Forecast',
+                                    category: 'Expense',
+                                    forecast_id: forecastRecord[0].id
+                                });
+                            });
+                        }
+                    }
+                });
+        
+                // Insert forecast transactions
+                if (forecastTransactions.length > 0) {
+                    const { error: transactionError } = await supabase
+                        .from('financial_transactions_meridash')
+                        .insert(forecastTransactions);
+                        
+                    if (transactionError) throw transactionError;
+                }
+        
+                console.log(`Forecast saved to Supabase: ${forecastPeriod.total_months} months from ${forecastPeriod.start_month_name} to ${forecastPeriod.end_month_name}`);
+                
+            } catch (error) {
+                console.error('Error saving forecast to Supabase:', error);
+                // Don't throw - this is not critical for the forecast display
+            }
         }
         
         function completeAIForecast(industry) {
