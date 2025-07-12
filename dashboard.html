@@ -20950,8 +20950,17 @@
                 });
             });
             
-            // Recalculate all totals and derived metrics
-            recalculateEntirePL();
+            // CRUCIAL: Use a longer timeout to ensure DOM is fully updated before recalculating
+            setTimeout(() => {
+                console.log('🔥 Starting recalculation after data population...');
+                recalculateEntirePL();
+                
+                // Add another timeout specifically for margin calculations
+                setTimeout(() => {
+                    console.log('🔥 Running margin calculations...');
+                    calculatePLMarginMetrics();
+                }, 200);
+            }, 300);
             
             console.log('P&L populated with actual data!');
         }
@@ -21326,17 +21335,20 @@
         }
 
         function calculatePLMarginMetrics() {
+            console.log('🔥 Starting margin calculations...');
             const months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
             
             months.forEach((month, index) => {
                 const cellIndex = index + 2; // +2 because first column is line item
                 
-                // Get revenue for this month
+                // Get revenue for this month with better debugging
                 const revenueCell = document.querySelector(`.pl-revenue-total td:nth-child(${cellIndex})`);
                 const revenue = parseFloat(revenueCell?.textContent?.replace(/,/g, '') || 0);
                 
+                console.log(`Month ${month} (index ${index}): Revenue = ${revenue}`);
+                
                 if (revenue === 0) {
-                    // Set all margins to 0% if no revenue
+                    console.log(`Skipping ${month} - no revenue`);
                     setMarginCellByClass('.pl-gross-margin', cellIndex, '0.0%');
                     setMarginCellByClass('.pl-opex-margin', cellIndex, '0.0%');
                     setMarginCellByClass('.pl-ebitda-margin', cellIndex, '0.0%');
@@ -21344,7 +21356,7 @@
                     return;
                 }
                 
-                // Get values for margin calculations
+                // Get values for margin calculations with debugging
                 const grossProfitCell = document.querySelector(`.pl-gross-profit td:nth-child(${cellIndex})`);
                 const opexCell = document.querySelector(`.pl-opex-total td:nth-child(${cellIndex})`);
                 const ebitdaCell = document.querySelector(`.pl-ebitda td:nth-child(${cellIndex})`);
@@ -21355,11 +21367,15 @@
                 const ebitda = parseFloat(ebitdaCell?.textContent?.replace(/,/g, '') || 0);
                 const netIncome = parseFloat(netIncomeCell?.textContent?.replace(/,/g, '') || 0);
                 
+                console.log(`${month} values:`, { revenue, grossProfit, opex, ebitda, netIncome });
+                
                 // Calculate margin percentages
                 const grossMargin = (grossProfit / revenue) * 100;
                 const opexMargin = (opex / revenue) * 100;
                 const ebitdaMargin = (ebitda / revenue) * 100;
                 const netMargin = (netIncome / revenue) * 100;
+                
+                console.log(`${month} margins:`, { grossMargin, opexMargin, ebitdaMargin, netMargin });
                 
                 // Update margin cells with proper selectors
                 setMarginCellByClass('.pl-gross-margin', cellIndex, `${grossMargin.toFixed(1)}%`);
