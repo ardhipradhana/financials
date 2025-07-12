@@ -20311,11 +20311,36 @@
                 return [];
             }
         }
+
+        // Helper function to update individual forecast cells - with return value
+        function updateForecastCell(accountCode, month, amount) {
+            const row = document.querySelector(`tr[data-account-code="${accountCode}"]`);
+            if (row) {
+                const cell = row.querySelector(`.pl-forecast-cell[data-month="${month}"]`);
+                if (cell) {
+                    cell.textContent = Math.round(amount).toLocaleString();
+                    console.log(`✅ Updated ${accountCode} ${month}: ${Math.round(amount).toLocaleString()}`);
+                    return true;
+                } else {
+                    console.log(`⚠️ Cell not found: ${accountCode} ${month}`);
+                    return false;
+                }
+            } else {
+                console.log(`⚠️ Row not found for account: ${accountCode}`);
+                return false;
+            }
+        }
         
         // Helper function to get days remaining in current month
         function getDaysRemainingInMonth(year, month, currentDay) {
             const daysInMonth = getDaysInMonth(year, month);
             return daysInMonth - currentDay;
+        }
+
+        // Helper function to get account name
+        function getAccountName(accountCode) {
+            const account = window.glAccountsData?.find(acc => acc.account_code == accountCode);
+            return account ? account.account_name : `Account ${accountCode}`;
         }
         
         // Helper function to get total days in a month
@@ -20323,7 +20348,7 @@
             return new Date(year, month, 0).getDate();
         }
 
-        // Apply AI forecast data to the P&L table
+        // Apply AI forecast data to the P&L table - Updated with better error handling
         async function applyAIForecastToTable(forecastData, forecastPeriod) {
             console.log('📊 Applying forecast to table...', forecastData);
             
@@ -20331,6 +20356,9 @@
                 console.error('Invalid forecast data structure');
                 return;
             }
+        
+            let updatedCells = 0;
+            let failedUpdates = 0;
         
             // Apply forecasts to each month in the forecast period
             forecastData.monthly_forecasts.forEach((monthData, index) => {
@@ -20344,7 +20372,9 @@
                     if (monthData.revenue_accounts) {
                         Object.entries(monthData.revenue_accounts).forEach(([accountCode, amount]) => {
                             if (amount > 0) {
-                                updateForecastCell(accountCode, monthKey, amount);
+                                const success = updateForecastCell(accountCode, monthKey, amount);
+                                if (success !== false) updatedCells++;
+                                else failedUpdates++;
                             }
                         });
                     }
@@ -20353,7 +20383,9 @@
                     if (monthData.cogs_accounts) {
                         Object.entries(monthData.cogs_accounts).forEach(([accountCode, amount]) => {
                             if (amount > 0) {
-                                updateForecastCell(accountCode, monthKey, amount);
+                                const success = updateForecastCell(accountCode, monthKey, amount);
+                                if (success !== false) updatedCells++;
+                                else failedUpdates++;
                             }
                         });
                     }
@@ -20362,14 +20394,20 @@
                     if (monthData.opex_accounts) {
                         Object.entries(monthData.opex_accounts).forEach(([accountCode, amount]) => {
                             if (amount > 0) {
-                                updateForecastCell(accountCode, monthKey, amount);
+                                const success = updateForecastCell(accountCode, monthKey, amount);
+                                if (success !== false) updatedCells++;
+                                else failedUpdates++;
                             }
                         });
                     }
                 }
             });
             
-            console.log(`✅ Applied forecasts for ${forecastPeriod.total_months} months`);
+            console.log(`✅ Applied forecasts: ${updatedCells} cells updated, ${failedUpdates} failed`);
+            
+            if (failedUpdates > 0) {
+                console.warn(`⚠️ Some forecast cells could not be updated. This might mean those account codes don't exist in your P&L table.`);
+            }
         }
         
         // Save forecast to Supabase with dynamic period
