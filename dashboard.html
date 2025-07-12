@@ -6865,6 +6865,62 @@
                 gap: 1rem;
             }
         }
+
+        /* Period Selector Tabs */
+        .forecast-period-tabs {
+            display: flex;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+        
+        .period-tab-btn {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: none;
+            background: transparent;
+            color: #64748b;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+        
+        .period-tab-btn:hover {
+            background: rgba(59, 130, 246, 0.05);
+            color: #1e40af;
+        }
+        
+        .period-tab-btn.active {
+            background: white;
+            color: #1e40af;
+            font-weight: 600;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .quarter-header, .year-header, .change-header {
+            min-width: 90px;
+        }
+        
+        .placeholder-row td {
+            text-align: center;
+            padding: 3rem;
+            color: #6b7280;
+            font-style: italic;
+        }
+        
+        .placeholder-text {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
         
     </style>
 </head>
@@ -8611,6 +8667,26 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Period Selector Tabs -->
+                    <div class="forecast-period-tabs">
+                        <button class="period-tab-btn active" data-period="current-year">
+                            <i class="fas fa-calendar"></i>
+                            2025 Monthly (Jul-Dec)
+                        </button>
+                        <button class="period-tab-btn" data-period="next-year">
+                            <i class="fas fa-calendar-alt"></i>
+                            2026 Full Year
+                        </button>
+                        <button class="period-tab-btn" data-period="multi-year">
+                            <i class="fas fa-chart-line"></i>
+                            2027-2030 Quarterly
+                        </button>
+                        <button class="period-tab-btn" data-period="summary">
+                            <i class="fas fa-table"></i>
+                            Annual Summary
+                        </button>
+                    </div>
                 
                     <!-- Main P&L Table -->
                     <div class="pl-forecast-container">
@@ -8844,6 +8920,136 @@
                                         <td class="pl-net-cell">-5,970,000</td>
                                         <td class="pl-net-cell pl-net-prominent" id="netIncome-total">-70,320,000</td>
                                         <td class="pl-percentage-cell" id="netIncome-pct">-2.3%</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- 2026 Full Year Table -->
+                    <div class="pl-forecast-container" id="next-year-container" style="display: none;">
+                        <div class="pl-table-header">
+                            <h4>2026 Full Year Forecast</h4>
+                            <div class="pl-table-controls">
+                                <button class="btn btn-secondary" onclick="copyPLForecastTable('2026')">
+                                    <i class="fas fa-copy"></i> Copy
+                                </button>
+                                <button class="btn btn-secondary" onclick="exportPLForecast('2026')">
+                                    <i class="fas fa-download"></i> Export
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="pl-table-scroll">
+                            <table class="pl-forecast-table" id="plForecast2026Table">
+                                <thead>
+                                    <tr>
+                                        <th class="pl-line-item-header">Line Item</th>
+                                        <th class="pl-month-header">Jan</th>
+                                        <th class="pl-month-header">Feb</th>
+                                        <th class="pl-month-header">Mar</th>
+                                        <th class="pl-month-header">Apr</th>
+                                        <th class="pl-month-header">May</th>
+                                        <th class="pl-month-header">Jun</th>
+                                        <th class="pl-month-header">Jul</th>
+                                        <th class="pl-month-header">Aug</th>
+                                        <th class="pl-month-header">Sep</th>
+                                        <th class="pl-month-header">Oct</th>
+                                        <th class="pl-month-header">Nov</th>
+                                        <th class="pl-month-header">Dec</th>
+                                        <th class="pl-total-header">2026 Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="plForecast2026Body">
+                                    <tr class="placeholder-row">
+                                        <td colspan="14" class="placeholder-text">
+                                            <i class="fas fa-brain"></i>
+                                            Generate AI forecast to view 2026 projections
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Multi-Year Quarterly Table -->
+                    <div class="pl-forecast-container" id="multi-year-container" style="display: none;">
+                        <div class="pl-table-header">
+                            <h4>Multi-Year Quarterly Forecast (2027-2030)</h4>
+                            <div class="pl-table-controls">
+                                <button class="btn btn-secondary" onclick="copyPLForecastTable('multiyear')">
+                                    <i class="fas fa-copy"></i> Copy
+                                </button>
+                                <button class="btn btn-secondary" onclick="exportPLForecast('multiyear')">
+                                    <i class="fas fa-download"></i> Export
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="pl-table-scroll">
+                            <table class="pl-forecast-table" id="plForecastMultiyearTable">
+                                <thead>
+                                    <tr>
+                                        <th class="pl-line-item-header">Line Item</th>
+                                        <th class="quarter-header">2027 Q1</th>
+                                        <th class="quarter-header">2027 Q2</th>
+                                        <th class="quarter-header">2027 Q3</th>
+                                        <th class="quarter-header">2027 Q4</th>
+                                        <th class="total-header">2027 Total</th>
+                                        <th class="quarter-header">2028 Q1</th>
+                                        <th class="quarter-header">2028 Q2</th>
+                                        <th class="quarter-header">2028 Q3</th>
+                                        <th class="quarter-header">2028 Q4</th>
+                                        <th class="total-header">2028 Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="plForecastMultiyearBody">
+                                    <tr class="placeholder-row">
+                                        <td colspan="11" class="placeholder-text">
+                                            <i class="fas fa-brain"></i>
+                                            Generate AI forecast to view multi-year projections
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Annual Summary Table -->
+                    <div class="pl-forecast-container" id="summary-container" style="display: none;">
+                        <div class="pl-table-header">
+                            <h4>Annual Growth Summary (2025-2030)</h4>
+                            <div class="pl-table-controls">
+                                <button class="btn btn-secondary" onclick="copyPLForecastTable('summary')">
+                                    <i class="fas fa-copy"></i> Copy
+                                </button>
+                                <button class="btn btn-secondary" onclick="exportPLForecast('summary')">
+                                    <i class="fas fa-download"></i> Export
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="pl-table-scroll">
+                            <table class="pl-forecast-table" id="plForecastSummaryTable">
+                                <thead>
+                                    <tr>
+                                        <th class="pl-line-item-header">Metric</th>
+                                        <th class="year-header">2025</th>
+                                        <th class="year-header">2026</th>
+                                        <th class="change-header">YoY Change</th>
+                                        <th class="year-header">2027</th>
+                                        <th class="change-header">YoY Change</th>
+                                        <th class="year-header">2028</th>
+                                        <th class="change-header">YoY Change</th>
+                                        <th class="cagr-header">CAGR</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="plForecastSummaryBody">
+                                    <tr class="placeholder-row">
+                                        <td colspan="9" class="placeholder-text">
+                                            <i class="fas fa-brain"></i>
+                                            Generate AI forecast to view growth analysis
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -20292,6 +20498,9 @@
 
         // P&L Forecasting Functions - All Unique Names
         function initializePLForecasting() {
+            // Initialize period tabs
+            initializePeriodTabs();
+            
             // Generate AI Forecast button
             const generateBtn = document.getElementById('generateAIForecast');
             if (generateBtn) {
@@ -20651,6 +20860,40 @@
         
         // Auto-save every 30 seconds
         setInterval(autoSavePLForecast, 30000);
+
+        function initializePeriodTabs() {
+            document.querySelectorAll('.period-tab-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    switchPLForecastPeriod(this.dataset.period);
+                });
+            });
+        }
+
+        function switchPLForecastPeriod(period) {
+            // Update tab active state
+            document.querySelectorAll('.period-tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-period="${period}"]`).classList.add('active');
+        
+            // Hide all containers
+            document.querySelectorAll('.pl-forecast-container').forEach(container => {
+                container.style.display = 'none';
+            });
+        
+            // Show selected container
+            const periodMap = {
+                'current-year': '.pl-forecast-container:first-of-type', // The original 2025 table
+                'next-year': '#next-year-container',
+                'multi-year': '#multi-year-container', 
+                'summary': '#summary-container'
+            };
+        
+            const targetContainer = document.querySelector(periodMap[period]);
+            if (targetContainer) {
+                targetContainer.style.display = 'block';
+            }
+        }
         
     </script>
 
