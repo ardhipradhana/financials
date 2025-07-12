@@ -9655,6 +9655,10 @@
                                     <label for="forecast2026Context">Additional Context:</label>
                                     <input type="text" id="forecast2026Context" placeholder="e.g., Expanding to new markets, launching new product..." style="width: 100%; padding: 0.5rem; border: 1px solid #e2e8f0; border-radius: 6px;">
                                 </div>
+                                <button class="btn btn-outline" onclick="loadLatest2026ForecastFromSupabase()" title="Load latest 2026 forecast from database">
+                                    <i class="fas fa-history"></i>
+                                    Load Latest Forecast
+                                </button>
                             </div>
                             <div class="forecasting-ai-controls-right">
                                 <button class="btn btn-primary" id="generateAI2026Forecast">
@@ -23108,13 +23112,17 @@
         }
 
         // Show a subtle notification that forecast was loaded
-        function showForecastLoadedNotification(forecastDate) {
+        function showForecastLoadedNotification(forecastDate, isGenerated = false) {
             const date = new Date(forecastDate).toLocaleDateString('en-US', {
                 month: 'short',
                 day: 'numeric',
                 hour: '2-digit',
                 minute: '2-digit'
             });
+            
+            const message = isGenerated ? 
+                `AI forecast generated (${date})` : 
+                `Latest forecast loaded (${date})`;
             
             // Create notification element
             const notification = document.createElement('div');
@@ -23137,7 +23145,7 @@
             notification.innerHTML = `
                 <div style="display: flex; align-items: center; gap: 8px;">
                     <i class="fas fa-check-circle"></i>
-                    <span>Latest AI forecast loaded (${date})</span>
+                    <span>${message}</span>
                 </div>
             `;
             
@@ -23947,6 +23955,122 @@
                 
                 tbody.appendChild(row);
             });
+        }
+
+        async function loadLatest2026ForecastFromSupabase() {
+            try {
+                console.log('📥 Loading latest 2026 forecast from Supabase...');
+                
+                // Get current user
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) {
+                    alert('Please log in to load forecasts');
+                    return;
+                }
+                
+                // Query the latest 2026 forecast
+                const { data, error } = await supabase
+                    .from('ai_forecasts_2026_meridash')
+                    .select('*')
+                    .eq('user_id', user.id)
+                    .eq('forecast_year', 2026)
+                    .order('generated_at', { ascending: false })
+                    .limit(1);
+                
+                if (error) {
+                    throw error;
+                }
+                
+                if (!data || data.length === 0) {
+                    alert('No 2026 forecasts found. Generate a forecast first.');
+                    return;
+                }
+                
+                const latestForecast = data[0];
+                console.log('📊 Latest 2026 forecast loaded:', latestForecast);
+                
+                // Convert Supabase data back to AI result format
+                const aiResult = {
+                    success: true,
+                    confidence: latestForecast.confidence_level,
+                    forecast_data: {
+                        monthly_forecasts: latestForecast.monthly_data.map(month => ({
+                            month: month.month_number,
+                            month_name: month.month_name,
+                            revenue_accounts: {
+                                '4010': month.sales_revenue,
+                                '4020': month.service_revenue
+                            },
+                            cogs_accounts: {
+                                '5010': month.direct_costs,
+                                '5020': 0
+                            },
+                            opex_accounts: {
+                                '5100': month.operating_expenses,
+                                '5110': 0
+                            }
+                        }))
+                    },
+                    insights: latestForecast.ai_insights,
+                    generated_at: latestForecast.generated_at,
+                    model_version: latestForecast.model_version || 'ai-agent-v1'
+                };
+                
+                // Populate the 2026 table with loaded data
+                populate2026TableWithAI(aiResult);
+                
+                // Restore the form values
+                document.getElementById('forecast2026IndustrySelect').value = latestForecast.industry_context || '';
+                document.getElementById('forecast2026Context').value = latestForecast.additional_context || '';
+                
+                // Show success notification
+                showForecastLoadedNotification(new Date(latestForecast.generated_at));
+                
+                console.log('✅ 2026 forecast loaded and displayed successfully');
+                
+            } catch (error) {
+                console.error('❌ Error loading 2026 forecast:', error);
+                alert('Failed to load 2026 forecast. Please try again.');
+            }
+        }
+
+        async function show2026ForecastHistory() {
+            try {
+                console.log('📋 Loading 2026 forecast history...');
+                
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) {
+                    alert('Please log in to view forecast history');
+                    return;
+                }
+                
+                const { data, error } = await supabase
+                    .from('ai_forecasts_2026_meridash')
+                    .select('id, generated_at, confidence_level, industry_context, additional_context')
+                    .eq('user_id', user.id)
+                    .eq('forecast_year', 2026)
+                    .order('generated_at', { ascending: false });
+                
+                if (error) {
+                    throw error;
+                }
+                
+                if (!data || data.length === 0) {
+                    alert('No 2026 forecast history found.');
+                    return;
+                }
+                
+                console.log('📊 2026 forecast history:', data);
+                
+                // You can implement a modal or dropdown to show the history
+                // For now, just log it
+                data.forEach((forecast, index) => {
+                    console.log(`${index + 1}. ${new Date(forecast.generated_at).toLocaleDateString()} - ${forecast.industry_context} - ${forecast.confidence_level}%`);
+                });
+                
+            } catch (error) {
+                console.error('❌ Error loading 2026 forecast history:', error);
+            }
         }
         
     </script>
