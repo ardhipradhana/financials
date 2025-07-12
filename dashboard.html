@@ -20952,10 +20952,12 @@
             const aiInsightsContainer = document.getElementById('aiInsightsContainer');
             const forecastTrendingContainer = document.getElementById('forecastTrendingContainer');
             const ai2026InsightsContainer = document.getElementById('ai2026InsightsContainer');
+            const forecast2026TrendingContainer = document.getElementById('forecast2026TrendingContainer');
             
             if (aiInsightsContainer) aiInsightsContainer.style.display = 'none';
             if (forecastTrendingContainer) forecastTrendingContainer.style.display = 'none';
             if (ai2026InsightsContainer) ai2026InsightsContainer.style.display = 'none';
+            if (forecast2026TrendingContainer) forecast2026TrendingContainer.style.display = 'none';
         
             // Show the appropriate container
             const targetContainer = document.getElementById(`${period}-container`);
@@ -20964,9 +20966,9 @@
                 
                 // Load content based on period
                 if (period === 'next-year') {
-                    // Remove the call to initialize2026Forecast() since it doesn't exist
-                    // Show 2026 insights if they exist
+                    // Show 2026 insights and trending if they exist
                     if (ai2026InsightsContainer) ai2026InsightsContainer.style.display = 'block';
+                    if (forecast2026TrendingContainer) forecast2026TrendingContainer.style.display = 'block';
                 } else if (period === 'current-year') {
                     // Show insights and chart only for current year tab
                     if (aiInsightsContainer) aiInsightsContainer.style.display = 'block';
@@ -23798,9 +23800,8 @@
                 table2026Container.parentNode.insertBefore(insightsContainer, table2026Container.nextSibling);
             }
             
-            // Populate the insights
+            // Populate ONLY the insights (no chart here)
             insightsContainer.innerHTML = `
-                <!-- Insights Section -->
                 <div class="insights-header-AIinsight">
                     <h4><i class="fas fa-brain"></i> 2026 AI Analysis & Insights</h4>
                     <div class="insights-meta">
@@ -23842,55 +23843,81 @@
                 </div>
             `;
             
-            // Add 2026 Trending Chart Section
-            insightsContainer.innerHTML += `
-                <div id="forecast2026TrendingContainer" style="margin-top: 2rem; background: white; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);">
-                    <div class="trending-chart-header">
-                        <div class="trending-title-section">
-                            <h4>2026 Financial Trends Analysis</h4>
-                            <p class="trending-subtitle">Monthly revenue, COGS, and OPEX projections with growth patterns</p>
-                        </div>
-                        <button class="btn btn-secondary" onclick="export2026TrendingChart()">
-                            <i class="fas fa-download"></i> Export
-                        </button>
+            // Show the insights container
+            insightsContainer.style.display = 'block';
+            
+            // Create separate trending chart container
+            create2026TrendingContainer();
+            
+            // Generate the 2026 trending chart
+            generate2026ForecastTrendingChart();
+        }
+
+        function create2026TrendingContainer() {
+            let trendingContainer = document.getElementById('forecast2026TrendingContainer');
+            
+            if (!trendingContainer) {
+                // Find where to insert the trending container
+                const insightsContainer = document.getElementById('ai2026InsightsContainer');
+                
+                trendingContainer = document.createElement('div');
+                trendingContainer.id = 'forecast2026TrendingContainer';
+                trendingContainer.style.cssText = `
+                    margin-top: 2rem;
+                    background: white;
+                    border: 1px solid #e5e7eb;
+                    border-radius: 12px;
+                    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+                `;
+                
+                // Insert after the insights container
+                insightsContainer.parentNode.insertBefore(trendingContainer, insightsContainer.nextSibling);
+            }
+            
+            // Populate the trending container
+            trendingContainer.innerHTML = `
+                <div class="trending-chart-header">
+                    <div class="trending-title-section">
+                        <h4>2026 Financial Trends Analysis</h4>
+                        <p class="trending-subtitle">Monthly revenue, COGS, and OPEX projections with growth patterns</p>
                     </div>
-                    <div class="trending-chart-divider"></div>
-                    <div class="trending-chart-container">
-                        <canvas id="forecast2026TrendingChart" width="800" height="400"></canvas>
+                    <button class="btn btn-secondary" onclick="export2026TrendingChart()">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                </div>
+                <div class="trending-chart-divider"></div>
+                <div class="trending-chart-container">
+                    <canvas id="forecast2026TrendingChart" width="800" height="400"></canvas>
+                </div>
+                
+                <!-- Enhanced Metrics Summary for 2026 -->
+                <div class="breakdown-summary-row" style="margin-top: 1.5rem;">
+                    <div class="summary-card revenue">
+                        <div class="summary-header">
+                            <h4><i class="fas fa-chart-line"></i> Projected Growth</h4>
+                            <span class="summary-amount" id="forecast2026RevenueGrowth">+0%</span>
+                        </div>
+                        <div class="summary-change positive" id="revenue2026GrowthDirection">vs 2025</div>
                     </div>
-                    
-                    <!-- Enhanced Metrics Summary for 2026 -->
-                    <div class="breakdown-summary-row" style="margin-top: 1.5rem;">
-                        <div class="summary-card revenue">
-                            <div class="summary-header">
-                                <h4><i class="fas fa-chart-line"></i> Projected Growth</h4>
-                                <span class="summary-amount" id="forecast2026RevenueGrowth">+0%</span>
-                            </div>
-                            <div class="summary-change positive" id="revenue2026GrowthDirection">vs 2025</div>
+                    <div class="summary-card efficiency">
+                        <div class="summary-header">
+                            <h4><i class="fas fa-percentage"></i> Avg Gross Margin</h4>
+                            <span class="summary-amount" id="forecast2026GrossMargin">0%</span>
                         </div>
-                        <div class="summary-card efficiency">
-                            <div class="summary-header">
-                                <h4><i class="fas fa-percentage"></i> Avg Gross Margin</h4>
-                                <span class="summary-amount" id="forecast2026GrossMargin">0%</span>
-                            </div>
-                            <div class="summary-change" id="grossMargin2026Trend">2026 Average</div>
+                        <div class="summary-change" id="grossMargin2026Trend">2026 Average</div>
+                    </div>
+                    <div class="summary-card opex">
+                        <div class="summary-header">
+                            <h4><i class="fas fa-chart-bar"></i> Avg EBITDA Margin</h4>
+                            <span class="summary-amount" id="forecast2026EbitdaMargin">0%</span>
                         </div>
-                        <div class="summary-card opex">
-                            <div class="summary-header">
-                                <h4><i class="fas fa-chart-bar"></i> Avg EBITDA Margin</h4>
-                                <span class="summary-amount" id="forecast2026EbitdaMargin">0%</span>
-                            </div>
-                            <div class="summary-change" id="ebitdaMargin2026Trend">2026 Average</div>
-                        </div>
+                        <div class="summary-change" id="ebitdaMargin2026Trend">2026 Average</div>
                     </div>
                 </div>
             `;
             
-            // Show the container
-            insightsContainer.style.display = 'block';
-            
-            // Generate the 2026 trending chart
-            generate2026ForecastTrendingChart();
+            // Show the trending container
+            trendingContainer.style.display = 'block';
         }
 
         function generate2026ForecastTrendingChart() {
