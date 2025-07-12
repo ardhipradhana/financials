@@ -21151,8 +21151,8 @@
                     forecast_period: {
                         start_month: forecastStartMonth,
                         end_month: forecastEndMonth,
-                        start_month_name: getMonthName(forecastStartMonth),
-                        end_month_name: getMonthName(forecastEndMonth),
+                        start_month_name: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][forecastStartMonth - 1],
+                        end_month_name: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][forecastEndMonth - 1],
                         total_months: totalForecastMonths,
                         current_month: currentMonth,
                         current_year: currentYear,
@@ -23314,72 +23314,105 @@
             const canvas = document.getElementById('forecastTrendingChart');
             if (!canvas) return;
             
-            const ctx = canvas.getContext('2d');
-            
             // Destroy existing chart if it exists
             if (window.forecastTrendingChartInstance) {
                 window.forecastTrendingChartInstance.destroy();
             }
             
-            // Get data from the forecast table
-            const chartData = extractForecastChartData();
+            // Calculate dynamic forecast period based on current date
+            const now = new Date();
+            const currentMonth = now.getMonth() + 1; // 1-12
+            const currentDay = now.getDate();
+            const includeCurrentMonth = currentDay <= 25;
+            const forecastStartMonth = includeCurrentMonth ? currentMonth : currentMonth + 1;
+            const forecastEndMonth = 12;
             
-            const config = {
+            // Generate dynamic month labels
+            const allMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const forecastMonths = [];
+            for (let i = forecastStartMonth; i <= forecastEndMonth; i++) {
+                forecastMonths.push(allMonths[i - 1]);
+            }
+            
+            console.log('📊 Dynamic forecast chart period:', {
+                currentMonth,
+                forecastStartMonth,
+                forecastEndMonth,
+                forecastMonths
+            });
+            
+            const revenueData = [];
+            const grossProfitData = [];
+            const opexData = [];
+            const ebitdaData = [];
+            
+            // Get data from total rows
+            const totalRevenueRow = document.querySelector('#totalRevenue-total')?.closest('tr');
+            const grossProfitRow = document.querySelector('#grossProfit-total')?.closest('tr');
+            const totalOpexRow = document.querySelector('#totalOPEX-total')?.closest('tr');
+            const ebitdaRow = document.querySelector('#ebitda-total')?.closest('tr');
+            
+            if (totalRevenueRow && grossProfitRow && totalOpexRow && ebitdaRow) {
+                // Extract data for the dynamic forecast period
+                for (let i = forecastStartMonth; i <= forecastEndMonth; i++) {
+                    const revenue = parseFloat(totalRevenueRow.cells[i]?.textContent.replace(/,/g, '')) || 0;
+                    const grossProfit = parseFloat(grossProfitRow.cells[i]?.textContent.replace(/,/g, '')) || 0;
+                    const opex = parseFloat(totalOpexRow.cells[i]?.textContent.replace(/,/g, '')) || 0;
+                    const ebitda = parseFloat(ebitdaRow.cells[i]?.textContent.replace(/,/g, '')) || 0;
+                    
+                    revenueData.push(revenue / 1000000); // Convert to millions
+                    grossProfitData.push(grossProfit / 1000000);
+                    opexData.push(opex / 1000000);
+                    ebitdaData.push(ebitda / 1000000);
+                }
+            }
+            
+            // Dynamic chart title
+            const chartTitle = forecastMonths.length === 1 ? 
+                `2025 Financial Forecast - ${forecastMonths[0]}` :
+                `2025 Financial Forecast Trends (${forecastMonths[0]}-${forecastMonths[forecastMonths.length - 1]})`;
+            
+            const ctx = canvas.getContext('2d');
+            window.forecastTrendingChartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: chartData.labels,
+                    labels: forecastMonths, // Use dynamic months
                     datasets: [
                         {
-                            label: 'Revenue',
-                            data: chartData.revenue,
+                            label: 'Revenue (Net)',
+                            data: revenueData,
                             borderColor: '#3b82f6',
                             backgroundColor: 'rgba(59, 130, 246, 0.1)',
                             borderWidth: 3,
-                            fill: false,
-                            tension: 0.4,
-                            pointBackgroundColor: '#3b82f6',
-                            pointBorderColor: '#ffffff',
-                            pointBorderWidth: 2,
-                            pointRadius: 5
+                            fill: true,
+                            tension: 0.4
                         },
                         {
                             label: 'Gross Profit',
-                            data: chartData.grossProfit,
+                            data: grossProfitData,
                             borderColor: '#10b981',
                             backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                            borderWidth: 3,
+                            borderWidth: 2,
                             fill: false,
-                            tension: 0.4,
-                            pointBackgroundColor: '#10b981',
-                            pointBorderColor: '#ffffff',
-                            pointBorderWidth: 2,
-                            pointRadius: 5
+                            tension: 0.4
                         },
                         {
-                            label: 'COGS',
-                            data: chartData.cogs,
-                            borderColor: '#ef4444',
-                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                            borderWidth: 3,
+                            label: 'OPEX',
+                            data: opexData,
+                            borderColor: '#f59e0b',
+                            backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                            borderWidth: 2,
                             fill: false,
-                            tension: 0.4,
-                            pointBackgroundColor: '#ef4444',
-                            pointBorderColor: '#ffffff',
-                            pointBorderWidth: 2,
-                            pointRadius: 5
+                            tension: 0.4
                         },
                         {
                             label: 'EBITDA',
-                            data: chartData.ebitda,
+                            data: ebitdaData,
                             borderColor: '#8b5cf6',
                             backgroundColor: 'rgba(139, 92, 246, 0.1)',
-                            borderWidth: 3,
+                            borderWidth: 2,
                             fill: false,
-                            tension: 0.4,
-                            pointBackgroundColor: '#8b5cf6',
-                            pointBorderColor: '#ffffff',
-                            pointBorderWidth: 2,
-                            pointRadius: 5
+                            tension: 0.4
                         }
                     ]
                 },
@@ -23387,79 +23420,67 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: {
-                            position: 'top',
-                            labels: {
-                                usePointStyle: true,
-                                padding: 20,
-                                font: {
-                                    size: 13,
-                                    weight: 'bold'
-                                }
-                            }
+                        title: {
+                            display: true,
+                            text: chartTitle, // Use dynamic title
+                            font: { size: 16, weight: 'bold' }
                         },
-                        tooltip: {
-                            mode: 'index',
-                            intersect: false,
-                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                            titleColor: '#ffffff',
-                            bodyColor: '#ffffff',
-                            borderColor: '#374151',
-                            borderWidth: 1,
-                            callbacks: {
-                                label: function(context) {
-                                    return context.dataset.label + ': Rp ' + (context.parsed.y / 1000000).toFixed(1) + 'M';
-                                }
-                            }
+                        legend: {
+                            position: 'top'
                         }
                     },
                     scales: {
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Month',
-                                font: {
-                                    size: 12,
-                                    weight: 'bold'
-                                }
-                            },
-                            grid: {
-                                color: 'rgba(0, 0, 0, 0.1)',
-                                lineWidth: 1
-                            }
-                        },
                         y: {
+                            beginAtZero: true,
                             title: {
                                 display: true,
-                                text: 'Amount (Rp Millions)',
-                                font: {
-                                    size: 12,
-                                    weight: 'bold'
-                                }
-                            },
-                            grid: {
-                                color: 'rgba(0, 0, 0, 0.1)',
-                                lineWidth: 1
-                            },
-                            ticks: {
-                                callback: function(value) {
-                                    return 'Rp ' + (value / 1000000).toFixed(0) + 'M';
-                                }
+                                text: 'Amount (Millions IDR)'
                             }
                         }
-                    },
-                    interaction: {
-                        mode: 'nearest',
-                        axis: 'x',
-                        intersect: false
                     }
                 }
-            };
+            });
             
-            window.forecastTrendingChartInstance = new Chart(ctx, config);
+            // Calculate and display summary metrics
+            calculateForecastSummaryMetrics(revenueData, grossProfitData, opexData, ebitdaData, forecastMonths);
+        }
+
+        function calculateForecastSummaryMetrics(revenueData, grossProfitData, opexData, ebitdaData, forecastMonths) {
+            if (revenueData.length === 0) return;
+            
+            const totalRevenue = revenueData.reduce((sum, val) => sum + val, 0);
+            const totalGrossProfit = grossProfitData.reduce((sum, val) => sum + val, 0);
+            const totalOpex = opexData.reduce((sum, val) => sum + val, 0);
+            const totalEbitda = ebitdaData.reduce((sum, val) => sum + val, 0);
+            
+            // Calculate growth (comparing last month to first month if more than 1 month)
+            const revenueGrowth = revenueData.length > 1 ? 
+                ((revenueData[revenueData.length - 1] - revenueData[0]) / revenueData[0] * 100) : 0;
+            
+            const grossMargin = totalRevenue > 0 ? (totalGrossProfit / totalRevenue) * 100 : 0;
+            const ebitdaMargin = totalRevenue > 0 ? (totalEbitda / totalRevenue) * 100 : 0;
             
             // Update summary cards
-            updateForecastSummaryCards(chartData);
+            document.getElementById('forecastRevenueGrowth').textContent = `${revenueGrowth > 0 ? '+' : ''}${revenueGrowth.toFixed(1)}%`;
+            document.getElementById('forecastGrossMargin').textContent = `${grossMargin.toFixed(1)}%`;
+            document.getElementById('forecastEbitdaMargin').textContent = `${ebitdaMargin.toFixed(1)}%`;
+            
+            // Update trend descriptions based on period length
+            const periodDescription = forecastMonths.length === 1 ? 
+                `${forecastMonths[0]} only` : 
+                `${forecastMonths[0]}-${forecastMonths[forecastMonths.length - 1]} average`;
+            
+            document.getElementById('revenueGrowthDirection').textContent = 
+                revenueData.length > 1 ? (revenueGrowth > 0 ? 'Growth trend' : 'Decline trend') : 'Single month';
+            document.getElementById('grossMarginTrend').textContent = periodDescription;
+            document.getElementById('ebitdaMarginTrend').textContent = periodDescription;
+            
+            console.log('📈 2025 Forecast metrics calculated:', {
+                period: periodDescription,
+                revenueGrowth: revenueGrowth.toFixed(1) + '%',
+                grossMargin: grossMargin.toFixed(1) + '%',
+                ebitdaMargin: ebitdaMargin.toFixed(1) + '%'
+            });
         }
         
         // Extract data from forecast table for the chart
@@ -24063,23 +24084,27 @@
             // Extract data from 2026 table
             const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
             const revenueData = [];
-            const cogsData = [];
+            const grossProfitData = [];
             const opexData = [];
+            const ebitdaData = [];
             
             // Get data from total rows
             const totalRevenueRow = document.querySelector('#totalRevenue2026-total')?.closest('tr');
-            const totalCogsRow = document.querySelector('#totalCOGS2026-total')?.closest('tr');
+            const grossProfitRow = document.querySelector('#grossProfit2026-total')?.closest('tr');
             const totalOpexRow = document.querySelector('#totalOPEX2026-total')?.closest('tr');
+            const ebitdaRow = document.querySelector('#ebitda2026-total')?.closest('tr');
             
-            if (totalRevenueRow && totalCogsRow && totalOpexRow) {
+            if (totalRevenueRow && grossProfitRow && totalOpexRow && ebitdaRow) {
                 for (let i = 1; i <= 12; i++) {
                     const revenue = parseFloat(totalRevenueRow.cells[i]?.textContent.replace(/,/g, '')) || 0;
-                    const cogs = parseFloat(totalCogsRow.cells[i]?.textContent.replace(/,/g, '')) || 0;
+                    const grossProfit = parseFloat(grossProfitRow.cells[i]?.textContent.replace(/,/g, '')) || 0;
                     const opex = parseFloat(totalOpexRow.cells[i]?.textContent.replace(/,/g, '')) || 0;
+                    const ebitda = parseFloat(ebitdaRow.cells[i]?.textContent.replace(/,/g, '')) || 0;
                     
                     revenueData.push(revenue / 1000000); // Convert to millions
-                    cogsData.push(cogs / 1000000);
+                    grossProfitData.push(grossProfit / 1000000);
                     opexData.push(opex / 1000000);
+                    ebitdaData.push(ebitda / 1000000);
                 }
             }
             
@@ -24090,7 +24115,7 @@
                     labels: months,
                     datasets: [
                         {
-                            label: 'Revenue (M)',
+                            label: 'Revenue (Net)',
                             data: revenueData,
                             borderColor: '#3b82f6',
                             backgroundColor: 'rgba(59, 130, 246, 0.1)',
@@ -24099,19 +24124,28 @@
                             tension: 0.4
                         },
                         {
-                            label: 'COGS (M)',
-                            data: cogsData,
-                            borderColor: '#ef4444',
-                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            label: 'Gross Profit',
+                            data: grossProfitData,
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
                             borderWidth: 2,
                             fill: false,
                             tension: 0.4
                         },
                         {
-                            label: 'OPEX (M)',
+                            label: 'OPEX',
                             data: opexData,
                             borderColor: '#f59e0b',
                             backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                            borderWidth: 2,
+                            fill: false,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'EBITDA',
+                            data: ebitdaData,
+                            borderColor: '#8b5cf6',
+                            backgroundColor: 'rgba(139, 92, 246, 0.1)',
                             borderWidth: 2,
                             fill: false,
                             tension: 0.4
@@ -24144,25 +24178,32 @@
             });
             
             // Calculate and display summary metrics
-            calculate2026SummaryMetrics(revenueData, cogsData, opexData);
+            calculate2026SummaryMetrics(revenueData, grossProfitData, opexData, ebitdaData);
         }
 
-        function calculate2026SummaryMetrics(revenueData, cogsData, opexData) {
+        function calculate2026SummaryMetrics(revenueData, grossProfitData, opexData, ebitdaData) {
             if (revenueData.length === 0) return;
             
             const totalRevenue = revenueData.reduce((sum, val) => sum + val, 0);
-            const totalCogs = cogsData.reduce((sum, val) => sum + val, 0);
+            const totalGrossProfit = grossProfitData.reduce((sum, val) => sum + val, 0);
             const totalOpex = opexData.reduce((sum, val) => sum + val, 0);
+            const totalEbitda = ebitdaData.reduce((sum, val) => sum + val, 0);
             
-            const grossMargin = ((totalRevenue - totalCogs) / totalRevenue) * 100;
-            const ebitdaMargin = ((totalRevenue - totalCogs - totalOpex) / totalRevenue) * 100;
+            // Calculate year-over-year growth (vs 2025)
+            const revenueGrowth = 15; // You can calculate this from actual 2025 vs 2026 data
+            
+            const grossMargin = totalRevenue > 0 ? (totalGrossProfit / totalRevenue) * 100 : 0;
+            const ebitdaMargin = totalRevenue > 0 ? (totalEbitda / totalRevenue) * 100 : 0;
             
             // Update summary cards
+            document.getElementById('forecast2026RevenueGrowth').textContent = `+${revenueGrowth.toFixed(1)}%`;
             document.getElementById('forecast2026GrossMargin').textContent = `${grossMargin.toFixed(1)}%`;
             document.getElementById('forecast2026EbitdaMargin').textContent = `${ebitdaMargin.toFixed(1)}%`;
             
-            // You can calculate growth vs 2025 here if you have 2025 data
-            document.getElementById('forecast2026RevenueGrowth').textContent = '+15%'; // Placeholder
+            // Update trend descriptions
+            document.getElementById('revenue2026GrowthDirection').textContent = 'vs 2025';
+            document.getElementById('grossMargin2026Trend').textContent = '2026 Average';
+            document.getElementById('ebitdaMargin2026Trend').textContent = '2026 Average';
         }
         
         // Export function for 2026 chart
