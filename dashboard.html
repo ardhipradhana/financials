@@ -23525,6 +23525,7 @@
                 
                 // Populate the 2026 table with AI results
                 populate2026TableWithAI(result);
+                await save2026ForecastToSupabase(result);
                 
                 // Show success notification
                 showForecastLoadedNotification(new Date());
@@ -23760,6 +23761,98 @@
                 riskFactors: insights.risk_factors,
                 opportunities: insights.opportunities
             });
+        }
+
+        async function save2026ForecastToSupabase(aiResult) {
+            try {
+                console.log('💾 Saving 2026 forecast to Supabase...');
+                
+                // Get current user
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) {
+                    throw new Error('User not authenticated');
+                }
+                
+                if (!aiResult.forecast_data || !aiResult.forecast_data.monthly_forecasts) {
+                    throw new Error('Invalid AI result format');
+                }
+                
+                const monthlyForecasts = aiResult.forecast_data.monthly_forecasts;
+                
+                // Prepare the forecast data for Supabase
+                const forecastData = {
+                    user_id: user.id, // Add user_id for RLS
+                    forecast_year: 2026,
+                    forecast_type: 'full_year_ai_forecast',
+                    industry_context: document.getElementById('forecast2026IndustrySelect').value,
+                    additional_context: document.getElementById('forecast2026Context').value,
+                    confidence_level: aiResult.confidence,
+                    generated_at: new Date().toISOString(),
+                    model_version: aiResult.model_version || 'ai-agent-v1',
+                    
+                    // Monthly data (rest remains the same...)
+                    monthly_data: monthlyForecasts.map(month => ({
+                        month_number: month.month,
+                        month_name: month.month_name,
+                        sales_revenue: month.revenue_accounts['4010'] || 0,
+                        service_revenue: month.revenue_accounts['4020'] || 0,
+                        total_revenue: (month.revenue_accounts['4010'] || 0) + (month.revenue_accounts['4020'] || 0),
+                        direct_costs: month.cogs_accounts['5010'] || 0,
+                        total_cogs: (month.cogs_accounts['5010'] || 0) + (month.cogs_accounts['5020'] || 0),
+                        operating_expenses: month.opex_accounts['5100'] || 0,
+                        total_opex: (month.opex_accounts['5100'] || 0) + (month.opex_accounts['5110'] || 0),
+                        gross_profit: ((month.revenue_accounts['4010'] || 0) + (month.revenue_accounts['4020'] || 0)) - ((month.cogs_accounts['5010'] || 0) + (month.cogs_accounts['5020'] || 0)),
+                        ebitda: ((month.revenue_accounts['4010'] || 0) + (month.revenue_accounts['4020'] || 0)) - ((month.cogs_accounts['5010'] || 0) + (month.cogs_accounts['5020'] || 0)) - ((month.opex_accounts['5100'] || 0) + (month.opex_accounts['5110'] || 0))
+                    })),
+                    
+                    // Year totals
+                    year_totals: {
+                        total_revenue: monthlyForecasts.reduce((sum, m) => sum + (m.revenue_accounts['4010'] || 0) + (m.revenue_accounts['4020'] || 0), 0),
+                        total_cogs: monthlyForecasts.reduce((sum, m) => sum + (m.cogs_accounts['5010'] || 0) + (m.cogs_accounts['5020'] || 0), 0),
+                        total_opex: monthlyForecasts.reduce((sum, m) => sum + (m.opex_accounts['5100'] || 0) + (m.opex_accounts['5110'] || 0), 0),
+                        gross_profit: monthlyForecasts.reduce((sum, m) => {
+                            const revenue = (m.revenue_accounts['4010'] || 0) + (m.revenue_accounts['4020'] || 0);
+                            const cogs = (m.cogs_accounts['5010'] || 0) + (m.cogs_accounts['5020'] || 0);
+                            return sum + (revenue - cogs);
+                        }, 0),
+                        ebitda: monthlyForecasts.reduce((sum, m) => {
+                            const revenue = (m.revenue_accounts['4010'] || 0) + (m.revenue_accounts['4020'] || 0);
+                            const cogs = (m.cogs_accounts['5010'] || 0) + (m.cogs_accounts['5020'] || 0);
+                            const opex = (m.opex_accounts['5100'] || 0) + (m.opex_accounts['5110'] || 0);
+                            return sum + (revenue - cogs - opex);
+                        }, 0)
+                    },
+                    
+                    // AI insights
+                    ai_insights: {
+                        key_trends: aiResult.insights?.key_trends || '',
+                        risk_factors: aiResult.insights?.risk_factors || '',
+                        opportunities: aiResult.insights?.opportunities || '',
+                        methodology: aiResult.insights?.methodology || ''
+                    }
+                };
+                
+                // Calculate margins
+                forecastData.year_totals.gross_margin = (forecastData.year_totals.gross_profit / forecastData.year_totals.total_revenue) * 100;
+                forecastData.year_totals.ebitda_margin = (forecastData.year_totals.ebitda / forecastData.year_totals.total_revenue) * 100;
+                
+                // Save to Supabase
+                const { data, error } = await supabase
+                    .from('ai_forecasts_2026_meridash')
+                    .insert([forecastData])
+                    .select();
+                
+                if (error) {
+                    throw error;
+                }
+                
+                console.log('✅ 2026 forecast saved to Supabase:', data);
+                return data;
+                
+            } catch (error) {
+                console.error('❌ Error saving 2026 forecast to Supabase:', error);
+                throw error;
+            }
         }
         
         // Helper function to populate table with forecast data
