@@ -21232,6 +21232,8 @@
                     
                     // Generate trending chart
                     generateForecastTrendingChart();
+
+                    await saveForecastToSupabase(result, payload.forecast_period);
                 }
         
                 // Show success notification
