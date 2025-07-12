@@ -21329,24 +21329,26 @@
             const months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
             
             months.forEach((month, index) => {
+                const cellIndex = index + 2; // +2 because first column is line item
+                
                 // Get revenue for this month
-                const revenueCell = document.querySelector(`.pl-revenue-total td:nth-child(${index + 2})`);
+                const revenueCell = document.querySelector(`.pl-revenue-total td:nth-child(${cellIndex})`);
                 const revenue = parseFloat(revenueCell?.textContent?.replace(/,/g, '') || 0);
                 
                 if (revenue === 0) {
                     // Set all margins to 0% if no revenue
-                    setMarginCell('.pl-gross-margin', index + 2, '0.0%');
-                    setMarginCell('.pl-opex-margin', index + 2, '0.0%');
-                    setMarginCell('.pl-ebitda-margin', index + 2, '0.0%');
-                    setMarginCell('.pl-net-margin', index + 2, '0.0%');
+                    setMarginCellByClass('.pl-gross-margin', cellIndex, '0.0%');
+                    setMarginCellByClass('.pl-opex-margin', cellIndex, '0.0%');
+                    setMarginCellByClass('.pl-ebitda-margin', cellIndex, '0.0%');
+                    setMarginCellByClass('.pl-net-margin', cellIndex, '0.0%');
                     return;
                 }
                 
                 // Get values for margin calculations
-                const grossProfitCell = document.querySelector(`.pl-gross-profit td:nth-child(${index + 2})`);
-                const opexCell = document.querySelector(`.pl-opex-total td:nth-child(${index + 2})`);
-                const ebitdaCell = document.querySelector(`.pl-ebitda td:nth-child(${index + 2})`);
-                const netIncomeCell = document.querySelector(`.pl-net-income td:nth-child(${index + 2})`);
+                const grossProfitCell = document.querySelector(`.pl-gross-profit td:nth-child(${cellIndex})`);
+                const opexCell = document.querySelector(`.pl-opex-total td:nth-child(${cellIndex})`);
+                const ebitdaCell = document.querySelector(`.pl-ebitda td:nth-child(${cellIndex})`);
+                const netIncomeCell = document.querySelector(`.pl-net-income td:nth-child(${cellIndex})`);
                 
                 const grossProfit = parseFloat(grossProfitCell?.textContent?.replace(/,/g, '') || 0);
                 const opex = parseFloat(opexCell?.textContent?.replace(/,/g, '') || 0);
@@ -21359,22 +21361,25 @@
                 const ebitdaMargin = (ebitda / revenue) * 100;
                 const netMargin = (netIncome / revenue) * 100;
                 
-                // Update margin cells
-                setMarginCell('.pl-gross-margin', index + 2, `${grossMargin.toFixed(1)}%`);
-                setMarginCell('.pl-opex-margin', index + 2, `${opexMargin.toFixed(1)}%`);
-                setMarginCell('.pl-ebitda-margin', index + 2, `${ebitdaMargin.toFixed(1)}%`);
-                setMarginCell('.pl-net-margin', index + 2, `${netMargin.toFixed(1)}%`);
+                // Update margin cells with proper selectors
+                setMarginCellByClass('.pl-gross-margin', cellIndex, `${grossMargin.toFixed(1)}%`);
+                setMarginCellByClass('.pl-opex-margin', cellIndex, `${opexMargin.toFixed(1)}%`);
+                setMarginCellByClass('.pl-ebitda-margin', cellIndex, `${ebitdaMargin.toFixed(1)}%`);
+                setMarginCellByClass('.pl-net-margin', cellIndex, `${netMargin.toFixed(1)}%`);
             });
             
             // Calculate margin totals
             calculateMarginTotals();
         }
         
-        // Helper function to set margin cell values
-        function setMarginCell(rowSelector, cellIndex, value) {
-            const cell = document.querySelector(`${rowSelector} td:nth-child(${cellIndex})`);
-            if (cell) {
-                cell.textContent = value;
+        // Updated helper function to set margin cell values
+        function setMarginCellByClass(rowSelector, cellIndex, value) {
+            const row = document.querySelector(rowSelector);
+            if (row) {
+                const cell = row.querySelector(`td:nth-child(${cellIndex})`);
+                if (cell) {
+                    cell.textContent = value;
+                }
             }
         }
 
@@ -21385,18 +21390,23 @@
             
             if (totalRevenue === 0) {
                 // Set all total margins to 0%
-                setTotalMargin('grossMargin-total', '0.0%');
-                setTotalMargin('opexMargin-total', '0.0%');
-                setTotalMargin('ebitdaMargin-total', '0.0%');
-                setTotalMargin('netMargin-total', '0.0%');
+                setTotalMarginById('grossMargin-total', '0.0%');
+                setTotalMarginById('opexMargin-total', '0.0%');
+                setTotalMarginById('ebitdaMargin-total', '0.0%');
+                setTotalMarginById('netMargin-total', '0.0%');
                 return;
             }
             
             // Get total values for margin calculations
-            const totalGrossProfit = parseFloat(document.getElementById('grossProfit-total')?.textContent?.replace(/,/g, '') || 0);
-            const totalOpex = parseFloat(document.getElementById('totalOPEX-total')?.textContent?.replace(/,/g, '') || 0);
-            const totalEbitda = parseFloat(document.getElementById('ebitda-total')?.textContent?.replace(/,/g, '') || 0);
-            const totalNetIncome = parseFloat(document.getElementById('netIncome-total')?.textContent?.replace(/,/g, '') || 0);
+            const totalGrossProfitCell = document.getElementById('grossProfit-total');
+            const totalOpexCell = document.getElementById('totalOPEX-total');
+            const totalEbitdaCell = document.getElementById('ebitda-total');
+            const totalNetIncomeCell = document.getElementById('netIncome-total');
+            
+            const totalGrossProfit = parseFloat(totalGrossProfitCell?.textContent?.replace(/,/g, '') || 0);
+            const totalOpex = parseFloat(totalOpexCell?.textContent?.replace(/,/g, '') || 0);
+            const totalEbitda = parseFloat(totalEbitdaCell?.textContent?.replace(/,/g, '') || 0);
+            const totalNetIncome = parseFloat(totalNetIncomeCell?.textContent?.replace(/,/g, '') || 0);
             
             // Calculate total margin percentages
             const grossMargin = (totalGrossProfit / totalRevenue) * 100;
@@ -21404,15 +21414,15 @@
             const ebitdaMargin = (totalEbitda / totalRevenue) * 100;
             const netMargin = (totalNetIncome / totalRevenue) * 100;
             
-            // Update total margin cells
-            setTotalMargin('grossMargin-total', `${grossMargin.toFixed(1)}%`);
-            setTotalMargin('opexMargin-total', `${opexMargin.toFixed(1)}%`);
-            setTotalMargin('ebitdaMargin-total', `${ebitdaMargin.toFixed(1)}%`);
-            setTotalMargin('netMargin-total', `${netMargin.toFixed(1)}%`);
+            // Update total margin cells with specific IDs
+            setTotalMarginById('grossMargin-total', `${grossMargin.toFixed(1)}%`);
+            setTotalMarginById('opexMargin-total', `${opexMargin.toFixed(1)}%`);
+            setTotalMarginById('ebitdaMargin-total', `${ebitdaMargin.toFixed(1)}%`);
+            setTotalMarginById('netMargin-total', `${netMargin.toFixed(1)}%`);
         }
         
-        // Helper function to set total margin values
-        function setTotalMargin(elementId, value) {
+        // Updated helper function to set total margin values by ID
+        function setTotalMarginById(elementId, value) {
             const element = document.getElementById(elementId);
             if (element) {
                 element.textContent = value;
