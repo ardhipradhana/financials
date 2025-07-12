@@ -20473,19 +20473,14 @@
         function buildPLStructureFromGLAccounts(glAccounts) {
             console.log('🔥 Building P&L structure from GL accounts...');
             
-            // FIXED: Categorize accounts based on YOUR actual account codes
+            // CORRECTED: Categorize accounts based on broader COGS range
             const accountCategories = {
                 revenue: glAccounts.filter(acc => acc.account_code >= 4000 && acc.account_code < 5000),
                 cogs: glAccounts.filter(acc => 
-                    acc.account_code === 5010 || 
-                    acc.account_code === 5020 || 
-                    acc.account_code === 5030
+                    acc.account_code >= 5000 && acc.account_code < 5100  // Changed to broader range
                 ),
                 opex: glAccounts.filter(acc => 
-                    acc.account_code >= 5000 && acc.account_code < 6000 &&
-                    acc.account_code !== 5010 && 
-                    acc.account_code !== 5020 && 
-                    acc.account_code !== 5030
+                    acc.account_code >= 5100 && acc.account_code < 6000  // Changed to start from 5100
                 )
             };
             
@@ -20733,16 +20728,20 @@
                 }
                 
                 // For P&L, we need net effect (debits - credits for expenses, credits - debits for revenue)
-                const netAmount = parseFloat(transaction.debit_amount || 0) - parseFloat(transaction.credit_amount || 0);
+                const debitAmount = parseFloat(transaction.debit_amount || 0);
+                const creditAmount = parseFloat(transaction.credit_amount || 0);
                 
-                // Revenue accounts (4000-4999): credits increase revenue, so use negative net amount
-                // Expense accounts (5000-5999): debits increase expenses, so use positive net amount
+                // CORRECTED: Revenue accounts (4000-4999): credits increase revenue
                 if (accountCode >= 4000 && accountCode < 5000) {
-                    monthlyData[accountCode][month] += -netAmount; // Revenue: credits are positive
-                } else if (accountCode >= 5000 && accountCode < 6000) {
-                    monthlyData[accountCode][month] += netAmount; // Expenses: debits are positive
-                } else if (accountCode >= 2000 && accountCode < 3000) {
-                    monthlyData[accountCode][month] += netAmount; // COGS: debits are positive
+                    monthlyData[accountCode][month] += (creditAmount - debitAmount); // Revenue: credits are positive
+                } 
+                // CORRECTED: COGS accounts (5000-5099): debits increase COGS
+                else if (accountCode >= 5000 && accountCode < 5100) {
+                    monthlyData[accountCode][month] += (debitAmount - creditAmount); // COGS: debits are positive
+                } 
+                // CORRECTED: OPEX accounts (5100-5999): debits increase expenses
+                else if (accountCode >= 5100 && accountCode < 6000) {
+                    monthlyData[accountCode][month] += (debitAmount - creditAmount); // OPEX: debits are positive
                 }
             });
             
@@ -20764,7 +20763,7 @@
                 });
             });
             
-            // Recalculate all totals
+            // Recalculate all totals and derived metrics
             recalculateEntirePL();
             
             console.log('P&L populated with actual data!');
