@@ -6548,14 +6548,24 @@
         .forecasting-ai-controls {
             display: flex;
             align-items: end;
+            justify-content: space-between;
             gap: 1rem;
             margin-bottom: 1.5rem;
-            padding: 1rem 1.5rem;
-            background: white;
-            border-radius: 8px;
-            border: 1px solid #e2e8f0;
+            padding: 1rem 0;
             flex-wrap: wrap;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .forecasting-ai-controls-left {
+            display: flex;
+            align-items: end;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .forecasting-ai-controls-right {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
         }
         
         .industry-input-wrapper,
@@ -7660,6 +7670,17 @@
             
             .header-right {
                 justify-content: center;
+            }
+
+            .forecasting-ai-controls {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1rem;
+            }
+            
+            .forecasting-ai-controls-left,
+            .forecasting-ai-controls-right {
+                justify-content: flex-start;
             }
         }
         
@@ -9438,26 +9459,31 @@
                             </div>
                         </div>
 
-                        <div class="forecasting-ai-controls" style="margin-bottom: 1rem;">
-                            <div class="industry-input-wrapper">
-                                <select id="forecastIndustrySelect" class="industry-input-select">
-                                    <option value="">Select Industry for AI Context</option>
-                                    <option value="saas">SaaS / Technology</option>
-                                    <option value="retail">Retail / E-commerce</option>
-                                    <option value="consulting">Consulting / Services</option>
-                                    <option value="manufacturing">Manufacturing</option>
-                                    <option value="healthcare">Healthcare</option>
-                                    <option value="fintech">FinTech</option>
-                                </select>
+                        <div class="forecasting-ai-controls">
+                            <div class="forecasting-ai-controls-left">
+                                <div class="industry-input-wrapper">
+                                    <label for="forecastIndustrySelect">Industry Context:</label>
+                                    <select id="forecastIndustrySelect" class="industry-input-select">
+                                        <option value="">Select Industry for AI Context</option>
+                                        <option value="saas">SaaS / Technology</option>
+                                        <option value="retail">Retail / E-commerce</option>
+                                        <option value="consulting">Consulting / Services</option>
+                                        <option value="manufacturing">Manufacturing</option>
+                                        <option value="healthcare">Healthcare</option>
+                                        <option value="fintech">FinTech</option>
+                                    </select>
+                                </div>
+                                <button class="btn btn-outline" onclick="loadLatestForecastFromSupabase()" title="Load latest forecast from database">
+                                    <i class="fas fa-history"></i>
+                                    Load Latest Forecast
+                                </button>
                             </div>
-                            <button class="btn btn-outline" onclick="loadLatestForecastFromSupabase()" title="Load latest forecast from database">
-                                <i class="fas fa-history"></i>
-                                Load Latest Forecast
-                            </button>
-                            <button class="btn btn-primary" id="generateAIForecast">
-                                <i class="fas fa-brain"></i>
-                                Generate AI Forecast
-                            </button>
+                            <div class="forecasting-ai-controls-right">
+                                <button class="btn btn-primary" id="generateAIForecast">
+                                    <i class="fas fa-brain"></i>
+                                    Generate AI Forecast
+                                </button>
+                            </div>
                         </div>
                         
                         <div class="pl-table-scroll">
@@ -9614,26 +9640,31 @@
                             </div>
                         </div>
 
-                        <div class="forecasting-ai-controls" style="margin-bottom: 1rem;">
-                            <div class="industry-input-wrapper">
-                                <select id="forecast2026IndustrySelect" class="industry-input-select">
-                                    <option value="">Select Industry for AI Context</option>
-                                    <option value="saas">SaaS / Technology</option>
-                                    <option value="retail">Retail / E-commerce</option>
-                                    <option value="consulting">Consulting / Services</option>
-                                    <option value="manufacturing">Manufacturing</option>
-                                    <option value="healthcare">Healthcare</option>
-                                    <option value="fintech">FinTech</option>
-                                </select>
+                        <div class="forecasting-ai-controls">
+                            <div class="forecasting-ai-controls-left">
+                                <div class="industry-input-wrapper">
+                                    <label for="forecast2026IndustrySelect">Industry Context:</label>
+                                    <select id="forecast2026IndustrySelect" class="industry-input-select">
+                                        <option value="">Select Industry for AI Context</option>
+                                        <option value="saas">SaaS / Technology</option>
+                                        <option value="retail">Retail / E-commerce</option>
+                                        <option value="consulting">Consulting / Services</option>
+                                        <option value="manufacturing">Manufacturing</option>
+                                        <option value="healthcare">Healthcare</option>
+                                        <option value="fintech">FinTech</option>
+                                    </select>
+                                </div>
+                                <div class="context-input-wrapper">
+                                    <label for="forecast2026Context">Additional Context:</label>
+                                    <input type="text" id="forecast2026Context" placeholder="e.g., Expanding to new markets, launching new product..." style="width: 100%; padding: 0.5rem; border: 1px solid #e2e8f0; border-radius: 6px;">
+                                </div>
                             </div>
-                            <div class="context-input-wrapper" style="flex: 1; margin-left: 1rem;">
-                                <label for="forecast2026Context">Additional Context:</label>
-                                <input type="text" id="forecast2026Context" placeholder="e.g., Expanding to new markets, launching new product..." style="width: 100%; padding: 0.5rem; border: 1px solid #e2e8f0; border-radius: 6px;">
+                            <div class="forecasting-ai-controls-right">
+                                <button class="btn btn-primary" id="generateAI2026Forecast">
+                                    <i class="fas fa-brain"></i>
+                                    Generate AI Forecast
+                                </button>
                             </div>
-                            <button class="btn btn-primary" id="generateAI2026Forecast">
-                                <i class="fas fa-brain"></i>
-                                Generate AI Forecast
-                            </button>
                         </div>
                         
                         <div class="pl-table-scroll">
