@@ -23539,96 +23539,57 @@
             }
         }
         
-        // Fix the extractFullYearData function to get complete 2025 data
+        // Fix the extractFullYearData function with dynamic actual/forecast periods
         function extractFullYearData() {
-            const data = {
-                actuals: {},
-                forecast: {},
-                totals: {},
-                monthlyData: [] // Add this for complete monthly breakdown
-            };
-            
-            // Extract data from the current year table (which should have all 12 months)
-            const tbody = document.getElementById('plForecastBody');
-            if (!tbody) {
-                console.error('❌ Could not find plForecastBody table');
-                return null;
-            }
-            
-            const rows = tbody.querySelectorAll('tr:not(.placeholder-row)');
-            if (rows.length === 0) {
-                console.error('❌ No forecast data found. Please generate 2025 forecast first.');
-                return null;
-            }
-            
-            console.log('📊 Extracting full year data from', rows.length, 'rows');
-            
-            // Create monthly data structure for all 12 months
+            const monthlyBreakdown = [];
             const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-            const monthlyBreakdown = months.map((month, index) => ({
-                month: `2025-${String(index + 1).padStart(2, '0')}`,
-                year: 2025,
-                month_number: index + 1,
-                month_name: month,
-                revenue: 0,
-                cogs: 0,
-                opex: 0,
-                gross_profit: 0,
-                ebitda: 0,
-                is_actual: index < 6, // Jan-Jun are actuals, Jul-Dec are forecast
-                is_forecast: index >= 6
-            }));
             
-            rows.forEach(row => {
-                const cells = row.querySelectorAll('td');
-                if (cells.length >= 14) { // Should have 13 months + total column
-                    const lineItem = cells[0].textContent.trim();
-                    
-                    // Skip section headers and margin rows
-                    if (lineItem === '' || lineItem.includes('REVENUE') || lineItem.includes('COGS') || 
-                        lineItem.includes('OPEX') || lineItem.includes('Margin') || lineItem.includes('%')) {
-                        return;
-                    }
-                    
-                    // Extract monthly values (cells 1-12 are the months)
-                    const monthlyValues = [];
-                    for (let i = 1; i <= 12; i++) {
-                        const cellValue = parseFloat(cells[i].textContent.replace(/,/g, '')) || 0;
-                        monthlyValues.push(cellValue);
-                    }
-                    
-                    // Map line items to our monthly breakdown
-                    monthlyValues.forEach((value, monthIndex) => {
-                        if (lineItem.includes('Revenue') || lineItem.includes('Sales')) {
-                            monthlyBreakdown[monthIndex].revenue += value;
-                        } else if (lineItem.includes('COGS') || lineItem.includes('Cost of')) {
-                            monthlyBreakdown[monthIndex].cogs += value;
-                        } else if (lineItem.includes('OPEX') || lineItem.includes('Operating') || 
-                                  lineItem.includes('Marketing') || lineItem.includes('Salaries') || 
-                                  lineItem.includes('Administrative') || lineItem.includes('Other')) {
-                            monthlyBreakdown[monthIndex].opex += value;
-                        }
-                    });
-                    
-                    // Store in the original format for backward compatibility
-                    data.actuals[lineItem] = monthlyValues.slice(0, 6); // Jan-Jun
-                    data.forecast[lineItem] = monthlyValues.slice(6, 12); // Jul-Dec
-                    data.totals[lineItem] = parseFloat(cells[13].textContent.replace(/,/g, '')) || 0;
-                }
-            });
+            // Calculate dynamic cutoff based on current date
+            const now = new Date();
+            const currentMonth = now.getMonth() + 1; // 1-12
+            const currentDay = now.getDate();
+            const includeCurrentMonth = currentDay <= 25;
+            const actualEndMonth = includeCurrentMonth ? currentMonth : currentMonth - 1;
             
-            // Calculate derived metrics for each month
-            monthlyBreakdown.forEach(month => {
-                month.gross_profit = month.revenue - month.cogs;
-                month.ebitda = month.gross_profit - month.opex;
-                month.gross_margin = month.revenue > 0 ? (month.gross_profit / month.revenue) * 100 : 0;
-                month.ebitda_margin = month.revenue > 0 ? (month.ebitda / month.revenue) * 100 : 0;
-            });
+            // Get data directly from the total rows using their IDs
+            const totalRevenueRow = document.querySelector('#totalRevenue-total')?.closest('tr');
+            const totalCogsRow = document.querySelector('#totalCOGS-total')?.closest('tr');
+            const totalOpexRow = document.querySelector('#totalOPEX-total')?.closest('tr');
             
-            data.monthlyData = monthlyBreakdown;
+            if (!totalRevenueRow || !totalCogsRow || !totalOpexRow) {
+                console.error('❌ Could not find total rows. Please generate forecast first.');
+                return null;
+            }
+            
+            for (let i = 0; i < 12; i++) {
+                const monthNumber = i + 1;
+                const revenueCells = totalRevenueRow.querySelectorAll('td');
+                const cogsCells = totalCogsRow.querySelectorAll('td');
+                const opexCells = totalOpexRow.querySelectorAll('td');
+                
+                const revenue = parseFloat(revenueCells[i + 1]?.textContent.replace(/,/g, '')) || 0;
+                const cogs = parseFloat(cogsCells[i + 1]?.textContent.replace(/,/g, '')) || 0;
+                const opex = parseFloat(opexCells[i + 1]?.textContent.replace(/,/g, '')) || 0;
+                
+                monthlyBreakdown.push({
+                    month: `2025-${String(monthNumber).padStart(2, '0')}`,
+                    year: 2025,
+                    month_number: monthNumber,
+                    month_name: months[i],
+                    revenue: revenue,
+                    cogs: cogs,
+                    opex: opex,
+                    gross_profit: revenue - cogs,
+                    ebitda: revenue - cogs - opex,
+                    is_actual: monthNumber <= actualEndMonth,
+                    is_forecast: monthNumber > actualEndMonth,
+                    gross_margin: revenue > 0 ? ((revenue - cogs) / revenue) * 100 : 0,
+                    ebitda_margin: revenue > 0 ? ((revenue - cogs - opex) / revenue) * 100 : 0
+                });
+            }
             
             // Calculate year totals
-            data.yearTotals = {
+            const yearTotals = {
                 totalRevenue: monthlyBreakdown.reduce((sum, month) => sum + month.revenue, 0),
                 totalCogs: monthlyBreakdown.reduce((sum, month) => sum + month.cogs, 0),
                 totalOpex: monthlyBreakdown.reduce((sum, month) => sum + month.opex, 0),
@@ -23636,17 +23597,20 @@
                 totalEbitda: monthlyBreakdown.reduce((sum, month) => sum + month.ebitda, 0)
             };
             
-            data.yearTotals.grossMargin = (data.yearTotals.totalGrossProfit / data.yearTotals.totalRevenue) * 100;
-            data.yearTotals.ebitdaMargin = (data.yearTotals.totalEbitda / data.yearTotals.totalRevenue) * 100;
+            yearTotals.grossMargin = (yearTotals.totalGrossProfit / yearTotals.totalRevenue) * 100;
+            yearTotals.ebitdaMargin = (yearTotals.totalEbitda / yearTotals.totalRevenue) * 100;
             
-            console.log('✅ Full year data extracted:', {
-                months: data.monthlyData.length,
-                yearTotals: data.yearTotals,
-                actualMonths: data.monthlyData.filter(m => m.is_actual).length,
-                forecastMonths: data.monthlyData.filter(m => m.is_forecast).length
+            console.log('📅 Dynamic periods:', {
+                currentMonth,
+                actualEndMonth,
+                actualsCount: monthlyBreakdown.filter(m => m.is_actual).length,
+                forecastCount: monthlyBreakdown.filter(m => m.is_forecast).length
             });
             
-            return data;
+            return {
+                monthlyData: monthlyBreakdown,
+                yearTotals: yearTotals
+            };
         }
         
         // Populate 2026 table with AI forecast results
