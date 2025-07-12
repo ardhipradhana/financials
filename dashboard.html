@@ -20922,7 +20922,7 @@
         }
         
         function switchForecastPeriod(period) {
-            // Clear ALL active states first (this fixes the double active issue)
+            // Clear ALL active states first
             document.querySelectorAll('.period-tab-btn, .period-tab').forEach(tab => {
                 tab.classList.remove('active');
             });
@@ -20935,12 +20935,14 @@
                 container.style.display = 'none';
             });
             
-            // Hide AI insights and trending chart when switching tabs
+            // Hide ALL insights and trending chart containers when switching tabs
             const aiInsightsContainer = document.getElementById('aiInsightsContainer');
             const forecastTrendingContainer = document.getElementById('forecastTrendingContainer');
+            const ai2026InsightsContainer = document.getElementById('ai2026InsightsContainer');
             
             if (aiInsightsContainer) aiInsightsContainer.style.display = 'none';
             if (forecastTrendingContainer) forecastTrendingContainer.style.display = 'none';
+            if (ai2026InsightsContainer) ai2026InsightsContainer.style.display = 'none';
         
             // Show the appropriate container
             const targetContainer = document.getElementById(`${period}-container`);
@@ -20950,6 +20952,8 @@
                 // Load content based on period
                 if (period === 'next-year') {
                     initialize2026Forecast();
+                    // Show 2026 insights if they exist
+                    if (ai2026InsightsContainer) ai2026InsightsContainer.style.display = 'block';
                 } else if (period === 'current-year') {
                     // Show insights and chart only for current year tab
                     if (aiInsightsContainer) aiInsightsContainer.style.display = 'block';
@@ -23756,11 +23760,81 @@
         
         // Add function to show 2026 insights
         function show2026Insights(insights) {
-            console.log('📊 2026 AI Insights:', {
-                keyTrends: insights.key_trends,
-                riskFactors: insights.risk_factors,
-                opportunities: insights.opportunities
-            });
+            console.log('📊 Displaying 2026 AI Insights...');
+            
+            // Create or find the insights container for 2026
+            let insightsContainer = document.getElementById('ai2026InsightsContainer');
+            
+            if (!insightsContainer) {
+                // Create the insights container after the 2026 table
+                const table2026Container = document.getElementById('next-year-container');
+                
+                insightsContainer = document.createElement('div');
+                insightsContainer.id = 'ai2026InsightsContainer';
+                insightsContainer.className = 'ai-insights-container';
+                insightsContainer.style.marginTop = '2rem';
+                
+                // Insert after the table container
+                table2026Container.parentNode.insertBefore(insightsContainer, table2026Container.nextSibling);
+            }
+            
+            // Populate the insights
+            insightsContainer.innerHTML = `
+                <div class="insights-header-AIinsight">
+                    <h4><i class="fas fa-brain"></i> 2026 AI Analysis & Insights</h4>
+                    <div class="insights-meta">
+                        <span class="confidence-badge">Confidence: 85%</span>
+                        <span class="forecast-date">Generated: ${new Date().toLocaleDateString()}</span>
+                    </div>
+                </div>
+                
+                <div class="insights-content">
+                    <div class="insight-card key-trends-card">
+                        <div class="insight-header">
+                            <i class="fas fa-chart-line insight-icon"></i>
+                            <h5>Key Trends & Growth Drivers</h5>
+                        </div>
+                        <div class="insight-text">
+                            ${formatInsightText(insights.key_trends)}
+                        </div>
+                    </div>
+                    
+                    <div class="insight-card risk-factors-card">
+                        <div class="insight-header">
+                            <i class="fas fa-exclamation-triangle insight-icon"></i>
+                            <h5>Risk Factors & Considerations</h5>
+                        </div>
+                        <div class="insight-text">
+                            ${formatInsightText(insights.risk_factors)}
+                        </div>
+                    </div>
+                    
+                    <div class="insight-card opportunities-card">
+                        <div class="insight-header">
+                            <i class="fas fa-lightbulb insight-icon"></i>
+                            <h5>Growth Opportunities</h5>
+                        </div>
+                        <div class="insight-text">
+                            ${formatInsightText(insights.opportunities)}
+                        </div>
+                    </div>
+                    
+                    ${insights.methodology ? `
+                        <div class="insight-card methodology-card">
+                            <div class="insight-header">
+                                <i class="fas fa-cogs insight-icon"></i>
+                                <h5>Forecast Methodology</h5>
+                            </div>
+                            <div class="insight-text">
+                                ${formatInsightText(insights.methodology)}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            
+            // Show the container
+            insightsContainer.style.display = 'block';
         }
 
         async function save2026ForecastToSupabase(aiResult) {
