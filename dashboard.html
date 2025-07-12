@@ -9460,6 +9460,29 @@
                                 </button>
                             </div>
                         </div>
+
+                        <div class="forecasting-ai-controls" style="margin-bottom: 1rem;">
+                            <div class="industry-input-wrapper">
+                                <label for="forecast2026IndustrySelect">Industry Context:</label>
+                                <select id="forecast2026IndustrySelect" class="industry-input-select">
+                                    <option value="">Select Industry for AI Context</option>
+                                    <option value="saas">SaaS / Technology</option>
+                                    <option value="retail">Retail / E-commerce</option>
+                                    <option value="consulting">Consulting / Services</option>
+                                    <option value="manufacturing">Manufacturing</option>
+                                    <option value="healthcare">Healthcare</option>
+                                    <option value="fintech">FinTech</option>
+                                </select>
+                            </div>
+                            <div class="context-input-wrapper" style="flex: 1; margin-left: 1rem;">
+                                <label for="forecast2026Context">Additional Context:</label>
+                                <input type="text" id="forecast2026Context" placeholder="e.g., Expanding to new markets, launching new product..." style="width: 100%; padding: 0.5rem; border: 1px solid #e2e8f0; border-radius: 6px;">
+                            </div>
+                            <button class="btn btn-primary" id="generateAI2026Forecast">
+                                <i class="fas fa-brain"></i>
+                                Generate AI Forecast
+                            </button>
+                        </div>
                         
                         <div class="pl-table-scroll">
                             <table class="pl-forecast-table" id="plForecast2026Table">
@@ -22447,6 +22470,11 @@
                 initializePLForecasting();
                 loadSavedPLForecast();
             }, 1000);
+
+            const generate2026Button = document.getElementById('generateAI2026Forecast');
+            if (generate2026Button) {
+                generate2026Button.addEventListener('click', generateAI2026Forecast);
+            }
         });
         
         // Auto-save every 30 seconds
@@ -22455,7 +22483,7 @@
         function initializePeriodTabs() {
             document.querySelectorAll('.period-tab-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
-                    switchPLForecastPeriod(this.dataset.period);
+                    switchForecastPeriod(this.dataset.period); 
                 });
             });
         }
@@ -23204,264 +23232,147 @@
             }
         }
 
-        // Initialize 2026 forecast functionality
-        function initialize2026Forecast() {
-            console.log('🚀 Initializing 2026 forecast...');
+        // Generate 2026 AI Forecast Function
+        async function generateAI2026Forecast() {
+            console.log('🚀 Starting 2026 AI Forecast Generation...');
             
-            // Check if we have current year forecast data to base 2026 on
-            const currentYearData = extractCurrentYearTotals();
+            const industry = document.getElementById('forecast2026IndustrySelect').value;
+            const additionalContext = document.getElementById('forecast2026Context').value;
             
-            if (!currentYearData || currentYearData.totalRevenue === 0) {
-                show2026EmptyState();
+            if (!industry) {
+                alert('Please select an industry for AI context');
                 return;
             }
             
-            // Generate 2026 forecast based on current year
-            generate2026ForecastTable(currentYearData);
+            // Show loading state
+            const button = document.getElementById('generateAI2026Forecast');
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating 2026 Forecast...';
+            button.disabled = true;
             
-            // Show 2026-specific insights
-            show2026Insights(currentYearData);
-        }
-        
-        // Extract current year totals for 2026 baseline
-        function extractCurrentYearTotals() {
-            const totalRevenueCell = document.querySelector('#totalRevenue-total');
-            const totalCogsCell = document.querySelector('#totalCOGS-total');
-            const totalOpexCell = document.querySelector('#totalOPEX-total');
-            const grossProfitCell = document.querySelector('#grossProfit-total');
-            const ebitdaCell = document.querySelector('#ebitda-total');
-            
-            if (!totalRevenueCell) {
-                console.log('No current year data found');
-                return null;
+            try {
+                // Extract current year data (both actuals and forecast)
+                const currentYearData = extractFullYearData();
+                
+                if (!currentYearData) {
+                    alert('Please generate the current year forecast first');
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                    return;
+                }
+                
+                // Prepare payload for 2026 forecast
+                const payload = {
+                    year: 2026,
+                    industry: industry,
+                    additionalContext: additionalContext,
+                    baselineData: currentYearData,
+                    requestType: 'full_year_forecast'
+                };
+                
+                console.log('📤 Sending 2026 forecast request:', payload);
+                
+                // Call n8n webhook
+                const response = await fetch('https://montpro.app.n8n.cloud/webhook/ai-forecast-2026', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                console.log('📥 2026 AI Forecast received:', result);
+                
+                // Populate the 2026 table with AI results
+                populate2026TableWithAI(result);
+                
+                // Show success notification
+                showForecastLoadedNotification(new Date());
+                
+            } catch (error) {
+                console.error('❌ 2026 Forecast generation failed:', error);
+                alert('Failed to generate 2026 forecast. Please try again.');
+            } finally {
+                // Reset button
+                button.innerHTML = originalText;
+                button.disabled = false;
             }
-            
-            return {
-                totalRevenue: parseFloat(totalRevenueCell.textContent.replace(/,/g, '')) || 0,
-                totalCogs: parseFloat(totalCogsCell?.textContent.replace(/,/g, '')) || 0,
-                totalOpex: parseFloat(totalOpexCell?.textContent.replace(/,/g, '')) || 0,
-                grossProfit: parseFloat(grossProfitCell?.textContent.replace(/,/g, '')) || 0,
-                ebitda: parseFloat(ebitdaCell?.textContent.replace(/,/g, '')) || 0
-            };
         }
         
-        // Show empty state for 2026 when no current year data
-        function show2026EmptyState() {
-            const tbody = document.getElementById('plForecast2026Body');
-            if (tbody) {
-                tbody.innerHTML = `
-                    <tr class="placeholder-row">
-                        <td colspan="14" class="placeholder-text">
-                            <i class="fas fa-info-circle"></i>
-                            Generate current year forecast first to enable 2026 projections
-                        </td>
-                    </tr>
-                `;
-            }
-        }
-        
-        // Generate 2026 forecast table with growth assumptions
-        function generate2026ForecastTable(baseData) {
-            console.log('📊 Generating 2026 forecast based on:', baseData);
-            
-            // Growth assumptions for 2026
-            const growthAssumptions = {
-                revenue: 1.15, // 15% growth
-                cogs: 1.12,    // 12% growth (improving efficiency)
-                opex: 1.08     // 8% growth (operational leverage)
+        // Extract full year data (actuals + forecast) for 2026 baseline
+        function extractFullYearData() {
+            const data = {
+                actuals: {},
+                forecast: {},
+                totals: {}
             };
             
-            // Calculate 2026 projections
-            const projections2026 = {
-                totalRevenue: baseData.totalRevenue * growthAssumptions.revenue,
-                totalCogs: baseData.totalCogs * growthAssumptions.cogs,
-                totalOpex: baseData.totalOpex * growthAssumptions.opex
-            };
+            // Extract actuals (Jan-Jun) and forecast (Jul-Dec) from current year table
+            const tbody = document.getElementById('plForecastBody');
+            if (!tbody) return null;
             
-            projections2026.grossProfit = projections2026.totalRevenue - projections2026.totalCogs;
-            projections2026.ebitda = projections2026.grossProfit - projections2026.totalOpex;
+            const rows = tbody.querySelectorAll('tr');
             
-            // Distribute across months (simplified even distribution for now)
-            const monthlyRevenue = projections2026.totalRevenue / 12;
-            const monthlyCogs = projections2026.totalCogs / 12;
-            const monthlyOpex = projections2026.totalOpex / 12;
-            
-            // Populate the 2026 table
-            populate2026Table({
-                monthlyRevenue,
-                monthlyCogs,
-                monthlyOpex,
-                projections2026,
-                growthAssumptions
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                if (cells.length >= 13) {
+                    const lineItem = cells[0].textContent.trim();
+                    
+                    // Extract monthly data (months 1-12) and totals
+                    data.actuals[lineItem] = Array.from(cells).slice(1, 7).map(cell => 
+                        parseFloat(cell.textContent.replace(/,/g, '')) || 0
+                    );
+                    data.forecast[lineItem] = Array.from(cells).slice(7, 13).map(cell => 
+                        parseFloat(cell.textContent.replace(/,/g, '')) || 0
+                    );
+                    data.totals[lineItem] = parseFloat(cells[13].textContent.replace(/,/g, '')) || 0;
+                }
             });
+            
+            return data;
         }
         
-        // Enhanced 2026 table population with full P&L structure
-        function populate2026Table(data) {
+        // Populate 2026 table with AI forecast results
+        function populate2026TableWithAI(aiResult) {
             const tbody = document.getElementById('plForecast2026Body');
             if (!tbody) return;
             
             // Clear existing content
             tbody.innerHTML = '';
             
-            // Monthly breakdown
-            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            // Use the same table population logic as current year, but for 2026 data
+            // This assumes aiResult has the same structure as current year forecast
+            if (aiResult.forecast_data) {
+                // Populate using the AI result data
+                populateTableWithForecastData(tbody, aiResult.forecast_data, '2026');
+            }
             
-            // Add growth assumptions header
-            tbody.innerHTML = `
-                <tr class="growth-assumptions-row">
-                    <td colspan="14" style="background: #f0f9ff; padding: 1rem; text-align: center; font-weight: 600; color: #1e40af;">
-                        <i class="fas fa-chart-line"></i> 2026 Projections: Revenue +15% | COGS +12% | OPEX +8% (vs 2025 actuals)
-                    </td>
-                </tr>
-            `;
-            
-            // Revenue Section
-            tbody.innerHTML += `
-                <tr class="section-header-row">
-                    <td colspan="14" class="section-header" style="background: #f8fafc; font-weight: 600; padding: 0.75rem;">
-                        <i class="fas fa-dollar-sign"></i> REVENUE
-                    </td>
-                </tr>
-            `;
-            
-            // Revenue rows
-            const revenueRows = [
-                { name: 'Sales Revenue', monthly: data.monthlyRevenue * 0.85, code: '4010' },
-                { name: 'Service Revenue', monthly: data.monthlyRevenue * 0.15, code: '4020' }
-            ];
-            
-            revenueRows.forEach(row => {
-                const monthlyValues = months.map(() => Math.round(row.monthly)).map(val => val.toLocaleString());
-                const annual = Math.round(row.monthly * 12);
-                
-                tbody.innerHTML += `
-                    <tr class="forecast-data-row">
-                        <td style="font-weight: 500; padding: 0.5rem 1rem;">${row.name}</td>
-                        ${monthlyValues.map(val => `<td style="text-align: right; padding: 0.5rem;">${val}</td>`).join('')}
-                        <td style="text-align: right; font-weight: 600; background: #fef3c7; padding: 0.5rem;">${annual.toLocaleString()}</td>
-                    </tr>
-                `;
-            });
-            
-            // Revenue Total
-            const totalRevenue = Math.round(data.projections2026.totalRevenue);
-            const monthlyRevenueRounded = Math.round(data.monthlyRevenue);
-            tbody.innerHTML += `
-                <tr class="total-row" style="background: #fef3c7; font-weight: 700;">
-                    <td style="padding: 0.5rem 1rem;">Total Revenue</td>
-                    ${months.map(() => `<td style="text-align: right; padding: 0.5rem;">${monthlyRevenueRounded.toLocaleString()}</td>`).join('')}
-                    <td style="text-align: right; padding: 0.5rem; background: #fde047;">${totalRevenue.toLocaleString()}</td>
-                </tr>
-            `;
-            
-            // COGS Section
-            tbody.innerHTML += `
-                <tr class="section-header-row">
-                    <td colspan="14" class="section-header" style="background: #f8fafc; font-weight: 600; padding: 0.75rem;">
-                        <i class="fas fa-box"></i> COST OF GOODS SOLD
-                    </td>
-                </tr>
-            `;
-            
-            const cogsRows = [
-                { name: 'Cost of Goods Sold', monthly: data.monthlyCogs * 0.9, code: '5010' },
-                { name: 'Freight In', monthly: data.monthlyCogs * 0.1, code: '5020' }
-            ];
-            
-            cogsRows.forEach(row => {
-                const monthlyValues = months.map(() => Math.round(row.monthly)).map(val => val.toLocaleString());
-                const annual = Math.round(row.monthly * 12);
-                
-                tbody.innerHTML += `
-                    <tr class="forecast-data-row">
-                        <td style="font-weight: 500; padding: 0.5rem 1rem;">${row.name}</td>
-                        ${monthlyValues.map(val => `<td style="text-align: right; padding: 0.5rem;">${val}</td>`).join('')}
-                        <td style="text-align: right; font-weight: 600; background: #fef3c7; padding: 0.5rem;">${annual.toLocaleString()}</td>
-                    </tr>
-                `;
-            });
-            
-            // COGS Total
-            const totalCogs = Math.round(data.projections2026.totalCogs);
-            const monthlyCogsRounded = Math.round(data.monthlyCogs);
-            tbody.innerHTML += `
-                <tr class="total-row" style="background: #fee2e2; font-weight: 700;">
-                    <td style="padding: 0.5rem 1rem;">Total COGS</td>
-                    ${months.map(() => `<td style="text-align: right; padding: 0.5rem;">${monthlyCogsRounded.toLocaleString()}</td>`).join('')}
-                    <td style="text-align: right; padding: 0.5rem; background: #fecaca;">${totalCogs.toLocaleString()}</td>
-                </tr>
-            `;
-            
-            // Gross Profit
-            const grossProfit = Math.round(data.projections2026.grossProfit);
-            const monthlyGrossProfit = Math.round(data.monthlyRevenue - data.monthlyCogs);
-            tbody.innerHTML += `
-                <tr class="calculated-row" style="background: #dcfce7; font-weight: 700;">
-                    <td style="padding: 0.5rem 1rem;">Gross Profit</td>
-                    ${months.map(() => `<td style="text-align: right; padding: 0.5rem;">${monthlyGrossProfit.toLocaleString()}</td>`).join('')}
-                    <td style="text-align: right; padding: 0.5rem; background: #bbf7d0;">${grossProfit.toLocaleString()}</td>
-                </tr>
-            `;
-            
-            // OPEX Section
-            tbody.innerHTML += `
-                <tr class="section-header-row">
-                    <td colspan="14" class="section-header" style="background: #f8fafc; font-weight: 600; padding: 0.75rem;">
-                        <i class="fas fa-calculator"></i> OPERATING EXPENSES
-                    </td>
-                </tr>
-            `;
-            
-            const opexRows = [
-                { name: 'Salaries and Wages', monthly: data.monthlyOpex * 0.6, code: '6010' },
-                { name: 'Rent and Utilities', monthly: data.monthlyOpex * 0.2, code: '6020' },
-                { name: 'Marketing and Advertising', monthly: data.monthlyOpex * 0.15, code: '6030' },
-                { name: 'Professional Services', monthly: data.monthlyOpex * 0.05, code: '6040' }
-            ];
-            
-            opexRows.forEach(row => {
-                const monthlyValues = months.map(() => Math.round(row.monthly)).map(val => val.toLocaleString());
-                const annual = Math.round(row.monthly * 12);
-                
-                tbody.innerHTML += `
-                    <tr class="forecast-data-row">
-                        <td style="font-weight: 500; padding: 0.5rem 1rem;">${row.name}</td>
-                        ${monthlyValues.map(val => `<td style="text-align: right; padding: 0.5rem;">${val}</td>`).join('')}
-                        <td style="text-align: right; font-weight: 600; background: #fef3c7; padding: 0.5rem;">${annual.toLocaleString()}</td>
-                    </tr>
-                `;
-            });
-            
-            // OPEX Total
-            const totalOpex = Math.round(data.projections2026.totalOpex);
-            const monthlyOpexRounded = Math.round(data.monthlyOpex);
-            tbody.innerHTML += `
-                <tr class="total-row" style="background: #fef3c7; font-weight: 700;">
-                    <td style="padding: 0.5rem 1rem;">Total OPEX</td>
-                    ${months.map(() => `<td style="text-align: right; padding: 0.5rem;">${monthlyOpexRounded.toLocaleString()}</td>`).join('')}
-                    <td style="text-align: right; padding: 0.5rem; background: #fde047;">${totalOpex.toLocaleString()}</td>
-                </tr>
-            `;
-            
-            // EBITDA
-            const ebitda = Math.round(data.projections2026.ebitda);
-            const monthlyEbitda = Math.round(monthlyGrossProfit - data.monthlyOpex);
-            tbody.innerHTML += `
-                <tr class="calculated-row" style="background: #dbeafe; font-weight: 700;">
-                    <td style="padding: 0.5rem 1rem;">EBITDA</td>
-                    ${months.map(() => `<td style="text-align: right; padding: 0.5rem;">${monthlyEbitda.toLocaleString()}</td>`).join('')}
-                    <td style="text-align: right; padding: 0.5rem; background: #bfdbfe;">${ebitda.toLocaleString()}</td>
-                </tr>
-            `;
-            
-            console.log('✅ 2026 forecast table populated with detailed P&L structure');
+            console.log('✅ 2026 forecast table populated with AI data');
         }
         
-        // Show 2026-specific insights
-        function show2026Insights(baseData) {
-            // Could add 2026-specific insights here if needed
-            console.log('2026 insights could be added here');
+        // Helper function to populate table with forecast data
+        function populateTableWithForecastData(tbody, forecastData, year) {
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            
+            // Create rows based on forecast data structure
+            Object.keys(forecastData).forEach(lineItem => {
+                const monthlyData = forecastData[lineItem];
+                const annual = monthlyData.reduce((sum, val) => sum + val, 0);
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td style="font-weight: 500; padding: 0.5rem 1rem;">${lineItem}</td>
+                    ${monthlyData.map(val => `<td style="text-align: right; padding: 0.5rem;">${Math.round(val).toLocaleString()}</td>`).join('')}
+                    <td style="text-align: right; font-weight: 600; background: #fef3c7; padding: 0.5rem;">${Math.round(annual).toLocaleString()}</td>
+                `;
+                
+                tbody.appendChild(row);
+            });
         }
         
     </script>
