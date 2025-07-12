@@ -21218,13 +21218,13 @@
                 const result = await response.json();
                 console.log('📥 AI Forecast Result:', result);
         
-                // Process and display the results using the correct function name
+                // Process and display the results using the correct function names
                 if (result && result.forecast_data) {
                     await applyAIForecastToTable(result.forecast_data, payload.forecast_period);
                     
-                    // Show insights if available
+                    // Show insights using the correct function name
                     if (result.insights) {
-                        generateForecastInsights(result.insights);
+                        displayAIInsights(result); // Use the correct function name
                     }
                     
                     // Recalculate totals
