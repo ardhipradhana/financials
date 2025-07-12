@@ -20092,7 +20092,7 @@
         }
         
         async function generateAIForecast() {
-            console.log('🚀 Starting AI Forecast Generation...');
+            console.log('🚀 Starting REAL AI Forecast Generation...');
             
             const industry = document.getElementById('forecastIndustrySelect').value;
             
@@ -20111,19 +20111,18 @@
                 // Get current date and calculate forecast period dynamically
                 const now = new Date();
                 const currentYear = now.getFullYear();
-                const currentMonth = now.getMonth() + 1; // 1-12
+                const currentMonth = now.getMonth() + 1;
                 const currentDay = now.getDate();
                 
-                // Determine if current month should be included in forecast
                 const includeCurrentMonth = currentDay <= 25;
                 const forecastStartMonth = includeCurrentMonth ? currentMonth : currentMonth + 1;
                 const monthsToForecast = 12 - forecastStartMonth + 1;
                 
                 if (monthsToForecast <= 0) {
-                    throw new Error('Cannot generate forecast - already at end of year. Please wait for next year setup.');
+                    throw new Error('Cannot generate forecast - already at end of year');
                 }
         
-                // Prepare historical data for AI analysis
+                // Prepare historical data
                 const historicalData = await prepareHistoricalDataForAI();
                 
                 if (!historicalData || historicalData.length === 0) {
@@ -20133,7 +20132,7 @@
                 // Get forecast period details
                 const forecastPeriod = getForecastPeriodDetails(currentYear, currentMonth, currentDay, includeCurrentMonth);
         
-                // Call n8n webhook for AI processing
+                // Call n8n webhook
                 const forecastResponse = await callAIForecastAPI({
                     historical_data: historicalData,
                     industry: industry,
@@ -20146,35 +20145,22 @@
                     company_context: await getCompanyContext()
                 });
         
-                if (forecastResponse.success) {
-                    // Apply AI forecast to the P&L table
+                console.log('✅ Got response from AI:', forecastResponse);
+        
+                if (forecastResponse && forecastResponse.success) {
+                    // Apply forecast to table
                     await applyAIForecastToTable(forecastResponse.forecast_data, forecastPeriod);
-                    
-                    // Save forecast to Supabase for future reference
-                    await saveForecastToSupabase(forecastResponse.forecast_data, forecastPeriod);
-                    
-                    // Recalculate everything
                     recalculateEntirePL();
                     
-                    const forecastScope = includeCurrentMonth ? 
-                        `Including current month completion + remaining year` : 
-                        `Remaining months only`;
-                    
-                    alert(`🤖 AI Forecast Generated Successfully!\n\n` + 
-                          `• Period: ${forecastPeriod.start_month_name} - ${forecastPeriod.end_month_name} ${currentYear}\n` +
-                          `• Scope: ${forecastScope}\n` +
-                          `• ${forecastResponse.insights.key_trends}\n` +
-                          `• Confidence: ${forecastResponse.confidence}%\n` +
-                          `• Based on ${historicalData.length} months of data`);
+                    alert(`🤖 AI Forecast Generated Successfully!\n\nConfidence: ${forecastResponse.confidence}%\nPeriod: ${forecastPeriod.start_month_name} - ${forecastPeriod.end_month_name}`);
                 } else {
-                    throw new Error(forecastResponse.error || 'AI forecast generation failed');
+                    throw new Error('AI forecast failed');
                 }
         
             } catch (error) {
-                console.error('❌ Error generating AI forecast:', error);
+                console.error('❌ Error:', error);
                 alert('Error generating AI forecast: ' + error.message);
             } finally {
-                // Restore button state
                 button.innerHTML = originalText;
                 button.disabled = false;
             }
@@ -20182,33 +20168,21 @@
 
         // Call the n8n AI forecast API
         async function callAIForecastAPI(payload) {
-            try {
-                // Your actual n8n webhook URL
-                const N8N_WEBHOOK_URL = 'https://montpro.app.n8n.cloud/webhook/ai-forecast';
-                
-                console.log('🚀 Sending payload to n8n:', payload);
-                
-                const response = await fetch(N8N_WEBHOOK_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(payload)
-                });
+            const N8N_WEBHOOK_URL = 'https://montpro.app.n8n.cloud/webhook/ai-forecast';
+            
+            console.log('🌐 Calling n8n with payload:', payload);
+            
+            const response = await fetch(N8N_WEBHOOK_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
         
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-        
-                const result = await response.json();
-                console.log('✅ Received response from n8n:', result);
-                
-                return result;
-                
-            } catch (error) {
-                console.error('❌ Error calling n8n API:', error);
-                throw error;
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
+        
+            return await response.json();
         }
 
         // Get dynamic forecast period based on current date and whether to include current month
@@ -20753,31 +20727,6 @@
             } catch (error) {
                 console.error('Error in buildTableStructureFromSupabase:', error);
             }
-        }
-        
-        function generateAIForecast() {
-            const industry = document.getElementById('forecastIndustrySelect').value;
-            
-            if (!industry) {
-                alert('Please select an industry for AI context');
-                return;
-            }
-        
-            // Simulate AI processing
-            const forecastCells = document.querySelectorAll('.pl-forecast-cell[contenteditable="true"]');
-            
-            forecastCells.forEach(cell => {
-                const currentValue = parseFloat(cell.textContent.replace(/,/g, '')) || 0;
-                // Apply AI growth trend (2.5% monthly growth)
-                const growth = 1.025;
-                const newValue = Math.round(currentValue * growth);
-                cell.textContent = newValue.toLocaleString();
-            });
-        
-            // Recalculate everything
-            recalculateEntirePL();
-            
-            alert('AI Forecast Generated! Forecast cells updated with trend-based projections.');
         }
         
         function loadPLActualDataFromSupabase() {
