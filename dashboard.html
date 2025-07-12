@@ -7484,6 +7484,39 @@
             border-radius: 12px;
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
         }
+
+        /* 2026 Forecast Specific Styling */
+        .growth-assumptions-row td {
+            background: #f0f9ff !important;
+            border: 1px solid #bfdbfe !important;
+            font-weight: 600 !important;
+            color: #1e40af !important;
+        }
+        
+        .projected-totals-row td {
+            background: #f8fafc !important;
+            border: 1px solid #e2e8f0 !important;
+            font-weight: 600 !important;
+            padding: 0.75rem 0.5rem !important;
+        }
+
+        /* Enhanced 2026 Table Styling */
+        .forecast-data-row:hover {
+            background: #f8fafc !important;
+        }
+        
+        .section-header {
+            background: #f1f5f9 !important;
+            font-weight: 600 !important;
+            color: #374151 !important;
+            border-top: 2px solid #e2e8f0 !important;
+            border-bottom: 1px solid #e2e8f0 !important;
+        }
+        
+        .calculated-row {
+            border-top: 2px solid #d1d5db !important;
+            border-bottom: 2px solid #d1d5db !important;
+        }
         
     </style>
 </head>
@@ -20692,21 +20725,31 @@
             });
             document.querySelector(`[data-period="${period}"]`).classList.add('active');
         
-            // Show/hide appropriate table
-            document.querySelectorAll('.forecast-table-container').forEach(container => {
+            // Hide all containers first
+            document.querySelectorAll('.pl-forecast-container').forEach(container => {
                 container.style.display = 'none';
             });
+            
+            // Hide AI insights and trending chart when switching tabs
+            const aiInsightsContainer = document.getElementById('aiInsightsContainer');
+            const forecastTrendingContainer = document.getElementById('forecastTrendingContainer');
+            
+            if (aiInsightsContainer) aiInsightsContainer.style.display = 'none';
+            if (forecastTrendingContainer) forecastTrendingContainer.style.display = 'none';
         
-            const periodMap = {
-                'current-year': 'current-year-forecast',
-                'next-year': 'next-year-forecast',
-                'multi-year': 'multi-year-forecast',
-                'summary': 'annual-summary'
-            };
-        
-            const targetContainer = document.getElementById(periodMap[period]);
+            // Show the appropriate container
+            const targetContainer = document.getElementById(`${period}-container`);
             if (targetContainer) {
                 targetContainer.style.display = 'block';
+                
+                // Load content based on period
+                if (period === 'next-year') {
+                    initialize2026Forecast();
+                } else if (period === 'current-year') {
+                    // Show insights and chart only for current year tab
+                    if (aiInsightsContainer) aiInsightsContainer.style.display = 'block';
+                    if (forecastTrendingContainer) forecastTrendingContainer.style.display = 'block';
+                }
             }
         }
         
@@ -23159,6 +23202,266 @@
                 link.href = window.forecastTrendingChartInstance.toBase64Image();
                 link.click();
             }
+        }
+
+        // Initialize 2026 forecast functionality
+        function initialize2026Forecast() {
+            console.log('🚀 Initializing 2026 forecast...');
+            
+            // Check if we have current year forecast data to base 2026 on
+            const currentYearData = extractCurrentYearTotals();
+            
+            if (!currentYearData || currentYearData.totalRevenue === 0) {
+                show2026EmptyState();
+                return;
+            }
+            
+            // Generate 2026 forecast based on current year
+            generate2026ForecastTable(currentYearData);
+            
+            // Show 2026-specific insights
+            show2026Insights(currentYearData);
+        }
+        
+        // Extract current year totals for 2026 baseline
+        function extractCurrentYearTotals() {
+            const totalRevenueCell = document.querySelector('#totalRevenue-total');
+            const totalCogsCell = document.querySelector('#totalCOGS-total');
+            const totalOpexCell = document.querySelector('#totalOPEX-total');
+            const grossProfitCell = document.querySelector('#grossProfit-total');
+            const ebitdaCell = document.querySelector('#ebitda-total');
+            
+            if (!totalRevenueCell) {
+                console.log('No current year data found');
+                return null;
+            }
+            
+            return {
+                totalRevenue: parseFloat(totalRevenueCell.textContent.replace(/,/g, '')) || 0,
+                totalCogs: parseFloat(totalCogsCell?.textContent.replace(/,/g, '')) || 0,
+                totalOpex: parseFloat(totalOpexCell?.textContent.replace(/,/g, '')) || 0,
+                grossProfit: parseFloat(grossProfitCell?.textContent.replace(/,/g, '')) || 0,
+                ebitda: parseFloat(ebitdaCell?.textContent.replace(/,/g, '')) || 0
+            };
+        }
+        
+        // Show empty state for 2026 when no current year data
+        function show2026EmptyState() {
+            const tbody = document.getElementById('plForecast2026Body');
+            if (tbody) {
+                tbody.innerHTML = `
+                    <tr class="placeholder-row">
+                        <td colspan="14" class="placeholder-text">
+                            <i class="fas fa-info-circle"></i>
+                            Generate current year forecast first to enable 2026 projections
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+        
+        // Generate 2026 forecast table with growth assumptions
+        function generate2026ForecastTable(baseData) {
+            console.log('📊 Generating 2026 forecast based on:', baseData);
+            
+            // Growth assumptions for 2026
+            const growthAssumptions = {
+                revenue: 1.15, // 15% growth
+                cogs: 1.12,    // 12% growth (improving efficiency)
+                opex: 1.08     // 8% growth (operational leverage)
+            };
+            
+            // Calculate 2026 projections
+            const projections2026 = {
+                totalRevenue: baseData.totalRevenue * growthAssumptions.revenue,
+                totalCogs: baseData.totalCogs * growthAssumptions.cogs,
+                totalOpex: baseData.totalOpex * growthAssumptions.opex
+            };
+            
+            projections2026.grossProfit = projections2026.totalRevenue - projections2026.totalCogs;
+            projections2026.ebitda = projections2026.grossProfit - projections2026.totalOpex;
+            
+            // Distribute across months (simplified even distribution for now)
+            const monthlyRevenue = projections2026.totalRevenue / 12;
+            const monthlyCogs = projections2026.totalCogs / 12;
+            const monthlyOpex = projections2026.totalOpex / 12;
+            
+            // Populate the 2026 table
+            populate2026Table({
+                monthlyRevenue,
+                monthlyCogs,
+                monthlyOpex,
+                projections2026,
+                growthAssumptions
+            });
+        }
+        
+        // Enhanced 2026 table population with full P&L structure
+        function populate2026Table(data) {
+            const tbody = document.getElementById('plForecast2026Body');
+            if (!tbody) return;
+            
+            // Clear existing content
+            tbody.innerHTML = '';
+            
+            // Monthly breakdown
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            
+            // Add growth assumptions header
+            tbody.innerHTML = `
+                <tr class="growth-assumptions-row">
+                    <td colspan="14" style="background: #f0f9ff; padding: 1rem; text-align: center; font-weight: 600; color: #1e40af;">
+                        <i class="fas fa-chart-line"></i> 2026 Projections: Revenue +15% | COGS +12% | OPEX +8% (vs 2025 actuals)
+                    </td>
+                </tr>
+            `;
+            
+            // Revenue Section
+            tbody.innerHTML += `
+                <tr class="section-header-row">
+                    <td colspan="14" class="section-header" style="background: #f8fafc; font-weight: 600; padding: 0.75rem;">
+                        <i class="fas fa-dollar-sign"></i> REVENUE
+                    </td>
+                </tr>
+            `;
+            
+            // Revenue rows
+            const revenueRows = [
+                { name: 'Sales Revenue', monthly: data.monthlyRevenue * 0.85, code: '4010' },
+                { name: 'Service Revenue', monthly: data.monthlyRevenue * 0.15, code: '4020' }
+            ];
+            
+            revenueRows.forEach(row => {
+                const monthlyValues = months.map(() => Math.round(row.monthly)).map(val => val.toLocaleString());
+                const annual = Math.round(row.monthly * 12);
+                
+                tbody.innerHTML += `
+                    <tr class="forecast-data-row">
+                        <td style="font-weight: 500; padding: 0.5rem 1rem;">${row.name}</td>
+                        ${monthlyValues.map(val => `<td style="text-align: right; padding: 0.5rem;">${val}</td>`).join('')}
+                        <td style="text-align: right; font-weight: 600; background: #fef3c7; padding: 0.5rem;">${annual.toLocaleString()}</td>
+                    </tr>
+                `;
+            });
+            
+            // Revenue Total
+            const totalRevenue = Math.round(data.projections2026.totalRevenue);
+            const monthlyRevenueRounded = Math.round(data.monthlyRevenue);
+            tbody.innerHTML += `
+                <tr class="total-row" style="background: #fef3c7; font-weight: 700;">
+                    <td style="padding: 0.5rem 1rem;">Total Revenue</td>
+                    ${months.map(() => `<td style="text-align: right; padding: 0.5rem;">${monthlyRevenueRounded.toLocaleString()}</td>`).join('')}
+                    <td style="text-align: right; padding: 0.5rem; background: #fde047;">${totalRevenue.toLocaleString()}</td>
+                </tr>
+            `;
+            
+            // COGS Section
+            tbody.innerHTML += `
+                <tr class="section-header-row">
+                    <td colspan="14" class="section-header" style="background: #f8fafc; font-weight: 600; padding: 0.75rem;">
+                        <i class="fas fa-box"></i> COST OF GOODS SOLD
+                    </td>
+                </tr>
+            `;
+            
+            const cogsRows = [
+                { name: 'Cost of Goods Sold', monthly: data.monthlyCogs * 0.9, code: '5010' },
+                { name: 'Freight In', monthly: data.monthlyCogs * 0.1, code: '5020' }
+            ];
+            
+            cogsRows.forEach(row => {
+                const monthlyValues = months.map(() => Math.round(row.monthly)).map(val => val.toLocaleString());
+                const annual = Math.round(row.monthly * 12);
+                
+                tbody.innerHTML += `
+                    <tr class="forecast-data-row">
+                        <td style="font-weight: 500; padding: 0.5rem 1rem;">${row.name}</td>
+                        ${monthlyValues.map(val => `<td style="text-align: right; padding: 0.5rem;">${val}</td>`).join('')}
+                        <td style="text-align: right; font-weight: 600; background: #fef3c7; padding: 0.5rem;">${annual.toLocaleString()}</td>
+                    </tr>
+                `;
+            });
+            
+            // COGS Total
+            const totalCogs = Math.round(data.projections2026.totalCogs);
+            const monthlyCogsRounded = Math.round(data.monthlyCogs);
+            tbody.innerHTML += `
+                <tr class="total-row" style="background: #fee2e2; font-weight: 700;">
+                    <td style="padding: 0.5rem 1rem;">Total COGS</td>
+                    ${months.map(() => `<td style="text-align: right; padding: 0.5rem;">${monthlyCogsRounded.toLocaleString()}</td>`).join('')}
+                    <td style="text-align: right; padding: 0.5rem; background: #fecaca;">${totalCogs.toLocaleString()}</td>
+                </tr>
+            `;
+            
+            // Gross Profit
+            const grossProfit = Math.round(data.projections2026.grossProfit);
+            const monthlyGrossProfit = Math.round(data.monthlyRevenue - data.monthlyCogs);
+            tbody.innerHTML += `
+                <tr class="calculated-row" style="background: #dcfce7; font-weight: 700;">
+                    <td style="padding: 0.5rem 1rem;">Gross Profit</td>
+                    ${months.map(() => `<td style="text-align: right; padding: 0.5rem;">${monthlyGrossProfit.toLocaleString()}</td>`).join('')}
+                    <td style="text-align: right; padding: 0.5rem; background: #bbf7d0;">${grossProfit.toLocaleString()}</td>
+                </tr>
+            `;
+            
+            // OPEX Section
+            tbody.innerHTML += `
+                <tr class="section-header-row">
+                    <td colspan="14" class="section-header" style="background: #f8fafc; font-weight: 600; padding: 0.75rem;">
+                        <i class="fas fa-calculator"></i> OPERATING EXPENSES
+                    </td>
+                </tr>
+            `;
+            
+            const opexRows = [
+                { name: 'Salaries and Wages', monthly: data.monthlyOpex * 0.6, code: '6010' },
+                { name: 'Rent and Utilities', monthly: data.monthlyOpex * 0.2, code: '6020' },
+                { name: 'Marketing and Advertising', monthly: data.monthlyOpex * 0.15, code: '6030' },
+                { name: 'Professional Services', monthly: data.monthlyOpex * 0.05, code: '6040' }
+            ];
+            
+            opexRows.forEach(row => {
+                const monthlyValues = months.map(() => Math.round(row.monthly)).map(val => val.toLocaleString());
+                const annual = Math.round(row.monthly * 12);
+                
+                tbody.innerHTML += `
+                    <tr class="forecast-data-row">
+                        <td style="font-weight: 500; padding: 0.5rem 1rem;">${row.name}</td>
+                        ${monthlyValues.map(val => `<td style="text-align: right; padding: 0.5rem;">${val}</td>`).join('')}
+                        <td style="text-align: right; font-weight: 600; background: #fef3c7; padding: 0.5rem;">${annual.toLocaleString()}</td>
+                    </tr>
+                `;
+            });
+            
+            // OPEX Total
+            const totalOpex = Math.round(data.projections2026.totalOpex);
+            const monthlyOpexRounded = Math.round(data.monthlyOpex);
+            tbody.innerHTML += `
+                <tr class="total-row" style="background: #fef3c7; font-weight: 700;">
+                    <td style="padding: 0.5rem 1rem;">Total OPEX</td>
+                    ${months.map(() => `<td style="text-align: right; padding: 0.5rem;">${monthlyOpexRounded.toLocaleString()}</td>`).join('')}
+                    <td style="text-align: right; padding: 0.5rem; background: #fde047;">${totalOpex.toLocaleString()}</td>
+                </tr>
+            `;
+            
+            // EBITDA
+            const ebitda = Math.round(data.projections2026.ebitda);
+            const monthlyEbitda = Math.round(monthlyGrossProfit - data.monthlyOpex);
+            tbody.innerHTML += `
+                <tr class="calculated-row" style="background: #dbeafe; font-weight: 700;">
+                    <td style="padding: 0.5rem 1rem;">EBITDA</td>
+                    ${months.map(() => `<td style="text-align: right; padding: 0.5rem;">${monthlyEbitda.toLocaleString()}</td>`).join('')}
+                    <td style="text-align: right; padding: 0.5rem; background: #bfdbfe;">${ebitda.toLocaleString()}</td>
+                </tr>
+            `;
+            
+            console.log('✅ 2026 forecast table populated with detailed P&L structure');
+        }
+        
+        // Show 2026-specific insights
+        function show2026Insights(baseData) {
+            // Could add 2026-specific insights here if needed
+            console.log('2026 insights could be added here');
         }
         
     </script>
