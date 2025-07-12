@@ -6547,8 +6547,56 @@
         /* P&L Forecasting Styles - All Unique Classes */
         .forecasting-ai-controls {
             display: flex;
-            align-items: center;
-            gap: 1.5rem;
+            align-items: end;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            flex-wrap: wrap;
+        }
+
+        .industry-input-wrapper,
+        .context-input-wrapper {
+            display: flex;
+            flex-direction: column;
+            min-width: 200px;
+        }
+        
+        .industry-input-wrapper label,
+        .context-input-wrapper label {
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .context-input-wrapper input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 0.875rem;
+        }
+        
+        .context-input-wrapper input:focus {
+            outline: none;
+            border-color: #fbbf24;
+            box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.1);
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 1024px) {
+            .forecasting-ai-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .context-input-wrapper {
+                margin-left: 0 !important;
+                margin-top: 1rem;
+            }
         }
         
         .industry-input-wrapper {
