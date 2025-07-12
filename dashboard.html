@@ -20153,9 +20153,23 @@
                 if (forecastResponse && forecastResponse.success) {
                     // Apply forecast to table
                     await applyAIForecastToTable(forecastResponse.forecast_data, forecastPeriod);
+                    
+                    // Save to Supabase
+                    await saveForecastToSupabase(forecastResponse, forecastPeriod);
+                    
+                    // Recalculate everything
                     recalculateEntirePL();
                     
-                    alert(`🤖 AI Forecast Generated Successfully!\n\nConfidence: ${forecastResponse.confidence}%\nPeriod: ${forecastPeriod.start_month_name} - ${forecastPeriod.end_month_name}`);
+                    // Enhanced success message with insights
+                    const keyTrends = forecastResponse.insights?.key_trends || 'AI forecast generated successfully';
+                    const riskFactors = forecastResponse.insights?.risk_factors || '';
+                    const opportunities = forecastResponse.insights?.opportunities || '';
+                    
+                    alert(`🤖 AI Forecast Generated Successfully!\n\n` + 
+                          `• Period: ${forecastPeriod.start_month_name} - ${forecastPeriod.end_month_name} ${forecastPeriod.current_year}\n` +
+                          `• Confidence: ${forecastResponse.confidence}%\n` +
+                          `• Key Trends: ${keyTrends.substring(0, 100)}...\n\n` +
+                          `• Opportunities: ${opportunities.substring(0, 80)}...`);
                 } else {
                     throw new Error('AI forecast failed');
                 }
@@ -20309,154 +20323,205 @@
             return new Date(year, month, 0).getDate();
         }
 
-        // Apply AI forecast data to the P&L table with dynamic period
+        // Apply AI forecast data to the P&L table
         async function applyAIForecastToTable(forecastData, forecastPeriod) {
+            console.log('📊 Applying forecast to table...', forecastData);
+            
             if (!forecastData || !forecastData.monthly_forecasts) {
-                throw new Error('Invalid forecast data structure');
+                console.error('Invalid forecast data structure');
+                return;
             }
         
             // Apply forecasts to each month in the forecast period
             forecastData.monthly_forecasts.forEach((monthData, index) => {
                 if (index < forecastPeriod.forecast_months.length) {
                     const monthInfo = forecastPeriod.forecast_months[index];
-                    const monthKey = monthInfo.month_key; // jan, feb, mar, etc.
+                    const monthKey = monthInfo.month_key; // jul, aug, sep, etc.
                     
                     console.log(`Applying forecast for ${monthInfo.month_name} (${monthKey})`);
                     
                     // Apply revenue forecasts
                     if (monthData.revenue_accounts) {
                         Object.entries(monthData.revenue_accounts).forEach(([accountCode, amount]) => {
-                            updateForecastCell(accountCode, monthKey, amount);
+                            if (amount > 0) {
+                                updateForecastCell(accountCode, monthKey, amount);
+                            }
                         });
                     }
                     
                     // Apply COGS forecasts
                     if (monthData.cogs_accounts) {
                         Object.entries(monthData.cogs_accounts).forEach(([accountCode, amount]) => {
-                            updateForecastCell(accountCode, monthKey, amount);
+                            if (amount > 0) {
+                                updateForecastCell(accountCode, monthKey, amount);
+                            }
                         });
                     }
                     
                     // Apply OPEX forecasts
                     if (monthData.opex_accounts) {
                         Object.entries(monthData.opex_accounts).forEach(([accountCode, amount]) => {
-                            updateForecastCell(accountCode, monthKey, amount);
+                            if (amount > 0) {
+                                updateForecastCell(accountCode, monthKey, amount);
+                            }
                         });
                     }
                 }
             });
             
-            console.log(`Applied forecasts for ${forecastPeriod.total_months} months: ${forecastPeriod.start_month_name} - ${forecastPeriod.end_month_name}`);
+            console.log(`✅ Applied forecasts for ${forecastPeriod.total_months} months`);
         }
-
+        
         // Save forecast to Supabase with dynamic period
-        async function saveForecastToSupabase(forecastData, forecastPeriod) {
+        async function saveForecastToSupabase(aiResponse, forecastPeriod) {
             try {
+                console.log('💾 Saving AI forecast to Supabase...');
+                
                 const user = await supabase.auth.getUser();
                 const userId = user?.data?.user?.id;
                 
-                // Create dynamic start and end dates
+                if (!userId) {
+                    console.log('No user found, skipping save');
+                    return;
+                }
+                
+                // Extract data from AI response
+                const forecastData = aiResponse.forecast_data;
+                const confidence = aiResponse.confidence;
+                const insights = aiResponse.insights;
+                const methodology = aiResponse.methodology;
+                const generatedAt = aiResponse.generated_at;
+                
+                // Calculate period dates
                 const startDate = `${forecastPeriod.current_year}-${String(forecastPeriod.start_month).padStart(2, '0')}-01`;
                 const endDate = `${forecastPeriod.current_year}-12-31`;
                 
-                // Save forecast metadata
+                // Save forecast metadata to ai_forecasts_meridash
                 const { data: forecastRecord, error: forecastError } = await supabase
                     .from('ai_forecasts_meridash')
                     .insert([{
                         user_id: userId,
-                        forecast_date: new Date().toISOString(),
+                        forecast_date: generatedAt || new Date().toISOString(),
                         forecast_period_start: startDate,
                         forecast_period_end: endDate,
-                        model_version: forecastData.model_version || '1.0',
-                        confidence_score: forecastData.confidence || 0,
+                        model_version: aiResponse.model_version || 'ai-agent-v1',
+                        confidence_score: confidence,
                         industry_context: document.getElementById('forecastIndustrySelect').value,
                         forecast_data: {
-                            ...forecastData,
+                            forecast_data: forecastData,
+                            insights: insights,
+                            methodology: methodology,
                             period_info: forecastPeriod
                         }
                     }])
                     .select();
-        
-                if (forecastError) throw forecastError;
-        
-                // Save individual forecast transactions
-                const forecastTransactions = [];
+                    
+                if (forecastError) {
+                    console.error('Error saving forecast metadata:', forecastError);
+                    throw forecastError;
+                }
                 
+                console.log('✅ Forecast metadata saved to Supabase');
+                
+                // Optionally save individual forecast transactions
+                await saveForecastTransactions(forecastData, forecastPeriod, userId, forecastRecord[0].id);
+                
+                return forecastRecord[0];
+                
+            } catch (error) {
+                console.error('Error saving forecast to Supabase:', error);
+                // Don't throw - this shouldn't break the forecast display
+                return null;
+            }
+        }
+
+        // Save individual forecast transactions
+        async function saveForecastTransactions(forecastData, forecastPeriod, userId, forecastId) {
+            try {
+                console.log('💾 Saving forecast transactions...');
+                
+                const transactions = [];
+                
+                // Generate transactions for each forecasted month
                 forecastData.monthly_forecasts.forEach((monthData, index) => {
                     if (index < forecastPeriod.forecast_months.length) {
                         const monthInfo = forecastPeriod.forecast_months[index];
-                        const forecastDate = `${monthInfo.year}-${String(monthInfo.month_number).padStart(2, '0')}-15`; // 15th of each month
+                        const transactionDate = `${monthInfo.year}-${String(monthInfo.month_number).padStart(2, '0')}-15`;
                         
-                        // Add revenue forecast transactions
-                        if (monthData.revenue_accounts) {
-                            Object.entries(monthData.revenue_accounts).forEach(([accountCode, amount]) => {
-                                forecastTransactions.push({
+                        // Revenue transactions
+                        Object.entries(monthData.revenue_accounts).forEach(([accountCode, amount]) => {
+                            if (amount > 0) {
+                                transactions.push({
                                     user_id: userId,
-                                    transaction_date: forecastDate,
+                                    transaction_date: transactionDate,
                                     account_code: parseInt(accountCode),
                                     account_name: getAccountName(accountCode),
                                     description: `AI Forecast - ${monthInfo.month_name} ${monthInfo.year}`,
                                     debit_amount: 0,
-                                    credit_amount: Math.abs(amount),
+                                    credit_amount: amount,
                                     source: 'AI_Forecast',
                                     category: 'Revenue',
-                                    forecast_id: forecastRecord[0].id
+                                    forecast_id: forecastId,
+                                    notes: `Generated by AI agent on ${new Date().toISOString()}`
                                 });
-                            });
-                        }
+                            }
+                        });
                         
-                        // Add COGS forecast transactions
-                        if (monthData.cogs_accounts) {
-                            Object.entries(monthData.cogs_accounts).forEach(([accountCode, amount]) => {
-                                forecastTransactions.push({
+                        // COGS transactions
+                        Object.entries(monthData.cogs_accounts).forEach(([accountCode, amount]) => {
+                            if (amount > 0) {
+                                transactions.push({
                                     user_id: userId,
-                                    transaction_date: forecastDate,
+                                    transaction_date: transactionDate,
                                     account_code: parseInt(accountCode),
                                     account_name: getAccountName(accountCode),
                                     description: `AI Forecast - ${monthInfo.month_name} ${monthInfo.year}`,
-                                    debit_amount: Math.abs(amount),
+                                    debit_amount: amount,
                                     credit_amount: 0,
                                     source: 'AI_Forecast',
                                     category: 'Expense',
-                                    forecast_id: forecastRecord[0].id
+                                    forecast_id: forecastId,
+                                    notes: `Generated by AI agent on ${new Date().toISOString()}`
                                 });
-                            });
-                        }
+                            }
+                        });
                         
-                        // Add OPEX forecast transactions
-                        if (monthData.opex_accounts) {
-                            Object.entries(monthData.opex_accounts).forEach(([accountCode, amount]) => {
-                                forecastTransactions.push({
+                        // OPEX transactions
+                        Object.entries(monthData.opex_accounts).forEach(([accountCode, amount]) => {
+                            if (amount > 0) {
+                                transactions.push({
                                     user_id: userId,
-                                    transaction_date: forecastDate,
+                                    transaction_date: transactionDate,
                                     account_code: parseInt(accountCode),
                                     account_name: getAccountName(accountCode),
                                     description: `AI Forecast - ${monthInfo.month_name} ${monthInfo.year}`,
-                                    debit_amount: Math.abs(amount),
+                                    debit_amount: amount,
                                     credit_amount: 0,
                                     source: 'AI_Forecast',
                                     category: 'Expense',
-                                    forecast_id: forecastRecord[0].id
+                                    forecast_id: forecastId,
+                                    notes: `Generated by AI agent on ${new Date().toISOString()}`
                                 });
-                            });
-                        }
+                            }
+                        });
                     }
                 });
-        
-                // Insert forecast transactions
-                if (forecastTransactions.length > 0) {
+                
+                // Insert forecast transactions in batches
+                if (transactions.length > 0) {
                     const { error: transactionError } = await supabase
                         .from('financial_transactions_meridash')
-                        .insert(forecastTransactions);
+                        .insert(transactions);
                         
-                    if (transactionError) throw transactionError;
+                    if (transactionError) {
+                        console.error('Error saving forecast transactions:', transactionError);
+                    } else {
+                        console.log(`✅ Saved ${transactions.length} forecast transactions`);
+                    }
                 }
-        
-                console.log(`Forecast saved to Supabase: ${forecastPeriod.total_months} months from ${forecastPeriod.start_month_name} to ${forecastPeriod.end_month_name}`);
                 
             } catch (error) {
-                console.error('Error saving forecast to Supabase:', error);
-                // Don't throw - this is not critical for the forecast display
+                console.error('Error saving forecast transactions:', error);
             }
         }
         
