@@ -6550,13 +6550,14 @@
             align-items: end;
             gap: 1rem;
             margin-bottom: 1.5rem;
-            padding: 1rem;
-            background: #f8fafc;
+            padding: 1rem 1.5rem;
+            background: white;
             border-radius: 8px;
             border: 1px solid #e2e8f0;
             flex-wrap: wrap;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
-
+        
         .industry-input-wrapper,
         .context-input-wrapper {
             display: flex;
@@ -6571,19 +6572,25 @@
             margin-bottom: 0.5rem;
             font-size: 0.875rem;
         }
-
+        
+        .context-input-wrapper {
+            flex: 1;
+            margin-left: 0;
+        }
+        
         .context-input-wrapper input {
             width: 100%;
             padding: 0.5rem;
             border: 1px solid #e2e8f0;
             border-radius: 6px;
             font-size: 0.875rem;
+            transition: border-color 0.2s ease;
         }
         
         .context-input-wrapper input:focus {
             outline: none;
-            border-color: #fbbf24;
-            box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.1);
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
         }
         
         /* Responsive adjustments */
@@ -6611,12 +6618,18 @@
         }
         
         .industry-input-select {
-            padding: 0.5rem 1rem;
-            border: 1px solid #d1d5db;
+            padding: 0.5rem;
+            border: 1px solid #e2e8f0;
             border-radius: 6px;
-            background: white;
-            min-width: 200px;
             font-size: 0.875rem;
+            min-width: 220px;
+            transition: border-color 0.2s ease;
+        }
+
+        .industry-input-select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
         }
         
         .forecast-status-info {
@@ -6943,26 +6956,27 @@
         .forecast-period-tabs {
             display: flex;
             background: #f8fafc;
-            border-radius: 8px;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
             border: 1px solid #e2e8f0;
-            margin-bottom: 2rem;
             overflow: hidden;
         }
         
         .period-tab-btn {
             flex: 1;
-            padding: 0.75rem 1rem;
+            padding: 1rem 1.5rem;
             border: none;
             background: transparent;
-            color: #64748b;
+            font-size: 0.875rem;
             font-weight: 500;
+            color: #64748b;
             cursor: pointer;
             transition: all 0.2s ease;
+            position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
-            font-size: 0.875rem;
         }
         
         .period-tab-btn:hover {
@@ -6974,7 +6988,20 @@
             background: white;
             color: #1e40af;
             font-weight: 600;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .period-tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #3b82f6, #1e40af);
+        }
+        
+        .period-tab-btn i {
+            font-size: 0.875rem;
         }
         
         .quarter-header, .year-header, .change-header {
