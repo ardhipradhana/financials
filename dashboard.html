@@ -7114,6 +7114,51 @@
             background: #f1f5f9;
             border-color: #94a3b8;
         }
+
+        /* Add this to your existing CSS in the <style> section */
+        .pl-table-scroll {
+            overflow-x: auto;
+            max-height: 800px;
+            overflow-y: auto;
+            position: relative;
+        }
+        
+        .pl-forecast-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+            min-width: 1400px;
+            position: relative;
+        }
+        
+        /* Freeze the first column (Line Item) */
+        .pl-line-item-header,
+        .pl-line-item {
+            position: sticky;
+            left: 0;
+            background: #f1f5f9 !important;
+            z-index: 2;
+            border-right: 2px solid #e2e8f0;
+            min-width: 200px;
+            max-width: 200px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+        
+        /* Ensure headers have higher z-index than regular cells */
+        .pl-forecast-table th.pl-line-item-header {
+            z-index: 3;
+            background: #e2e8f0 !important;
+        }
+        
+        /* Section headers also need to be sticky */
+        .pl-section-header-row td {
+            position: sticky;
+            left: 0;
+            background: #f8fafc !important;
+            z-index: 2;
+            border-right: 2px solid #e2e8f0;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
         
     </style>
 </head>
@@ -21645,6 +21690,33 @@
             // based on your actual data structure and mapping
         }
         
+        // Add this function to your JavaScript section
+        function hideZeroValueRows() {
+            const dataRows = document.querySelectorAll('.pl-data-row');
+            
+            dataRows.forEach(row => {
+                // Get all value cells (both actual and forecast)
+                const valueCells = row.querySelectorAll('.pl-actual-cell, .pl-forecast-cell');
+                let hasNonZeroValue = false;
+                
+                // Check if any cell has a non-zero value
+                valueCells.forEach(cell => {
+                    const value = parseFloat(cell.textContent.replace(/,/g, '')) || 0;
+                    if (value !== 0) {
+                        hasNonZeroValue = true;
+                    }
+                });
+                
+                // Hide the row if all values are zero
+                if (!hasNonZeroValue) {
+                    row.style.display = 'none';
+                } else {
+                    row.style.display = '';
+                }
+            });
+        }
+
+        // Call this function after updating the forecast table
         function recalculateEntirePL() {
             console.log('🔥 Starting complete P&L recalculation...');
             
@@ -21665,6 +21737,9 @@
             
             // Step 6: Calculate percentages for revenue breakdown
             calculatePLPercentages();
+            
+            // Step 7: Hide rows with all zero values
+            hideZeroValueRows();
             
             console.log('🔥 P&L recalculation complete!');
         }
@@ -21751,9 +21826,9 @@
                 
                 // Calculate derived metrics
                 const grossProfit = revenue - cogs;
-                const ebitda = grossProfit - opex; // EBITDA = Gross Profit - OPEX
-                const ebit = ebitda; // For simplicity, assuming no depreciation/amortization separate line
-                const netIncome = ebit; // For simplicity, assuming no interest/tax separate lines
+                const ebitda = grossProfit - opex; 
+                const ebit = ebitda; 
+                const netIncome = ebit; 
                 
                 // Update Gross Profit cells
                 const grossProfitCell = document.querySelector(`.pl-gross-profit td:nth-child(${index + 2})`);
@@ -21779,10 +21854,9 @@
                     netIncomeCell.textContent = Math.round(netIncome).toLocaleString();
                 }
             });
-            
-            // Calculate totals for derived metrics
-            calculateDerivedMetricTotals();
         }
+
+        
         
         function calculatePLDerivedRow(row1, row2, resultRow, operation) {
             const row1Cells = row1.querySelectorAll('td:not(.pl-line-item):not(.pl-percentage-cell)');
@@ -22101,30 +22175,43 @@
         }
 
         function calculateDerivedMetricTotals() {
-            const metricRows = [
-                { selector: '.pl-gross-profit', totalId: 'grossProfit-total' },
-                { selector: '.pl-ebitda', totalId: 'ebitda-total' },
-                { selector: '.pl-ebit', totalId: 'ebit-total' },
-                { selector: '.pl-net-income', totalId: 'netIncome-total' }
-            ];
+            // Calculate Gross Profit Total: Total Revenue - Total COGS
+            const totalRevenueCell = document.querySelector('#totalRevenue-total');
+            const totalCogsCell = document.querySelector('#totalCOGS-total');
+            const grossProfitTotalCell = document.querySelector('#grossProfit-total');
             
-            metricRows.forEach(metric => {
-                const row = document.querySelector(metric.selector);
-                if (!row) return;
+            if (totalRevenueCell && totalCogsCell && grossProfitTotalCell) {
+                const totalRevenue = parseFloat(totalRevenueCell.textContent.replace(/,/g, '')) || 0;
+                const totalCogs = parseFloat(totalCogsCell.textContent.replace(/,/g, '')) || 0;
+                const grossProfitTotal = totalRevenue - totalCogs;
                 
-                const cells = row.querySelectorAll('td:not(.pl-line-item):not(.pl-total-cell):not(.pl-percentage-cell)');
-                let total = 0;
+                grossProfitTotalCell.textContent = Math.round(grossProfitTotal).toLocaleString();
+                console.log(`✅ Gross Profit Total: ${totalRevenue.toLocaleString()} - ${totalCogs.toLocaleString()} = ${grossProfitTotal.toLocaleString()}`);
+            }
+            
+            // Calculate EBITDA Total: Gross Profit - Total OPEX  
+            const totalOpexCell = document.querySelector('#totalOPEX-total');
+            const ebitdaTotalCell = document.querySelector('#ebitda-total');
+            
+            if (grossProfitTotalCell && totalOpexCell && ebitdaTotalCell) {
+                const grossProfitTotal = parseFloat(grossProfitTotalCell.textContent.replace(/,/g, '')) || 0;
+                const totalOpex = parseFloat(totalOpexCell.textContent.replace(/,/g, '')) || 0;
+                const ebitdaTotal = grossProfitTotal - totalOpex;
                 
-                cells.forEach(cell => {
-                    const value = parseFloat(cell.textContent.replace(/,/g, '')) || 0;
-                    total += value;
-                });
-                
-                const totalCell = document.getElementById(metric.totalId);
-                if (totalCell) {
-                    totalCell.textContent = Math.round(total).toLocaleString();
-                }
-            });
+                ebitdaTotalCell.textContent = Math.round(ebitdaTotal).toLocaleString();
+            }
+            
+            // Calculate EBIT Total (same as EBITDA for simplicity)
+            const ebitTotalCell = document.querySelector('#ebit-total');
+            if (ebitdaTotalCell && ebitTotalCell) {
+                ebitTotalCell.textContent = ebitdaTotalCell.textContent;
+            }
+            
+            // Calculate Net Income Total (same as EBIT for simplicity) 
+            const netIncomeTotalCell = document.querySelector('#netIncome-total');
+            if (ebitTotalCell && netIncomeTotalCell) {
+                netIncomeTotalCell.textContent = ebitTotalCell.textContent;
+            }
         }
         
         // Updated helper function to set margin cell values
