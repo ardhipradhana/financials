@@ -20091,6 +20091,7 @@
             }
         }
         
+        // REAL AI FORECASTING FUNCTION - Simplified
         async function generateAIForecast() {
             console.log('🚀 Starting REAL AI Forecast Generation...');
             
@@ -20132,8 +20133,8 @@
                 // Get forecast period details
                 const forecastPeriod = getForecastPeriodDetails(currentYear, currentMonth, currentDay, includeCurrentMonth);
         
-                // Call n8n webhook
-                const forecastResponse = await callAIForecastAPI({
+                // Simplified payload - let AI figure out company context from the data
+                const payload = {
                     historical_data: historicalData,
                     industry: industry,
                     forecast_months: monthsToForecast,
@@ -20141,9 +20142,11 @@
                     forecast_year: currentYear,
                     forecast_period: forecastPeriod,
                     include_current_month: includeCurrentMonth,
-                    current_day: currentDay,
-                    company_context: await getCompanyContext()
-                });
+                    current_day: currentDay
+                };
+        
+                // Call n8n webhook
+                const forecastResponse = await callAIForecastAPI(payload);
         
                 console.log('✅ Got response from AI:', forecastResponse);
         
