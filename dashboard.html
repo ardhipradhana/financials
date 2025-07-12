@@ -7592,6 +7592,97 @@
             border-top: 2px solid #d1d5db !important;
             border-bottom: 2px solid #d1d5db !important;
         }
+
+        /* Modern Section Headers */
+        .modern-section-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 16px;
+            margin-bottom: 2rem;
+            color: white;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2rem 2.5rem;
+            gap: 2rem;
+        }
+        
+        .header-left h2.section-main-title {
+            margin: 0 0 0.5rem 0;
+            font-size: 2rem;
+            font-weight: 700;
+            color: white;
+        }
+        
+        .header-left .section-description {
+            margin: 0;
+            font-size: 1rem;
+            opacity: 0.9;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+        
+        /* Balance indicator in header */
+        .balance-indicator .balance-status {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 0.75rem 1.25rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+        }
+        
+        /* Update forecasting controls in header */
+        .modern-section-header .forecasting-ai-controls {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            margin: 0;
+        }
+        
+        .modern-section-header .forecasting-ai-controls label {
+            color: white;
+            font-weight: 500;
+        }
+        
+        .modern-section-header .industry-input-select {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #374151;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 1024px) {
+            .header-content {
+                flex-direction: column;
+                align-items: stretch;
+                text-align: center;
+                gap: 1.5rem;
+            }
+            
+            .header-right {
+                justify-content: center;
+            }
+        }
         
     </style>
 </head>
@@ -8417,13 +8508,20 @@
             <!-- Financial Statements Section (add this to your main dashboard.html) -->
             <div id="statements-section" class="section-content" style="display: none;">
                 <div class="dashboard-section">
-                    <div class="section-header">
-                        <h3 class="section-title">Playground</h3>
-                        <div class="balance-indicator" id="balanceIndicator">
-                            <span class="balance-status balanced" id="balanceStatus">
-                                <i class="fas fa-check-circle"></i>
-                                Trial Balance: In Balance
-                            </span>
+                    <div class="modern-section-header">
+                        <div class="header-content">
+                            <div class="header-left">
+                                <h2 class="section-main-title">Financial Statements</h2>
+                                <p class="section-description">Generate income statements, balance sheets, and cash flow reports</p>
+                            </div>
+                            <div class="header-right">
+                                <div class="balance-indicator" id="balanceIndicator">
+                                    <span class="balance-status balanced" id="balanceStatus">
+                                        <i class="fas fa-check-circle"></i>
+                                        Trial Balance: In Balance
+                                    </span>
+                                </div>
+                            </div>
                         </div>
                     </div>
             
@@ -8930,21 +9028,28 @@
             <!-- Reports & Analytics Section -->
             <div id="reports-section" class="section-content" style="display: none;">
                 <div class="dashboard-section">
-                    <div class="section-header">
-                        <h3 class="section-title">Variance, Detailed Breakdown, and Trending Analysis</h3>
-                        <div class="section-actions">
-                            <button class="btn btn-secondary" onclick="exportComparisonToPDF()">
-                                <i class="fas fa-file-pdf"></i>
-                                Export PDF
-                            </button>
-                            <button class="btn btn-secondary" onclick="copyComparisonToClipboard()">
-                                <i class="fas fa-clipboard"></i>
-                                Copy Chart
-                            </button>
-                            <button class="btn btn-primary" onclick="generateComparisonReport()">
-                                <i class="fas fa-chart-line"></i>
-                                Generate Report
-                            </button>
+                    <div class="modern-section-header">
+                        <div class="header-content">
+                            <div class="header-left">
+                                <h2 class="section-main-title">Reports & Analytics</h2>
+                                <p class="section-description">Period-to-period variance analysis and business intelligence</p>
+                            </div>
+                            <div class="header-right">
+                                <div class="header-actions">
+                                    <button class="btn btn-secondary" onclick="exportComparisonToPDF()">
+                                        <i class="fas fa-file-pdf"></i>
+                                        Export PDF
+                                    </button>
+                                    <button class="btn btn-secondary" onclick="copyComparisonToClipboard()">
+                                        <i class="fas fa-clipboard"></i>
+                                        Copy Chart
+                                    </button>
+                                    <button class="btn btn-primary" onclick="generateComparisonReport()">
+                                        <i class="fas fa-chart-line"></i>
+                                        Generate Report
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 
@@ -9305,29 +9410,36 @@
             <!-- Forecasting Section -->
             <div id="forecasting-section" class="section-content" style="display: none;">
                 <div class="dashboard-section">
-                    <div class="section-header">
-                        <h3 class="section-title">AI-Powered Financial Forecasting</h3>
-                        <div class="forecasting-ai-controls">
-                            <div class="industry-input-wrapper">
-                                <label for="forecastIndustrySelect">Industry Context:</label>
-                                <select id="forecastIndustrySelect" class="industry-input-select">
-                                    <option value="">Select Industry for AI Context</option>
-                                    <option value="saas">SaaS / Technology</option>
-                                    <option value="retail">Retail / E-commerce</option>
-                                    <option value="consulting">Consulting / Services</option>
-                                    <option value="manufacturing">Manufacturing</option>
-                                    <option value="healthcare">Healthcare</option>
-                                    <option value="fintech">FinTech</option>
-                                </select>
+                    <div class="modern-section-header">
+                        <div class="header-content">
+                            <div class="header-left">
+                                <h2 class="section-main-title">Forecasting & Analytics</h2>
+                                <p class="section-description">AI-powered financial forecasting and 13-week cash flow projections</p>
                             </div>
-                            <button class="btn btn-outline" onclick="loadLatestForecastFromSupabase()" title="Load latest forecast from database">
-                                <i class="fas fa-history"></i>
-                                Load Latest Forecast
-                            </button>
-                            <button class="btn btn-primary" id="generateAIForecast">
-                                <i class="fas fa-brain"></i>
-                                Generate AI Forecast
-                            </button>
+                            <div class="header-right">
+                                <div class="forecasting-ai-controls">
+                                    <div class="industry-input-wrapper">
+                                        <label for="forecastIndustrySelect">Industry Context:</label>
+                                        <select id="forecastIndustrySelect" class="industry-input-select">
+                                            <option value="">Select Industry for AI Context</option>
+                                            <option value="saas">SaaS / Technology</option>
+                                            <option value="retail">Retail / E-commerce</option>
+                                            <option value="consulting">Consulting / Services</option>
+                                            <option value="manufacturing">Manufacturing</option>
+                                            <option value="healthcare">Healthcare</option>
+                                            <option value="fintech">FinTech</option>
+                                        </select>
+                                    </div>
+                                    <button class="btn btn-outline" onclick="loadLatestForecastFromSupabase()" title="Load latest forecast from database">
+                                        <i class="fas fa-history"></i>
+                                        Load Latest Forecast
+                                    </button>
+                                    <button class="btn btn-primary" id="generateAIForecast">
+                                        <i class="fas fa-brain"></i>
+                                        Generate AI Forecast
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 
@@ -20817,10 +20929,12 @@
         }
         
         function switchForecastPeriod(period) {
-            // Update tab active state
-            document.querySelectorAll('.period-tab').forEach(tab => {
+            // Clear ALL active states first (this fixes the double active issue)
+            document.querySelectorAll('.period-tab-btn, .period-tab').forEach(tab => {
                 tab.classList.remove('active');
             });
+            
+            // Add active to the correct tab
             document.querySelector(`[data-period="${period}"]`).classList.add('active');
         
             // Hide all containers first
