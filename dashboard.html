@@ -21160,7 +21160,7 @@
         
                 // Prepare the request payload with actual data
                 const payload = {
-                    historical_data: monthlyData, // Add the actual historical data
+                    historical_data: monthlyData,
                     industry: industry,
                     forecastStyle: forecastStyle,
                     forecast_months: totalForecastMonths,
@@ -21178,9 +21178,22 @@
                         current_year: currentYear,
                         current_day: currentDay,
                         include_current_month: includeCurrentMonth,
-                        forecast_type: includeCurrentMonth ? "current_month_completion" : "future_months_only"
+                        forecast_type: includeCurrentMonth ? "current_month_completion" : "future_months_only",
+                        forecast_months: [] // We'll populate this
                     }
                 };
+        
+                // Add forecast_months array with proper structure
+                for (let i = forecastStartMonth; i <= forecastEndMonth; i++) {
+                    payload.forecast_period.forecast_months.push({
+                        month_number: i,
+                        month_key: ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'][i - 1],
+                        month_name: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][i - 1],
+                        year: currentYear,
+                        is_current_month: i === currentMonth,
+                        is_partial_month: i === currentMonth && includeCurrentMonth
+                    });
+                }
         
                 console.log('📤 Sending forecast request with historical data:', {
                     historicalDataPoints: monthlyData.length,
@@ -21205,10 +21218,19 @@
                 const result = await response.json();
                 console.log('📥 AI Forecast Result:', result);
         
-                // Process and display the results
+                // Process and display the results using the correct function name
                 if (result && result.forecast_data) {
-                    populateForecastTable(result);
-                    generateForecastInsights(result.insights || {});
+                    await applyAIForecastToTable(result.forecast_data, payload.forecast_period);
+                    
+                    // Show insights if available
+                    if (result.insights) {
+                        generateForecastInsights(result.insights);
+                    }
+                    
+                    // Recalculate totals
+                    recalculateEntirePL();
+                    
+                    // Generate trending chart
                     generateForecastTrendingChart();
                 }
         
