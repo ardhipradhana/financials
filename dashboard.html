@@ -6550,7 +6550,6 @@
             align-items: end;
             justify-content: space-between;
             gap: 1rem;
-            margin-bottom: 1.5rem;
             padding: 1rem 1.5rem;
             flex-wrap: wrap;
         }
@@ -23415,7 +23414,7 @@
             }
         }
 
-        // Generate 2026 AI Forecast Function
+        // Update the generateAI2026Forecast function to calculate dynamic periods
         async function generateAI2026Forecast() {
             console.log('🚀 Starting 2026 AI Forecast Generation...');
             
@@ -23444,13 +23443,66 @@
                     return;
                 }
                 
+                // Calculate dynamic periods based on current date
+                const now = new Date();
+                const currentYear = now.getFullYear();
+                const currentMonth = now.getMonth() + 1; // 1-12
+                const currentDay = now.getDate();
+                
+                // Determine if current month should be included in actuals or forecast
+                const includeCurrentMonth = currentDay <= 25; // If after 25th, consider month mostly complete
+                const actualEndMonth = includeCurrentMonth ? currentMonth : currentMonth - 1;
+                const forecastStartMonth = includeCurrentMonth ? currentMonth : currentMonth + 1;
+                
+                // Create dynamic period descriptions
+                const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                
+                let actualsPeriod, forecastPeriod;
+                
+                if (actualEndMonth >= 1) {
+                    actualsPeriod = actualEndMonth === 1 ? 
+                        `${monthNames[0]} ${currentYear}` : 
+                        `${monthNames[0]}-${monthNames[actualEndMonth - 1]} ${currentYear}`;
+                } else {
+                    actualsPeriod = `No actuals yet for ${currentYear}`;
+                }
+                
+                if (forecastStartMonth <= 12) {
+                    forecastPeriod = forecastStartMonth === 12 ? 
+                        `${monthNames[11]} ${currentYear}` : 
+                        `${monthNames[forecastStartMonth - 1]}-${monthNames[11]} ${currentYear}`;
+                } else {
+                    forecastPeriod = `All months forecasted for ${currentYear}`;
+                }
+                
+                console.log('📅 Dynamic periods calculated:', {
+                    currentDate: `${currentYear}-${currentMonth}-${currentDay}`,
+                    actualEndMonth,
+                    forecastStartMonth,
+                    actualsPeriod,
+                    forecastPeriod
+                });
+                
                 // Prepare payload for 2026 forecast
                 const payload = {
                     year: 2026,
                     industry: industry,
                     additionalContext: additionalContext,
-                    baselineData: currentYearData,
-                    requestType: 'full_year_forecast'
+                    baselineData: {
+                        year_2025_complete: currentYearData.monthlyData, // All 12 months of 2025
+                        year_2025_totals: currentYearData.yearTotals,
+                        actuals_period: actualsPeriod,
+                        forecast_period: forecastPeriod,
+                        actual_months_count: actualEndMonth,
+                        forecast_months_count: 12 - actualEndMonth,
+                        current_date: {
+                            year: currentYear,
+                            month: currentMonth,
+                            day: currentDay,
+                            include_current_month: includeCurrentMonth
+                        }
+                    },
+                    requestType: 'full_year_forecast_2026'
                 };
                 
                 console.log('📤 Sending 2026 forecast request:', payload);
@@ -23487,34 +23539,111 @@
             }
         }
         
-        // Extract full year data (actuals + forecast) for 2026 baseline
+        // Fix the extractFullYearData function to get complete 2025 data
         function extractFullYearData() {
             const data = {
                 actuals: {},
                 forecast: {},
-                totals: {}
+                totals: {},
+                monthlyData: [] // Add this for complete monthly breakdown
             };
             
-            // Extract actuals (Jan-Jun) and forecast (Jul-Dec) from current year table
+            // Extract data from the current year table (which should have all 12 months)
             const tbody = document.getElementById('plForecastBody');
-            if (!tbody) return null;
+            if (!tbody) {
+                console.error('❌ Could not find plForecastBody table');
+                return null;
+            }
             
-            const rows = tbody.querySelectorAll('tr');
+            const rows = tbody.querySelectorAll('tr:not(.placeholder-row)');
+            if (rows.length === 0) {
+                console.error('❌ No forecast data found. Please generate 2025 forecast first.');
+                return null;
+            }
+            
+            console.log('📊 Extracting full year data from', rows.length, 'rows');
+            
+            // Create monthly data structure for all 12 months
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const monthlyBreakdown = months.map((month, index) => ({
+                month: `2025-${String(index + 1).padStart(2, '0')}`,
+                year: 2025,
+                month_number: index + 1,
+                month_name: month,
+                revenue: 0,
+                cogs: 0,
+                opex: 0,
+                gross_profit: 0,
+                ebitda: 0,
+                is_actual: index < 6, // Jan-Jun are actuals, Jul-Dec are forecast
+                is_forecast: index >= 6
+            }));
             
             rows.forEach(row => {
                 const cells = row.querySelectorAll('td');
-                if (cells.length >= 13) {
+                if (cells.length >= 14) { // Should have 13 months + total column
                     const lineItem = cells[0].textContent.trim();
                     
-                    // Extract monthly data (months 1-12) and totals
-                    data.actuals[lineItem] = Array.from(cells).slice(1, 7).map(cell => 
-                        parseFloat(cell.textContent.replace(/,/g, '')) || 0
-                    );
-                    data.forecast[lineItem] = Array.from(cells).slice(7, 13).map(cell => 
-                        parseFloat(cell.textContent.replace(/,/g, '')) || 0
-                    );
+                    // Skip section headers and margin rows
+                    if (lineItem === '' || lineItem.includes('REVENUE') || lineItem.includes('COGS') || 
+                        lineItem.includes('OPEX') || lineItem.includes('Margin') || lineItem.includes('%')) {
+                        return;
+                    }
+                    
+                    // Extract monthly values (cells 1-12 are the months)
+                    const monthlyValues = [];
+                    for (let i = 1; i <= 12; i++) {
+                        const cellValue = parseFloat(cells[i].textContent.replace(/,/g, '')) || 0;
+                        monthlyValues.push(cellValue);
+                    }
+                    
+                    // Map line items to our monthly breakdown
+                    monthlyValues.forEach((value, monthIndex) => {
+                        if (lineItem.includes('Revenue') || lineItem.includes('Sales')) {
+                            monthlyBreakdown[monthIndex].revenue += value;
+                        } else if (lineItem.includes('COGS') || lineItem.includes('Cost of')) {
+                            monthlyBreakdown[monthIndex].cogs += value;
+                        } else if (lineItem.includes('OPEX') || lineItem.includes('Operating') || 
+                                  lineItem.includes('Marketing') || lineItem.includes('Salaries') || 
+                                  lineItem.includes('Administrative') || lineItem.includes('Other')) {
+                            monthlyBreakdown[monthIndex].opex += value;
+                        }
+                    });
+                    
+                    // Store in the original format for backward compatibility
+                    data.actuals[lineItem] = monthlyValues.slice(0, 6); // Jan-Jun
+                    data.forecast[lineItem] = monthlyValues.slice(6, 12); // Jul-Dec
                     data.totals[lineItem] = parseFloat(cells[13].textContent.replace(/,/g, '')) || 0;
                 }
+            });
+            
+            // Calculate derived metrics for each month
+            monthlyBreakdown.forEach(month => {
+                month.gross_profit = month.revenue - month.cogs;
+                month.ebitda = month.gross_profit - month.opex;
+                month.gross_margin = month.revenue > 0 ? (month.gross_profit / month.revenue) * 100 : 0;
+                month.ebitda_margin = month.revenue > 0 ? (month.ebitda / month.revenue) * 100 : 0;
+            });
+            
+            data.monthlyData = monthlyBreakdown;
+            
+            // Calculate year totals
+            data.yearTotals = {
+                totalRevenue: monthlyBreakdown.reduce((sum, month) => sum + month.revenue, 0),
+                totalCogs: monthlyBreakdown.reduce((sum, month) => sum + month.cogs, 0),
+                totalOpex: monthlyBreakdown.reduce((sum, month) => sum + month.opex, 0),
+                totalGrossProfit: monthlyBreakdown.reduce((sum, month) => sum + month.gross_profit, 0),
+                totalEbitda: monthlyBreakdown.reduce((sum, month) => sum + month.ebitda, 0)
+            };
+            
+            data.yearTotals.grossMargin = (data.yearTotals.totalGrossProfit / data.yearTotals.totalRevenue) * 100;
+            data.yearTotals.ebitdaMargin = (data.yearTotals.totalEbitda / data.yearTotals.totalRevenue) * 100;
+            
+            console.log('✅ Full year data extracted:', {
+                months: data.monthlyData.length,
+                yearTotals: data.yearTotals,
+                actualMonths: data.monthlyData.filter(m => m.is_actual).length,
+                forecastMonths: data.monthlyData.filter(m => m.is_forecast).length
             });
             
             return data;
