@@ -20561,26 +20561,343 @@
         }
         
         function loadPLActualDataFromSupabase() {
-            // This is where you'll integrate with your existing Supabase connection
             console.log('Loading actual Jan-Jun 2025 data from Supabase...');
             
-            // Use your existing supabase variable from the dashboard
             if (typeof supabase !== 'undefined') {
-                // Example query - adapt to your actual table structure
-                supabase
-                    .from('financial_transactions') // Replace with your table name
-                    .select('*')
-                    .gte('date', '2025-01-01')
-                    .lt('date', '2025-07-01')
-                    .then(({ data, error }) => {
-                        if (error) {
-                            console.error('Error loading actual data:', error);
-                        } else {
-                            console.log('Loaded actual data:', data);
-                            populatePLActualCells(data);
-                        }
-                    });
+                // First, load GL accounts structure
+                loadGLAccountsStructure().then(() => {
+                    // Then load actual transaction data
+                    loadActualTransactionData();
+                });
+            } else {
+                console.error('Supabase not available');
             }
+        }
+
+        async function loadGLAccountsStructure() {
+            try {
+                const { data: glAccounts, error } = await supabase
+                    .from('gl_accounts_meridash')
+                    .select('*')
+                    .eq('is_active', true)
+                    .order('account_code');
+                    
+                if (error) {
+                    console.error('Error loading GL accounts:', error);
+                    return;
+                }
+                
+                console.log('Loaded GL accounts:', glAccounts);
+                
+                // Store GL accounts for later use
+                window.glAccountsData = glAccounts;
+                
+                // Build P&L structure based on account codes
+                buildPLStructureFromGLAccounts(glAccounts);
+                
+            } catch (error) {
+                console.error('Error loading GL accounts:', error);
+            }
+        }
+
+        async function loadActualTransactionData() {
+            try {
+                const { data: transactions, error } = await supabase
+                    .from('financial_transactions_meridash')
+                    .select('*')
+                    .gte('transaction_date', '2025-01-01')
+                    .lt('transaction_date', '2025-07-01'); // Jan-Jun 2025
+                    
+                if (error) {
+                    console.error('Error loading actual data:', error);
+                    return;
+                }
+                
+                console.log('Loaded transactions:', transactions);
+                
+                // Process transactions and populate P&L
+                populatePLWithActualData(transactions);
+                
+            } catch (error) {
+                console.error('Error loading transaction data:', error);
+            }
+        }
+
+        function buildPLStructureFromGLAccounts(glAccounts) {
+            // Categorize accounts based on account codes
+            const accountCategories = {
+                revenue: glAccounts.filter(acc => acc.account_code >= 4000 && acc.account_code < 5000),
+                cogs: glAccounts.filter(acc => acc.account_code >= 2000 && acc.account_code < 3000),
+                opex: glAccounts.filter(acc => acc.account_code >= 5000 && acc.account_code < 6000)
+            };
+            
+            console.log('Account categories:', accountCategories);
+            
+            // Rebuild the P&L table structure dynamically
+            rebuildPLTableStructure(accountCategories);
+        }
+
+        function rebuildPLTableStructure(accountCategories) {
+            const tbody = document.getElementById('plForecastBody');
+            if (!tbody) return;
+            
+            let htmlContent = '';
+            
+            // REVENUE SECTION
+            htmlContent += `
+                <tr class="pl-section-header-row">
+                    <td colspan="15" class="pl-section-header">
+                        <i class="fas fa-chart-line"></i> REVENUE
+                    </td>
+                </tr>
+            `;
+            
+            accountCategories.revenue.forEach(account => {
+                htmlContent += `
+                    <tr class="pl-data-row pl-revenue-row" data-account-code="${account.account_code}">
+                        <td class="pl-line-item">${account.account_name}</td>
+                        <td class="pl-actual-cell" data-month="jan">0</td>
+                        <td class="pl-actual-cell" data-month="feb">0</td>
+                        <td class="pl-actual-cell" data-month="mar">0</td>
+                        <td class="pl-actual-cell" data-month="apr">0</td>
+                        <td class="pl-actual-cell" data-month="may">0</td>
+                        <td class="pl-actual-cell" data-month="jun">0</td>
+                        <td class="pl-forecast-cell" contenteditable="true" data-month="jul">0</td>
+                        <td class="pl-forecast-cell" contenteditable="true" data-month="aug">0</td>
+                        <td class="pl-forecast-cell" contenteditable="true" data-month="sep">0</td>
+                        <td class="pl-forecast-cell" contenteditable="true" data-month="oct">0</td>
+                        <td class="pl-forecast-cell" contenteditable="true" data-month="nov">0</td>
+                        <td class="pl-forecast-cell" contenteditable="true" data-month="dec">0</td>
+                        <td class="pl-total-cell" id="${account.account_code}-total">0</td>
+                        <td class="pl-percentage-cell" id="${account.account_code}-pct">0.0%</td>
+                    </tr>
+                `;
+            });
+            
+            // Revenue Total Row
+            htmlContent += `
+                <tr class="pl-total-row pl-revenue-total">
+                    <td class="pl-line-item pl-total-line">Total Revenue</td>
+                    <td class="pl-calculated-cell">0</td>
+                    <td class="pl-calculated-cell">0</td>
+                    <td class="pl-calculated-cell">0</td>
+                    <td class="pl-calculated-cell">0</td>
+                    <td class="pl-calculated-cell">0</td>
+                    <td class="pl-calculated-cell">0</td>
+                    <td class="pl-calculated-cell">0</td>
+                    <td class="pl-calculated-cell">0</td>
+                    <td class="pl-calculated-cell">0</td>
+                    <td class="pl-calculated-cell">0</td>
+                    <td class="pl-calculated-cell">0</td>
+                    <td class="pl-calculated-cell">0</td>
+                    <td class="pl-total-cell pl-total-prominent" id="totalRevenue-total">0</td>
+                    <td class="pl-percentage-cell">100.0%</td>
+                </tr>
+            `;
+            
+            // COGS SECTION (if any COGS accounts exist)
+            if (accountCategories.cogs.length > 0) {
+                htmlContent += `
+                    <tr class="pl-section-header-row">
+                        <td colspan="15" class="pl-section-header">
+                            <i class="fas fa-box"></i> COST OF GOODS SOLD
+                        </td>
+                    </tr>
+                `;
+                
+                accountCategories.cogs.forEach(account => {
+                    htmlContent += `
+                        <tr class="pl-data-row pl-cogs-row" data-account-code="${account.account_code}">
+                            <td class="pl-line-item">${account.account_name}</td>
+                            <td class="pl-actual-cell" data-month="jan">0</td>
+                            <td class="pl-actual-cell" data-month="feb">0</td>
+                            <td class="pl-actual-cell" data-month="mar">0</td>
+                            <td class="pl-actual-cell" data-month="apr">0</td>
+                            <td class="pl-actual-cell" data-month="may">0</td>
+                            <td class="pl-actual-cell" data-month="jun">0</td>
+                            <td class="pl-forecast-cell" contenteditable="true" data-month="jul">0</td>
+                            <td class="pl-forecast-cell" contenteditable="true" data-month="aug">0</td>
+                            <td class="pl-forecast-cell" contenteditable="true" data-month="sep">0</td>
+                            <td class="pl-forecast-cell" contenteditable="true" data-month="oct">0</td>
+                            <td class="pl-forecast-cell" contenteditable="true" data-month="nov">0</td>
+                            <td class="pl-forecast-cell" contenteditable="true" data-month="dec">0</td>
+                            <td class="pl-total-cell" id="${account.account_code}-total">0</td>
+                            <td class="pl-percentage-cell" id="${account.account_code}-pct">0.0%</td>
+                        </tr>
+                    `;
+                });
+                
+                // COGS Total Row
+                htmlContent += `
+                    <tr class="pl-total-row pl-cogs-total">
+                        <td class="pl-line-item pl-total-line">Total COGS</td>
+                        <td class="pl-calculated-cell">0</td>
+                        <td class="pl-calculated-cell">0</td>
+                        <td class="pl-calculated-cell">0</td>
+                        <td class="pl-calculated-cell">0</td>
+                        <td class="pl-calculated-cell">0</td>
+                        <td class="pl-calculated-cell">0</td>
+                        <td class="pl-calculated-cell">0</td>
+                        <td class="pl-calculated-cell">0</td>
+                        <td class="pl-calculated-cell">0</td>
+                        <td class="pl-calculated-cell">0</td>
+                        <td class="pl-calculated-cell">0</td>
+                        <td class="pl-calculated-cell">0</td>
+                        <td class="pl-total-cell pl-total-prominent" id="totalCOGS-total">0</td>
+                        <td class="pl-percentage-cell" id="totalCOGS-pct">0.0%</td>
+                    </tr>
+                `;
+                
+                // Gross Profit Row
+                htmlContent += `
+                    <tr class="pl-calculated-row pl-gross-profit">
+                        <td class="pl-line-item pl-calculated-line">Gross Profit</td>
+                        <td class="pl-gross-cell">0</td>
+                        <td class="pl-gross-cell">0</td>
+                        <td class="pl-gross-cell">0</td>
+                        <td class="pl-gross-cell">0</td>
+                        <td class="pl-gross-cell">0</td>
+                        <td class="pl-gross-cell">0</td>
+                        <td class="pl-gross-cell">0</td>
+                        <td class="pl-gross-cell">0</td>
+                        <td class="pl-gross-cell">0</td>
+                        <td class="pl-gross-cell">0</td>
+                        <td class="pl-gross-cell">0</td>
+                        <td class="pl-gross-cell">0</td>
+                        <td class="pl-gross-cell pl-gross-prominent" id="grossProfit-total">0</td>
+                        <td class="pl-percentage-cell" id="grossProfit-pct">0.0%</td>
+                    </tr>
+                `;
+            }
+            
+            // OPERATING EXPENSES SECTION
+            htmlContent += `
+                <tr class="pl-section-header-row">
+                    <td colspan="15" class="pl-section-header">
+                        <i class="fas fa-calculator"></i> OPERATING EXPENSES
+                    </td>
+                </tr>
+            `;
+            
+            accountCategories.opex.forEach(account => {
+                htmlContent += `
+                    <tr class="pl-data-row pl-opex-row" data-account-code="${account.account_code}">
+                        <td class="pl-line-item">${account.account_name}</td>
+                        <td class="pl-actual-cell" data-month="jan">0</td>
+                        <td class="pl-actual-cell" data-month="feb">0</td>
+                        <td class="pl-actual-cell" data-month="mar">0</td>
+                        <td class="pl-actual-cell" data-month="apr">0</td>
+                        <td class="pl-actual-cell" data-month="may">0</td>
+                        <td class="pl-actual-cell" data-month="jun">0</td>
+                        <td class="pl-forecast-cell" contenteditable="true" data-month="jul">0</td>
+                        <td class="pl-forecast-cell" contenteditable="true" data-month="aug">0</td>
+                        <td class="pl-forecast-cell" contenteditable="true" data-month="sep">0</td>
+                        <td class="pl-forecast-cell" contenteditable="true" data-month="oct">0</td>
+                        <td class="pl-forecast-cell" contenteditable="true" data-month="nov">0</td>
+                        <td class="pl-forecast-cell" contenteditable="true" data-month="dec">0</td>
+                        <td class="pl-total-cell" id="${account.account_code}-total">0</td>
+                        <td class="pl-percentage-cell" id="${account.account_code}-pct">0.0%</td>
+                    </tr>
+                `;
+            });
+            
+            // OPEX Total Row
+            htmlContent += `
+                <tr class="pl-total-row pl-opex-total">
+                    <td class="pl-line-item pl-total-line">Total Operating Expenses</td>
+                    <td class="pl-calculated-cell">0</td>
+                    <td class="pl-calculated-cell">0</td>
+                    <td class="pl-calculated-cell">0</td>
+                    <td class="pl-calculated-cell">0</td>
+                    <td class="pl-calculated-cell">0</td>
+                    <td class="pl-calculated-cell">0</td>
+                    <td class="pl-calculated-cell">0</td>
+                    <td class="pl-calculated-cell">0</td>
+                    <td class="pl-calculated-cell">0</td>
+                    <td class="pl-calculated-cell">0</td>
+                    <td class="pl-calculated-cell">0</td>
+                    <td class="pl-calculated-cell">0</td>
+                    <td class="pl-total-cell pl-total-prominent" id="totalOPEX-total">0</td>
+                    <td class="pl-percentage-cell" id="totalOPEX-pct">0.0%</td>
+                </tr>
+            `;
+            
+            // NET INCOME Row
+            htmlContent += `
+                <tr class="pl-calculated-row pl-net-income">
+                    <td class="pl-line-item pl-net-income-line">Net Income</td>
+                    <td class="pl-net-cell">0</td>
+                    <td class="pl-net-cell">0</td>
+                    <td class="pl-net-cell">0</td>
+                    <td class="pl-net-cell">0</td>
+                    <td class="pl-net-cell">0</td>
+                    <td class="pl-net-cell">0</td>
+                    <td class="pl-net-cell">0</td>
+                    <td class="pl-net-cell">0</td>
+                    <td class="pl-net-cell">0</td>
+                    <td class="pl-net-cell">0</td>
+                    <td class="pl-net-cell">0</td>
+                    <td class="pl-net-cell">0</td>
+                    <td class="pl-net-cell pl-net-prominent" id="netIncome-total">0</td>
+                    <td class="pl-percentage-cell" id="netIncome-pct">0.0%</td>
+                </tr>
+            `;
+            
+            // Update the table
+            tbody.innerHTML = htmlContent;
+        }
+
+        function populatePLWithActualData(transactions) {
+            console.log('Populating P&L with actual transaction data...');
+            
+            // Group transactions by account code and month
+            const monthlyData = {};
+            
+            transactions.forEach(transaction => {
+                const date = new Date(transaction.transaction_date);
+                const month = date.getMonth(); // 0 = Jan, 1 = Feb, etc.
+                const accountCode = transaction.account_code;
+                
+                if (!monthlyData[accountCode]) {
+                    monthlyData[accountCode] = Array(12).fill(0);
+                }
+                
+                // For P&L, we need net effect (debits - credits for expenses, credits - debits for revenue)
+                const netAmount = parseFloat(transaction.debit_amount || 0) - parseFloat(transaction.credit_amount || 0);
+                
+                // Revenue accounts (4000-4999): credits increase revenue, so use negative net amount
+                // Expense accounts (5000-5999): debits increase expenses, so use positive net amount
+                if (accountCode >= 4000 && accountCode < 5000) {
+                    monthlyData[accountCode][month] += -netAmount; // Revenue: credits are positive
+                } else if (accountCode >= 5000 && accountCode < 6000) {
+                    monthlyData[accountCode][month] += netAmount; // Expenses: debits are positive
+                } else if (accountCode >= 2000 && accountCode < 3000) {
+                    monthlyData[accountCode][month] += netAmount; // COGS: debits are positive
+                }
+            });
+            
+            console.log('Monthly data by account:', monthlyData);
+            
+            // Populate the actual cells (Jan-Jun only)
+            Object.keys(monthlyData).forEach(accountCode => {
+                const accountRow = document.querySelector(`tr[data-account-code="${accountCode}"]`);
+                if (!accountRow) return;
+                
+                const monthNames = ['jan', 'feb', 'mar', 'apr', 'may', 'jun'];
+                
+                monthNames.forEach((monthName, index) => {
+                    const cell = accountRow.querySelector(`.pl-actual-cell[data-month="${monthName}"]`);
+                    if (cell) {
+                        const amount = monthlyData[accountCode][index] || 0;
+                        cell.textContent = Math.round(amount).toLocaleString();
+                    }
+                });
+            });
+            
+            // Recalculate all totals
+            recalculateEntirePL();
+            
+            console.log('P&L populated with actual data!');
         }
         
         function populatePLActualCells(data) {
