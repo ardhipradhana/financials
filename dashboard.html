@@ -20624,14 +20624,23 @@
         }
 
         function buildPLStructureFromGLAccounts(glAccounts) {
-            // Categorize accounts based on account codes
+            // Categorize accounts based on YOUR actual account codes
             const accountCategories = {
                 revenue: glAccounts.filter(acc => acc.account_code >= 4000 && acc.account_code < 5000),
-                cogs: glAccounts.filter(acc => acc.account_code >= 2000 && acc.account_code < 3000),
-                opex: glAccounts.filter(acc => acc.account_code >= 5000 && acc.account_code < 6000)
+                cogs: glAccounts.filter(acc => 
+                    acc.account_code === 5010 || // Cost of Goods Sold
+                    acc.account_code === 5020 || // Purchase Discounts  
+                    acc.account_code === 5030    // Freight In
+                ),
+                opex: glAccounts.filter(acc => 
+                    acc.account_code >= 5000 && acc.account_code < 6000 &&
+                    acc.account_code !== 5010 && 
+                    acc.account_code !== 5020 && 
+                    acc.account_code !== 5030
+                ) // All other 5000+ accounts except COGS
             };
             
-            console.log('Account categories:', accountCategories);
+            console.log('Corrected account categories with actual COGS:', accountCategories);
             
             // Rebuild the P&L table structure dynamically
             rebuildPLTableStructure(accountCategories);
