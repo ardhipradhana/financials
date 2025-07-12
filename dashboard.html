@@ -20053,7 +20053,8 @@
             // Industry selector change
             document.getElementById('forecastIndustrySelect').addEventListener('change', function() {
                 if (this.value) {
-                    updateMarketContext(this.value);
+                    console.log(`✅ Industry context selected: ${this.value}`);
+                    console.log(`This context will be sent to AI agent for intelligent forecasting`);
                 }
             });
         
@@ -20503,62 +20504,6 @@
         
             // Update confidence levels (simulate AI confidence)
             updateConfidenceLevels();
-        }
-        
-        function updateMarketContext(industry) {
-            const contextInsights = document.getElementById('contextInsights');
-            
-            const industryData = {
-                'saas': {
-                    growth: '15-25% annually',
-                    margin: '18-25%',
-                    trends: 'AI integration driving higher valuations'
-                },
-                'retail': {
-                    growth: '8-12% annually',
-                    margin: '8-15%',
-                    trends: 'E-commerce acceleration post-pandemic'
-                },
-                'consulting': {
-                    growth: '10-18% annually',
-                    margin: '15-30%',
-                    trends: 'Digital transformation demand high'
-                },
-                'manufacturing': {
-                    growth: '5-10% annually',
-                    margin: '10-18%',
-                    trends: 'Supply chain optimization focus'
-                },
-                'healthcare': {
-                    growth: '8-15% annually',
-                    margin: '12-20%',
-                    trends: 'Telehealth and AI diagnostics growing'
-                },
-                'fintech': {
-                    growth: '20-35% annually',
-                    margin: '15-25%',
-                    trends: 'Regulatory clarity improving adoption'
-                }
-            };
-        
-            const data = industryData[industry] || industryData['saas'];
-            
-            contextInsights.innerHTML = `
-                <div class="context-metrics">
-                    <div class="context-metric">
-                        <span class="metric-label">Industry Growth Rate:</span>
-                        <span class="metric-value">${data.growth}</span>
-                    </div>
-                    <div class="context-metric">
-                        <span class="metric-label">Typical Net Margin:</span>
-                        <span class="metric-value">${data.margin}</span>
-                    </div>
-                    <div class="context-insight">
-                        <i class="fas fa-lightbulb"></i>
-                        <span>${data.trends}</span>
-                    </div>
-                </div>
-            `;
         }
         
         function populate2026Forecast() {
