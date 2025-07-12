@@ -23441,6 +23441,7 @@
             
             const industry = document.getElementById('forecast2026IndustrySelect').value;
             const additionalContext = document.getElementById('forecast2026Context').value;
+            const forecastStyle = document.getElementById('forecast2026StyleSelect').value; // Define this early
             
             if (!industry) {
                 alert('Please select an industry for AI context');
@@ -23467,11 +23468,10 @@
                 // Calculate dynamic periods based on current date
                 const now = new Date();
                 const currentYear = now.getFullYear();
-                const currentMonth = now.getMonth() + 1; // 1-12
+                const currentMonth = now.getMonth() + 1;
                 const currentDay = now.getDate();
                 
-                // Determine if current month should be included in actuals or forecast
-                const includeCurrentMonth = currentDay <= 25; // If after 25th, consider month mostly complete
+                const includeCurrentMonth = currentDay <= 25;
                 const actualEndMonth = includeCurrentMonth ? currentMonth : currentMonth - 1;
                 const forecastStartMonth = includeCurrentMonth ? currentMonth : currentMonth + 1;
                 
@@ -23509,9 +23509,9 @@
                     year: 2026,
                     industry: industry,
                     additionalContext: additionalContext,
-                    forecastStyle: forecastStyle,
+                    forecastStyle: forecastStyle, // Now this is defined
                     baselineData: {
-                        year_2025_complete: currentYearData.monthlyData, // All 12 months of 2025
+                        year_2025_complete: currentYearData.monthlyData,
                         year_2025_totals: currentYearData.yearTotals,
                         actuals_period: actualsPeriod,
                         forecast_period: forecastPeriod,
@@ -23547,10 +23547,12 @@
                 
                 // Populate the 2026 table with AI results
                 populate2026TableWithAI(result);
+                
+                // Save to Supabase
                 await save2026ForecastToSupabase(result);
                 
                 // Show success notification
-                showForecastLoadedNotification(new Date());
+                showForecastLoadedNotification(new Date(), true);
                 
             } catch (error) {
                 console.error('❌ 2026 Forecast generation failed:', error);
