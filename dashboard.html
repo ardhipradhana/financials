@@ -22715,6 +22715,11 @@
             } catch (error) {
                 console.error('Error loading latest forecast:', error);
             }
+            // In your loadLatestForecastFromSupabase() or similar function, add at the end:
+            if (document.getElementById('forecastTrendingContainer')) {
+                document.getElementById('forecastTrendingContainer').style.display = 'block';
+                generateForecastTrendingChart();
+            }
         }
 
         // Apply stored forecast data to P&L table
@@ -23081,33 +23086,57 @@
             return { labels, revenue, grossProfit, cogs, ebitda };
         }
         
-        // Update summary cards with forecast data
+        // Updated summary cards calculation to match table data exactly
         function updateForecastSummaryCards(data) {
             if (data.revenue.length < 2) return;
             
-            // Calculate revenue growth
-            const revenueStart = data.revenue[0];
-            const revenueEnd = data.revenue[data.revenue.length - 1];
-            const revenueGrowth = revenueStart > 0 ? ((revenueEnd - revenueStart) / revenueStart) * 100 : 0;
+            // 1. Revenue Growth - CMGR (Compound Monthly Growth Rate) Dec vs Jan
+            const revenueJan = data.revenue[0]; // Jan (first month)
+            const revenueDec = data.revenue[data.revenue.length - 1]; // Dec (last month)
+            const months = 11; // Jan to Dec is 11 months progression
             
-            document.getElementById('forecastRevenueGrowth').textContent = `${revenueGrowth >= 0 ? '+' : ''}${revenueGrowth.toFixed(1)}%`;
-            document.getElementById('revenueGrowthDirection').textContent = revenueGrowth > 0 ? 'Growing' : 'Declining';
+            let revenueCMGR = 0;
+            if (revenueJan > 0 && revenueDec > 0 && months > 0) {
+                revenueCMGR = (Math.pow(revenueDec / revenueJan, 1 / months) - 1) * 100;
+            }
             
-            // Calculate average gross margin
-            const avgGrossMargin = data.revenue.reduce((sum, rev, i) => {
-                return sum + (rev > 0 ? (data.grossProfit[i] / rev) * 100 : 0);
-            }, 0) / data.revenue.length;
+            document.getElementById('forecastRevenueGrowth').textContent = `${revenueCMGR >= 0 ? '+' : ''}${revenueCMGR.toFixed(1)}%`;
+            document.getElementById('revenueGrowthDirection').textContent = 'CMGR (Monthly)';
             
-            document.getElementById('forecastGrossMargin').textContent = `${avgGrossMargin.toFixed(1)}%`;
-            document.getElementById('grossMarginTrend').textContent = avgGrossMargin > 50 ? 'Healthy' : avgGrossMargin > 30 ? 'Moderate' : 'Low';
+            // 2. Gross Margin - Get from P&L table "2025 Total" column percentage
+            const grossProfitTotalCell = document.querySelector('#grossProfit-total');
+            const totalRevenueTotalCell = document.querySelector('#totalRevenue-total');
             
-            // Calculate average EBITDA margin
-            const avgEbitdaMargin = data.revenue.reduce((sum, rev, i) => {
-                return sum + (rev > 0 ? (data.ebitda[i] / rev) * 100 : 0);
-            }, 0) / data.revenue.length;
+            let fullYearGrossMargin = 0;
+            if (grossProfitTotalCell && totalRevenueTotalCell) {
+                const totalRevenue = parseFloat(totalRevenueTotalCell.textContent.replace(/,/g, '')) || 0;
+                const totalGrossProfit = parseFloat(grossProfitTotalCell.textContent.replace(/,/g, '')) || 0;
+                fullYearGrossMargin = totalRevenue > 0 ? (totalGrossProfit / totalRevenue) * 100 : 0;
+            }
             
-            document.getElementById('forecastEbitdaMargin').textContent = `${avgEbitdaMargin.toFixed(1)}%`;
-            document.getElementById('ebitdaMarginTrend').textContent = avgEbitdaMargin > 20 ? 'Strong' : avgEbitdaMargin > 10 ? 'Moderate' : 'Weak';
+            document.getElementById('forecastGrossMargin').textContent = `${fullYearGrossMargin.toFixed(1)}%`;
+            document.getElementById('grossMarginTrend').textContent = 'Full Year Total';
+            
+            // 3. EBITDA Margin - Get from P&L table "2025 Total" column percentage  
+            const ebitdaTotalCell = document.querySelector('#ebitda-total');
+            
+            let fullYearEbitdaMargin = 0;
+            if (ebitdaTotalCell && totalRevenueTotalCell) {
+                const totalRevenue = parseFloat(totalRevenueTotalCell.textContent.replace(/,/g, '')) || 0;
+                const totalEbitda = parseFloat(ebitdaTotalCell.textContent.replace(/,/g, '')) || 0;
+                fullYearEbitdaMargin = totalRevenue > 0 ? (totalEbitda / totalRevenue) * 100 : 0;
+            }
+            
+            document.getElementById('forecastEbitdaMargin').textContent = `${fullYearEbitdaMargin.toFixed(1)}%`;
+            document.getElementById('ebitdaMarginTrend').textContent = 'Full Year Total';
+            
+            console.log('Summary Card Calculations (from P&L table):', {
+                revenueCMGR: revenueCMGR.toFixed(1) + '%',
+                revenueJan: revenueJan.toLocaleString(),
+                revenueDec: revenueDec.toLocaleString(),
+                fullYearGrossMargin: fullYearGrossMargin.toFixed(1) + '%',
+                fullYearEbitdaMargin: fullYearEbitdaMargin.toFixed(1) + '%'
+            });
         }
         
         // Export function
