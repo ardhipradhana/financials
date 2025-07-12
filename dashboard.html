@@ -23613,7 +23613,7 @@
             };
         }
         
-        // Populate 2026 table with AI forecast results
+        // Update the populate2026TableWithAI function to handle the new backend response
         function populate2026TableWithAI(aiResult) {
             const tbody = document.getElementById('plForecast2026Body');
             if (!tbody) return;
@@ -23621,14 +23621,154 @@
             // Clear existing content
             tbody.innerHTML = '';
             
-            // Use the same table population logic as current year, but for 2026 data
-            // This assumes aiResult has the same structure as current year forecast
-            if (aiResult.forecast_data) {
-                // Populate using the AI result data
-                populateTableWithForecastData(tbody, aiResult.forecast_data, '2026');
+            if (!aiResult.forecast_data || !aiResult.forecast_data.monthly_forecasts) {
+                console.error('❌ Invalid AI result format');
+                return;
             }
             
+            const monthlyForecasts = aiResult.forecast_data.monthly_forecasts;
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            
+            // Add confidence header
+            tbody.innerHTML = `
+                <tr class="growth-assumptions-row">
+                    <td colspan="14" style="background: #f0f9ff; padding: 1rem; text-align: center; font-weight: 600; color: #1e40af;">
+                        <i class="fas fa-brain"></i> 2026 AI Forecast (Confidence: ${aiResult.confidence}%) - New Product Launch Impact Included
+                    </td>
+                </tr>
+            `;
+            
+            // Revenue Section
+            tbody.innerHTML += `
+                <tr class="section-header-row">
+                    <td colspan="14" class="section-header" style="background: #f8fafc; font-weight: 600; padding: 0.75rem;">
+                        <i class="fas fa-dollar-sign"></i> REVENUE
+                    </td>
+                </tr>
+            `;
+            
+            // Sales Revenue row
+            const salesRevenueRow = monthlyForecasts.map(m => Math.round(m.revenue_accounts['4010'] || 0));
+            const salesRevenueTotal = salesRevenueRow.reduce((sum, val) => sum + val, 0);
+            
+            tbody.innerHTML += `
+                <tr class="forecast-data-row">
+                    <td style="font-weight: 500; padding: 0.5rem 1rem;">Sales Revenue</td>
+                    ${salesRevenueRow.map(val => `<td style="text-align: right; padding: 0.5rem;">${val.toLocaleString()}</td>`).join('')}
+                    <td style="text-align: right; font-weight: 600; background: #fef3c7; padding: 0.5rem;">${salesRevenueTotal.toLocaleString()}</td>
+                </tr>
+            `;
+            
+            // Service Revenue row (if exists)
+            const serviceRevenueRow = monthlyForecasts.map(m => Math.round(m.revenue_accounts['4020'] || 0));
+            const serviceRevenueTotal = serviceRevenueRow.reduce((sum, val) => sum + val, 0);
+            
+            if (serviceRevenueTotal > 0) {
+                tbody.innerHTML += `
+                    <tr class="forecast-data-row">
+                        <td style="font-weight: 500; padding: 0.5rem 1rem;">Service Revenue</td>
+                        ${serviceRevenueRow.map(val => `<td style="text-align: right; padding: 0.5rem;">${val.toLocaleString()}</td>`).join('')}
+                        <td style="text-align: right; font-weight: 600; background: #fef3c7; padding: 0.5rem;">${serviceRevenueTotal.toLocaleString()}</td>
+                    </tr>
+                `;
+            }
+            
+            // Total Revenue
+            const totalRevenueRow = monthlyForecasts.map(m => 
+                Math.round((m.revenue_accounts['4010'] || 0) + (m.revenue_accounts['4020'] || 0))
+            );
+            const totalRevenueTotal = totalRevenueRow.reduce((sum, val) => sum + val, 0);
+            
+            tbody.innerHTML += `
+                <tr class="total-row" style="background: #fef3c7; font-weight: 700;">
+                    <td style="padding: 0.5rem 1rem;">Total Revenue</td>
+                    ${totalRevenueRow.map(val => `<td style="text-align: right; padding: 0.5rem;">${val.toLocaleString()}</td>`).join('')}
+                    <td style="text-align: right; padding: 0.5rem; background: #fde047;">${totalRevenueTotal.toLocaleString()}</td>
+                </tr>
+            `;
+            
+            // COGS Section
+            tbody.innerHTML += `
+                <tr class="section-header-row">
+                    <td colspan="14" class="section-header" style="background: #f8fafc; font-weight: 600; padding: 0.75rem;">
+                        <i class="fas fa-box"></i> COST OF GOODS SOLD (COGS)
+                    </td>
+                </tr>
+            `;
+            
+            // COGS rows
+            const cogsRow = monthlyForecasts.map(m => 
+                Math.round((m.cogs_accounts['5010'] || 0) + (m.cogs_accounts['5020'] || 0))
+            );
+            const cogsTotal = cogsRow.reduce((sum, val) => sum + val, 0);
+            
+            tbody.innerHTML += `
+                <tr class="forecast-data-row">
+                    <td style="font-weight: 500; padding: 0.5rem 1rem;">Direct Costs</td>
+                    ${cogsRow.map(val => `<td style="text-align: right; padding: 0.5rem;">${val.toLocaleString()}</td>`).join('')}
+                    <td style="text-align: right; font-weight: 600; background: #fef3c7; padding: 0.5rem;">${cogsTotal.toLocaleString()}</td>
+                </tr>
+            `;
+            
+            // Gross Profit
+            const grossProfitRow = totalRevenueRow.map((rev, i) => rev - cogsRow[i]);
+            const grossProfitTotal = grossProfitRow.reduce((sum, val) => sum + val, 0);
+            
+            tbody.innerHTML += `
+                <tr class="calculated-row" style="background: #dbeafe; font-weight: 700;">
+                    <td style="padding: 0.5rem 1rem;">Gross Profit</td>
+                    ${grossProfitRow.map(val => `<td style="text-align: right; padding: 0.5rem;">${val.toLocaleString()}</td>`).join('')}
+                    <td style="text-align: right; padding: 0.5rem; background: #bfdbfe;">${grossProfitTotal.toLocaleString()}</td>
+                </tr>
+            `;
+            
+            // OPEX Section
+            tbody.innerHTML += `
+                <tr class="section-header-row">
+                    <td colspan="14" class="section-header" style="background: #f8fafc; font-weight: 600; padding: 0.75rem;">
+                        <i class="fas fa-cogs"></i> OPERATING EXPENSES (OPEX)
+                    </td>
+                </tr>
+            `;
+            
+            // OPEX rows
+            const opexRow = monthlyForecasts.map(m => 
+                Math.round((m.opex_accounts['5100'] || 0) + (m.opex_accounts['5110'] || 0))
+            );
+            const opexTotal = opexRow.reduce((sum, val) => sum + val, 0);
+            
+            tbody.innerHTML += `
+                <tr class="forecast-data-row">
+                    <td style="font-weight: 500; padding: 0.5rem 1rem;">Operating Expenses</td>
+                    ${opexRow.map(val => `<td style="text-align: right; padding: 0.5rem;">${val.toLocaleString()}</td>`).join('')}
+                    <td style="text-align: right; font-weight: 600; background: #fef3c7; padding: 0.5rem;">${opexTotal.toLocaleString()}</td>
+                </tr>
+            `;
+            
+            // EBITDA
+            const ebitdaRow = grossProfitRow.map((gp, i) => gp - opexRow[i]);
+            const ebitdaTotal = ebitdaRow.reduce((sum, val) => sum + val, 0);
+            
+            tbody.innerHTML += `
+                <tr class="calculated-row" style="background: #dbeafe; font-weight: 700;">
+                    <td style="padding: 0.5rem 1rem;">EBITDA</td>
+                    ${ebitdaRow.map(val => `<td style="text-align: right; padding: 0.5rem;">${val.toLocaleString()}</td>`).join('')}
+                    <td style="text-align: right; padding: 0.5rem; background: #bfdbfe;">${ebitdaTotal.toLocaleString()}</td>
+                </tr>
+            `;
+            
             console.log('✅ 2026 forecast table populated with AI data');
+            
+            // Show insights if available
+            if (aiResult.insights) {
+                show2026Insights(aiResult.insights);
+            }
+        }
+        
+        // Add function to show 2026 insights
+        function show2026Insights(insights) {
+            // You can implement this to show the AI insights in a separate section
+            console.log('📊 2026 AI Insights:', insights);
         }
         
         // Helper function to populate table with forecast data
