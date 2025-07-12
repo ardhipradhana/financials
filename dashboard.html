@@ -20624,23 +20624,25 @@
         }
 
         function buildPLStructureFromGLAccounts(glAccounts) {
-            // Categorize accounts based on YOUR actual account codes
+            // FIXED: Categorize accounts based on YOUR actual account codes
             const accountCategories = {
                 revenue: glAccounts.filter(acc => acc.account_code >= 4000 && acc.account_code < 5000),
                 cogs: glAccounts.filter(acc => 
-                    acc.account_code === 5010 || // Cost of Goods Sold
-                    acc.account_code === 5020 || // Purchase Discounts  
-                    acc.account_code === 5030    // Freight In
+                    acc.account_code === 5010 || 
+                    acc.account_code === 5020 || 
+                    acc.account_code === 5030
                 ),
                 opex: glAccounts.filter(acc => 
                     acc.account_code >= 5000 && acc.account_code < 6000 &&
                     acc.account_code !== 5010 && 
                     acc.account_code !== 5020 && 
                     acc.account_code !== 5030
-                ) // All other 5000+ accounts except COGS
+                )
             };
             
-            console.log('Corrected account categories with actual COGS:', accountCategories);
+            console.log('FIXED account categories:', accountCategories);
+            console.log('COGS accounts found:', accountCategories.cogs.map(acc => `${acc.account_code}: ${acc.account_name}`));
+            console.log('OPEX accounts found:', accountCategories.opex.map(acc => `${acc.account_code}: ${acc.account_name}`));
             
             // Rebuild the P&L table structure dynamically
             rebuildPLTableStructure(accountCategories);
@@ -20854,6 +20856,11 @@
             
             // Update the table
             tbody.innerHTML = htmlContent;
+
+            // FIXED: Calculate derived metrics AFTER DOM is updated
+            setTimeout(() => {
+                recalculateEntirePL();
+            }, 100);
         }
 
         function populatePLWithActualData(transactions) {
@@ -21006,9 +21013,23 @@
             const totalOpexRow = document.querySelector('.pl-opex-total');
             const netIncomeRow = document.querySelector('.pl-net-income');
             
-            // Calculate Gross Profit (Revenue - COGS)
-            if (totalRevenueRow && totalCogsRow && grossProfitRow) {
-                calculatePLDerivedRow(totalRevenueRow, totalCogsRow, grossProfitRow, 'subtract');
+            console.log('Found rows for calculation:', {
+                totalRevenueRow: !!totalRevenueRow,
+                totalCogsRow: !!totalCogsRow,
+                grossProfitRow: !!grossProfitRow,
+                totalOpexRow: !!totalOpexRow,
+                netIncomeRow: !!netIncomeRow
+            });
+            
+            // Calculate Gross Profit (Revenue - COGS, or just Revenue if no COGS)
+            if (totalRevenueRow && grossProfitRow) {
+                if (totalCogsRow) {
+                    // Has COGS: Gross Profit = Revenue - COGS
+                    calculatePLDerivedRow(totalRevenueRow, totalCogsRow, grossProfitRow, 'subtract');
+                } else {
+                    // No COGS: Gross Profit = Revenue
+                    calculatePLDerivedRow(totalRevenueRow, totalRevenueRow, grossProfitRow, 'copy');
+                }
             }
             
             // Calculate Net Income (Gross Profit - OPEX)
@@ -21023,15 +21044,17 @@
             const resultCells = resultRow.querySelectorAll('td:not(.pl-line-item):not(.pl-percentage-cell)');
             
             resultCells.forEach((resultCell, index) => {
-                if (row1Cells[index] && row2Cells[index]) {
+                if (row1Cells[index]) {
                     const value1 = parseFloat(row1Cells[index].textContent.replace(/,/g, '')) || 0;
-                    const value2 = parseFloat(row2Cells[index].textContent.replace(/,/g, '')) || 0;
+                    const value2 = row2Cells[index] ? parseFloat(row2Cells[index].textContent.replace(/,/g, '')) || 0 : 0;
                     
                     let result;
                     if (operation === 'subtract') {
                         result = value1 - value2;
                     } else if (operation === 'add') {
                         result = value1 + value2;
+                    } else if (operation === 'copy') {
+                        result = value1;
                     }
                     
                     resultCell.textContent = result.toLocaleString();
