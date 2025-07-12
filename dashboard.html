@@ -7682,6 +7682,120 @@
                 justify-content: flex-start;
             }
         }
+
+        #plForecast2026Table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+            min-width: 1200px;
+            table-layout: fixed; /* Important for freeze pane */
+        }
+        
+        #plForecast2026Table th:first-child,
+        #plForecast2026Table td:first-child {
+            position: sticky;
+            left: 0;
+            z-index: 10;
+            background: #f8fafc;
+            border-right: 2px solid #e2e8f0;
+            min-width: 200px;
+            max-width: 200px;
+            box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        #plForecast2026Table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 5;
+            background: #f9fafb;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        #plForecast2026Table thead th:first-child {
+            z-index: 11; /* Higher than other sticky elements */
+            background: #f1f5f9;
+        }
+        
+        /* Ensure proper scrolling container for 2026 */
+        .pl-table-scroll {
+            overflow-x: auto;
+            overflow-y: auto;
+            max-height: 600px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+        }
+        
+        /* Month header styling for 2026 */
+        #plForecast2026Table .pl-month-header {
+            min-width: 80px;
+            text-align: center;
+            font-weight: 600;
+            background: #f9fafb;
+        }
+        
+        #plForecast2026Table .pl-total-header {
+            min-width: 100px;
+            background: #fef3c7;
+            font-weight: 700;
+        }
+        
+        /* Line item styling for 2026 */
+        #plForecast2026Table .line-item {
+            text-align: left;
+            font-weight: 500;
+            color: #374151;
+            padding: 0.5rem 1rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        /* Cell styling for 2026 */
+        #plForecast2026Table .forecast-cell,
+        #plForecast2026Table .total-cell,
+        #plForecast2026Table .calculated-cell {
+            text-align: right;
+            padding: 0.5rem;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        
+        #plForecast2026Table .total-cell {
+            background: #fef3c7;
+            font-weight: 600;
+        }
+        
+        #plForecast2026Table .calculated-cell {
+            background: #dbeafe;
+            font-weight: 600;
+        }
+        
+        #plForecast2026Table .section-header {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #374151;
+            text-align: left;
+            padding: 0.75rem 1rem;
+        }
+        
+        /* Margin row styling for 2026 */
+        #plForecast2026Table .pl-margin-row td {
+            background: #f1f5f9;
+            font-style: italic;
+            color: #64748b;
+            font-weight: 500;
+            font-family: 'SF Mono', 'Monaco', monospace;
+        }
+        
+        #plForecast2026Table .pl-margin-cell {
+            text-align: right;
+            font-weight: 600;
+            color: #475569;
+        }
+        
+        #plForecast2026Table .pl-margin-prominent {
+            background: #e2e8f0;
+            font-weight: 700;
+        }
         
     </style>
 </head>
@@ -9458,9 +9572,11 @@
                             </div>
                         </div>
 
+                        <!-- Update the 2025 forecasting controls -->
                         <div class="forecasting-ai-controls">
                             <div class="forecasting-ai-controls-left">
                                 <div class="industry-input-wrapper">
+                                    <label for="forecastIndustrySelect">Industry Context:</label>
                                     <select id="forecastIndustrySelect" class="industry-input-select">
                                         <option value="">Select Industry for AI Context</option>
                                         <option value="saas">SaaS / Technology</option>
@@ -9471,7 +9587,15 @@
                                         <option value="fintech">FinTech</option>
                                     </select>
                                 </div>
-                                <button class="btn btn-outline" onclick="loadLatestForecastFromSupabase()" title="Load latest forecast from database">
+                                <div class="industry-input-wrapper">
+                                    <label for="forecastStyleSelect">Forecast Style:</label>
+                                    <select id="forecastStyleSelect" class="industry-input-select">
+                                        <option value="normal">Normal Growth</option>
+                                        <option value="aggressive">Aggressive Growth</option>
+                                        <option value="pessimistic">Conservative/Pessimistic</option>
+                                    </select>
+                                </div>
+                                <button class="btn btn-outline" onclick="loadLatestForecastFromSupabase()">
                                     <i class="fas fa-history"></i>
                                     Load Latest Forecast
                                 </button>
@@ -20982,6 +21106,7 @@
             console.log('🚀 Starting REAL AI Forecast Generation...');
             
             const industry = document.getElementById('forecastIndustrySelect').value;
+            const forecastStyle = document.getElementById('forecastStyleSelect').value; // Add this line
             
             if (!industry) {
                 alert('Please select an industry for AI context');
@@ -21003,32 +21128,38 @@
                 
                 const includeCurrentMonth = currentDay <= 25;
                 const forecastStartMonth = includeCurrentMonth ? currentMonth : currentMonth + 1;
-                const monthsToForecast = 12 - forecastStartMonth + 1;
-                
-                if (monthsToForecast <= 0) {
-                    throw new Error('Cannot generate forecast - already at end of year');
-                }
+                const forecastEndMonth = 12;
+                const totalForecastMonths = forecastEndMonth - forecastStartMonth + 1;
         
-                // Prepare historical data
-                const historicalData = await prepareHistoricalDataForAI();
-                
-                if (!historicalData || historicalData.length === 0) {
-                    throw new Error('No historical data available for forecasting');
-                }
+                console.log('📅 Forecast Period Calculation:', {
+                    currentDate: `${currentYear}-${currentMonth}-${currentDay}`,
+                    includeCurrentMonth,
+                    forecastStartMonth,
+                    forecastEndMonth,
+                    totalForecastMonths
+                });
         
-                // Get forecast period details
-                const forecastPeriod = getForecastPeriodDetails(currentYear, currentMonth, currentDay, includeCurrentMonth);
-        
-                // Simplified payload - let AI figure out company context from the data
+                // Prepare the request payload
                 const payload = {
-                    historical_data: historicalData,
                     industry: industry,
-                    forecast_months: monthsToForecast,
+                    forecastStyle: forecastStyle, // Add this line
+                    forecast_months: totalForecastMonths,
                     forecast_start_month: forecastStartMonth,
                     forecast_year: currentYear,
-                    forecast_period: forecastPeriod,
                     include_current_month: includeCurrentMonth,
-                    current_day: currentDay
+                    current_day: currentDay,
+                    forecast_period: {
+                        start_month: forecastStartMonth,
+                        end_month: forecastEndMonth,
+                        start_month_name: getMonthName(forecastStartMonth),
+                        end_month_name: getMonthName(forecastEndMonth),
+                        total_months: totalForecastMonths,
+                        current_month: currentMonth,
+                        current_year: currentYear,
+                        current_day: currentDay,
+                        include_current_month: includeCurrentMonth,
+                        forecast_type: includeCurrentMonth ? "current_month_completion" : "future_months_only"
+                    }
                 };
         
                 // Call n8n webhook
@@ -24067,6 +24198,7 @@
                     forecast_type: 'full_year_ai_forecast',
                     industry_context: document.getElementById('forecast2026IndustrySelect').value,
                     additional_context: document.getElementById('forecast2026Context').value,
+                    forecast_style: document.getElementById('forecast2026StyleSelect').value,
                     confidence_level: aiResult.confidence,
                     generated_at: new Date().toISOString(),
                     model_version: aiResult.model_version || 'ai-agent-v1',
