@@ -21109,7 +21109,7 @@
             console.log('🚀 Starting REAL AI Forecast Generation...');
             
             const industry = document.getElementById('forecastIndustrySelect').value;
-            const forecastStyle = document.getElementById('forecastStyleSelect').value; // Add this line
+            const forecastStyle = document.getElementById('forecastStyleSelect').value;
             
             if (!industry) {
                 alert('Please select an industry for AI context');
@@ -21123,6 +21123,21 @@
             button.disabled = true;
         
             try {
+                // FIRST: Get historical data from Supabase
+                console.log('📥 Fetching historical data from Supabase...');
+                
+                const { data: historicalData, error } = await supabase
+                    .from('financial_transactions_meridash')
+                    .select('*')
+                    .order('transaction_date', { ascending: true });
+        
+                if (error) {
+                    throw error;
+                }
+        
+                // Process historical data into monthly summaries
+                const monthlyData = processHistoricalDataToMonthly(historicalData);
+                
                 // Get current date and calculate forecast period dynamically
                 const now = new Date();
                 const currentYear = now.getFullYear();
@@ -21139,13 +21154,15 @@
                     includeCurrentMonth,
                     forecastStartMonth,
                     forecastEndMonth,
-                    totalForecastMonths
+                    totalForecastMonths,
+                    historicalMonths: monthlyData.length
                 });
         
-                // Prepare the request payload
+                // Prepare the request payload with actual data
                 const payload = {
+                    historical_data: monthlyData, // Add the actual historical data
                     industry: industry,
-                    forecastStyle: forecastStyle, // Add this line
+                    forecastStyle: forecastStyle,
                     forecast_months: totalForecastMonths,
                     forecast_start_month: forecastStartMonth,
                     forecast_year: currentYear,
@@ -21165,42 +21182,102 @@
                     }
                 };
         
-                // Call n8n webhook
-                const forecastResponse = await callAIForecastAPI(payload);
+                console.log('📤 Sending forecast request with historical data:', {
+                    historicalDataPoints: monthlyData.length,
+                    forecastPeriod: `${payload.forecast_period.start_month_name}-${payload.forecast_period.end_month_name}`,
+                    industry,
+                    forecastStyle
+                });
         
-                console.log('✅ Got response from AI:', forecastResponse);
+                // Call the webhook
+                const response = await fetch('https://montpro.app.n8n.cloud/webhook/ai-forecast', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload)
+                });
         
-                if (forecastResponse && forecastResponse.success) {
-                    // Apply forecast to table
-                    await applyAIForecastToTable(forecastResponse.forecast_data, forecastPeriod);
-                    
-                    // Save to Supabase
-                    await saveForecastToSupabase(forecastResponse, forecastPeriod);
-                    
-                    // Recalculate everything
-                    recalculateEntirePL();
-                    
-                    // Display AI insights
-                    displayAIInsights(forecastResponse);
-                    
-                    // Simple success message
-                    alert(`🤖 AI Forecast Generated Successfully!\n\n` + 
-                          `Period: ${forecastPeriod.start_month_name} - ${forecastPeriod.end_month_name} ${forecastPeriod.current_year}\n` +
-                          `Confidence: ${forecastResponse.confidence}%\n\n` +
-                          `Check the AI Analysis & Insights section below for detailed analysis.`);
-                } else {
-                    throw new Error('AI forecast failed');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
         
+                const result = await response.json();
+                console.log('📥 AI Forecast Result:', result);
+        
+                // Process and display the results
+                if (result && result.forecast_data) {
+                    populateForecastTable(result);
+                    generateForecastInsights(result.insights || {});
+                    generateForecastTrendingChart();
+                }
+        
+                // Show success notification
+                showForecastLoadedNotification(new Date(), true);
+        
             } catch (error) {
-                console.error('❌ Error:', error);
-                alert('Error generating AI forecast: ' + error.message);
+                console.error('❌ AI Forecast generation failed:', error);
+                alert('Failed to generate AI forecast. Please try again.');
             } finally {
+                // Reset button
                 button.innerHTML = originalText;
                 button.disabled = false;
             }
         }
 
+        function processHistoricalDataToMonthly(transactions) {
+            const monthlyData = {};
+            
+            transactions.forEach(transaction => {
+                const date = new Date(transaction.transaction_date);
+                const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                
+                if (!monthlyData[monthKey]) {
+                    monthlyData[monthKey] = {
+                        month: monthKey,
+                        year: date.getFullYear(),
+                        month_number: date.getMonth() + 1,
+                        revenue: 0,
+                        cogs: 0,
+                        opex: 0,
+                        total_transactions: 0,
+                        is_complete_month: true // You can adjust this logic based on your needs
+                    };
+                }
+                
+                const amount = parseFloat(transaction.amount) || 0;
+                
+                // Categorize based on account code
+                if (transaction.account_code?.startsWith('4')) {
+                    // Revenue accounts
+                    monthlyData[monthKey].revenue += amount;
+                } else if (transaction.account_code?.startsWith('5') && 
+                           (transaction.account_code.includes('5010') || transaction.account_code.includes('5020'))) {
+                    // COGS accounts
+                    monthlyData[monthKey].cogs += amount;
+                } else if (transaction.account_code?.startsWith('5')) {
+                    // Other expense accounts (OPEX)
+                    monthlyData[monthKey].opex += amount;
+                }
+                
+                monthlyData[monthKey].total_transactions++;
+            });
+            
+            // Convert to array and sort by date
+            const monthlyArray = Object.values(monthlyData).sort((a, b) => {
+                return new Date(a.month) - new Date(b.month);
+            });
+            
+            console.log('📊 Processed historical data:', {
+                totalMonths: monthlyArray.length,
+                dateRange: monthlyArray.length > 0 ? 
+                    `${monthlyArray[0].month} to ${monthlyArray[monthlyArray.length - 1].month}` : 'No data',
+                sampleMonth: monthlyArray[0]
+            });
+            
+            return monthlyArray;
+        }
+        
         // Call the n8n AI forecast API
         async function callAIForecastAPI(payload) {
             const N8N_WEBHOOK_URL = 'https://montpro.app.n8n.cloud/webhook/ai-forecast';
