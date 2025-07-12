@@ -6393,6 +6393,11 @@
         .insights-header {
             margin-bottom: 1rem;
         }
+
+        .insights-header-AIinsight {
+            margin-bottom: 1rem;
+            color: white;
+        }
         
         .insights-header h4 {
             margin: 0;
@@ -6735,9 +6740,10 @@
         }
         
         .pl-total-prominent {
-            background: #fde047;
-            font-weight: 700;
-            font-size: 0.95rem;
+            background: #fde047 !important;
+            font-weight: 700 !important;
+            font-size: 0.95rem !important;
+            color: #92400e !important; /* Dark brown text */
         }
         
         .pl-percentage-cell {
@@ -6779,10 +6785,9 @@
         }
         
         .pl-gross-prominent {
-            background: #16a34a !important;
-            color: white !important;
-            font-weight: 700;
-            font-size: 0.95rem;
+            background: #bfdbfe !important;
+            font-weight: 700 !important;
+            color: #1d4ed8 !important; /* Dark blue text */
         }
         
         .pl-net-income td {
@@ -6800,10 +6805,9 @@
         }
         
         .pl-net-prominent {
-            background: #16a34a !important;
-            color: white !important;
-            font-weight: 700;
-            font-size: 0.95rem;
+            background: #dcfce7 !important;
+            font-weight: 700 !important;
+            color: #166534 !important; /* Dark green text */
         }
         
         /* Total Row Styling */
@@ -6945,7 +6949,7 @@
         .pl-margin-prominent {
             background: #e2e8f0 !important;
             font-weight: 700 !important;
-            color: #1e293b !important;
+            color: #1e293b !important; /* Dark slate text */
         }
         
         /* EBITDA Specific Styling */
@@ -6962,8 +6966,8 @@
         
         .pl-ebitda-prominent {
             background: #bfdbfe !important;
-            font-weight: 700;
-            font-size: 0.95rem;
+            font-weight: 700 !important;
+            color: #1d4ed8 !important; /* Dark blue text */
         }
         
         /* EBIT Specific Styling */
@@ -6980,7 +6984,8 @@
         
         .pl-ebit-prominent {
             background: #fde047 !important;
-            font-weight: 700;
+            font-weight: 700 !important;
+            color: #92400e !important; /* Dark brown text */
         }
 
         /* AI Insights Container Styling */
@@ -8835,6 +8840,10 @@
                                     <option value="fintech">FinTech</option>
                                 </select>
                             </div>
+                            <button class="btn btn-outline" onclick="loadLatestForecastFromSupabase()" title="Load latest forecast from database">
+                                <i class="fas fa-history"></i>
+                                Load Latest Forecast
+                            </button>
                             <button class="btn btn-primary" id="generateAIForecast">
                                 <i class="fas fa-brain"></i>
                                 Generate AI Forecast
@@ -8928,7 +8937,7 @@
 
                     <!-- AI Insights Section - Add this after the P&L forecast table -->
                     <div class="ai-insights-container" id="aiInsightsContainer" style="display: none;">
-                        <div class="insights-header">
+                        <div class="insights-header-AIinsight">
                             <h4><i class="fas fa-brain"></i> AI Analysis & Insights</h4>
                             <div class="insights-meta">
                                 <span class="confidence-badge" id="confidenceBadge">Confidence: 85%</span>
@@ -20229,6 +20238,10 @@
         // AI Forecasting Functionality
         document.addEventListener('DOMContentLoaded', function() {
             initializeForecastingModule();
+
+            setTimeout(() => {
+                loadLatestForecastFromSupabase();
+            }, 1000);
         });
         
         function initializeForecastingModule() {
@@ -21801,7 +21814,18 @@
             
             const totalRevenue = parseFloat(totalRevenueCell.textContent.replace(/,/g, '')) || 0;
             
-            // Calculate percentage of revenue for each line item
+            if (totalRevenue === 0) {
+                // Set all percentages to 0% if no revenue
+                const percentageCells = document.querySelectorAll('.pl-percentage-cell[id]');
+                percentageCells.forEach(cell => {
+                    if (cell.id !== 'totalRevenue-total') { // Don't change revenue percentage (always 100%)
+                        cell.textContent = '0.0%';
+                    }
+                });
+                return;
+            }
+            
+            // Calculate percentage of total revenue for each line item
             const percentageCells = document.querySelectorAll('.pl-percentage-cell[id]');
             percentageCells.forEach(cell => {
                 const id = cell.id.replace('-pct', '-total');
@@ -21809,10 +21833,18 @@
                 
                 if (totalCell && totalRevenue > 0) {
                     const value = parseFloat(totalCell.textContent.replace(/,/g, '')) || 0;
+                    
+                    // CORRECTED: All percentages calculated as percentage of TOTAL REVENUE
                     const percentage = (value / totalRevenue) * 100;
                     cell.textContent = percentage.toFixed(1) + '%';
                 }
             });
+            
+            // Ensure Total Revenue is always 100%
+            const totalRevenuePercentage = document.querySelector('#totalRevenue-total').parentElement.querySelector('.pl-percentage-cell');
+            if (totalRevenuePercentage) {
+                totalRevenuePercentage.textContent = '100.0%';
+            }
         }
         
         function formatPLCellValue(cell) {
@@ -22131,17 +22163,25 @@
             const totalEbitda = parseFloat(totalEbitdaCell?.textContent?.replace(/,/g, '') || 0);
             const totalNetIncome = parseFloat(totalNetIncomeCell?.textContent?.replace(/,/g, '') || 0);
             
-            // Calculate total margin percentages
+            // CORRECTED: Calculate margin percentages as percentage of TOTAL REVENUE (not sum of monthly percentages)
             const grossMargin = (totalGrossProfit / totalRevenue) * 100;
             const opexMargin = (totalOpex / totalRevenue) * 100;
             const ebitdaMargin = (totalEbitda / totalRevenue) * 100;
             const netMargin = (totalNetIncome / totalRevenue) * 100;
             
-            // Update total margin cells with specific IDs
+            // Update total margin cells with corrected calculations
             setTotalMarginById('grossMargin-total', `${grossMargin.toFixed(1)}%`);
             setTotalMarginById('opexMargin-total', `${opexMargin.toFixed(1)}%`);
             setTotalMarginById('ebitdaMargin-total', `${ebitdaMargin.toFixed(1)}%`);
             setTotalMarginById('netMargin-total', `${netMargin.toFixed(1)}%`);
+            
+            console.log('✅ Margin totals calculated correctly:', {
+                totalRevenue: totalRevenue.toLocaleString(),
+                grossMargin: `${grossMargin.toFixed(1)}%`,
+                opexMargin: `${opexMargin.toFixed(1)}%`,
+                ebitdaMargin: `${ebitdaMargin.toFixed(1)}%`,
+                netMargin: `${netMargin.toFixed(1)}%`
+            });
         }
         
         // Updated helper function to set total margin values by ID
@@ -22150,6 +22190,234 @@
             if (element) {
                 element.textContent = value;
             }
+        }
+
+        // Load latest AI forecast from Supabase on page load
+        async function loadLatestForecastFromSupabase() {
+            try {
+                console.log('🔄 Loading latest AI forecast from Supabase...');
+                
+                const user = await supabase.auth.getUser();
+                const userId = user?.data?.user?.id;
+                
+                if (!userId) {
+                    console.log('No authenticated user - skipping forecast load');
+                    return;
+                }
+                
+                // Get the latest forecast for this user
+                const { data: latestForecast, error } = await supabase
+                    .from('ai_forecasts_meridash')
+                    .select('*')
+                    .eq('user_id', userId)
+                    .order('forecast_date', { ascending: false })
+                    .limit(1);
+                
+                if (error) {
+                    console.error('Error loading latest forecast:', error);
+                    return;
+                }
+                
+                if (!latestForecast || latestForecast.length === 0) {
+                    console.log('No previous forecasts found');
+                    return;
+                }
+                
+                const forecast = latestForecast[0];
+                console.log('📊 Found latest forecast:', forecast);
+                
+                // Extract forecast data
+                const forecastData = forecast.forecast_data;
+                
+                // Apply the forecast to the P&L table
+                if (forecastData && forecastData.forecast_data && forecastData.forecast_data.monthly_forecasts) {
+                    await applyStoredForecastToTable(forecastData.forecast_data.monthly_forecasts);
+                    
+                    // Show insights if available
+                    if (forecastData.insights) {
+                        displayStoredAIInsights(forecastData, forecast);
+                    }
+                    
+                    // Recalculate everything
+                    recalculateEntirePL();
+                    
+                    console.log('✅ Latest forecast loaded and applied');
+                    
+                    // Show a subtle notification
+                    showForecastLoadedNotification(forecast.forecast_date);
+                }
+                
+            } catch (error) {
+                console.error('Error loading latest forecast:', error);
+            }
+        }
+
+        // Apply stored forecast data to P&L table
+        async function applyStoredForecastToTable(monthlyForecasts) {
+            console.log('📊 Applying stored forecast to table...', monthlyForecasts);
+            
+            if (!monthlyForecasts || !Array.isArray(monthlyForecasts)) {
+                console.error('Invalid stored forecast data');
+                return;
+            }
+        
+            const monthKeyMap = {
+                7: 'jul', 8: 'aug', 9: 'sep', 
+                10: 'oct', 11: 'nov', 12: 'dec'
+            };
+        
+            let updatedCells = 0;
+        
+            // Apply forecasts to each month
+            monthlyForecasts.forEach((monthData) => {
+                const monthKey = monthKeyMap[monthData.month];
+                
+                if (!monthKey) {
+                    console.log(`Skipping month ${monthData.month} - not in forecast period`);
+                    return;
+                }
+                
+                console.log(`Applying stored forecast for ${monthData.month_name} (${monthKey})`);
+                
+                // Apply revenue forecasts
+                if (monthData.revenue_accounts) {
+                    Object.entries(monthData.revenue_accounts).forEach(([accountCode, amount]) => {
+                        if (amount > 0) {
+                            const success = updateForecastCell(accountCode, monthKey, amount);
+                            if (success) updatedCells++;
+                        }
+                    });
+                }
+                
+                // Apply COGS forecasts
+                if (monthData.cogs_accounts) {
+                    Object.entries(monthData.cogs_accounts).forEach(([accountCode, amount]) => {
+                        if (amount > 0) {
+                            const success = updateForecastCell(accountCode, monthKey, amount);
+                            if (success) updatedCells++;
+                        }
+                    });
+                }
+                
+                // Apply OPEX forecasts
+                if (monthData.opex_accounts) {
+                    Object.entries(monthData.opex_accounts).forEach(([accountCode, amount]) => {
+                        if (amount > 0) {
+                            const success = updateForecastCell(accountCode, monthKey, amount);
+                            if (success) updatedCells++;
+                        }
+                    });
+                }
+            });
+            
+            console.log(`✅ Applied stored forecast: ${updatedCells} cells updated`);
+        }
+
+        // Display stored AI insights
+        function displayStoredAIInsights(forecastData, forecastRecord) {
+            const insightsContainer = document.getElementById('aiInsightsContainer');
+            const insights = forecastData.insights;
+            
+            if (!insightsContainer || !insights) {
+                console.log('Insights container or data not found');
+                return;
+            }
+            
+            // Update confidence badge
+            const confidenceBadge = document.getElementById('confidenceBadge');
+            if (confidenceBadge) {
+                const confidence = forecastRecord.confidence_score || 75;
+                confidenceBadge.textContent = `Confidence: ${confidence}%`;
+                
+                // Color code confidence level
+                if (confidence >= 80) {
+                    confidenceBadge.style.background = 'rgba(34, 197, 94, 0.2)';
+                    confidenceBadge.style.color = '#22c55e';
+                    confidenceBadge.style.borderColor = 'rgba(34, 197, 94, 0.3)';
+                } else if (confidence >= 60) {
+                    confidenceBadge.style.background = 'rgba(245, 158, 11, 0.2)';
+                    confidenceBadge.style.color = '#f59e0b';
+                    confidenceBadge.style.borderColor = 'rgba(245, 158, 11, 0.3)';
+                } else {
+                    confidenceBadge.style.background = 'rgba(239, 68, 68, 0.2)';
+                    confidenceBadge.style.color = '#ef4444';
+                    confidenceBadge.style.borderColor = 'rgba(239, 68, 68, 0.3)';
+                }
+            }
+            
+            // Update forecast date
+            const forecastDate = document.getElementById('forecastDate');
+            if (forecastDate) {
+                const date = new Date(forecastRecord.forecast_date).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                forecastDate.textContent = `Generated: ${date}`;
+            }
+            
+            // Update insight texts
+            document.getElementById('keyTrendsText').textContent = insights.key_trends || 'No trends analysis available.';
+            document.getElementById('riskFactorsText').textContent = insights.risk_factors || 'No risk factors identified.';
+            document.getElementById('opportunitiesText').textContent = insights.opportunities || 'No opportunities identified.';
+            document.getElementById('methodologyText').textContent = forecastData.methodology || 'AI-based analysis methodology.';
+            
+            // Show the insights container
+            insightsContainer.style.display = 'block';
+        }
+
+        // Show a subtle notification that forecast was loaded
+        function showForecastLoadedNotification(forecastDate) {
+            const date = new Date(forecastDate).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, #22c55e, #16a34a);
+                color: white;
+                padding: 12px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                z-index: 1000;
+                font-size: 14px;
+                font-weight: 500;
+                opacity: 0;
+                transform: translateX(100%);
+                transition: all 0.3s ease;
+            `;
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Latest AI forecast loaded (${date})</span>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Animate in
+            setTimeout(() => {
+                notification.style.opacity = '1';
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+            
+            // Auto remove after 4 seconds
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 4000);
         }
         
     </script>
