@@ -5104,7 +5104,12 @@
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 1.5rem;
-            margin-bottom: 2rem;
+            margin: 0 2rem 2rem 2rem;
+            padding: 0;
+        }
+
+        .breakdown-summary-row .summary-card {
+            margin: 0; /* Remove any default margins */
         }
 
         .breakdown-metrics-grid {
@@ -5325,6 +5330,11 @@
             margin-bottom: 2rem;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
         }
+
+        #forecastTrendingContainer.ro-analysis-panel-full {
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+        }
         
         .ro-analysis-content-full {
             padding: 0 1.5rem 1.5rem;
@@ -5483,8 +5493,9 @@
         }
 
         .trending-chart-container {
-            padding: 2rem 0;
+            padding: 2rem;
             height: 450px;
+            background: #fafbfc;
         }
         
         #trendingChart {
@@ -5496,7 +5507,7 @@
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            padding: 1.5rem 2rem 1rem;
+            padding: 1.5rem 2rem;
         }
         
         .trending-title-section h4 {
@@ -7465,6 +7476,13 @@
         
         .nav-bottom .connection-status.disconnected .connection-dot {
             background: #ef4444;
+        }
+
+        #forecastTrendingContainer {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
         }
         
     </style>
@@ -22094,6 +22112,12 @@
             
             // Step 7: Hide rows with all zero values
             hideZeroValueRows();
+
+            // Step 8: Update trending chart if container exists
+            const trendingContainer = document.getElementById('forecastTrendingContainer');
+            if (trendingContainer && trendingContainer.style.display !== 'none') {
+                generateForecastTrendingChart();
+            }
             
             console.log('🔥 P&L recalculation complete!');
         }
