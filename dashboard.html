@@ -21196,6 +21196,11 @@
         }
 
         function switchPLForecastPeriod(period) {
+            // Preserve current year data before switching
+            if (document.querySelector('.period-tab-btn.active').dataset.period === 'current-year') {
+                preserveCurrentYearData();
+            }
+            
             // Update tab active state
             document.querySelectorAll('.period-tab-btn').forEach(btn => {
                 btn.classList.remove('active');
@@ -21209,7 +21214,7 @@
         
             // Show selected container
             const periodMap = {
-                'current-year': '.pl-forecast-container:first-of-type', // The original 2025 table
+                'current-year': '.pl-forecast-container:first-of-type',
                 'next-year': '#next-year-container',
                 'multi-year': '#multi-year-container', 
                 'summary': '#summary-container'
@@ -21218,6 +21223,55 @@
             const targetContainer = document.querySelector(periodMap[period]);
             if (targetContainer) {
                 targetContainer.style.display = 'block';
+                
+                // If switching back to current year, restore the data
+                if (period === 'current-year') {
+                    const tbody = document.getElementById('plForecastBody');
+                    if (tbody && (!tbody.innerHTML || tbody.innerHTML.trim() === '')) {
+                        // First try to restore preserved data
+                        restoreCurrentYearData();
+                        
+                        // If still empty, reload from Supabase
+                        if (!tbody.innerHTML || tbody.innerHTML.trim() === '') {
+                            console.log('Reloading current year data from Supabase...');
+                            loadPLActualDataFromSupabase();
+                        }
+                    }
+                }
+            }
+        }
+
+        // Store current year data when switching tabs
+        function preserveCurrentYearData() {
+            const currentYearData = {
+                tableHTML: null,
+                lastUpdated: Date.now()
+            };
+            
+            const tbody = document.getElementById('plForecastBody');
+            if (tbody && tbody.innerHTML) {
+                currentYearData.tableHTML = tbody.innerHTML;
+                window.currentYearTableData = currentYearData;
+            }
+        }
+        
+        // Restore current year data when switching back
+        function restoreCurrentYearData() {
+            if (window.currentYearTableData && window.currentYearTableData.tableHTML) {
+                const tbody = document.getElementById('plForecastBody');
+                if (tbody) {
+                    tbody.innerHTML = window.currentYearTableData.tableHTML;
+                    
+                    // Re-attach event listeners for forecast cells
+                    document.querySelectorAll('.pl-forecast-cell[contenteditable="true"]').forEach(cell => {
+                        cell.addEventListener('input', function() {
+                            recalculateEntirePL();
+                        });
+                        cell.addEventListener('blur', function() {
+                            formatPLCellValue(this);
+                        });
+                    });
+                }
             }
         }
         
