@@ -8689,7 +8689,7 @@
                     </div>
                 
                     <!-- Main P&L Table -->
-                    <div class="pl-forecast-container">
+                    <div class="pl-forecast-container" id="current-year-container">
                         <div class="pl-table-header">
                             <h4>2025 P&L Forecast - Actual vs Budget</h4>
                             <div class="pl-table-controls">
@@ -20704,7 +20704,7 @@
                 </tr>
             `;
             
-            // COGS SECTION (if any COGS accounts exist)
+            // COGS SECTION (add this BEFORE the OPEX section)
             if (accountCategories.cogs.length > 0) {
                 htmlContent += `
                     <tr class="pl-section-header-row">
@@ -21003,29 +21003,17 @@
             const totalRevenueRow = document.querySelector('.pl-revenue-total');
             const totalCogsRow = document.querySelector('.pl-cogs-total');
             const grossProfitRow = document.querySelector('.pl-gross-profit');
+            const totalOpexRow = document.querySelector('.pl-opex-total');
             const netIncomeRow = document.querySelector('.pl-net-income');
             
+            // Calculate Gross Profit (Revenue - COGS)
             if (totalRevenueRow && totalCogsRow && grossProfitRow) {
-                // Calculate Gross Profit (Revenue - COGS)
                 calculatePLDerivedRow(totalRevenueRow, totalCogsRow, grossProfitRow, 'subtract');
             }
             
-            // For Net Income, you'll need to add more OPEX calculations
-            // This is a simplified version
-            if (grossProfitRow && netIncomeRow) {
-                // Simplified: assume some operating expenses
-                // You'll want to expand this based on your full P&L structure
-                const grossCells = grossProfitRow.querySelectorAll('td:not(.pl-line-item):not(.pl-percentage-cell)');
-                const netCells = netIncomeRow.querySelectorAll('td:not(.pl-line-item):not(.pl-percentage-cell)');
-                
-                netCells.forEach((netCell, index) => {
-                    if (grossCells[index]) {
-                        const grossValue = parseFloat(grossCells[index].textContent.replace(/,/g, '')) || 0;
-                        // Simplified calculation - you'll want to subtract actual OPEX
-                        const netValue = grossValue * 0.1; // Assume 10% net margin for demo
-                        netCell.textContent = netValue.toLocaleString();
-                    }
-                });
+            // Calculate Net Income (Gross Profit - OPEX)
+            if (grossProfitRow && totalOpexRow && netIncomeRow) {
+                calculatePLDerivedRow(grossProfitRow, totalOpexRow, netIncomeRow, 'subtract');
             }
         }
         
@@ -21196,11 +21184,6 @@
         }
 
         function switchPLForecastPeriod(period) {
-            // Preserve current year data before switching
-            if (document.querySelector('.period-tab-btn.active').dataset.period === 'current-year') {
-                preserveCurrentYearData();
-            }
-            
             // Update tab active state
             document.querySelectorAll('.period-tab-btn').forEach(btn => {
                 btn.classList.remove('active');
@@ -21214,7 +21197,7 @@
         
             // Show selected container
             const periodMap = {
-                'current-year': '.pl-forecast-container:first-of-type',
+                'current-year': '#current-year-container', // Fixed this
                 'next-year': '#next-year-container',
                 'multi-year': '#multi-year-container', 
                 'summary': '#summary-container'
@@ -21223,21 +21206,6 @@
             const targetContainer = document.querySelector(periodMap[period]);
             if (targetContainer) {
                 targetContainer.style.display = 'block';
-                
-                // If switching back to current year, restore the data
-                if (period === 'current-year') {
-                    const tbody = document.getElementById('plForecastBody');
-                    if (tbody && (!tbody.innerHTML || tbody.innerHTML.trim() === '')) {
-                        // First try to restore preserved data
-                        restoreCurrentYearData();
-                        
-                        // If still empty, reload from Supabase
-                        if (!tbody.innerHTML || tbody.innerHTML.trim() === '') {
-                            console.log('Reloading current year data from Supabase...');
-                            loadPLActualDataFromSupabase();
-                        }
-                    }
-                }
             }
         }
 
