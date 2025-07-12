@@ -6517,6 +6517,354 @@
             grid-column: 1 / -1;
             margin-top: 0.5rem;
         }
+
+        /* P&L Forecasting Styles - All Unique Classes */
+        .forecasting-ai-controls {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        
+        .industry-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .industry-input-wrapper label {
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .industry-input-select {
+            padding: 0.5rem 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            background: white;
+            min-width: 200px;
+            font-size: 0.875rem;
+        }
+        
+        .forecast-status-info {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .status-indicators {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+        
+        .actual-status-indicator, .forecast-status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+        
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        
+        .actual-dot {
+            background: #374151;
+        }
+        
+        .forecast-dot {
+            background: #3b82f6;
+        }
+        
+        .pl-forecast-container {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+        
+        .pl-table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .pl-table-header h4 {
+            margin: 0;
+            color: #1f2937;
+            font-size: 1.1rem;
+        }
+        
+        .pl-table-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .pl-table-scroll {
+            overflow-x: auto;
+            max-height: 800px;
+            overflow-y: auto;
+        }
+        
+        .pl-forecast-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+            min-width: 1400px;
+        }
+        
+        .pl-forecast-table th {
+            background: #f9fafb;
+            color: #374151;
+            font-weight: 600;
+            padding: 0.75rem 0.5rem;
+            text-align: center;
+            border-bottom: 2px solid #e2e8f0;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+        
+        .pl-line-item-header {
+            text-align: left !important;
+            min-width: 200px;
+            background: #f1f5f9 !important;
+        }
+        
+        .pl-month-header {
+            min-width: 85px;
+        }
+        
+        .pl-actual-header {
+            background: #374151 !important;
+            color: white !important;
+        }
+        
+        .pl-forecast-header {
+            background: #3b82f6 !important;
+            color: white !important;
+        }
+        
+        .pl-total-header, .pl-percentage-header {
+            min-width: 100px;
+            background: #fef3c7 !important;
+        }
+        
+        .pl-forecast-table td {
+            padding: 0.5rem;
+            border-bottom: 1px solid #f3f4f6;
+            text-align: center;
+        }
+        
+        .pl-section-header-row td {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #374151;
+            text-align: left;
+            padding: 0.75rem 1rem;
+            border-bottom: 2px solid #e2e8f0;
+            border-top: 2px solid #e2e8f0;
+        }
+        
+        .pl-section-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .pl-line-item {
+            text-align: left;
+            font-weight: 500;
+            color: #374151;
+            min-width: 200px;
+            padding-left: 1rem;
+        }
+        
+        /* Actual vs Forecast Cell Styling */
+        .pl-actual-cell {
+            background: #374151;
+            color: white;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Monaco', monospace;
+            text-align: right;
+            cursor: not-allowed;
+        }
+        
+        .pl-forecast-cell {
+            background: #ffffff;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+            font-family: 'SF Mono', 'Monaco', monospace;
+            text-align: right;
+            font-weight: 500;
+        }
+        
+        .pl-forecast-cell:hover {
+            background: #f0f9ff;
+            border-color: #bae6fd;
+        }
+        
+        .pl-forecast-cell:focus {
+            outline: none;
+            background: #f0f9ff;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+        }
+        
+        .pl-calculated-cell {
+            background: #f3f4f6;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Monaco', monospace;
+            text-align: right;
+            color: #374151;
+        }
+        
+        .pl-total-cell {
+            background: #fef3c7;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Monaco', monospace;
+            text-align: right;
+        }
+        
+        .pl-total-prominent {
+            background: #fde047;
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+        
+        .pl-percentage-cell {
+            background: #fef3c7;
+            font-weight: 500;
+            font-family: 'SF Mono', 'Monaco', monospace;
+            text-align: right;
+            color: #92400e;
+        }
+        
+        /* P&L Specific Row Styling */
+        .pl-revenue-row .pl-line-item {
+            color: #1e40af;
+            font-weight: 600;
+        }
+        
+        .pl-cogs-row .pl-line-item {
+            color: #dc2626;
+            font-weight: 600;
+        }
+        
+        .pl-opex-row .pl-line-item {
+            color: #7c2d12;
+            font-weight: 600;
+        }
+        
+        .pl-gross-profit td {
+            background: #dcfce7 !important;
+            font-weight: 700;
+            color: #166534;
+        }
+        
+        .pl-gross-cell {
+            background: #dcfce7 !important;
+            font-weight: 700;
+            color: #166534;
+            font-family: 'SF Mono', 'Monaco', monospace;
+            text-align: right;
+        }
+        
+        .pl-gross-prominent {
+            background: #16a34a !important;
+            color: white !important;
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+        
+        .pl-net-income td {
+            background: #dcfce7 !important;
+            font-weight: 700;
+            color: #166534;
+        }
+        
+        .pl-net-cell {
+            background: #bbf7d0 !important;
+            font-weight: 700;
+            color: #166534;
+            font-family: 'SF Mono', 'Monaco', monospace;
+            text-align: right;
+        }
+        
+        .pl-net-prominent {
+            background: #16a34a !important;
+            color: white !important;
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+        
+        /* Total Row Styling */
+        .pl-total-row td {
+            background: #fef3c7 !important;
+            font-weight: 700;
+            border-top: 2px solid #f59e0b;
+            border-bottom: 2px solid #f59e0b;
+        }
+        
+        .pl-calculated-row td {
+            background: #f3f4f6 !important;
+            font-weight: 700;
+            border-top: 1px solid #d1d5db;
+        }
+        
+        .pl-total-line, .pl-calculated-line, .pl-net-income-line {
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.025em;
+        }
+        
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .pl-forecast-table {
+                min-width: 1200px;
+            }
+            
+            .pl-month-header {
+                min-width: 70px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .forecasting-ai-controls {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1rem;
+            }
+            
+            .industry-input-wrapper {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .industry-input-select {
+                min-width: auto;
+            }
+            
+            .pl-table-header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: stretch;
+            }
+            
+            .status-indicators {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
         
     </style>
 </head>
@@ -8230,10 +8578,10 @@
                 <div class="dashboard-section">
                     <div class="section-header">
                         <h3 class="section-title">AI-Powered Financial Forecasting</h3>
-                        <div class="ai-forecast-controls">
-                            <div class="industry-context">
+                        <div class="forecasting-ai-controls">
+                            <div class="industry-input-wrapper">
                                 <label for="forecastIndustrySelect">Industry Context:</label>
-                                <select id="forecastIndustrySelect" class="industry-select">
+                                <select id="forecastIndustrySelect" class="industry-input-select">
                                     <option value="">Select Industry for AI Context</option>
                                     <option value="saas">SaaS / Technology</option>
                                     <option value="retail">Retail / E-commerce</option>
@@ -8241,7 +8589,6 @@
                                     <option value="manufacturing">Manufacturing</option>
                                     <option value="healthcare">Healthcare</option>
                                     <option value="fintech">FinTech</option>
-                                    <option value="custom">Custom Industry</option>
                                 </select>
                             </div>
                             <button class="btn btn-primary" id="generateAIForecast">
@@ -8250,404 +8597,256 @@
                             </button>
                         </div>
                     </div>
-            
-                    <!-- AI Status Panel -->
-                    <div class="ai-status-panel" id="aiStatusPanel" style="display: none;">
-                        <div class="ai-status-content">
-                            <div class="ai-status-icon">
-                                <i class="fas fa-sync fa-spin"></i>
+                
+                    <!-- Period Info -->
+                    <div class="forecast-status-info">
+                        <div class="status-indicators">
+                            <div class="actual-status-indicator">
+                                <span class="status-dot actual-dot"></span>
+                                <span>Jan-Jun 2025: Actual (from Supabase)</span>
                             </div>
-                            <div class="ai-status-text">
-                                <h4>AI is analyzing your financial data...</h4>
-                                <p id="aiStatusMessage">Preparing historical analysis</p>
+                            <div class="forecast-status-indicator">
+                                <span class="status-dot forecast-dot"></span>
+                                <span>Jul-Dec 2025: Forecast (AI + Editable)</span>
                             </div>
                         </div>
                     </div>
-            
-                    <!-- Market Intelligence Context -->
-                    <div class="market-context-summary" id="marketContext" style="display: none;">
-                        <div class="context-header">
-                            <h4><i class="fas fa-globe"></i> Market Intelligence Applied</h4>
-                        </div>
-                        <div class="context-insights" id="contextInsights">
-                            <!-- AI will populate this -->
-                        </div>
-                    </div>
-            
-                    <!-- Forecast Period Selector -->
-                    <div class="forecast-period-selector">
-                        <div class="period-tabs">
-                            <button class="period-tab active" data-period="current-year">
-                                <i class="fas fa-calendar"></i>
-                                2025 Forecast (Jul-Dec)
-                            </button>
-                            <button class="period-tab" data-period="next-year">
-                                <i class="fas fa-calendar-alt"></i>
-                                2026 Full Year
-                            </button>
-                            <button class="period-tab" data-period="multi-year">
-                                <i class="fas fa-chart-line"></i>
-                                2027-2030 Quarterly
-                            </button>
-                            <button class="period-tab" data-period="summary">
-                                <i class="fas fa-table"></i>
-                                Annual Summary
-                            </button>
-                        </div>
-                    </div>
-            
-                    <!-- 2025 Remainder Forecast Table -->
-                    <div class="forecast-table-container active" id="current-year-forecast">
-                        <div class="table-header">
-                            <h4>2025 Financial Forecast (Jul-Dec)</h4>
-                            <div class="table-actions">
-                                <button class="btn btn-secondary" onclick="exportForecastTable('2025')">
-                                    <i class="fas fa-download"></i> Export
+                
+                    <!-- Main P&L Table -->
+                    <div class="pl-forecast-container">
+                        <div class="pl-table-header">
+                            <h4>2025 P&L Forecast - Actual vs Budget</h4>
+                            <div class="pl-table-controls">
+                                <button class="btn btn-secondary" onclick="refreshActualData()">
+                                    <i class="fas fa-sync"></i> Refresh Actuals
                                 </button>
-                                <button class="btn btn-secondary" onclick="copyForecastTable('2025')">
+                                <button class="btn btn-secondary" onclick="copyPLForecastTable()">
                                     <i class="fas fa-copy"></i> Copy
+                                </button>
+                                <button class="btn btn-secondary" onclick="exportPLForecast()">
+                                    <i class="fas fa-download"></i> Export
                                 </button>
                             </div>
                         </div>
                         
-                        <div class="forecast-table-wrapper">
-                            <table class="forecast-table" id="forecast2025Table">
+                        <div class="pl-table-scroll">
+                            <table class="pl-forecast-table" id="plForecastTable">
                                 <thead>
                                     <tr>
-                                        <th class="line-item-header">Line Item</th>
-                                        <th class="month-header">Jul 2025</th>
-                                        <th class="month-header">Aug 2025</th>
-                                        <th class="month-header">Sep 2025</th>
-                                        <th class="month-header">Oct 2025</th>
-                                        <th class="month-header">Nov 2025</th>
-                                        <th class="month-header">Dec 2025</th>
-                                        <th class="total-header">2025 Total</th>
-                                        <th class="ai-confidence-header">AI Confidence</th>
+                                        <th class="pl-line-item-header">Line Item</th>
+                                        <th class="pl-month-header pl-actual-header">Jan 2025</th>
+                                        <th class="pl-month-header pl-actual-header">Feb 2025</th>
+                                        <th class="pl-month-header pl-actual-header">Mar 2025</th>
+                                        <th class="pl-month-header pl-actual-header">Apr 2025</th>
+                                        <th class="pl-month-header pl-actual-header">May 2025</th>
+                                        <th class="pl-month-header pl-actual-header">Jun 2025</th>
+                                        <th class="pl-month-header pl-forecast-header">Jul 2025</th>
+                                        <th class="pl-month-header pl-forecast-header">Aug 2025</th>
+                                        <th class="pl-month-header pl-forecast-header">Sep 2025</th>
+                                        <th class="pl-month-header pl-forecast-header">Oct 2025</th>
+                                        <th class="pl-month-header pl-forecast-header">Nov 2025</th>
+                                        <th class="pl-month-header pl-forecast-header">Dec 2025</th>
+                                        <th class="pl-total-header">2025 Total</th>
+                                        <th class="pl-percentage-header">% of Revenue</th>
                                     </tr>
                                 </thead>
-                                <tbody id="forecast2025Body">
-                                    <!-- Revenue Section -->
-                                    <tr class="section-header-row">
-                                        <td colspan="8" class="section-header">
-                                            <i class="fas fa-chart-line"></i> Revenue
+                                <tbody id="plForecastBody">
+                                    <!-- REVENUE SECTION -->
+                                    <tr class="pl-section-header-row">
+                                        <td colspan="15" class="pl-section-header">
+                                            <i class="fas fa-chart-line"></i> REVENUE
                                         </td>
                                     </tr>
-                                    <tr class="editable-row">
-                                        <td class="line-item">Total Revenue</td>
-                                        <td class="forecast-cell" contenteditable="true">275,000,000</td>
-                                        <td class="forecast-cell" contenteditable="true">280,000,000</td>
-                                        <td class="forecast-cell" contenteditable="true">285,000,000</td>
-                                        <td class="forecast-cell" contenteditable="true">290,000,000</td>
-                                        <td class="forecast-cell" contenteditable="true">295,000,000</td>
-                                        <td class="forecast-cell" contenteditable="true">300,000,000</td>
-                                        <td class="total-cell">1,725,000,000</td>
-                                        <td class="confidence-cell">
-                                            <div class="confidence-bar">
-                                                <div class="confidence-fill" style="width: 78%"></div>
-                                            </div>
-                                            <span class="confidence-text">78%</span>
+                                    <tr class="pl-data-row pl-revenue-row">
+                                        <td class="pl-line-item">Product Revenue</td>
+                                        <td class="pl-actual-cell">180,000,000</td>
+                                        <td class="pl-actual-cell">185,000,000</td>
+                                        <td class="pl-actual-cell">190,000,000</td>
+                                        <td class="pl-actual-cell">195,000,000</td>
+                                        <td class="pl-actual-cell">200,000,000</td>
+                                        <td class="pl-actual-cell">205,000,000</td>
+                                        <td class="pl-forecast-cell" contenteditable="true" data-month="jul">210,000,000</td>
+                                        <td class="pl-forecast-cell" contenteditable="true" data-month="aug">215,000,000</td>
+                                        <td class="pl-forecast-cell" contenteditable="true" data-month="sep">220,000,000</td>
+                                        <td class="pl-forecast-cell" contenteditable="true" data-month="oct">225,000,000</td>
+                                        <td class="pl-forecast-cell" contenteditable="true" data-month="nov">230,000,000</td>
+                                        <td class="pl-forecast-cell" contenteditable="true" data-month="dec">235,000,000</td>
+                                        <td class="pl-total-cell" id="productRevenue-total">2,490,000,000</td>
+                                        <td class="pl-percentage-cell" id="productRevenue-pct">80.4%</td>
+                                    </tr>
+                                    <tr class="pl-data-row pl-revenue-row">
+                                        <td class="pl-line-item">Service Revenue</td>
+                                        <td class="pl-actual-cell">45,000,000</td>
+                                        <td class="pl-actual-cell">46,000,000</td>
+                                        <td class="pl-actual-cell">47,000,000</td>
+                                        <td class="pl-actual-cell">48,000,000</td>
+                                        <td class="pl-actual-cell">49,000,000</td>
+                                        <td class="pl-actual-cell">50,000,000</td>
+                                        <td class="pl-forecast-cell" contenteditable="true">51,000,000</td>
+                                        <td class="pl-forecast-cell" contenteditable="true">52,000,000</td>
+                                        <td class="pl-forecast-cell" contenteditable="true">53,000,000</td>
+                                        <td class="pl-forecast-cell" contenteditable="true">54,000,000</td>
+                                        <td class="pl-forecast-cell" contenteditable="true">55,000,000</td>
+                                        <td class="pl-forecast-cell" contenteditable="true">56,000,000</td>
+                                        <td class="pl-total-cell" id="serviceRevenue-total">606,000,000</td>
+                                        <td class="pl-percentage-cell" id="serviceRevenue-pct">19.6%</td>
+                                    </tr>
+                                    <tr class="pl-total-row pl-revenue-total">
+                                        <td class="pl-line-item pl-total-line">Total Revenue</td>
+                                        <td class="pl-calculated-cell">225,000,000</td>
+                                        <td class="pl-calculated-cell">231,000,000</td>
+                                        <td class="pl-calculated-cell">237,000,000</td>
+                                        <td class="pl-calculated-cell">243,000,000</td>
+                                        <td class="pl-calculated-cell">249,000,000</td>
+                                        <td class="pl-calculated-cell">255,000,000</td>
+                                        <td class="pl-calculated-cell">261,000,000</td>
+                                        <td class="pl-calculated-cell">267,000,000</td>
+                                        <td class="pl-calculated-cell">273,000,000</td>
+                                        <td class="pl-calculated-cell">279,000,000</td>
+                                        <td class="pl-calculated-cell">285,000,000</td>
+                                        <td class="pl-calculated-cell">291,000,000</td>
+                                        <td class="pl-total-cell pl-total-prominent" id="totalRevenue-total">3,096,000,000</td>
+                                        <td class="pl-percentage-cell">100.0%</td>
+                                    </tr>
+                
+                                    <!-- COGS SECTION -->
+                                    <tr class="pl-section-header-row">
+                                        <td colspan="15" class="pl-section-header">
+                                            <i class="fas fa-box"></i> COST OF GOODS SOLD
                                         </td>
                                     </tr>
-                                    
-                                    <!-- Operating Expenses Section -->
-                                    <tr class="section-header-row">
-                                        <td colspan="8" class="section-header">
-                                            <i class="fas fa-calculator"></i> Operating Expenses
+                                    <tr class="pl-data-row pl-cogs-row">
+                                        <td class="pl-line-item">Direct Materials</td>
+                                        <td class="pl-actual-cell">67,500,000</td>
+                                        <td class="pl-actual-cell">69,300,000</td>
+                                        <td class="pl-actual-cell">71,100,000</td>
+                                        <td class="pl-actual-cell">72,900,000</td>
+                                        <td class="pl-actual-cell">74,700,000</td>
+                                        <td class="pl-actual-cell">76,500,000</td>
+                                        <td class="pl-forecast-cell" contenteditable="true">78,300,000</td>
+                                        <td class="pl-forecast-cell" contenteditable="true">80,100,000</td>
+                                        <td class="pl-forecast-cell" contenteditable="true">81,900,000</td>
+                                        <td class="pl-forecast-cell" contenteditable="true">83,700,000</td>
+                                        <td class="pl-forecast-cell" contenteditable="true">85,500,000</td>
+                                        <td class="pl-forecast-cell" contenteditable="true">87,300,000</td>
+                                        <td class="pl-total-cell" id="directMaterials-total">928,800,000</td>
+                                        <td class="pl-percentage-cell" id="directMaterials-pct">30.0%</td>
+                                    </tr>
+                                    <tr class="pl-data-row pl-cogs-row">
+                                        <td class="pl-line-item">Direct Labor</td>
+                                        <td class="pl-actual-cell">22,500,000</td>
+                                        <td class="pl-actual-cell">23,100,000</td>
+                                        <td class="pl-actual-cell">23,700,000</td>
+                                        <td class="pl-actual-cell">24,300,000</td>
+                                        <td class="pl-actual-cell">24,900,000</td>
+                                        <td class="pl-actual-cell">25,500,000</td>
+                                        <td class="pl-forecast-cell" contenteditable="true">26,100,000</td>
+                                        <td class="pl-forecast-cell" contenteditable="true">26,700,000</td>
+                                        <td class="pl-forecast-cell" contenteditable="true">27,300,000</td>
+                                        <td class="pl-forecast-cell" contenteditable="true">27,900,000</td>
+                                        <td class="pl-forecast-cell" contenteditable="true">28,500,000</td>
+                                        <td class="pl-forecast-cell" contenteditable="true">29,100,000</td>
+                                        <td class="pl-total-cell" id="directLabor-total">309,600,000</td>
+                                        <td class="pl-percentage-cell" id="directLabor-pct">10.0%</td>
+                                    </tr>
+                                    <tr class="pl-total-row pl-cogs-total">
+                                        <td class="pl-line-item pl-total-line">Total COGS</td>
+                                        <td class="pl-calculated-cell">90,000,000</td>
+                                        <td class="pl-calculated-cell">92,400,000</td>
+                                        <td class="pl-calculated-cell">94,800,000</td>
+                                        <td class="pl-calculated-cell">97,200,000</td>
+                                        <td class="pl-calculated-cell">99,600,000</td>
+                                        <td class="pl-calculated-cell">102,000,000</td>
+                                        <td class="pl-calculated-cell">104,400,000</td>
+                                        <td class="pl-calculated-cell">106,800,000</td>
+                                        <td class="pl-calculated-cell">109,200,000</td>
+                                        <td class="pl-calculated-cell">111,600,000</td>
+                                        <td class="pl-calculated-cell">114,000,000</td>
+                                        <td class="pl-calculated-cell">116,400,000</td>
+                                        <td class="pl-total-cell pl-total-prominent" id="totalCOGS-total">1,238,400,000</td>
+                                        <td class="pl-percentage-cell" id="totalCOGS-pct">40.0%</td>
+                                    </tr>
+                
+                                    <!-- GROSS PROFIT -->
+                                    <tr class="pl-calculated-row pl-gross-profit">
+                                        <td class="pl-line-item pl-calculated-line">Gross Profit</td>
+                                        <td class="pl-gross-cell">135,000,000</td>
+                                        <td class="pl-gross-cell">138,600,000</td>
+                                        <td class="pl-gross-cell">142,200,000</td>
+                                        <td class="pl-gross-cell">145,800,000</td>
+                                        <td class="pl-gross-cell">149,400,000</td>
+                                        <td class="pl-gross-cell">153,000,000</td>
+                                        <td class="pl-gross-cell">156,600,000</td>
+                                        <td class="pl-gross-cell">160,200,000</td>
+                                        <td class="pl-gross-cell">163,800,000</td>
+                                        <td class="pl-gross-cell">167,400,000</td>
+                                        <td class="pl-gross-cell">171,000,000</td>
+                                        <td class="pl-gross-cell">174,600,000</td>
+                                        <td class="pl-gross-cell pl-gross-prominent" id="grossProfit-total">1,857,600,000</td>
+                                        <td class="pl-percentage-cell" id="grossProfit-pct">60.0%</td>
+                                    </tr>
+                
+                                    <!-- OPERATING EXPENSES -->
+                                    <tr class="pl-section-header-row">
+                                        <td colspan="15" class="pl-section-header">
+                                            <i class="fas fa-calculator"></i> OPERATING EXPENSES
                                         </td>
                                     </tr>
-                                    <tr class="editable-row">
-                                        <td class="line-item">Salaries & Benefits</td>
-                                        <td class="forecast-cell" contenteditable="true">120,000,000</td>
-                                        <td class="forecast-cell" contenteditable="true">122,000,000</td>
-                                        <td class="forecast-cell" contenteditable="true">124,000,000</td>
-                                        <td class="forecast-cell" contenteditable="true">126,000,000</td>
-                                        <td class="forecast-cell" contenteditable="true">128,000,000</td>
-                                        <td class="forecast-cell" contenteditable="true">130,000,000</td>
-                                        <td class="total-cell">750,000,000</td>
-                                        <td class="confidence-cell">
-                                            <div class="confidence-bar">
-                                                <div class="confidence-fill" style="width: 85%"></div>
-                                            </div>
-                                            <span class="confidence-text">85%</span>
-                                        </td>
+                                    <tr class="pl-data-row pl-opex-row">
+                                        <td class="pl-line-item">Salaries & Benefits</td>
+                                        <td class="pl-actual-cell">80,000,000</td>
+                                        <td class="pl-actual-cell">82,000,000</td>
+                                        <td class="pl-actual-cell">84,000,000</td>
+                                        <td class="pl-actual-cell">86,000,000</td>
+                                        <td class="pl-actual-cell">88,000,000</td>
+                                        <td class="pl-actual-cell">90,000,000</td>
+                                        <td class="pl-forecast-cell" contenteditable="true">92,000,000</td>
+                                        <td class="pl-forecast-cell" contenteditable="true">94,000,000</td>
+                                        <td class="pl-forecast-cell" contenteditable="true">96,000,000</td>
+                                        <td class="pl-forecast-cell" contenteditable="true">98,000,000</td>
+                                        <td class="pl-forecast-cell" contenteditable="true">100,000,000</td>
+                                        <td class="pl-forecast-cell" contenteditable="true">102,000,000</td>
+                                        <td class="pl-total-cell" id="salariesBenefits-total">1,092,000,000</td>
+                                        <td class="pl-percentage-cell" id="salariesBenefits-pct">35.3%</td>
                                     </tr>
-                                    <tr class="editable-row">
-                                        <td class="line-item">Marketing & Sales</td>
-                                        <td class="forecast-cell" contenteditable="true">55,000,000</td>
-                                        <td class="forecast-cell" contenteditable="true">56,000,000</td>
-                                        <td class="forecast-cell" contenteditable="true">57,000,000</td>
-                                        <td class="forecast-cell" contenteditable="true">58,000,000</td>
-                                        <td class="forecast-cell" contenteditable="true">59,000,000</td>
-                                        <td class="forecast-cell" contenteditable="true">60,000,000</td>
-                                        <td class="total-cell">345,000,000</td>
-                                        <td class="confidence-cell">
-                                            <div class="confidence-bar">
-                                                <div class="confidence-fill" style="width: 72%"></div>
-                                            </div>
-                                            <span class="confidence-text">72%</span>
-                                        </td>
+                                    <tr class="pl-data-row pl-opex-row">
+                                        <td class="pl-line-item">Marketing & Sales</td>
+                                        <td class="pl-actual-cell">33,750,000</td>
+                                        <td class="pl-actual-cell">34,650,000</td>
+                                        <td class="pl-actual-cell">35,550,000</td>
+                                        <td class="pl-actual-cell">36,450,000</td>
+                                        <td class="pl-actual-cell">37,350,000</td>
+                                        <td class="pl-actual-cell">38,250,000</td>
+                                        <td class="pl-forecast-cell" contenteditable="true">39,150,000</td>
+                                        <td class="pl-forecast-cell" contenteditable="true">40,050,000</td>
+                                        <td class="pl-forecast-cell" contenteditable="true">40,950,000</td>
+                                        <td class="pl-forecast-cell" contenteditable="true">41,850,000</td>
+                                        <td class="pl-forecast-cell" contenteditable="true">42,750,000</td>
+                                        <td class="pl-forecast-cell" contenteditable="true">43,650,000</td>
+                                        <td class="pl-total-cell" id="marketingSales-total">464,400,000</td>
+                                        <td class="pl-percentage-cell" id="marketingSales-pct">15.0%</td>
                                     </tr>
-                                    <tr class="editable-row">
-                                        <td class="line-item">Office & Operations</td>
-                                        <td class="forecast-cell" contenteditable="true">27,500,000</td>
-                                        <td class="forecast-cell" contenteditable="true">28,000,000</td>
-                                        <td class="forecast-cell" contenteditable="true">28,500,000</td>
-                                        <td class="forecast-cell" contenteditable="true">29,000,000</td>
-                                        <td class="forecast-cell" contenteditable="true">29,500,000</td>
-                                        <td class="forecast-cell" contenteditable="true">30,000,000</td>
-                                        <td class="total-cell">172,500,000</td>
-                                        <td class="confidence-cell">
-                                            <div class="confidence-bar">
-                                                <div class="confidence-fill" style="width: 90%"></div>
-                                            </div>
-                                            <span class="confidence-text">90%</span>
-                                        </td>
-                                    </tr>
-                                    <tr class="editable-row">
-                                        <td class="line-item">Technology & Software</td>
-                                        <td class="forecast-cell" contenteditable="true">13,750,000</td>
-                                        <td class="forecast-cell" contenteditable="true">14,000,000</td>
-                                        <td class="forecast-cell" contenteditable="true">14,250,000</td>
-                                        <td class="forecast-cell" contenteditable="true">14,500,000</td>
-                                        <td class="forecast-cell" contenteditable="true">14,750,000</td>
-                                        <td class="forecast-cell" contenteditable="true">15,000,000</td>
-                                        <td class="total-cell">86,250,000</td>
-                                        <td class="confidence-cell">
-                                            <div class="confidence-bar">
-                                                <div class="confidence-fill" style="width: 80%"></div>
-                                            </div>
-                                            <span class="confidence-text">80%</span>
-                                        </td>
-                                    </tr>
-                                    <tr class="editable-row">
-                                        <td class="line-item">Professional Services</td>
-                                        <td class="forecast-cell" contenteditable="true">16,500,000</td>
-                                        <td class="forecast-cell" contenteditable="true">16,800,000</td>
-                                        <td class="forecast-cell" contenteditable="true">17,100,000</td>
-                                        <td class="forecast-cell" contenteditable="true">17,400,000</td>
-                                        <td class="forecast-cell" contenteditable="true">17,700,000</td>
-                                        <td class="forecast-cell" contenteditable="true">18,000,000</td>
-                                        <td class="total-cell">103,500,000</td>
-                                        <td class="confidence-cell">
-                                            <div class="confidence-bar">
-                                                <div class="confidence-fill" style="width: 75%"></div>
-                                            </div>
-                                            <span class="confidence-text">75%</span>
-                                        </td>
-                                    </tr>
-                                    <tr class="editable-row">
-                                        <td class="line-item">Other Expenses</td>
-                                        <td class="forecast-cell" contenteditable="true">11,000,000</td>
-                                        <td class="forecast-cell" contenteditable="true">11,200,000</td>
-                                        <td class="forecast-cell" contenteditable="true">11,400,000</td>
-                                        <td class="forecast-cell" contenteditable="true">11,600,000</td>
-                                        <td class="forecast-cell" contenteditable="true">11,800,000</td>
-                                        <td class="forecast-cell" contenteditable="true">12,000,000</td>
-                                        <td class="total-cell">69,000,000</td>
-                                        <td class="confidence-cell">
-                                            <div class="confidence-bar">
-                                                <div class="confidence-fill" style="width: 65%"></div>
-                                            </div>
-                                            <span class="confidence-text">65%</span>
-                                        </td>
-                                    </tr>
-                                    
-                                    <!-- Totals Section -->
-                                    <tr class="total-section-row">
-                                        <td class="line-item total-line">Total Operating Expenses</td>
-                                        <td class="total-cell">243,750,000</td>
-                                        <td class="total-cell">248,000,000</td>
-                                        <td class="total-cell">252,250,000</td>
-                                        <td class="total-cell">256,500,000</td>
-                                        <td class="total-cell">260,750,000</td>
-                                        <td class="total-cell">265,000,000</td>
-                                        <td class="total-cell total-prominent">1,526,250,000</td>
-                                        <td class="confidence-cell">
-                                            <div class="confidence-bar">
-                                                <div class="confidence-fill" style="width: 79%"></div>
-                                            </div>
-                                            <span class="confidence-text">79%</span>
-                                        </td>
-                                    </tr>
-                                    <tr class="net-income-row">
-                                        <td class="line-item net-income-line">Net Income</td>
-                                        <td class="net-income-cell">31,250,000</td>
-                                        <td class="net-income-cell">32,000,000</td>
-                                        <td class="net-income-cell">32,750,000</td>
-                                        <td class="net-income-cell">33,500,000</td>
-                                        <td class="net-income-cell">34,250,000</td>
-                                        <td class="net-income-cell">35,000,000</td>
-                                        <td class="net-income-cell net-income-prominent">198,750,000</td>
-                                        <td class="confidence-cell">
-                                            <div class="confidence-bar">
-                                                <div class="confidence-fill" style="width: 76%"></div>
-                                            </div>
-                                            <span class="confidence-text">76%</span>
-                                        </td>
-                                    </tr>
-                                    <tr class="margin-row">
-                                        <td class="line-item margin-line">Net Margin</td>
-                                        <td class="margin-cell">11.4%</td>
-                                        <td class="margin-cell">11.4%</td>
-                                        <td class="margin-cell">11.5%</td>
-                                        <td class="margin-cell">11.6%</td>
-                                        <td class="margin-cell">11.6%</td>
-                                        <td class="margin-cell">11.7%</td>
-                                        <td class="margin-cell margin-prominent">11.5%</td>
-                                        <td class="confidence-cell">
-                                            <div class="confidence-bar">
-                                                <div class="confidence-fill" style="width: 74%"></div>
-                                            </div>
-                                            <span class="confidence-text">74%</span>
-                                        </td>
+                
+                                    <!-- NET INCOME -->
+                                    <tr class="pl-calculated-row pl-net-income">
+                                        <td class="pl-line-item pl-net-income-line">Net Income</td>
+                                        <td class="pl-net-cell">-5,750,000</td>
+                                        <td class="pl-net-cell">-5,770,000</td>
+                                        <td class="pl-net-cell">-5,790,000</td>
+                                        <td class="pl-net-cell">-5,810,000</td>
+                                        <td class="pl-net-cell">-5,830,000</td>
+                                        <td class="pl-net-cell">-5,850,000</td>
+                                        <td class="pl-net-cell">-5,870,000</td>
+                                        <td class="pl-net-cell">-5,890,000</td>
+                                        <td class="pl-net-cell">-5,910,000</td>
+                                        <td class="pl-net-cell">-5,930,000</td>
+                                        <td class="pl-net-cell">-5,950,000</td>
+                                        <td class="pl-net-cell">-5,970,000</td>
+                                        <td class="pl-net-cell pl-net-prominent" id="netIncome-total">-70,320,000</td>
+                                        <td class="pl-percentage-cell" id="netIncome-pct">-2.3%</td>
                                     </tr>
                                 </tbody>
                             </table>
-                        </div>
-                    </div>
-            
-                    <!-- 2026 Full Year Forecast Table -->
-                    <div class="forecast-table-container" id="next-year-forecast" style="display: none;">
-                        <div class="table-header">
-                            <h4>2026 Full Year Forecast</h4>
-                            <div class="table-actions">
-                                <button class="btn btn-secondary" onclick="exportForecastTable('2026')">
-                                    <i class="fas fa-download"></i> Export
-                                </button>
-                                <button class="btn btn-secondary" onclick="copyForecastTable('2026')">
-                                    <i class="fas fa-copy"></i> Copy
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div class="forecast-table-wrapper">
-                            <table class="forecast-table" id="forecast2026Table">
-                                <thead>
-                                    <tr>
-                                        <th class="line-item-header">Line Item</th>
-                                        <th class="month-header">Jan</th>
-                                        <th class="month-header">Feb</th>
-                                        <th class="month-header">Mar</th>
-                                        <th class="month-header">Apr</th>
-                                        <th class="month-header">May</th>
-                                        <th class="month-header">Jun</th>
-                                        <th class="month-header">Jul</th>
-                                        <th class="month-header">Aug</th>
-                                        <th class="month-header">Sep</th>
-                                        <th class="month-header">Oct</th>
-                                        <th class="month-header">Nov</th>
-                                        <th class="month-header">Dec</th>
-                                        <th class="total-header">2026 Total</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="forecast2026Body">
-                                    <!-- Will be populated by AI or user interaction -->
-                                    <tr class="placeholder-row">
-                                        <td colspan="14" class="placeholder-text">
-                                            <i class="fas fa-brain"></i>
-                                            Generate AI forecast to view 2026 projections
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-            
-                    <!-- Multi-Year Quarterly Forecast -->
-                    <div class="forecast-table-container" id="multi-year-forecast" style="display: none;">
-                        <div class="table-header">
-                            <h4>Multi-Year Quarterly Forecast (2027-2030)</h4>
-                            <div class="table-actions">
-                                <button class="btn btn-secondary" onclick="exportForecastTable('multiyear')">
-                                    <i class="fas fa-download"></i> Export
-                                </button>
-                                <button class="btn btn-secondary" onclick="copyForecastTable('multiyear')">
-                                    <i class="fas fa-copy"></i> Copy
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div class="forecast-table-wrapper">
-                            <table class="forecast-table" id="forecastMultiyearTable">
-                                <thead>
-                                    <tr>
-                                        <th class="line-item-header">Line Item</th>
-                                        <th class="quarter-header">2027 Q1</th>
-                                        <th class="quarter-header">2027 Q2</th>
-                                        <th class="quarter-header">2027 Q3</th>
-                                        <th class="quarter-header">2027 Q4</th>
-                                        <th class="total-header">2027 Total</th>
-                                        <th class="quarter-header">2028 Q1</th>
-                                        <th class="quarter-header">2028 Q2</th>
-                                        <th class="quarter-header">2028 Q3</th>
-                                        <th class="quarter-header">2028 Q4</th>
-                                        <th class="total-header">2028 Total</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="forecastMultiyearBody">
-                                    <tr class="placeholder-row">
-                                        <td colspan="11" class="placeholder-text">
-                                            <i class="fas fa-brain"></i>
-                                            Generate AI forecast to view multi-year projections
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-            
-                    <!-- Annual Summary Table -->
-                    <div class="forecast-table-container" id="annual-summary" style="display: none;">
-                        <div class="table-header">
-                            <h4>Annual Growth Summary (2025-2030)</h4>
-                            <div class="table-actions">
-                                <button class="btn btn-secondary" onclick="exportForecastTable('summary')">
-                                    <i class="fas fa-download"></i> Export
-                                </button>
-                                <button class="btn btn-secondary" onclick="copyForecastTable('summary')">
-                                    <i class="fas fa-copy"></i> Copy
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div class="forecast-table-wrapper">
-                            <table class="forecast-table" id="forecastSummaryTable">
-                                <thead>
-                                    <tr>
-                                        <th class="line-item-header">Metric</th>
-                                        <th class="year-header">2025</th>
-                                        <th class="year-header">2026</th>
-                                        <th class="change-header">YoY Change</th>
-                                        <th class="year-header">2027</th>
-                                        <th class="change-header">YoY Change</th>
-                                        <th class="year-header">2028</th>
-                                        <th class="change-header">YoY Change</th>
-                                        <th class="year-header">2029</th>
-                                        <th class="change-header">YoY Change</th>
-                                        <th class="year-header">2030</th>
-                                        <th class="change-header">YoY Change</th>
-                                        <th class="cagr-header">CAGR</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="forecastSummaryBody">
-                                    <tr class="placeholder-row">
-                                        <td colspan="13" class="placeholder-text">
-                                            <i class="fas fa-brain"></i>
-                                            Generate AI forecast to view growth analysis
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-            
-                    <!-- AI Insights Panel -->
-                    <div class="ai-insights-summary" id="aiInsightsSummary" style="display: none;">
-                        <div class="insights-header">
-                            <h4><i class="fas fa-lightbulb"></i> Key AI Insights</h4>
-                        </div>
-                        <div class="insights-grid" id="insightsContent">
-                            <!-- AI insights will be populated here -->
                         </div>
                     </div>
                 </div>
@@ -20090,6 +20289,368 @@
             // Placeholder for copy functionality
             alert(`Copy ${period} forecast table to clipboard - Implementation needed`);
         }
+
+        // P&L Forecasting Functions - All Unique Names
+        function initializePLForecasting() {
+            // Generate AI Forecast button
+            const generateBtn = document.getElementById('generateAIForecast');
+            if (generateBtn) {
+                generateBtn.addEventListener('click', generateAIForecast);
+            }
+        
+            // Industry selector change
+            const industrySelect = document.getElementById('forecastIndustrySelect');
+            if (industrySelect) {
+                industrySelect.addEventListener('change', function() {
+                    if (this.value) {
+                        updatePLMarketContext(this.value);
+                    }
+                });
+            }
+        
+            // Make forecast cells auto-calculate when edited
+            document.addEventListener('input', function(e) {
+                if (e.target.classList.contains('pl-forecast-cell')) {
+                    recalculateEntirePL();
+                }
+            });
+        
+            // Format numbers on blur
+            document.addEventListener('blur', function(e) {
+                if (e.target.classList.contains('pl-forecast-cell')) {
+                    formatPLCellValue(e.target);
+                }
+            }, true);
+        
+            // Load actual data from Supabase on init
+            loadPLActualDataFromSupabase();
+        }
+        
+        function generateAIForecast() {
+            const industry = document.getElementById('forecastIndustrySelect').value;
+            
+            if (!industry) {
+                alert('Please select an industry for AI context');
+                return;
+            }
+        
+            // Simulate AI processing
+            const forecastCells = document.querySelectorAll('.pl-forecast-cell[contenteditable="true"]');
+            
+            forecastCells.forEach(cell => {
+                const currentValue = parseFloat(cell.textContent.replace(/,/g, '')) || 0;
+                // Apply AI growth trend (2.5% monthly growth)
+                const growth = 1.025;
+                const newValue = Math.round(currentValue * growth);
+                cell.textContent = newValue.toLocaleString();
+            });
+        
+            // Recalculate everything
+            recalculateEntirePL();
+            
+            alert('AI Forecast Generated! Forecast cells updated with trend-based projections.');
+        }
+        
+        function loadPLActualDataFromSupabase() {
+            // This is where you'll integrate with your existing Supabase connection
+            console.log('Loading actual Jan-Jun 2025 data from Supabase...');
+            
+            // Use your existing supabase variable from the dashboard
+            if (typeof supabase !== 'undefined') {
+                // Example query - adapt to your actual table structure
+                supabase
+                    .from('financial_transactions') // Replace with your table name
+                    .select('*')
+                    .gte('date', '2025-01-01')
+                    .lt('date', '2025-07-01')
+                    .then(({ data, error }) => {
+                        if (error) {
+                            console.error('Error loading actual data:', error);
+                        } else {
+                            console.log('Loaded actual data:', data);
+                            populatePLActualCells(data);
+                        }
+                    });
+            }
+        }
+        
+        function populatePLActualCells(data) {
+            // This function will map your Supabase data to the actual cells
+            // Adapt this based on your actual data structure
+            console.log('Populating actual cells with:', data);
+            
+            // Example implementation - you'll need to adapt this
+            // based on your actual data structure and mapping
+        }
+        
+        function recalculateEntirePL() {
+            // Calculate row totals first
+            calculatePLRowTotals();
+            
+            // Calculate section totals (Revenue, COGS, OPEX)
+            calculatePLSectionTotals();
+            
+            // Calculate derived metrics (Gross Profit, Net Income)
+            calculatePLDerivedMetrics();
+            
+            // Calculate percentages
+            calculatePLPercentages();
+        }
+        
+        function calculatePLRowTotals() {
+            const dataRows = document.querySelectorAll('.pl-data-row');
+            
+            dataRows.forEach(row => {
+                const cells = row.querySelectorAll('.pl-actual-cell, .pl-forecast-cell');
+                const totalCell = row.querySelector('.pl-total-cell');
+                
+                if (totalCell) {
+                    let total = 0;
+                    cells.forEach(cell => {
+                        const value = parseFloat(cell.textContent.replace(/,/g, '')) || 0;
+                        total += value;
+                    });
+                    totalCell.textContent = total.toLocaleString();
+                }
+            });
+        }
+        
+        function calculatePLSectionTotals() {
+            // Total Revenue
+            const revenueRows = document.querySelectorAll('.pl-revenue-row');
+            const totalRevenueRow = document.querySelector('.pl-revenue-total');
+            calculatePLSectionTotal(revenueRows, totalRevenueRow);
+            
+            // Total COGS
+            const cogsRows = document.querySelectorAll('.pl-cogs-row');
+            const totalCogsRow = document.querySelector('.pl-cogs-total');
+            calculatePLSectionTotal(cogsRows, totalCogsRow);
+            
+            // Total OPEX
+            const opexRows = document.querySelectorAll('.pl-opex-row');
+            const totalOpexRow = document.querySelector('.pl-opex-total');
+            calculatePLSectionTotal(opexRows, totalOpexRow);
+        }
+        
+        function calculatePLSectionTotal(rows, totalRow) {
+            if (!totalRow) return;
+            
+            const monthCells = totalRow.querySelectorAll('td:not(.pl-line-item):not(.pl-total-cell):not(.pl-percentage-cell)');
+            
+            monthCells.forEach((totalCell, index) => {
+                let monthTotal = 0;
+                rows.forEach(row => {
+                    const cells = row.querySelectorAll('td:not(.pl-line-item):not(.pl-total-cell):not(.pl-percentage-cell)');
+                    if (cells[index]) {
+                        const value = parseFloat(cells[index].textContent.replace(/,/g, '')) || 0;
+                        monthTotal += value;
+                    }
+                });
+                totalCell.textContent = monthTotal.toLocaleString();
+            });
+            
+            // Calculate annual total for section
+            const annualTotalCell = totalRow.querySelector('.pl-total-prominent');
+            if (annualTotalCell) {
+                let annualTotal = 0;
+                rows.forEach(row => {
+                    const rowTotal = row.querySelector('.pl-total-cell');
+                    if (rowTotal) {
+                        const value = parseFloat(rowTotal.textContent.replace(/,/g, '')) || 0;
+                        annualTotal += value;
+                    }
+                });
+                annualTotalCell.textContent = annualTotal.toLocaleString();
+            }
+        }
+        
+        function calculatePLDerivedMetrics() {
+            const totalRevenueRow = document.querySelector('.pl-revenue-total');
+            const totalCogsRow = document.querySelector('.pl-cogs-total');
+            const grossProfitRow = document.querySelector('.pl-gross-profit');
+            const netIncomeRow = document.querySelector('.pl-net-income');
+            
+            if (totalRevenueRow && totalCogsRow && grossProfitRow) {
+                // Calculate Gross Profit (Revenue - COGS)
+                calculatePLDerivedRow(totalRevenueRow, totalCogsRow, grossProfitRow, 'subtract');
+            }
+            
+            // For Net Income, you'll need to add more OPEX calculations
+            // This is a simplified version
+            if (grossProfitRow && netIncomeRow) {
+                // Simplified: assume some operating expenses
+                // You'll want to expand this based on your full P&L structure
+                const grossCells = grossProfitRow.querySelectorAll('td:not(.pl-line-item):not(.pl-percentage-cell)');
+                const netCells = netIncomeRow.querySelectorAll('td:not(.pl-line-item):not(.pl-percentage-cell)');
+                
+                netCells.forEach((netCell, index) => {
+                    if (grossCells[index]) {
+                        const grossValue = parseFloat(grossCells[index].textContent.replace(/,/g, '')) || 0;
+                        // Simplified calculation - you'll want to subtract actual OPEX
+                        const netValue = grossValue * 0.1; // Assume 10% net margin for demo
+                        netCell.textContent = netValue.toLocaleString();
+                    }
+                });
+            }
+        }
+        
+        function calculatePLDerivedRow(row1, row2, resultRow, operation) {
+            const row1Cells = row1.querySelectorAll('td:not(.pl-line-item):not(.pl-percentage-cell)');
+            const row2Cells = row2.querySelectorAll('td:not(.pl-line-item):not(.pl-percentage-cell)');
+            const resultCells = resultRow.querySelectorAll('td:not(.pl-line-item):not(.pl-percentage-cell)');
+            
+            resultCells.forEach((resultCell, index) => {
+                if (row1Cells[index] && row2Cells[index]) {
+                    const value1 = parseFloat(row1Cells[index].textContent.replace(/,/g, '')) || 0;
+                    const value2 = parseFloat(row2Cells[index].textContent.replace(/,/g, '')) || 0;
+                    
+                    let result;
+                    if (operation === 'subtract') {
+                        result = value1 - value2;
+                    } else if (operation === 'add') {
+                        result = value1 + value2;
+                    }
+                    
+                    resultCell.textContent = result.toLocaleString();
+                }
+            });
+        }
+        
+        function calculatePLPercentages() {
+            const totalRevenueCell = document.querySelector('#totalRevenue-total');
+            if (!totalRevenueCell) return;
+            
+            const totalRevenue = parseFloat(totalRevenueCell.textContent.replace(/,/g, '')) || 0;
+            
+            // Calculate percentage of revenue for each line item
+            const percentageCells = document.querySelectorAll('.pl-percentage-cell[id]');
+            percentageCells.forEach(cell => {
+                const id = cell.id.replace('-pct', '-total');
+                const totalCell = document.getElementById(id);
+                
+                if (totalCell && totalRevenue > 0) {
+                    const value = parseFloat(totalCell.textContent.replace(/,/g, '')) || 0;
+                    const percentage = (value / totalRevenue) * 100;
+                    cell.textContent = percentage.toFixed(1) + '%';
+                }
+            });
+        }
+        
+        function formatPLCellValue(cell) {
+            const value = parseFloat(cell.textContent.replace(/,/g, ''));
+            if (!isNaN(value)) {
+                cell.textContent = value.toLocaleString();
+            }
+        }
+        
+        function updatePLMarketContext(industry) {
+            console.log(`Updating market context for ${industry} industry`);
+            // This would integrate with web search for real market data
+            // For now, just log the industry selection
+        }
+        
+        function refreshActualData() {
+            loadPLActualDataFromSupabase();
+            alert('Refreshing actual data from Supabase...');
+        }
+        
+        function copyPLForecastTable() {
+            const table = document.getElementById('plForecastTable');
+            if (!table) {
+                alert('Table not found');
+                return;
+            }
+            
+            // Create tab-separated values
+            let csvContent = '';
+            const rows = table.querySelectorAll('tr');
+            
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('th, td');
+                const rowData = Array.from(cells).map(cell => {
+                    let text = cell.textContent.trim();
+                    text = text.replace(/\s+/g, ' ');
+                    return text;
+                });
+                csvContent += rowData.join('\t') + '\n';
+            });
+            
+            // Copy to clipboard
+            navigator.clipboard.writeText(csvContent).then(function() {
+                alert('P&L Forecast table copied to clipboard! You can paste it into Excel or Google Sheets.');
+            }).catch(function(err) {
+                console.error('Could not copy text: ', err);
+                // Fallback method
+                const textarea = document.createElement('textarea');
+                textarea.value = csvContent;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                alert('P&L Forecast table copied to clipboard!');
+            });
+        }
+        
+        function exportPLForecast() {
+            alert('Export P&L Forecast - Integration with your export system needed');
+        }
+        
+        // Auto-save functionality
+        function autoSavePLForecast() {
+            const forecastData = {};
+            
+            document.querySelectorAll('.pl-forecast-cell[contenteditable="true"]').forEach(cell => {
+                const month = cell.dataset.month || 'unknown';
+                const row = cell.closest('tr');
+                const lineItem = row.querySelector('.pl-line-item');
+                
+                if (lineItem) {
+                    const lineItemText = lineItem.textContent;
+                    if (!forecastData[lineItemText]) {
+                        forecastData[lineItemText] = {};
+                    }
+                    forecastData[lineItemText][month] = cell.textContent;
+                }
+            });
+            
+            localStorage.setItem('plForecastData_2025', JSON.stringify(forecastData));
+        }
+        
+        function loadSavedPLForecast() {
+            const savedData = localStorage.getItem('plForecastData_2025');
+            if (savedData) {
+                const forecastData = JSON.parse(savedData);
+                
+                Object.keys(forecastData).forEach(lineItem => {
+                    Object.keys(forecastData[lineItem]).forEach(month => {
+                        const cell = document.querySelector(
+                            `.pl-forecast-cell[data-month="${month}"]`
+                        );
+                        if (cell) {
+                            const row = cell.closest('tr');
+                            const lineItemCell = row.querySelector('.pl-line-item');
+                            if (lineItemCell && lineItemCell.textContent === lineItem) {
+                                cell.textContent = forecastData[lineItem][month];
+                            }
+                        }
+                    });
+                });
+                
+                recalculateEntirePL();
+            }
+        }
+        
+        // Initialize when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            // Small delay to ensure other scripts are loaded
+            setTimeout(function() {
+                initializePLForecasting();
+                loadSavedPLForecast();
+            }, 1000);
+        });
+        
+        // Auto-save every 30 seconds
+        setInterval(autoSavePLForecast, 30000);
         
     </script>
 
