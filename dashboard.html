@@ -20333,8 +20333,53 @@
                 }
             }, true);
         
-            // Load actual data from Supabase on init
-            loadPLActualDataFromSupabase();
+            // CRITICAL: Load GL accounts and build structure IMMEDIATELY
+            buildTableStructureFromSupabase();
+        }
+
+        async function buildTableStructureFromSupabase() {
+            console.log('Building P&L table structure from Supabase...');
+            
+            if (typeof supabase === 'undefined') {
+                console.error('Supabase not available');
+                return;
+            }
+            
+            try {
+                // Load GL accounts FIRST
+                const { data: glAccounts, error: glError } = await supabase
+                    .from('gl_accounts_meridash')
+                    .select('*')
+                    .eq('is_active', true)
+                    .order('account_code');
+                    
+                if (glError) {
+                    console.error('Error loading GL accounts:', glError);
+                    return;
+                }
+                
+                console.log('GL Accounts loaded:', glAccounts);
+                
+                // Build the proper P&L structure
+                buildPLStructureFromGLAccounts(glAccounts);
+                
+                // THEN load actual transaction data
+                const { data: transactions, error: txError } = await supabase
+                    .from('financial_transactions_meridash')
+                    .select('*')
+                    .gte('transaction_date', '2025-01-01')
+                    .lt('transaction_date', '2025-07-01');
+                    
+                if (txError) {
+                    console.error('Error loading transactions:', txError);
+                } else {
+                    console.log('Transactions loaded:', transactions);
+                    populatePLWithActualData(transactions);
+                }
+                
+            } catch (error) {
+                console.error('Error in buildTableStructureFromSupabase:', error);
+            }
         }
         
         function generateAIForecast() {
@@ -20426,6 +20471,8 @@
         }
 
         function buildPLStructureFromGLAccounts(glAccounts) {
+            console.log('🔥 Building P&L structure from GL accounts...');
+            
             // FIXED: Categorize accounts based on YOUR actual account codes
             const accountCategories = {
                 revenue: glAccounts.filter(acc => acc.account_code >= 4000 && acc.account_code < 5000),
@@ -20442,9 +20489,14 @@
                 )
             };
             
-            console.log('FIXED account categories:', accountCategories);
-            console.log('COGS accounts found:', accountCategories.cogs.map(acc => `${acc.account_code}: ${acc.account_name}`));
-            console.log('OPEX accounts found:', accountCategories.opex.map(acc => `${acc.account_code}: ${acc.account_name}`));
+            console.log('🔥 Account categories:', {
+                revenue: accountCategories.revenue.length,
+                cogs: accountCategories.cogs.length,
+                opex: accountCategories.opex.length
+            });
+            
+            console.log('🔥 COGS accounts:', accountCategories.cogs.map(acc => `${acc.account_code}: ${acc.account_name}`));
+            console.log('🔥 OPEX accounts:', accountCategories.opex.map(acc => `${acc.account_code}: ${acc.account_name}`));
             
             // Rebuild the P&L table structure dynamically
             rebuildPLTableStructure(accountCategories);
