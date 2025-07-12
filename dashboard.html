@@ -6921,6 +6921,67 @@
             justify-content: center;
             gap: 0.5rem;
         }
+
+        /* New Margin Row Styling */
+        .pl-margin-row td {
+            background: #f1f5f9 !important;
+            font-style: italic;
+            color: #64748b;
+            font-weight: 500;
+        }
+        
+        .pl-margin-line {
+            font-weight: 600 !important;
+            color: #475569 !important;
+        }
+        
+        .pl-margin-cell {
+            font-family: 'SF Mono', 'Monaco', monospace;
+            text-align: right;
+            font-weight: 600;
+            color: #475569;
+        }
+        
+        .pl-margin-prominent {
+            background: #e2e8f0 !important;
+            font-weight: 700 !important;
+            color: #1e293b !important;
+        }
+        
+        /* EBITDA Specific Styling */
+        .pl-ebitda td {
+            background: #dbeafe !important;
+            font-weight: 700;
+            color: #1d4ed8;
+        }
+        
+        .pl-ebitda-cell {
+            font-family: 'SF Mono', 'Monaco', monospace;
+            text-align: right;
+        }
+        
+        .pl-ebitda-prominent {
+            background: #bfdbfe !important;
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+        
+        /* EBIT Specific Styling */
+        .pl-ebit td {
+            background: #fef3c7 !important;
+            font-weight: 600;
+            color: #92400e;
+        }
+        
+        .pl-ebit-cell {
+            font-family: 'SF Mono', 'Monaco', monospace;
+            text-align: right;
+        }
+        
+        .pl-ebit-prominent {
+            background: #fde047 !important;
+            font-weight: 700;
+        }
         
     </style>
 </head>
@@ -20555,7 +20616,7 @@
                 </tr>
             `;
             
-            // COGS SECTION (add this BEFORE the OPEX section)
+            // COGS SECTION
             if (accountCategories.cogs.length > 0) {
                 htmlContent += `
                     <tr class="pl-section-header-row">
@@ -20628,6 +20689,27 @@
                         <td class="pl-percentage-cell" id="grossProfit-pct">0.0%</td>
                     </tr>
                 `;
+                
+                // NEW: Gross Profit Margin % Row
+                htmlContent += `
+                    <tr class="pl-margin-row pl-gross-margin">
+                        <td class="pl-line-item pl-margin-line">Gross Profit Margin %</td>
+                        <td class="pl-margin-cell">0.0%</td>
+                        <td class="pl-margin-cell">0.0%</td>
+                        <td class="pl-margin-cell">0.0%</td>
+                        <td class="pl-margin-cell">0.0%</td>
+                        <td class="pl-margin-cell">0.0%</td>
+                        <td class="pl-margin-cell">0.0%</td>
+                        <td class="pl-margin-cell">0.0%</td>
+                        <td class="pl-margin-cell">0.0%</td>
+                        <td class="pl-margin-cell">0.0%</td>
+                        <td class="pl-margin-cell">0.0%</td>
+                        <td class="pl-margin-cell">0.0%</td>
+                        <td class="pl-margin-cell">0.0%</td>
+                        <td class="pl-margin-cell pl-margin-prominent" id="grossMargin-total">0.0%</td>
+                        <td class="pl-percentage-cell">-</td>
+                    </tr>
+                `;
             }
             
             // OPERATING EXPENSES SECTION
@@ -20682,6 +20764,90 @@
                 </tr>
             `;
             
+            // NEW: OPEX to Sales % Row
+            htmlContent += `
+                <tr class="pl-margin-row pl-opex-margin">
+                    <td class="pl-line-item pl-margin-line">OPEX to Sales %</td>
+                    <td class="pl-margin-cell">0.0%</td>
+                    <td class="pl-margin-cell">0.0%</td>
+                    <td class="pl-margin-cell">0.0%</td>
+                    <td class="pl-margin-cell">0.0%</td>
+                    <td class="pl-margin-cell">0.0%</td>
+                    <td class="pl-margin-cell">0.0%</td>
+                    <td class="pl-margin-cell">0.0%</td>
+                    <td class="pl-margin-cell">0.0%</td>
+                    <td class="pl-margin-cell">0.0%</td>
+                    <td class="pl-margin-cell">0.0%</td>
+                    <td class="pl-margin-cell">0.0%</td>
+                    <td class="pl-margin-cell">0.0%</td>
+                    <td class="pl-margin-cell pl-margin-prominent" id="opexMargin-total">0.0%</td>
+                    <td class="pl-percentage-cell">-</td>
+                </tr>
+            `;
+            
+            // NEW: EBITDA Row
+            htmlContent += `
+                <tr class="pl-calculated-row pl-ebitda">
+                    <td class="pl-line-item pl-ebitda-line">EBITDA</td>
+                    <td class="pl-ebitda-cell">0</td>
+                    <td class="pl-ebitda-cell">0</td>
+                    <td class="pl-ebitda-cell">0</td>
+                    <td class="pl-ebitda-cell">0</td>
+                    <td class="pl-ebitda-cell">0</td>
+                    <td class="pl-ebitda-cell">0</td>
+                    <td class="pl-ebitda-cell">0</td>
+                    <td class="pl-ebitda-cell">0</td>
+                    <td class="pl-ebitda-cell">0</td>
+                    <td class="pl-ebitda-cell">0</td>
+                    <td class="pl-ebitda-cell">0</td>
+                    <td class="pl-ebitda-cell">0</td>
+                    <td class="pl-ebitda-cell pl-ebitda-prominent" id="ebitda-total">0</td>
+                    <td class="pl-percentage-cell" id="ebitda-pct">0.0%</td>
+                </tr>
+            `;
+            
+            // NEW: EBITDA Margin % Row
+            htmlContent += `
+                <tr class="pl-margin-row pl-ebitda-margin">
+                    <td class="pl-line-item pl-margin-line">EBITDA Margin %</td>
+                    <td class="pl-margin-cell">0.0%</td>
+                    <td class="pl-margin-cell">0.0%</td>
+                    <td class="pl-margin-cell">0.0%</td>
+                    <td class="pl-margin-cell">0.0%</td>
+                    <td class="pl-margin-cell">0.0%</td>
+                    <td class="pl-margin-cell">0.0%</td>
+                    <td class="pl-margin-cell">0.0%</td>
+                    <td class="pl-margin-cell">0.0%</td>
+                    <td class="pl-margin-cell">0.0%</td>
+                    <td class="pl-margin-cell">0.0%</td>
+                    <td class="pl-margin-cell">0.0%</td>
+                    <td class="pl-margin-cell">0.0%</td>
+                    <td class="pl-margin-cell pl-margin-prominent" id="ebitdaMargin-total">0.0%</td>
+                    <td class="pl-percentage-cell">-</td>
+                </tr>
+            `;
+            
+            // NEW: EBIT Row
+            htmlContent += `
+                <tr class="pl-calculated-row pl-ebit">
+                    <td class="pl-line-item pl-ebit-line">EBIT</td>
+                    <td class="pl-ebit-cell">0</td>
+                    <td class="pl-ebit-cell">0</td>
+                    <td class="pl-ebit-cell">0</td>
+                    <td class="pl-ebit-cell">0</td>
+                    <td class="pl-ebit-cell">0</td>
+                    <td class="pl-ebit-cell">0</td>
+                    <td class="pl-ebit-cell">0</td>
+                    <td class="pl-ebit-cell">0</td>
+                    <td class="pl-ebit-cell">0</td>
+                    <td class="pl-ebit-cell">0</td>
+                    <td class="pl-ebit-cell">0</td>
+                    <td class="pl-ebit-cell">0</td>
+                    <td class="pl-ebit-cell pl-ebit-prominent" id="ebit-total">0</td>
+                    <td class="pl-percentage-cell" id="ebit-pct">0.0%</td>
+                </tr>
+            `;
+            
             // NET INCOME Row
             htmlContent += `
                 <tr class="pl-calculated-row pl-net-income">
@@ -20703,10 +20869,31 @@
                 </tr>
             `;
             
+            // NEW: Net Income Margin % Row
+            htmlContent += `
+                <tr class="pl-margin-row pl-net-margin">
+                    <td class="pl-line-item pl-margin-line">Net Income Margin %</td>
+                    <td class="pl-margin-cell">0.0%</td>
+                    <td class="pl-margin-cell">0.0%</td>
+                    <td class="pl-margin-cell">0.0%</td>
+                    <td class="pl-margin-cell">0.0%</td>
+                    <td class="pl-margin-cell">0.0%</td>
+                    <td class="pl-margin-cell">0.0%</td>
+                    <td class="pl-margin-cell">0.0%</td>
+                    <td class="pl-margin-cell">0.0%</td>
+                    <td class="pl-margin-cell">0.0%</td>
+                    <td class="pl-margin-cell">0.0%</td>
+                    <td class="pl-margin-cell">0.0%</td>
+                    <td class="pl-margin-cell">0.0%</td>
+                    <td class="pl-margin-cell pl-margin-prominent" id="netMargin-total">0.0%</td>
+                    <td class="pl-percentage-cell">-</td>
+                </tr>
+            `;
+            
             // Update the table
             tbody.innerHTML = htmlContent;
         
-            // FIXED: Calculate derived metrics AFTER DOM is updated
+            // Calculate derived metrics AFTER DOM is updated
             setTimeout(() => {
                 recalculateEntirePL();
             }, 100);
@@ -20785,10 +20972,13 @@
             // Calculate section totals (Revenue, COGS, OPEX)
             calculatePLSectionTotals();
             
-            // Calculate derived metrics (Gross Profit, Net Income)
+            // Calculate derived metrics (Gross Profit, EBITDA, EBIT, Net Income)
             calculatePLDerivedMetrics();
             
-            // Calculate percentages
+            // Calculate all margin percentages
+            calculatePLMarginMetrics();
+            
+            // Calculate percentages for revenue breakdown
             calculatePLPercentages();
         }
         
@@ -20860,35 +21050,51 @@
         }
         
         function calculatePLDerivedMetrics() {
-            const totalRevenueRow = document.querySelector('.pl-revenue-total');
-            const totalCogsRow = document.querySelector('.pl-cogs-total');
-            const grossProfitRow = document.querySelector('.pl-gross-profit');
-            const totalOpexRow = document.querySelector('.pl-opex-total');
-            const netIncomeRow = document.querySelector('.pl-net-income');
+            const months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
             
-            console.log('Found rows for calculation:', {
-                totalRevenueRow: !!totalRevenueRow,
-                totalCogsRow: !!totalCogsRow,
-                grossProfitRow: !!grossProfitRow,
-                totalOpexRow: !!totalOpexRow,
-                netIncomeRow: !!netIncomeRow
+            months.forEach((month, index) => {
+                // Get revenue and costs for this month
+                const revenueCell = document.querySelector(`.pl-revenue-total td:nth-child(${index + 2})`);
+                const cogsCell = document.querySelector(`.pl-cogs-total td:nth-child(${index + 2})`);
+                const opexCell = document.querySelector(`.pl-opex-total td:nth-child(${index + 2})`);
+                
+                const revenue = parseFloat(revenueCell?.textContent?.replace(/,/g, '') || 0);
+                const cogs = parseFloat(cogsCell?.textContent?.replace(/,/g, '') || 0);
+                const opex = parseFloat(opexCell?.textContent?.replace(/,/g, '') || 0);
+                
+                // Calculate derived metrics
+                const grossProfit = revenue - cogs;
+                const ebitda = grossProfit - opex; // EBITDA = Gross Profit - OPEX
+                const ebit = ebitda; // For simplicity, assuming no depreciation/amortization separate line
+                const netIncome = ebit; // For simplicity, assuming no interest/tax separate lines
+                
+                // Update Gross Profit cells
+                const grossProfitCell = document.querySelector(`.pl-gross-profit td:nth-child(${index + 2})`);
+                if (grossProfitCell) {
+                    grossProfitCell.textContent = Math.round(grossProfit).toLocaleString();
+                }
+                
+                // Update EBITDA cells
+                const ebitdaCell = document.querySelector(`.pl-ebitda td:nth-child(${index + 2})`);
+                if (ebitdaCell) {
+                    ebitdaCell.textContent = Math.round(ebitda).toLocaleString();
+                }
+                
+                // Update EBIT cells
+                const ebitCell = document.querySelector(`.pl-ebit td:nth-child(${index + 2})`);
+                if (ebitCell) {
+                    ebitCell.textContent = Math.round(ebit).toLocaleString();
+                }
+                
+                // Update Net Income cells
+                const netIncomeCell = document.querySelector(`.pl-net-income td:nth-child(${index + 2})`);
+                if (netIncomeCell) {
+                    netIncomeCell.textContent = Math.round(netIncome).toLocaleString();
+                }
             });
             
-            // Calculate Gross Profit (Revenue - COGS, or just Revenue if no COGS)
-            if (totalRevenueRow && grossProfitRow) {
-                if (totalCogsRow) {
-                    // Has COGS: Gross Profit = Revenue - COGS
-                    calculatePLDerivedRow(totalRevenueRow, totalCogsRow, grossProfitRow, 'subtract');
-                } else {
-                    // No COGS: Gross Profit = Revenue
-                    calculatePLDerivedRow(totalRevenueRow, totalRevenueRow, grossProfitRow, 'copy');
-                }
-            }
-            
-            // Calculate Net Income (Gross Profit - OPEX)
-            if (grossProfitRow && totalOpexRow && netIncomeRow) {
-                calculatePLDerivedRow(grossProfitRow, totalOpexRow, netIncomeRow, 'subtract');
-            }
+            // Calculate totals for derived metrics
+            calculateDerivedMetricTotals();
         }
         
         function calculatePLDerivedRow(row1, row2, resultRow, operation) {
@@ -21116,6 +21322,100 @@
                         });
                     });
                 }
+            }
+        }
+
+        function calculatePLMarginMetrics() {
+            const months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+            
+            months.forEach((month, index) => {
+                // Get revenue for this month
+                const revenueCell = document.querySelector(`.pl-revenue-total td:nth-child(${index + 2})`);
+                const revenue = parseFloat(revenueCell?.textContent?.replace(/,/g, '') || 0);
+                
+                if (revenue === 0) {
+                    // Set all margins to 0% if no revenue
+                    setMarginCell('.pl-gross-margin', index + 2, '0.0%');
+                    setMarginCell('.pl-opex-margin', index + 2, '0.0%');
+                    setMarginCell('.pl-ebitda-margin', index + 2, '0.0%');
+                    setMarginCell('.pl-net-margin', index + 2, '0.0%');
+                    return;
+                }
+                
+                // Get values for margin calculations
+                const grossProfitCell = document.querySelector(`.pl-gross-profit td:nth-child(${index + 2})`);
+                const opexCell = document.querySelector(`.pl-opex-total td:nth-child(${index + 2})`);
+                const ebitdaCell = document.querySelector(`.pl-ebitda td:nth-child(${index + 2})`);
+                const netIncomeCell = document.querySelector(`.pl-net-income td:nth-child(${index + 2})`);
+                
+                const grossProfit = parseFloat(grossProfitCell?.textContent?.replace(/,/g, '') || 0);
+                const opex = parseFloat(opexCell?.textContent?.replace(/,/g, '') || 0);
+                const ebitda = parseFloat(ebitdaCell?.textContent?.replace(/,/g, '') || 0);
+                const netIncome = parseFloat(netIncomeCell?.textContent?.replace(/,/g, '') || 0);
+                
+                // Calculate margin percentages
+                const grossMargin = (grossProfit / revenue) * 100;
+                const opexMargin = (opex / revenue) * 100;
+                const ebitdaMargin = (ebitda / revenue) * 100;
+                const netMargin = (netIncome / revenue) * 100;
+                
+                // Update margin cells
+                setMarginCell('.pl-gross-margin', index + 2, `${grossMargin.toFixed(1)}%`);
+                setMarginCell('.pl-opex-margin', index + 2, `${opexMargin.toFixed(1)}%`);
+                setMarginCell('.pl-ebitda-margin', index + 2, `${ebitdaMargin.toFixed(1)}%`);
+                setMarginCell('.pl-net-margin', index + 2, `${netMargin.toFixed(1)}%`);
+            });
+            
+            // Calculate margin totals
+            calculateMarginTotals();
+        }
+        
+        // Helper function to set margin cell values
+        function setMarginCell(rowSelector, cellIndex, value) {
+            const cell = document.querySelector(`${rowSelector} td:nth-child(${cellIndex})`);
+            if (cell) {
+                cell.textContent = value;
+            }
+        }
+
+        function calculateMarginTotals() {
+            // Calculate total revenue for margin calculations
+            const totalRevenueCell = document.getElementById('totalRevenue-total');
+            const totalRevenue = parseFloat(totalRevenueCell?.textContent?.replace(/,/g, '') || 0);
+            
+            if (totalRevenue === 0) {
+                // Set all total margins to 0%
+                setTotalMargin('grossMargin-total', '0.0%');
+                setTotalMargin('opexMargin-total', '0.0%');
+                setTotalMargin('ebitdaMargin-total', '0.0%');
+                setTotalMargin('netMargin-total', '0.0%');
+                return;
+            }
+            
+            // Get total values for margin calculations
+            const totalGrossProfit = parseFloat(document.getElementById('grossProfit-total')?.textContent?.replace(/,/g, '') || 0);
+            const totalOpex = parseFloat(document.getElementById('totalOPEX-total')?.textContent?.replace(/,/g, '') || 0);
+            const totalEbitda = parseFloat(document.getElementById('ebitda-total')?.textContent?.replace(/,/g, '') || 0);
+            const totalNetIncome = parseFloat(document.getElementById('netIncome-total')?.textContent?.replace(/,/g, '') || 0);
+            
+            // Calculate total margin percentages
+            const grossMargin = (totalGrossProfit / totalRevenue) * 100;
+            const opexMargin = (totalOpex / totalRevenue) * 100;
+            const ebitdaMargin = (totalEbitda / totalRevenue) * 100;
+            const netMargin = (totalNetIncome / totalRevenue) * 100;
+            
+            // Update total margin cells
+            setTotalMargin('grossMargin-total', `${grossMargin.toFixed(1)}%`);
+            setTotalMargin('opexMargin-total', `${opexMargin.toFixed(1)}%`);
+            setTotalMargin('ebitdaMargin-total', `${ebitdaMargin.toFixed(1)}%`);
+            setTotalMargin('netMargin-total', `${netMargin.toFixed(1)}%`);
+        }
+        
+        // Helper function to set total margin values
+        function setTotalMargin(elementId, value) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.textContent = value;
             }
         }
         
