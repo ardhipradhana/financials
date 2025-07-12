@@ -21250,22 +21250,16 @@
                 forecastDate.textContent = `Generated: ${date}`;
             }
             
-            // Update insight texts
-            document.getElementById('keyTrendsText').textContent = insights.key_trends || 'No trends analysis available.';
-            document.getElementById('riskFactorsText').textContent = insights.risk_factors || 'No risk factors identified.';
-            document.getElementById('opportunitiesText').textContent = insights.opportunities || 'No opportunities identified.';
-            document.getElementById('methodologyText').textContent = forecastResponse.methodology || 'AI-based analysis methodology.';
+            // Update insight texts with formatting support
+            document.getElementById('keyTrendsText').innerHTML = formatInsightText(insights.key_trends || 'No trends analysis available.');
+            document.getElementById('riskFactorsText').innerHTML = formatInsightText(insights.risk_factors || 'No risk factors identified.');
+            document.getElementById('opportunitiesText').innerHTML = formatInsightText(insights.opportunities || 'No opportunities identified.');
+            document.getElementById('methodologyText').innerHTML = formatInsightText(forecastResponse.methodology || 'AI-based analysis methodology.');
             
-            // Show the insights container with animation
+            // Show insights container
             insightsContainer.style.display = 'block';
             
-            // Scroll to insights smoothly
-            setTimeout(() => {
-                insightsContainer.scrollIntoView({ 
-                    behavior: 'smooth', 
-                    block: 'start' 
-                });
-            }, 100);
+            console.log('✅ AI insights displayed with formatting');
         }
         
         // Function to hide insights
@@ -22828,14 +22822,32 @@
                 forecastDate.textContent = `Generated: ${date}`;
             }
             
-            // Update insight texts
-            document.getElementById('keyTrendsText').textContent = insights.key_trends || 'No trends analysis available.';
-            document.getElementById('riskFactorsText').textContent = insights.risk_factors || 'No risk factors identified.';
-            document.getElementById('opportunitiesText').textContent = insights.opportunities || 'No opportunities identified.';
-            document.getElementById('methodologyText').textContent = forecastData.methodology || 'AI-based analysis methodology.';
+            // Update insight texts with formatting support
+            document.getElementById('keyTrendsText').innerHTML = formatInsightText(insights.key_trends || 'No trends analysis available.');
+            document.getElementById('riskFactorsText').innerHTML = formatInsightText(insights.risk_factors || 'No risk factors identified.');
+            document.getElementById('opportunitiesText').innerHTML = formatInsightText(insights.opportunities || 'No opportunities identified.');
+            document.getElementById('methodologyText').innerHTML = formatInsightText(forecastData.methodology || 'AI-based analysis methodology.');
             
-            // Show the insights container
+            // Show insights container
             insightsContainer.style.display = 'block';
+            
+            console.log('✅ Stored AI insights displayed with formatting');
+        }
+
+        function formatInsightText(text) {
+            if (!text) return '';
+            
+            return text
+                // Convert **bold** to <strong>
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                // Convert *italic* to <em>
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                // Convert line breaks to <br>
+                .replace(/\n/g, '<br>')
+                // Handle multiple spaces
+                .replace(/  +/g, ' ')
+                // Ensure proper paragraph spacing
+                .replace(/\. ([A-Z])/g, '. <br><br>$1');
         }
 
         // Show a subtle notification that forecast was loaded
