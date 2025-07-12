@@ -20092,6 +20092,8 @@
         }
         
         async function generateAIForecast() {
+            console.log('🚀 Starting AI Forecast Generation...');
+            
             const industry = document.getElementById('forecastIndustrySelect').value;
             
             if (!industry) {
@@ -20113,9 +20115,7 @@
                 const currentDay = now.getDate();
                 
                 // Determine if current month should be included in forecast
-                // If we're before the 25th of the month, include current month in forecast
                 const includeCurrentMonth = currentDay <= 25;
-                
                 const forecastStartMonth = includeCurrentMonth ? currentMonth : currentMonth + 1;
                 const monthsToForecast = 12 - forecastStartMonth + 1;
                 
@@ -20171,7 +20171,7 @@
                 }
         
             } catch (error) {
-                console.error('Error generating AI forecast:', error);
+                console.error('❌ Error generating AI forecast:', error);
                 alert('Error generating AI forecast: ' + error.message);
             } finally {
                 // Restore button state
@@ -20183,7 +20183,7 @@
         // Call the n8n AI forecast API
         async function callAIForecastAPI(payload) {
             try {
-                // Replace this URL with your actual n8n webhook URL
+                // Your actual n8n webhook URL
                 const N8N_WEBHOOK_URL = 'https://montpro.app.n8n.cloud/webhook/ai-forecast';
                 
                 console.log('🚀 Sending payload to n8n:', payload);
