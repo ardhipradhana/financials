@@ -5515,6 +5515,531 @@
             padding: 2rem;
             height: 450px;
         }
+
+        /* Forecasting Module - Unique Classes */
+        .forecasting-module-controls {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        
+        .industry-context-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .industry-context-selector label {
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .industry-context-dropdown {
+            padding: 0.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            background: white;
+            min-width: 180px;
+        }
+        
+        .custom-industry-field {
+            padding: 0.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            margin-left: 0.5rem;
+            min-width: 150px;
+        }
+        
+        .forecast-time-selector {
+            display: flex;
+            gap: 0.5rem;
+            margin: 1.5rem 0;
+            border-bottom: 2px solid #f3f4f6;
+        }
+        
+        .forecast-period-button {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            background: none;
+            color: #6b7280;
+            font-weight: 500;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+        
+        .forecast-period-button.active {
+            color: #1e40af;
+            border-bottom-color: #1e40af;
+            background: rgba(30, 64, 175, 0.05);
+        }
+        
+        .forecast-period-button:hover {
+            color: #1e40af;
+            background: rgba(30, 64, 175, 0.05);
+        }
+        
+        .market-context-panel {
+            background: linear-gradient(135deg, #1e293b, #475569);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+        
+        .market-intelligence-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .market-intelligence-header h4 {
+            margin: 0;
+            font-size: 1.1rem;
+        }
+        
+        .market-intel-status {
+            font-size: 0.875rem;
+            opacity: 0.8;
+        }
+        
+        .market-intel-placeholder {
+            text-align: center;
+            opacity: 0.7;
+            font-style: italic;
+        }
+        
+        .forecasting-workspace {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .forecast-workspace-view {
+            padding: 2rem;
+        }
+        
+        .forecast-planning-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        .forecast-columns-header {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #f3f4f6;
+        }
+        
+        .forecast-column h4 {
+            margin: 0 0 0.25rem 0;
+            color: #1f2937;
+        }
+        
+        .forecast-column-subtitle {
+            margin: 0;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+        
+        .forecast-planning-section {
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .forecast-section-header {
+            background: #f9fafb;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .forecast-section-header h5 {
+            margin: 0;
+            color: #374151;
+            font-weight: 600;
+        }
+        
+        .forecast-data-row {
+            display: grid;
+            grid-template-columns: 200px 1fr 1fr 1fr;
+            gap: 2rem;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #f3f4f6;
+            align-items: center;
+        }
+        
+        .forecast-data-row:last-child {
+            border-bottom: none;
+        }
+        
+        .forecast-expense-label {
+            font-weight: 500;
+            color: #374151;
+        }
+        
+        .forecast-historical-data .amount {
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .forecast-growth-indicator {
+            display: block;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+        
+        .forecast-growth-indicator.positive {
+            color: #059669;
+        }
+        
+        .forecast-growth-indicator.negative {
+            color: #dc2626;
+        }
+        
+        .forecast-input-group {
+            position: relative;
+        }
+        
+        .forecast-number-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 0.875rem;
+        }
+        
+        .forecast-number-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .forecast-growth-controls {
+            display: flex;
+            gap: 0.25rem;
+            margin-top: 0.5rem;
+        }
+        
+        .forecast-growth-preset {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            border: 1px solid #d1d5db;
+            background: #f9fafb;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .forecast-growth-preset:hover {
+            background: #e5e7eb;
+        }
+        
+        .ai-insight-card {
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 8px;
+            padding: 1rem;
+        }
+        
+        .ai-insight-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #1e40af;
+        }
+        
+        .ai-insight-text {
+            margin: 0 0 0.75rem 0;
+            font-size: 0.875rem;
+            color: #1f2937;
+            line-height: 1.4;
+        }
+        
+        .ai-confidence-meter {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+        }
+        
+        .ai-confidence-bar {
+            flex: 1;
+            height: 4px;
+            background: #e5e7eb;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        .ai-confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #f59e0b, #10b981);
+            transition: width 0.3s ease;
+        }
+        
+        .forecast-mini-insight {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            color: #374151;
+            padding: 0.5rem;
+            background: #f9fafb;
+            border-radius: 6px;
+        }
+        
+        .forecast-mini-insight.warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .forecast-results-summary {
+            background: #f8fafc;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .forecast-summary-line {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .forecast-summary-line:last-child {
+            border-bottom: none;
+        }
+        
+        .forecast-total-line {
+            font-weight: 700;
+            font-size: 1.1rem;
+            border-top: 2px solid #1e40af;
+            margin-top: 0.5rem;
+            padding-top: 1rem;
+        }
+        
+        .forecast-margin-line {
+            color: #059669;
+        }
+        
+        /* Multi-Year Planning View */
+        .multi-year-planning-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+        
+        .multi-year-columns {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1.5rem;
+        }
+        
+        .multi-year-column {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+        
+        .multi-year-column h4 {
+            text-align: center;
+            margin: 0 0 1rem 0;
+            color: #1f2937;
+        }
+        
+        .multi-year-inputs {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .multi-year-inputs label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.25rem;
+        }
+        
+        .multi-year-calculated {
+            font-weight: 600;
+            color: #059669;
+        }
+        
+        .multi-year-ai-insights {
+            background: #fefce8;
+            border: 1px solid #fde047;
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+        
+        .ai-insight-card.large {
+            background: none;
+            border: none;
+            padding: 0;
+        }
+        
+        .forecast-growth-chart {
+            display: flex;
+            align-items: end;
+            gap: 0.5rem;
+            height: 60px;
+            margin-top: 1rem;
+        }
+        
+        .forecast-chart-bar {
+            flex: 1;
+            background: linear-gradient(to top, #3b82f6, #60a5fa);
+            border-radius: 2px 2px 0 0;
+            min-height: 8px;
+        }
+        
+        /* Scenario Planning Module */
+        .scenario-planning-module {
+            margin-top: 2rem;
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .scenario-planning-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .scenario-selector-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .scenario-selector-button {
+            padding: 0.5rem 1rem;
+            border: 1px solid #d1d5db;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+        
+        .scenario-selector-button.active {
+            background: #1e40af;
+            color: white;
+            border-color: #1e40af;
+        }
+        
+        .scenario-comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+        
+        .scenario-planning-card {
+            padding: 1.5rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+        
+        .scenario-planning-card.active {
+            border-color: #1e40af;
+            background: #f0f9ff;
+        }
+        
+        .scenario-planning-card h5 {
+            margin: 0 0 1rem 0;
+            color: #1f2937;
+        }
+        
+        .scenario-metrics-display {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .scenario-metrics-display .metric {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.875rem;
+            color: #374151;
+        }
+        
+        .scenario-metrics-display .metric span {
+            font-weight: 600;
+        }
+        
+        /* Intelligence Grid for Market Data */
+        .intelligence-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .intel-metric {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.875rem;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .intel-label {
+            opacity: 0.8;
+        }
+        
+        .intel-value {
+            font-weight: 600;
+        }
+        
+        .intel-insight {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.75rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+
+        .scenario-card.active {
+            border-color: #1e40af;
+            background: #f0f9ff;
+        }
+        
+        .scenario-card h5 {
+            margin: 0 0 1rem 0;
+            color: #1f2937;
+        }
+        
+        .scenario-metrics {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .scenario-metrics .metric {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.875rem;
+            color: #374151;
+        }
+        
+        .scenario-metrics .metric span {
+            font-weight: 600;
+        }
         
     </style>
 </head>
@@ -7217,6 +7742,416 @@
                             </div>
                             <div class="ro-insights-content-full" id="trendingInsights">
                                 <!-- Insights will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Forecasting Section -->
+           <div id="forecasting-section" class="section-content" style="display: none;">
+                <div class="dashboard-section">
+                    <div class="section-header">
+                        <h3 class="section-title">Financial Forecasting & Budgeting</h3>
+                        <div class="forecasting-controls">
+                            <div class="industry-selector">
+                                <label for="industrySelect">Industry:</label>
+                                <select id="industrySelect" class="industry-dropdown">
+                                    <option value="">Select Industry</option>
+                                    <option value="saas">SaaS / Technology</option>
+                                    <option value="retail">Retail / E-commerce</option>
+                                    <option value="consulting">Consulting / Services</option>
+                                    <option value="manufacturing">Manufacturing</option>
+                                    <option value="healthcare">Healthcare</option>
+                                    <option value="fintech">FinTech</option>
+                                    <option value="custom">Custom (specify below)</option>
+                                </select>
+                                <input type="text" id="customIndustry" class="custom-industry-input" placeholder="Enter custom industry" style="display: none;">
+                            </div>
+                            <button class="btn btn-secondary" id="refreshMarketData">
+                                <i class="fas fa-sync"></i>
+                                Refresh Market Data
+                            </button>
+                        </div>
+                    </div>
+            
+                    <!-- Time Period Tabs -->
+                    <div class="forecast-period-tabs">
+                        <button class="forecast-tab-btn active" data-period="current-year">
+                            <i class="fas fa-calendar-alt"></i>
+                            2025 Remainder
+                        </button>
+                        <button class="forecast-tab-btn" data-period="multi-year">
+                            <i class="fas fa-chart-line"></i>
+                            Multi-Year (2026-2030)
+                        </button>
+                    </div>
+            
+                    <!-- Market Intelligence Panel -->
+                    <div class="market-intelligence-panel">
+                        <div class="intelligence-header">
+                            <h4><i class="fas fa-globe"></i> Market Intelligence</h4>
+                            <span class="intelligence-status" id="intelligenceStatus">
+                                <i class="fas fa-sync fa-spin"></i> Analyzing market trends...
+                            </span>
+                        </div>
+                        <div class="intelligence-content" id="intelligenceContent">
+                            <div class="intelligence-placeholder">
+                                Select an industry to view market insights and benchmarks
+                            </div>
+                        </div>
+                    </div>
+            
+                    <!-- Forecasting Grid Container -->
+                    <div class="forecasting-container">
+                        
+                        <!-- Current Year View (2025 Remainder) -->
+                        <div class="forecast-view active" id="current-year-view">
+                            <div class="forecast-grid">
+                                <!-- Header Row -->
+                                <div class="forecast-grid-header">
+                                    <div class="grid-column">
+                                        <h4>Historical (2024)</h4>
+                                        <p class="column-subtitle">Actual Performance</p>
+                                    </div>
+                                    <div class="grid-column">
+                                        <h4>Current Year (2025)</h4>
+                                        <p class="column-subtitle">Jul-Dec Forecast</p>
+                                    </div>
+                                    <div class="grid-column">
+                                        <h4>Projections</h4>
+                                        <p class="column-subtitle">AI-Assisted Insights</p>
+                                    </div>
+                                </div>
+            
+                                <!-- Revenue Section -->
+                                <div class="forecast-section revenue-section">
+                                    <div class="section-title-row">
+                                        <h5><i class="fas fa-chart-line"></i> Revenue</h5>
+                                    </div>
+                                    
+                                    <div class="forecast-row">
+                                        <div class="grid-column historical-data">
+                                            <div class="data-display">
+                                                <span class="amount" id="historical-revenue">Rp 2,850,000,000</span>
+                                                <span class="growth-rate positive">+15.2% YoY</span>
+                                            </div>
+                                        </div>
+                                        <div class="grid-column current-forecast">
+                                            <div class="input-group">
+                                                <input type="number" id="current-revenue" class="forecast-input" placeholder="0" value="1,650,000,000">
+                                                <div class="input-controls">
+                                                    <button class="growth-preset" data-growth="5">+5%</button>
+                                                    <button class="growth-preset" data-growth="10">+10%</button>
+                                                    <button class="growth-preset" data-growth="15">+15%</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="grid-column ai-insights">
+                                            <div class="insight-card">
+                                                <div class="insight-header">
+                                                    <i class="fas fa-robot"></i>
+                                                    <span>AI Trend Analysis</span>
+                                                </div>
+                                                <p class="insight-text">Based on 24-month trend: 12-18% growth likely. Market showing strong demand.</p>
+                                                <div class="confidence-indicator">
+                                                    <span class="confidence-label">Confidence:</span>
+                                                    <div class="confidence-bar">
+                                                        <div class="confidence-fill" style="width: 78%"></div>
+                                                    </div>
+                                                    <span class="confidence-value">78%</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+            
+                                <!-- OPEX Section -->
+                                <div class="forecast-section opex-section">
+                                    <div class="section-title-row">
+                                        <h5><i class="fas fa-calculator"></i> Operating Expenses</h5>
+                                    </div>
+                                    
+                                    <!-- Salaries & Benefits -->
+                                    <div class="forecast-row">
+                                        <div class="expense-label">
+                                            <span>Salaries & Benefits</span>
+                                        </div>
+                                        <div class="grid-column historical-data">
+                                            <span class="amount">Rp 1,200,000,000</span>
+                                        </div>
+                                        <div class="grid-column current-forecast">
+                                            <input type="number" class="forecast-input" placeholder="0" value="720,000,000">
+                                        </div>
+                                        <div class="grid-column ai-insights">
+                                            <div class="mini-insight">
+                                                <i class="fas fa-info-circle"></i>
+                                                42% of revenue (industry avg: 35-45%)
+                                            </div>
+                                        </div>
+                                    </div>
+            
+                                    <!-- Marketing & Sales -->
+                                    <div class="forecast-row">
+                                        <div class="expense-label">
+                                            <span>Marketing & Sales</span>
+                                        </div>
+                                        <div class="grid-column historical-data">
+                                            <span class="amount">Rp 570,000,000</span>
+                                        </div>
+                                        <div class="grid-column current-forecast">
+                                            <input type="number" class="forecast-input" placeholder="0" value="330,000,000">
+                                        </div>
+                                        <div class="grid-column ai-insights">
+                                            <div class="mini-insight warning">
+                                                <i class="fas fa-exclamation-triangle"></i>
+                                                20% of revenue (consider increasing for growth)
+                                            </div>
+                                        </div>
+                                    </div>
+            
+                                    <!-- Office & Operations -->
+                                    <div class="forecast-row">
+                                        <div class="expense-label">
+                                            <span>Office & Operations</span>
+                                        </div>
+                                        <div class="grid-column historical-data">
+                                            <span class="amount">Rp 285,000,000</span>
+                                        </div>
+                                        <div class="grid-column current-forecast">
+                                            <input type="number" class="forecast-input" placeholder="0" value="165,000,000">
+                                        </div>
+                                        <div class="grid-column ai-insights">
+                                            <div class="mini-insight">
+                                                <i class="fas fa-check-circle"></i>
+                                                10% of revenue (optimal range)
+                                            </div>
+                                        </div>
+                                    </div>
+            
+                                    <!-- Technology & Software -->
+                                    <div class="forecast-row">
+                                        <div class="expense-label">
+                                            <span>Technology & Software</span>
+                                        </div>
+                                        <div class="grid-column historical-data">
+                                            <span class="amount">Rp 142,500,000</span>
+                                        </div>
+                                        <div class="grid-column current-forecast">
+                                            <input type="number" class="forecast-input" placeholder="0" value="82,500,000">
+                                        </div>
+                                        <div class="grid-column ai-insights">
+                                            <div class="mini-insight">
+                                                <i class="fas fa-info-circle"></i>
+                                                5% of revenue (standard for tech)
+                                            </div>
+                                        </div>
+                                    </div>
+            
+                                    <!-- Professional Services -->
+                                    <div class="forecast-row">
+                                        <div class="expense-label">
+                                            <span>Professional Services</span>
+                                        </div>
+                                        <div class="grid-column historical-data">
+                                            <span class="amount">Rp 171,000,000</span>
+                                        </div>
+                                        <div class="grid-column current-forecast">
+                                            <input type="number" class="forecast-input" placeholder="0" value="99,000,000">
+                                        </div>
+                                        <div class="grid-column ai-insights">
+                                            <div class="mini-insight">
+                                                <i class="fas fa-info-circle"></i>
+                                                6% of revenue (legal, audit, consulting)
+                                            </div>
+                                        </div>
+                                    </div>
+            
+                                    <!-- Other Expenses -->
+                                    <div class="forecast-row">
+                                        <div class="expense-label">
+                                            <span>Other Expenses</span>
+                                        </div>
+                                        <div class="grid-column historical-data">
+                                            <span class="amount">Rp 114,000,000</span>
+                                        </div>
+                                        <div class="grid-column current-forecast">
+                                            <input type="number" class="forecast-input" placeholder="0" value="66,000,000">
+                                        </div>
+                                        <div class="grid-column ai-insights">
+                                            <div class="mini-insight">
+                                                <i class="fas fa-info-circle"></i>
+                                                4% of revenue (miscellaneous)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+            
+                                <!-- Summary Section -->
+                                <div class="forecast-summary">
+                                    <div class="summary-row">
+                                        <div class="summary-label">Total Revenue</div>
+                                        <div class="summary-value" id="total-revenue-summary">Rp 1,650,000,000</div>
+                                    </div>
+                                    <div class="summary-row">
+                                        <div class="summary-label">Total OPEX</div>
+                                        <div class="summary-value" id="total-opex-summary">Rp 1,462,500,000</div>
+                                    </div>
+                                    <div class="summary-row total-row">
+                                        <div class="summary-label">Net Income</div>
+                                        <div class="summary-value" id="net-income-summary">Rp 187,500,000</div>
+                                    </div>
+                                    <div class="summary-row margin-row">
+                                        <div class="summary-label">Net Margin</div>
+                                        <div class="summary-value" id="net-margin-summary">11.4%</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+            
+                        <!-- Multi-Year View (2026-2030) -->
+                        <div class="forecast-view" id="multi-year-view" style="display: none;">
+                            <div class="multi-year-grid">
+                                <div class="year-columns">
+                                    <div class="year-column">
+                                        <h4>2026</h4>
+                                        <div class="year-inputs">
+                                            <div class="input-group">
+                                                <label>Revenue</label>
+                                                <input type="number" class="forecast-input" placeholder="0" value="3,300,000,000">
+                                            </div>
+                                            <div class="input-group">
+                                                <label>Total OPEX</label>
+                                                <input type="number" class="forecast-input" placeholder="0" value="2,805,000,000">
+                                            </div>
+                                            <div class="result-group">
+                                                <label>Net Income</label>
+                                                <span class="calculated-value">Rp 495,000,000</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="year-column">
+                                        <h4>2027</h4>
+                                        <div class="year-inputs">
+                                            <div class="input-group">
+                                                <label>Revenue</label>
+                                                <input type="number" class="forecast-input" placeholder="0" value="4,125,000,000">
+                                            </div>
+                                            <div class="input-group">
+                                                <label>Total OPEX</label>
+                                                <input type="number" class="forecast-input" placeholder="0" value="3,300,000,000">
+                                            </div>
+                                            <div class="result-group">
+                                                <label>Net Income</label>
+                                                <span class="calculated-value">Rp 825,000,000</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="year-column">
+                                        <h4>2028</h4>
+                                        <div class="year-inputs">
+                                            <div class="input-group">
+                                                <label>Revenue</label>
+                                                <input type="number" class="forecast-input" placeholder="0" value="5,156,250,000">
+                                            </div>
+                                            <div class="input-group">
+                                                <label>Total OPEX</label>
+                                                <input type="number" class="forecast-input" placeholder="0" value="3,866,250,000">
+                                            </div>
+                                            <div class="result-group">
+                                                <label>Net Income</label>
+                                                <span class="calculated-value">Rp 1,290,000,000</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="year-column">
+                                        <h4>2029</h4>
+                                        <div class="year-inputs">
+                                            <div class="input-group">
+                                                <label>Revenue</label>
+                                                <input type="number" class="forecast-input" placeholder="0" value="6,445,312,500">
+                                            </div>
+                                            <div class="input-group">
+                                                <label>Total OPEX</label>
+                                                <input type="number" class="forecast-input" placeholder="0" value="4,512,968,750">
+                                            </div>
+                                            <div class="result-group">
+                                                <label>Net Income</label>
+                                                <span class="calculated-value">Rp 1,932,343,750</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="year-column">
+                                        <h4>2030</h4>
+                                        <div class="year-inputs">
+                                            <div class="input-group">
+                                                <label>Revenue</label>
+                                                <input type="number" class="forecast-input" placeholder="0" value="8,056,640,625">
+                                            </div>
+                                            <div class="input-group">
+                                                <label>Total OPEX</label>
+                                                <input type="number" class="forecast-input" placeholder="0" value="5,234,316,406">
+                                            </div>
+                                            <div class="result-group">
+                                                <label>Net Income</label>
+                                                <span class="calculated-value">Rp 2,822,324,219</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+            
+                                <!-- Multi-Year AI Insights -->
+                                <div class="multi-year-insights">
+                                    <div class="insight-card large">
+                                        <div class="insight-header">
+                                            <i class="fas fa-brain"></i>
+                                            <span>Long-term Growth Analysis</span>
+                                        </div>
+                                        <p>Your projected 25% CAGR is ambitious but achievable based on market trends. Consider scaling marketing spend proportionally in years 3-4.</p>
+                                        <div class="growth-chart-placeholder">
+                                            <div class="chart-bar" style="height: 20%"></div>
+                                            <div class="chart-bar" style="height: 35%"></div>
+                                            <div class="chart-bar" style="height: 50%"></div>
+                                            <div class="chart-bar" style="height: 70%"></div>
+                                            <div class="chart-bar" style="height: 100%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+            
+                    <!-- Scenario Analysis Section -->
+                    <div class="scenario-analysis">
+                        <div class="scenario-header">
+                            <h4><i class="fas fa-layer-group"></i> Scenario Analysis</h4>
+                            <div class="scenario-controls">
+                                <button class="scenario-btn active" data-scenario="base">Base Case</button>
+                                <button class="scenario-btn" data-scenario="optimistic">Optimistic</button>
+                                <button class="scenario-btn" data-scenario="conservative">Conservative</button>
+                            </div>
+                        </div>
+                        <div class="scenario-comparison">
+                            <div class="scenario-card">
+                                <h5>Conservative (-20%)</h5>
+                                <div class="scenario-metrics">
+                                    <div class="metric">2025 Revenue: <span>Rp 1,320M</span></div>
+                                    <div class="metric">Net Margin: <span>5.2%</span></div>
+                                </div>
+                            </div>
+                            <div class="scenario-card active">
+                                <h5>Base Case</h5>
+                                <div class="scenario-metrics">
+                                    <div class="metric">2025 Revenue: <span>Rp 1,650M</span></div>
+                                    <div class="metric">Net Margin: <span>11.4%</span></div>
+                                </div>
+                            </div>
+                            <div class="scenario-card">
+                                <h5>Optimistic (+30%)</h5>
+                                <div class="scenario-metrics">
+                                    <div class="metric">2025 Revenue: <span>Rp 2,145M</span></div>
+                                    <div class="metric">Net Margin: <span>18.7%</span></div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -18324,6 +19259,176 @@
                     }, 400);
                 }
             }
+        });
+
+        document.getElementById('industrySelect').addEventListener('change', function() {
+            const customInput = document.getElementById('customIndustry');
+            const industrySelect = this;
+            
+            if (this.value === 'custom') {
+                customInput.style.display = 'block';
+                customInput.focus();
+            } else {
+                customInput.style.display = 'none';
+                if (this.value) {
+                    updateMarketIntelligence(this.value);
+                }
+            }
+        });
+        
+        document.getElementById('customIndustry').addEventListener('blur', function() {
+            if (this.value.trim()) {
+                updateMarketIntelligence('custom', this.value.trim());
+            }
+        });
+        
+        // Period tab switching
+        document.querySelectorAll('.forecast-tab-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Update tab active state
+                document.querySelectorAll('.forecast-tab-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Show/hide appropriate view
+                const period = this.dataset.period;
+                document.querySelectorAll('.forecast-view').forEach(view => {
+                    view.style.display = 'none';
+                });
+                document.getElementById(period + '-view').style.display = 'block';
+            });
+        });
+        
+        // Growth preset buttons
+        document.querySelectorAll('.growth-preset').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const growth = parseFloat(this.dataset.growth);
+                const input = this.closest('.input-group').querySelector('.forecast-input');
+                const currentValue = parseFloat(input.value) || 0;
+                const newValue = currentValue * (1 + growth / 100);
+                input.value = Math.round(newValue);
+                updateSummary();
+            });
+        });
+        
+        // Real-time summary updates
+        document.querySelectorAll('.forecast-input').forEach(input => {
+            input.addEventListener('input', updateSummary);
+        });
+        
+        // Scenario switching
+        document.querySelectorAll('.scenario-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.scenario-card').forEach(c => c.classList.remove('active'));
+                
+                this.classList.add('active');
+                
+                const scenario = this.dataset.scenario;
+                const cards = document.querySelectorAll('.scenario-card');
+                if (scenario === 'base') cards[1].classList.add('active');
+                else if (scenario === 'optimistic') cards[2].classList.add('active');
+                else cards[0].classList.add('active');
+            });
+        });
+        
+        // Market intelligence updater
+        function updateMarketIntelligence(industry, customValue) {
+            const statusEl = document.getElementById('intelligenceStatus');
+            const contentEl = document.getElementById('intelligenceContent');
+            
+            statusEl.innerHTML = '<i class="fas fa-sync fa-spin"></i> Fetching market data...';
+            
+            setTimeout(() => {
+                const industryName = customValue || getIndustryName(industry);
+                statusEl.innerHTML = '<i class="fas fa-check-circle"></i> Data updated';
+                
+                contentEl.innerHTML = `
+                    <div class="intelligence-grid">
+                        <div class="intel-metric">
+                            <span class="intel-label">Industry Growth Rate:</span>
+                            <span class="intel-value">8.2% annually</span>
+                        </div>
+                        <div class="intel-metric">
+                            <span class="intel-label">Average Net Margin:</span>
+                            <span class="intel-value">12.5% - 18.7%</span>
+                        </div>
+                        <div class="intel-metric">
+                            <span class="intel-label">Market Size:</span>
+                            <span class="intel-value">$47.2B (growing)</span>
+                        </div>
+                        <div class="intel-insight">
+                            <i class="fas fa-lightbulb"></i>
+                            <span>${industryName} companies typically scale marketing spend as % of revenue during growth phases.</span>
+                        </div>
+                    </div>
+                `;
+            }, 1500);
+        }
+        
+        function getIndustryName(industry) {
+            const names = {
+                'saas': 'SaaS/Technology',
+                'retail': 'Retail/E-commerce',
+                'consulting': 'Consulting/Services',
+                'manufacturing': 'Manufacturing',
+                'healthcare': 'Healthcare',
+                'fintech': 'FinTech'
+            };
+            return names[industry] || industry;
+        }
+        
+        // Summary calculations
+        function updateSummary() {
+            const currentView = document.getElementById('current-year-view');
+            if (currentView.style.display === 'none') return;
+            
+            const revenueInput = document.getElementById('current-revenue');
+            const revenue = parseFloat(revenueInput.value) || 0;
+            
+            // Calculate total OPEX
+            const opexInputs = currentView.querySelectorAll('.opex-section .forecast-input');
+            let totalOpex = 0;
+            opexInputs.forEach(input => {
+                totalOpex += parseFloat(input.value) || 0;
+            });
+            
+            const netIncome = revenue - totalOpex;
+            const netMargin = revenue > 0 ? (netIncome / revenue) * 100 : 0;
+            
+            // Update summary
+            document.getElementById('total-revenue-summary').textContent = `Rp ${revenue.toLocaleString()}`;
+            document.getElementById('total-opex-summary').textContent = `Rp ${totalOpex.toLocaleString()}`;
+            document.getElementById('net-income-summary').textContent = `Rp ${netIncome.toLocaleString()}`;
+            document.getElementById('net-margin-summary').textContent = `${netMargin.toFixed(1)}%`;
+            
+            // Update summary color based on performance
+            const netIncomeEl = document.getElementById('net-income-summary');
+            const netMarginEl = document.getElementById('net-margin-summary');
+            
+            if (netIncome > 0) {
+                netIncomeEl.style.color = '#059669';
+                netMarginEl.style.color = '#059669';
+            } else {
+                netIncomeEl.style.color = '#dc2626';
+                netMarginEl.style.color = '#dc2626';
+            }
+        }
+        
+        // Refresh market data button
+        document.getElementById('refreshMarketData').addEventListener('click', function() {
+            const industrySelect = document.getElementById('industrySelect');
+            const customInput = document.getElementById('customIndustry');
+            
+            if (industrySelect.value && industrySelect.value !== 'custom') {
+                updateMarketIntelligence(industrySelect.value);
+            } else if (industrySelect.value === 'custom' && customInput.value.trim()) {
+                updateMarketIntelligence('custom', customInput.value.trim());
+            }
+        });
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateSummary();
         });
         
     </script>
