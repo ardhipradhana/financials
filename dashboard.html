@@ -6715,6 +6715,19 @@
             border-collapse: collapse;
             font-size: 0.875rem;
             min-width: 1400px;
+            border-radius: 0;
+        }
+
+        .pl-forecast-table th:first-child,
+        .pl-forecast-table td:first-child {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+        
+        .pl-forecast-table th:last-child,
+        .pl-forecast-table td:last-child {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
         }
         
         .pl-forecast-table th {
@@ -6777,11 +6790,18 @@
         }
         
         .pl-line-item {
-            text-align: left;
-            font-weight: 500;
-            color: #374151;
-            min-width: 200px;
+            text-align: left !important;
             padding-left: 1rem;
+            font-weight: 500;
+            background: #f8fafc;
+            border-right: 1px solid #e2e8f0;
+            min-width: 200px;
+            white-space: nowrap;
+        }
+
+        .pl-line-item.bold {
+            font-weight: 700;
+            background: #e2e8f0;
         }
         
         /* Actual vs Forecast Cell Styling */
@@ -6795,12 +6815,16 @@
         }
         
         .pl-forecast-cell {
-            background: #ffffff;
-            border: 1px solid transparent;
-            transition: all 0.2s ease;
-            font-family: 'SF Mono', 'Monaco', monospace;
             text-align: right;
-            font-weight: 500;
+            padding: 8px 16px;
+            border: 1px solid #e2e8f0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        .pl-forecast-cell.bold {
+            font-weight: 700;
+            background: #f1f5f9;
         }
         
         .pl-forecast-cell:hover {
@@ -6824,10 +6848,34 @@
         }
         
         .pl-total-cell {
-            background: #fef3c7;
-            font-weight: 600;
-            font-family: 'SF Mono', 'Monaco', monospace;
             text-align: right;
+            padding: 8px 16px;
+            border: 1px solid #d1d5db;
+            background: #fef3c7;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        .percentage-row {
+            background: #f0f9ff !important;
+            font-style: italic;
+            color: #1e40af;
+        }
+        
+        .percentage-row .pl-line-item {
+            background: #f0f9ff !important;
+            font-style: italic;
+            color: #1e40af;
+            padding-left: 2rem; /* Indent percentage rows */
+        }
+        
+        .percentage-row .pl-forecast-cell,
+        .percentage-row .pl-total-cell {
+            background: #f0f9ff !important;
+            color: #1e40af;
+            font-style: italic;
+            font-weight: 500;
         }
         
         .pl-total-prominent {
@@ -7234,6 +7282,7 @@
             font-size: 0.875rem;
             min-width: 1400px;
             position: relative;
+            border-radius: 0;
         }
         
         /* Freeze the first column (Line Item) */
@@ -7809,8 +7858,8 @@
         }
         
         .year-section {
-            background: #f8fafc;
-            border-radius: 8px;
+            background: #ffffff;
+            border-radius: 0; /* Remove curved edges */
             padding: 1.5rem;
             border: 1px solid #e2e8f0;
         }
@@ -7827,15 +7876,22 @@
             font-size: 1.1rem;
             font-weight: 600;
         }
+
+        .pl-table-scroll {
+            overflow-x: auto;
+            width: fit-content; /* Make container only as wide as needed */
+            max-width: 100%;
+        }
         
         .pl-quarter-header {
             background: linear-gradient(135deg, #3b82f6, #1d4ed8);
             color: white;
             font-weight: 600;
             text-align: center;
-            padding: 12px 8px;
+            padding: 12px 16px;
             border: 1px solid #2563eb;
-            min-width: 100px;
+            min-width: 120px;
+            border-radius: 0; /* Remove curved edges */
         }
         
         /* Responsive adjustments for quarterly view */
@@ -25037,7 +25093,7 @@
             // Clear placeholder
             tbody.innerHTML = '';
             
-            // Define line items structure
+            // Define line items structure with percentages
             const lineItems = [
                 { name: 'Sales Revenue', id: 'sales-revenue', type: 'revenue' },
                 { name: 'Service Revenue', id: 'service-revenue', type: 'revenue' },
@@ -25045,83 +25101,100 @@
                 { name: 'Direct Costs (COGS)', id: 'direct-costs', type: 'cogs' },
                 { name: 'Total COGS', id: 'total-cogs', type: 'cogs', isBold: true },
                 { name: 'Gross Profit', id: 'gross-profit', type: 'calculated', isBold: true },
+                { name: 'Gross Profit Margin %', id: 'gross-profit-margin', type: 'percentage', isPercentage: true },
                 { name: 'Operating Expenses', id: 'operating-expenses', type: 'opex' },
                 { name: 'Total OPEX', id: 'total-opex', type: 'opex', isBold: true },
-                { name: 'EBITDA', id: 'ebitda', type: 'calculated', isBold: true }
+                { name: 'OPEX to Sales %', id: 'opex-to-sales', type: 'percentage', isPercentage: true },
+                { name: 'EBITDA', id: 'ebitda', type: 'calculated', isBold: true },
+                { name: 'EBITDA Margin %', id: 'ebitda-margin', type: 'percentage', isPercentage: true }
             ];
             
+            // Calculate quarterly data with totals
+            const quarterlyCalculations = quarterlyData.map(quarter => {
+                const salesRevenue = quarter.revenue_accounts?.['4010'] || 0;
+                const serviceRevenue = quarter.revenue_accounts?.['4020'] || 0;
+                const totalRevenue = salesRevenue + serviceRevenue;
+                
+                const directCosts = quarter.cogs_accounts?.['5010'] || 0;
+                const totalCogs = directCosts + (quarter.cogs_accounts?.['5020'] || 0);
+                
+                const operatingExpenses = quarter.opex_accounts?.['5100'] || 0;
+                const totalOpex = operatingExpenses + (quarter.opex_accounts?.['5110'] || 0);
+                
+                const grossProfit = totalRevenue - totalCogs;
+                const ebitda = grossProfit - totalOpex;
+                
+                // Calculate percentages
+                const grossProfitMargin = totalRevenue > 0 ? (grossProfit / totalRevenue) * 100 : 0;
+                const opexToSales = totalRevenue > 0 ? (totalOpex / totalRevenue) * 100 : 0;
+                const ebitdaMargin = totalRevenue > 0 ? (ebitda / totalRevenue) * 100 : 0;
+                
+                return {
+                    salesRevenue,
+                    serviceRevenue,
+                    totalRevenue,
+                    directCosts,
+                    totalCogs,
+                    grossProfit,
+                    grossProfitMargin,
+                    operatingExpenses,
+                    totalOpex,
+                    opexToSales,
+                    ebitda,
+                    ebitdaMargin
+                };
+            });
+            
             // Calculate year totals
-            const yearTotals = {
-                sales_revenue: 0,
-                service_revenue: 0,
-                total_revenue: 0,
-                direct_costs: 0,
-                total_cogs: 0,
-                gross_profit: 0,
-                operating_expenses: 0,
-                total_opex: 0,
-                ebitda: 0
-            };
+            const yearTotals = quarterlyCalculations.reduce((totals, quarter) => {
+                return {
+                    salesRevenue: totals.salesRevenue + quarter.salesRevenue,
+                    serviceRevenue: totals.serviceRevenue + quarter.serviceRevenue,
+                    totalRevenue: totals.totalRevenue + quarter.totalRevenue,
+                    directCosts: totals.directCosts + quarter.directCosts,
+                    totalCogs: totals.totalCogs + quarter.totalCogs,
+                    grossProfit: totals.grossProfit + quarter.grossProfit,
+                    operatingExpenses: totals.operatingExpenses + quarter.operatingExpenses,
+                    totalOpex: totals.totalOpex + quarter.totalOpex,
+                    ebitda: totals.ebitda + quarter.ebitda
+                };
+            }, {
+                salesRevenue: 0, serviceRevenue: 0, totalRevenue: 0,
+                directCosts: 0, totalCogs: 0, grossProfit: 0,
+                operatingExpenses: 0, totalOpex: 0, ebitda: 0
+            });
+            
+            // Calculate year percentage totals
+            yearTotals.grossProfitMargin = yearTotals.totalRevenue > 0 ? (yearTotals.grossProfit / yearTotals.totalRevenue) * 100 : 0;
+            yearTotals.opexToSales = yearTotals.totalRevenue > 0 ? (yearTotals.totalOpex / yearTotals.totalRevenue) * 100 : 0;
+            yearTotals.ebitdaMargin = yearTotals.totalRevenue > 0 ? (yearTotals.ebitda / yearTotals.totalRevenue) * 100 : 0;
             
             // Build table rows
             lineItems.forEach(item => {
                 const row = document.createElement('tr');
                 if (item.isBold) row.classList.add('forecast-total-row');
+                if (item.isPercentage) row.classList.add('percentage-row');
                 
                 let rowHTML = `<td class="pl-line-item ${item.isBold ? 'bold' : ''}">${item.name}</td>`;
                 
                 // Add quarterly data
-                quarterlyData.forEach(quarter => {
-                    let value = 0;
+                quarterlyCalculations.forEach(quarter => {
+                    let value = quarter[item.id.replace('-', '_')] || 0;
                     
-                    switch (item.id) {
-                        case 'sales-revenue':
-                            value = quarter.revenue_accounts?.['4010'] || 0;
-                            break;
-                        case 'service-revenue':
-                            value = quarter.revenue_accounts?.['4020'] || 0;
-                            break;
-                        case 'total-revenue':
-                            value = (quarter.revenue_accounts?.['4010'] || 0) + (quarter.revenue_accounts?.['4020'] || 0);
-                            break;
-                        case 'direct-costs':
-                            value = quarter.cogs_accounts?.['5010'] || 0;
-                            break;
-                        case 'total-cogs':
-                            value = (quarter.cogs_accounts?.['5010'] || 0) + (quarter.cogs_accounts?.['5020'] || 0);
-                            break;
-                        case 'gross-profit':
-                            const totalRev = (quarter.revenue_accounts?.['4010'] || 0) + (quarter.revenue_accounts?.['4020'] || 0);
-                            const totalCogs = (quarter.cogs_accounts?.['5010'] || 0) + (quarter.cogs_accounts?.['5020'] || 0);
-                            value = totalRev - totalCogs;
-                            break;
-                        case 'operating-expenses':
-                            value = quarter.opex_accounts?.['5100'] || 0;
-                            break;
-                        case 'total-opex':
-                            value = (quarter.opex_accounts?.['5100'] || 0) + (quarter.opex_accounts?.['5110'] || 0);
-                            break;
-                        case 'ebitda':
-                            const qTotalRev = (quarter.revenue_accounts?.['4010'] || 0) + (quarter.revenue_accounts?.['4020'] || 0);
-                            const qTotalCogs = (quarter.cogs_accounts?.['5010'] || 0) + (quarter.cogs_accounts?.['5020'] || 0);
-                            const qTotalOpex = (quarter.opex_accounts?.['5100'] || 0) + (quarter.opex_accounts?.['5110'] || 0);
-                            value = qTotalRev - qTotalCogs - qTotalOpex;
-                            break;
-                    }
-                    
-                    rowHTML += `<td class="pl-forecast-cell ${item.isBold ? 'bold' : ''}">${value.toLocaleString()}</td>`;
-                    
-                    // Add to year totals
-                    const itemKey = item.id.replace('-', '_');
-                    if (yearTotals.hasOwnProperty(itemKey)) {
-                        yearTotals[itemKey] += value;
+                    if (item.isPercentage) {
+                        rowHTML += `<td class="pl-forecast-cell">${value.toFixed(1)}%</td>`;
+                    } else {
+                        rowHTML += `<td class="pl-forecast-cell ${item.isBold ? 'bold' : ''}">${value.toLocaleString()}</td>`;
                     }
                 });
                 
                 // Add year total
-                const itemKey = item.id.replace('-', '_');
-                const yearTotal = yearTotals[itemKey] || 0;
-                rowHTML += `<td class="pl-total-cell ${item.isBold ? 'bold' : ''}">${yearTotal.toLocaleString()}</td>`;
+                const yearValue = yearTotals[item.id.replace('-', '_')] || 0;
+                if (item.isPercentage) {
+                    rowHTML += `<td class="pl-total-cell">${yearValue.toFixed(1)}%</td>`;
+                } else {
+                    rowHTML += `<td class="pl-total-cell">${yearValue.toLocaleString()}</td>`;
+                }
                 
                 row.innerHTML = rowHTML;
                 tbody.appendChild(row);
