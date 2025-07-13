@@ -5491,12 +5491,6 @@
             line-height: 1.5;
             font-size: 0.875rem;
         }
-
-        .trending-chart-container {
-            padding: 2rem;
-            height: 450px;
-            background: #fafbfc;
-        }
         
         #trendingChart {
             max-height: 400px;
@@ -5535,90 +5529,23 @@
         .trending-chart-container {
             padding: 2rem;
             height: 450px;
+            background: #fafbfc;
             margin-bottom: 2rem;
+            width: 100%;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
-        .multiyear-summary-cards-container {
-            display: flex;
-            justify-content: space-around;
-            gap: 1.5rem;
-            margin-top: 2rem; /* Additional spacing from chart */
-            flex-wrap: wrap;
+        .trending-chart-container canvas {
+            max-width: 100%;
+            height: auto;
         }
 
-        .multiyear-summary-cards-container .summary-card {
-            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
-            border-radius: 12px;
-            padding: 1.5rem;
-            text-align: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            border: 1px solid #e2e8f0;
-            flex: 1;
-            min-width: 250px;
-            max-width: 300px;
-        }
-        
-        .multiyear-summary-cards-container .summary-card.revenue {
-            border-left: 4px solid #3b82f6;
-        }
-        
-        .multiyear-summary-cards-container .summary-card.efficiency {
-            border-left: 4px solid #10b981;
-        }
-        
-        .multiyear-summary-cards-container .summary-card.opex {
-            border-left: 4px solid #8b5cf6;
-        }
-        
-        .multiyear-summary-cards-container .summary-header {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-        }
-        
-        .multiyear-summary-cards-container .summary-header h4 {
-            margin: 0;
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: #64748b;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .multiyear-summary-cards-container .summary-amount {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #1e293b;
-        }
-        
-        .multiyear-summary-cards-container .summary-change {
-            font-size: 0.8rem;
-            color: #64748b;
-            font-weight: 500;
-        }
-        
-        .multiyear-summary-cards-container .summary-change.positive {
-            color: #059669;
-        }
-        
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .multiyear-summary-cards-container {
-                flex-direction: column;
-                gap: 1rem;
-            }
-            
-            .multiyear-summary-cards-container .summary-card {
-                min-width: 100%;
-                max-width: 100%;
-            }
-            
-            .trending-chart-container {
-                height: 300px;
-            }
+        #multiYearTrendingSection .breakdown-summary-row {
+            margin-top: 1.5rem;
+            margin-bottom: 0;
         }
         
         /* Forecasting Module - Unique Classes */
@@ -10216,14 +10143,12 @@
                             </button>
                         </div>
                         <div class="trending-chart-divider"></div>
-                        
-                        <!-- Chart Container -->
                         <div class="trending-chart-container">
                             <canvas id="multiYearTrendingChart" width="800" height="400"></canvas>
                         </div>
                         
-                        <!-- Summary Cards Below Chart -->
-                        <div class="multiyear-summary-cards-container">
+                        <!-- Use Same Summary Cards Structure as 2025/2026 Forecasts -->
+                        <div class="breakdown-summary-row" style="margin-top: 1.5rem;">
                             <div class="summary-card revenue">
                                 <div class="summary-header">
                                     <h4><i class="fas fa-chart-line"></i> CAGR (2027-2030)</h4>
