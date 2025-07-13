@@ -25417,42 +25417,59 @@
                             label: 'Revenue',
                             data: revenueData,
                             borderColor: '#3b82f6',
-                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                            fill: false,
+                            backgroundColor: 'rgba(59, 130, 246, 0.3)', // Increased opacity
+                            fill: true, // Changed to true for area fill
                             tension: 0.4,
-                            borderWidth: 3
+                            borderWidth: 2,
+                            pointBackgroundColor: '#3b82f6',
+                            pointBorderColor: '#ffffff',
+                            pointBorderWidth: 2,
+                            pointRadius: 4
                         },
                         {
                             label: 'Gross Profit',
                             data: grossProfitData,
                             borderColor: '#10b981',
-                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                            fill: false,
+                            backgroundColor: 'rgba(16, 185, 129, 0.3)', // Increased opacity
+                            fill: true, // Changed to true for area fill
                             tension: 0.4,
-                            borderWidth: 3
+                            borderWidth: 2,
+                            pointBackgroundColor: '#10b981',
+                            pointBorderColor: '#ffffff',
+                            pointBorderWidth: 2,
+                            pointRadius: 4
                         },
                         {
                             label: 'OPEX',
                             data: opexData,
                             borderColor: '#f59e0b',
-                            backgroundColor: 'rgba(245, 158, 11, 0.1)',
-                            fill: false,
+                            backgroundColor: 'rgba(245, 158, 11, 0.3)', // Increased opacity
+                            fill: true, // Changed to true for area fill
                             tension: 0.4,
-                            borderWidth: 3
+                            borderWidth: 2,
+                            pointBackgroundColor: '#f59e0b',
+                            pointBorderColor: '#ffffff',
+                            pointBorderWidth: 2,
+                            pointRadius: 4
                         },
                         {
                             label: 'EBITDA',
                             data: ebitdaData,
                             borderColor: '#8b5cf6',
-                            backgroundColor: 'rgba(139, 92, 246, 0.1)',
-                            fill: false,
+                            backgroundColor: 'rgba(139, 92, 246, 0.3)', // Increased opacity
+                            fill: true, // Changed to true for area fill
                             tension: 0.4,
-                            borderWidth: 3
+                            borderWidth: 2,
+                            pointBackgroundColor: '#8b5cf6',
+                            pointBorderColor: '#ffffff',
+                            pointBorderWidth: 2,
+                            pointRadius: 4
                         }
                     ]
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
                     plugins: {
                         title: {
                             display: true,
@@ -25460,31 +25477,99 @@
                             font: {
                                 size: 16,
                                 weight: 'bold'
+                            },
+                            color: '#374151',
+                            padding: {
+                                top: 10,
+                                bottom: 20
                             }
                         },
                         legend: {
                             display: true,
-                            position: 'top'
+                            position: 'top',
+                            align: 'center',
+                            labels: {
+                                usePointStyle: true,
+                                pointStyle: 'rect',
+                                padding: 20,
+                                font: {
+                                    size: 12,
+                                    weight: '500'
+                                }
+                            }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                            titleColor: '#374151',
+                            bodyColor: '#374151',
+                            borderColor: '#e5e7eb',
+                            borderWidth: 1,
+                            cornerRadius: 8,
+                            titleFont: {
+                                weight: '600'
+                            },
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.parsed.y.toLocaleString()}`;
+                                }
+                            }
                         }
                     },
                     scales: {
                         y: {
                             beginAtZero: true,
+                            grid: {
+                                color: 'rgba(156, 163, 175, 0.2)',
+                                drawBorder: false
+                            },
                             ticks: {
+                                color: '#6b7280',
+                                font: {
+                                    size: 11
+                                },
                                 callback: function(value) {
+                                    // Format large numbers (billions)
+                                    if (value >= 1000000000) {
+                                        return (value / 1000000000).toFixed(1) + 'B';
+                                    } else if (value >= 1000000) {
+                                        return (value / 1000000).toFixed(0) + 'M';
+                                    }
                                     return value.toLocaleString();
                                 }
+                            },
+                            border: {
+                                display: false
                             }
                         },
                         x: {
+                            grid: {
+                                color: 'rgba(156, 163, 175, 0.2)',
+                                drawBorder: false
+                            },
                             ticks: {
-                                maxRotation: 45
+                                color: '#6b7280',
+                                font: {
+                                    size: 11
+                                },
+                                maxRotation: 45,
+                                minRotation: 0
+                            },
+                            border: {
+                                display: false
                             }
                         }
                     },
                     interaction: {
                         intersect: false,
                         mode: 'index'
+                    },
+                    elements: {
+                        point: {
+                            hoverRadius: 6,
+                            hoverBorderWidth: 3
+                        }
                     }
                 }
             });
