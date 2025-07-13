@@ -7799,6 +7799,60 @@
             background: #fef3c7 !important;
             font-weight: 700;
         }
+
+        /* Multi-Year Specific Styles */
+        .multi-year-tables-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+        
+        .year-section {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 1.5rem;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .year-header {
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #3b82f6;
+        }
+        
+        .year-header h5 {
+            margin: 0;
+            color: #1e40af;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        .pl-quarter-header {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            font-weight: 600;
+            text-align: center;
+            padding: 12px 8px;
+            border: 1px solid #2563eb;
+            min-width: 100px;
+        }
+        
+        /* Responsive adjustments for quarterly view */
+        @media (max-width: 1200px) {
+            .multi-year-tables-container {
+                gap: 1.5rem;
+            }
+            
+            .year-section {
+                padding: 1rem;
+            }
+            
+            .pl-quarter-header {
+                min-width: 80px;
+                font-size: 0.85rem;
+            }
+        }
         
     </style>
 </head>
@@ -9849,33 +9903,206 @@
                                 </button>
                             </div>
                         </div>
+                    
+                        <!-- Multi-Year AI Controls -->
+                        <div class="forecasting-ai-controls">
+                            <div class="forecasting-ai-controls-left">
+                                <div class="industry-input-wrapper">
+                                    <label for="forecastMultiYearIndustrySelect">Industry Context:</label>
+                                    <select id="forecastMultiYearIndustrySelect" class="industry-input-select">
+                                        <option value="">Select Industry for AI Context</option>
+                                        <option value="saas">SaaS / Technology</option>
+                                        <option value="retail">Retail / E-commerce</option>
+                                        <option value="consulting">Consulting / Services</option>
+                                        <option value="manufacturing">Manufacturing</option>
+                                        <option value="healthcare">Healthcare</option>
+                                        <option value="fintech">FinTech</option>
+                                    </select>
+                                </div>
+                                <div class="industry-input-wrapper">
+                                    <label for="forecastMultiYearStyleSelect">Forecast Style:</label>
+                                    <select id="forecastMultiYearStyleSelect" class="industry-input-select">
+                                        <option value="normal">Normal Growth</option>
+                                        <option value="aggressive">Aggressive Growth</option>
+                                        <option value="pessimistic">Conservative/Pessimistic</option>
+                                    </select>
+                                </div>
+                                <div class="context-input-wrapper">
+                                    <label for="forecastMultiYearContext">Additional Context:</label>
+                                    <input type="text" id="forecastMultiYearContext" placeholder="e.g., Major expansion plans, new product launches, market shifts..." style="width: 100%; padding: 0.5rem; border: 1px solid #e2e8f0; border-radius: 6px;">
+                                </div>
+                                <button class="btn btn-outline" onclick="loadLatestMultiYearForecastFromSupabase()">
+                                    <i class="fas fa-history"></i>
+                                    Load Latest Forecast
+                                </button>
+                            </div>
+                            <div class="forecasting-ai-controls-right">
+                                <button class="btn btn-primary" id="generateAIMultiYearForecast">
+                                    <i class="fas fa-brain"></i>
+                                    Generate AI Forecast
+                                </button>
+                            </div>
+                        </div>
                         
-                        <div class="pl-table-scroll">
-                            <table class="pl-forecast-table" id="plForecastMultiyearTable">
-                                <thead>
-                                    <tr>
-                                        <th class="pl-line-item-header">Line Item</th>
-                                        <th class="quarter-header">2027 Q1</th>
-                                        <th class="quarter-header">2027 Q2</th>
-                                        <th class="quarter-header">2027 Q3</th>
-                                        <th class="quarter-header">2027 Q4</th>
-                                        <th class="total-header">2027 Total</th>
-                                        <th class="quarter-header">2028 Q1</th>
-                                        <th class="quarter-header">2028 Q2</th>
-                                        <th class="quarter-header">2028 Q3</th>
-                                        <th class="quarter-header">2028 Q4</th>
-                                        <th class="total-header">2028 Total</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="plForecastMultiyearBody">
-                                    <tr class="placeholder-row">
-                                        <td colspan="11" class="placeholder-text">
-                                            <i class="fas fa-brain"></i>
-                                            Generate AI forecast to view multi-year projections
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                        <!-- Multi-Year Tables by Year -->
+                        <div class="multi-year-tables-container">
+                            <!-- 2027 Table -->
+                            <div class="year-section">
+                                <div class="year-header">
+                                    <h5>2027 Quarterly Forecast</h5>
+                                </div>
+                                <div class="pl-table-scroll">
+                                    <table class="pl-forecast-table" id="plForecast2027Table">
+                                        <thead>
+                                            <tr>
+                                                <th class="pl-line-item-header">Line Item</th>
+                                                <th class="pl-quarter-header">Q1 2027</th>
+                                                <th class="pl-quarter-header">Q2 2027</th>
+                                                <th class="pl-quarter-header">Q3 2027</th>
+                                                <th class="pl-quarter-header">Q4 2027</th>
+                                                <th class="pl-total-header">2027 Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="plForecast2027Body">
+                                            <tr class="placeholder-row">
+                                                <td colspan="6" class="placeholder-text">
+                                                    <i class="fas fa-brain"></i>
+                                                    Generate AI forecast to view 2027 projections
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                    
+                            <!-- 2028 Table -->
+                            <div class="year-section">
+                                <div class="year-header">
+                                    <h5>2028 Quarterly Forecast</h5>
+                                </div>
+                                <div class="pl-table-scroll">
+                                    <table class="pl-forecast-table" id="plForecast2028Table">
+                                        <thead>
+                                            <tr>
+                                                <th class="pl-line-item-header">Line Item</th>
+                                                <th class="pl-quarter-header">Q1 2028</th>
+                                                <th class="pl-quarter-header">Q2 2028</th>
+                                                <th class="pl-quarter-header">Q3 2028</th>
+                                                <th class="pl-quarter-header">Q4 2028</th>
+                                                <th class="pl-total-header">2028 Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="plForecast2028Body">
+                                            <tr class="placeholder-row">
+                                                <td colspan="6" class="placeholder-text">
+                                                    <i class="fas fa-brain"></i>
+                                                    Generate AI forecast to view 2028 projections
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                    
+                            <!-- 2029 Table -->
+                            <div class="year-section">
+                                <div class="year-header">
+                                    <h5>2029 Quarterly Forecast</h5>
+                                </div>
+                                <div class="pl-table-scroll">
+                                    <table class="pl-forecast-table" id="plForecast2029Table">
+                                        <thead>
+                                            <tr>
+                                                <th class="pl-line-item-header">Line Item</th>
+                                                <th class="pl-quarter-header">Q1 2029</th>
+                                                <th class="pl-quarter-header">Q2 2029</th>
+                                                <th class="pl-quarter-header">Q3 2029</th>
+                                                <th class="pl-quarter-header">Q4 2029</th>
+                                                <th class="pl-total-header">2029 Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="plForecast2029Body">
+                                            <tr class="placeholder-row">
+                                                <td colspan="6" class="placeholder-text">
+                                                    <i class="fas fa-brain"></i>
+                                                    Generate AI forecast to view 2029 projections
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                    
+                            <!-- 2030 Table -->
+                            <div class="year-section">
+                                <div class="year-header">
+                                    <h5>2030 Quarterly Forecast</h5>
+                                </div>
+                                <div class="pl-table-scroll">
+                                    <table class="pl-forecast-table" id="plForecast2030Table">
+                                        <thead>
+                                            <tr>
+                                                <th class="pl-line-item-header">Line Item</th>
+                                                <th class="pl-quarter-header">Q1 2030</th>
+                                                <th class="pl-quarter-header">Q2 2030</th>
+                                                <th class="pl-quarter-header">Q3 2030</th>
+                                                <th class="pl-quarter-header">Q4 2030</th>
+                                                <th class="pl-total-header">2030 Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="plForecast2030Body">
+                                            <tr class="placeholder-row">
+                                                <td colspan="6" class="placeholder-text">
+                                                    <i class="fas fa-brain"></i>
+                                                    Generate AI forecast to view 2030 projections
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Multi-Year Trending Chart Section -->
+                    <div class="ro-analysis-panel-full" id="multiYearTrendingSection" style="display: none; margin-top: 2rem;">
+                        <div class="trending-chart-header">
+                            <div class="trending-title-section">
+                                <h4>Multi-Year Quarterly Trending Analysis (2027-2030)</h4>
+                                <p class="trending-subtitle">Quarterly performance projection across 4 years</p>
+                            </div>
+                            <button class="btn btn-secondary" onclick="exportMultiYearTrendingChart()">
+                                <i class="fas fa-download"></i> Export
+                            </button>
+                        </div>
+                        <div class="trending-chart-divider"></div>
+                        <div class="trending-chart-container">
+                            <canvas id="multiYearTrendingChart" width="800" height="400"></canvas>
+                        </div>
+                        
+                        <!-- Enhanced Metrics Summary for Multi-Year -->
+                        <div class="breakdown-summary-row" style="margin-top: 1.5rem;">
+                            <div class="summary-card revenue">
+                                <div class="summary-header">
+                                    <h4><i class="fas fa-chart-line"></i> CAGR (2027-2030)</h4>
+                                    <span class="summary-amount" id="multiYearRevenueCAGR">+0%</span>
+                                </div>
+                                <div class="summary-change positive" id="multiYearCAGRDirection">Compound Growth</div>
+                            </div>
+                            <div class="summary-card efficiency">
+                                <div class="summary-header">
+                                    <h4><i class="fas fa-percentage"></i> Avg Gross Margin</h4>
+                                    <span class="summary-amount" id="multiYearGrossMargin">0%</span>
+                                </div>
+                                <div class="summary-change" id="multiYearGrossMarginTrend">4-Year Average</div>
+                            </div>
+                            <div class="summary-card opex">
+                                <div class="summary-header">
+                                    <h4><i class="fas fa-chart-bar"></i> Avg EBITDA Margin</h4>
+                                    <span class="summary-amount" id="multiYearEbitdaMargin">0%</span>
+                                </div>
+                                <div class="summary-change" id="multiYearEbitdaMarginTrend">4-Year Average</div>
+                            </div>
                         </div>
                     </div>
                     
@@ -24597,6 +24824,686 @@
                 console.error('❌ Error loading 2026 forecast history:', error);
             }
         }
+
+        async function generateAIMultiYearForecast() {
+            console.log('🚀 Starting Multi-Year AI Forecast Generation (2027-2030)...');
+            
+            const industry = document.getElementById('forecastMultiYearIndustrySelect').value;
+            const additionalContext = document.getElementById('forecastMultiYearContext').value;
+            const forecastStyle = document.getElementById('forecastMultiYearStyleSelect').value;
+            
+            if (!industry) {
+                alert('Please select an industry for AI context');
+                return;
+            }
+            
+            // Show loading state
+            const button = document.getElementById('generateAIMultiYearForecast');
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating Multi-Year Forecast...';
+            button.disabled = true;
+            
+            try {
+                // Extract baseline data from 2025 and 2026 forecasts
+                const baselineData = extractMultiYearBaselineData();
+                
+                if (!baselineData) {
+                    alert('Please generate 2025 and 2026 forecasts first to establish baseline data');
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                    return;
+                }
+                
+                // Prepare the API payload
+                const payload = {
+                    baseline_data: baselineData,
+                    forecast_years: [2027, 2028, 2029, 2030],
+                    forecast_period: 'quarterly',
+                    industry_context: industry,
+                    forecast_style: forecastStyle,
+                    additional_context: additionalContext,
+                    timestamp: new Date().toISOString()
+                };
+                
+                console.log('📤 Sending multi-year forecast request:', payload);
+                
+                // Call the AI endpoint
+                const response = await fetch('https://montpro.app.n8n.cloud/webhook/ai-forecast-Y2-Y5', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const aiResult = await response.json();
+                console.log('📥 Multi-year AI forecast response:', aiResult);
+                
+                if (aiResult.success) {
+                    // Populate the multi-year tables with AI data
+                    populateMultiYearTablesWithAI(aiResult);
+                    
+                    // Create the multi-year trending chart
+                    createMultiYearTrendingChart(aiResult);
+                    
+                    // Show insights if available
+                    if (aiResult.insights) {
+                        showMultiYearInsights(aiResult.insights);
+                    }
+                    
+                    // Save to Supabase
+                    await saveMultiYearForecastToSupabase(aiResult);
+                    
+                    console.log('✅ Multi-year forecast generated and saved successfully');
+                } else {
+                    throw new Error(aiResult.message || 'Failed to generate multi-year forecast');
+                }
+                
+            } catch (error) {
+                console.error('❌ Error generating multi-year forecast:', error);
+                alert('Failed to generate multi-year forecast. Please try again.');
+            } finally {
+                // Reset button state
+                button.innerHTML = originalText;
+                button.disabled = false;
+            }
+        }
+        
+        function extractMultiYearBaselineData() {
+            // Extract 2025 data from current year table
+            const currentYearData = extractFullYearData();
+            
+            // Extract 2026 data from next year table
+            const nextYearData = extract2026Data();
+            
+            if (!currentYearData || !nextYearData) {
+                return null;
+            }
+            
+            return {
+                year_2025: currentYearData,
+                year_2026: nextYearData,
+                baseline_established: true
+            };
+        }
+        
+        function extract2026Data() {
+            const tbody = document.getElementById('plForecast2026Body');
+            if (!tbody || tbody.querySelector('.placeholder-row')) {
+                return null;
+            }
+            
+            const data = {
+                year: 2026,
+                monthly_data: [],
+                year_totals: {}
+            };
+            
+            // Extract monthly data from 2026 table (similar to existing extraction logic)
+            const rows = tbody.querySelectorAll('tr:not(.placeholder-row)');
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            
+            // Initialize monthly data structure
+            months.forEach((month, index) => {
+                data.monthly_data.push({
+                    month: index + 1,
+                    month_name: month,
+                    revenue: 0,
+                    cogs: 0,
+                    opex: 0,
+                    gross_profit: 0,
+                    ebitda: 0
+                });
+            });
+            
+            // Extract data from table rows
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                if (cells.length >= 14) { // 12 months + line item + total
+                    const lineItem = cells[0].textContent.trim();
+                    
+                    // Process revenue, cogs, opex based on line item
+                    for (let i = 1; i <= 12; i++) {
+                        const value = parseFloat(cells[i].textContent.replace(/,/g, '')) || 0;
+                        const monthIndex = i - 1;
+                        
+                        if (lineItem.includes('Revenue') || lineItem.includes('Sales')) {
+                            data.monthly_data[monthIndex].revenue += value;
+                        } else if (lineItem.includes('COGS') || lineItem.includes('Cost')) {
+                            data.monthly_data[monthIndex].cogs += value;
+                        } else if (lineItem.includes('Operating') || lineItem.includes('OPEX')) {
+                            data.monthly_data[monthIndex].opex += value;
+                        }
+                    }
+                }
+            });
+            
+            // Calculate derived metrics
+            data.monthly_data.forEach(month => {
+                month.gross_profit = month.revenue - month.cogs;
+                month.ebitda = month.gross_profit - month.opex;
+            });
+            
+            // Calculate year totals
+            data.year_totals = {
+                total_revenue: data.monthly_data.reduce((sum, month) => sum + month.revenue, 0),
+                total_cogs: data.monthly_data.reduce((sum, month) => sum + month.cogs, 0),
+                total_opex: data.monthly_data.reduce((sum, month) => sum + month.opex, 0),
+                total_gross_profit: data.monthly_data.reduce((sum, month) => sum + month.gross_profit, 0),
+                total_ebitda: data.monthly_data.reduce((sum, month) => sum + month.ebitda, 0)
+            };
+            
+            return data;
+        }
+        
+        function populateMultiYearTablesWithAI(aiResult) {
+            console.log('📊 Populating multi-year tables with AI data...');
+            
+            const years = [2027, 2028, 2029, 2030];
+            
+            years.forEach(year => {
+                const yearData = aiResult.forecast_data[`year_${year}`];
+                if (yearData && yearData.quarterly_forecasts) {
+                    populateYearTable(year, yearData.quarterly_forecasts);
+                }
+            });
+            
+            console.log('✅ Multi-year tables populated successfully');
+        }
+        
+        function populateYearTable(year, quarterlyData) {
+            const tbody = document.getElementById(`plForecast${year}Body`);
+            if (!tbody) return;
+            
+            // Clear placeholder
+            tbody.innerHTML = '';
+            
+            // Define line items structure
+            const lineItems = [
+                { name: 'Sales Revenue', id: 'sales-revenue', type: 'revenue' },
+                { name: 'Service Revenue', id: 'service-revenue', type: 'revenue' },
+                { name: 'Total Revenue', id: 'total-revenue', type: 'revenue', isBold: true },
+                { name: 'Direct Costs (COGS)', id: 'direct-costs', type: 'cogs' },
+                { name: 'Total COGS', id: 'total-cogs', type: 'cogs', isBold: true },
+                { name: 'Gross Profit', id: 'gross-profit', type: 'calculated', isBold: true },
+                { name: 'Operating Expenses', id: 'operating-expenses', type: 'opex' },
+                { name: 'Total OPEX', id: 'total-opex', type: 'opex', isBold: true },
+                { name: 'EBITDA', id: 'ebitda', type: 'calculated', isBold: true }
+            ];
+            
+            // Calculate year totals
+            const yearTotals = {
+                sales_revenue: 0,
+                service_revenue: 0,
+                total_revenue: 0,
+                direct_costs: 0,
+                total_cogs: 0,
+                gross_profit: 0,
+                operating_expenses: 0,
+                total_opex: 0,
+                ebitda: 0
+            };
+            
+            // Build table rows
+            lineItems.forEach(item => {
+                const row = document.createElement('tr');
+                if (item.isBold) row.classList.add('forecast-total-row');
+                
+                let rowHTML = `<td class="pl-line-item ${item.isBold ? 'bold' : ''}">${item.name}</td>`;
+                
+                // Add quarterly data
+                quarterlyData.forEach(quarter => {
+                    let value = 0;
+                    
+                    switch (item.id) {
+                        case 'sales-revenue':
+                            value = quarter.revenue_accounts?.['4010'] || 0;
+                            break;
+                        case 'service-revenue':
+                            value = quarter.revenue_accounts?.['4020'] || 0;
+                            break;
+                        case 'total-revenue':
+                            value = (quarter.revenue_accounts?.['4010'] || 0) + (quarter.revenue_accounts?.['4020'] || 0);
+                            break;
+                        case 'direct-costs':
+                            value = quarter.cogs_accounts?.['5010'] || 0;
+                            break;
+                        case 'total-cogs':
+                            value = (quarter.cogs_accounts?.['5010'] || 0) + (quarter.cogs_accounts?.['5020'] || 0);
+                            break;
+                        case 'gross-profit':
+                            const totalRev = (quarter.revenue_accounts?.['4010'] || 0) + (quarter.revenue_accounts?.['4020'] || 0);
+                            const totalCogs = (quarter.cogs_accounts?.['5010'] || 0) + (quarter.cogs_accounts?.['5020'] || 0);
+                            value = totalRev - totalCogs;
+                            break;
+                        case 'operating-expenses':
+                            value = quarter.opex_accounts?.['5100'] || 0;
+                            break;
+                        case 'total-opex':
+                            value = (quarter.opex_accounts?.['5100'] || 0) + (quarter.opex_accounts?.['5110'] || 0);
+                            break;
+                        case 'ebitda':
+                            const qTotalRev = (quarter.revenue_accounts?.['4010'] || 0) + (quarter.revenue_accounts?.['4020'] || 0);
+                            const qTotalCogs = (quarter.cogs_accounts?.['5010'] || 0) + (quarter.cogs_accounts?.['5020'] || 0);
+                            const qTotalOpex = (quarter.opex_accounts?.['5100'] || 0) + (quarter.opex_accounts?.['5110'] || 0);
+                            value = qTotalRev - qTotalCogs - qTotalOpex;
+                            break;
+                    }
+                    
+                    rowHTML += `<td class="pl-forecast-cell ${item.isBold ? 'bold' : ''}">${value.toLocaleString()}</td>`;
+                    
+                    // Add to year totals
+                    const itemKey = item.id.replace('-', '_');
+                    if (yearTotals.hasOwnProperty(itemKey)) {
+                        yearTotals[itemKey] += value;
+                    }
+                });
+                
+                // Add year total
+                const itemKey = item.id.replace('-', '_');
+                const yearTotal = yearTotals[itemKey] || 0;
+                rowHTML += `<td class="pl-total-cell ${item.isBold ? 'bold' : ''}">${yearTotal.toLocaleString()}</td>`;
+                
+                row.innerHTML = rowHTML;
+                tbody.appendChild(row);
+            });
+        }
+        
+        function createMultiYearTrendingChart(aiResult) {
+            console.log('📈 Creating multi-year trending chart...');
+            
+            // Show the trending section
+            document.getElementById('multiYearTrendingSection').style.display = 'block';
+            
+            const ctx = document.getElementById('multiYearTrendingChart').getContext('2d');
+            
+            // Prepare quarterly data for all 4 years (16 quarters)
+            const quarters = [];
+            const revenueData = [];
+            const grossProfitData = [];
+            const opexData = [];
+            const ebitdaData = [];
+            
+            const years = [2027, 2028, 2029, 2030];
+            
+            years.forEach(year => {
+                const yearData = aiResult.forecast_data[`year_${year}`];
+                if (yearData && yearData.quarterly_forecasts) {
+                    yearData.quarterly_forecasts.forEach((quarter, index) => {
+                        quarters.push(`Q${index + 1} ${year}`);
+                        
+                        const revenue = (quarter.revenue_accounts?.['4010'] || 0) + (quarter.revenue_accounts?.['4020'] || 0);
+                        const cogs = (quarter.cogs_accounts?.['5010'] || 0) + (quarter.cogs_accounts?.['5020'] || 0);
+                        const opex = (quarter.opex_accounts?.['5100'] || 0) + (quarter.opex_accounts?.['5110'] || 0);
+                        const grossProfit = revenue - cogs;
+                        const ebitda = grossProfit - opex;
+                        
+                        revenueData.push(revenue);
+                        grossProfitData.push(grossProfit);
+                        opexData.push(opex);
+                        ebitdaData.push(ebitda);
+                    });
+                }
+            });
+            
+            // Destroy existing chart if it exists
+            if (window.multiYearTrendingChartInstance) {
+                window.multiYearTrendingChartInstance.destroy();
+            }
+            
+            // Create the chart
+            window.multiYearTrendingChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: quarters,
+                    datasets: [
+                        {
+                            label: 'Revenue',
+                            data: revenueData,
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            fill: false,
+                            tension: 0.4,
+                            borderWidth: 3
+                        },
+                        {
+                            label: 'Gross Profit',
+                            data: grossProfitData,
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            fill: false,
+                            tension: 0.4,
+                            borderWidth: 3
+                        },
+                        {
+                            label: 'OPEX',
+                            data: opexData,
+                            borderColor: '#f59e0b',
+                            backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                            fill: false,
+                            tension: 0.4,
+                            borderWidth: 3
+                        },
+                        {
+                            label: 'EBITDA',
+                            data: ebitdaData,
+                            borderColor: '#8b5cf6',
+                            backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                            fill: false,
+                            tension: 0.4,
+                            borderWidth: 3
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Multi-Year Quarterly Performance Trends (2027-2030)',
+                            font: {
+                                size: 16,
+                                weight: 'bold'
+                            }
+                        },
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString();
+                                }
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                maxRotation: 45
+                            }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    }
+                }
+            });
+            
+            // Update summary metrics
+            updateMultiYearSummaryMetrics(aiResult);
+            
+            console.log('✅ Multi-year trending chart created successfully');
+        }
+        
+        function updateMultiYearSummaryMetrics(aiResult) {
+            // Calculate CAGR from 2027 to 2030
+            const year2027Data = aiResult.forecast_data.year_2027;
+            const year2030Data = aiResult.forecast_data.year_2030;
+            
+            if (year2027Data && year2030Data) {
+                const revenue2027 = year2027Data.year_totals.total_revenue;
+                const revenue2030 = year2030Data.year_totals.total_revenue;
+                const years = 3; // 2027 to 2030 is 3 years
+                const cagr = ((revenue2030 / revenue2027) ** (1/years) - 1) * 100;
+                
+                document.getElementById('multiYearRevenueCAGR').textContent = `+${cagr.toFixed(1)}%`;
+            }
+            
+            // Calculate average margins across all years
+            const years = [2027, 2028, 2029, 2030];
+            let totalGrossMargin = 0;
+            let totalEbitdaMargin = 0;
+            let validYears = 0;
+            
+            years.forEach(year => {
+                const yearData = aiResult.forecast_data[`year_${year}`];
+                if (yearData && yearData.year_totals) {
+                    const grossMargin = (yearData.year_totals.total_gross_profit / yearData.year_totals.total_revenue) * 100;
+                    const ebitdaMargin = (yearData.year_totals.total_ebitda / yearData.year_totals.total_revenue) * 100;
+                    
+                    totalGrossMargin += grossMargin;
+                    totalEbitdaMargin += ebitdaMargin;
+                    validYears++;
+                }
+            });
+            
+            if (validYears > 0) {
+                const avgGrossMargin = totalGrossMargin / validYears;
+                const avgEbitdaMargin = totalEbitdaMargin / validYears;
+                
+                document.getElementById('multiYearGrossMargin').textContent = `${avgGrossMargin.toFixed(1)}%`;
+                document.getElementById('multiYearEbitdaMargin').textContent = `${avgEbitdaMargin.toFixed(1)}%`;
+            }
+        }
+        
+        function showMultiYearInsights(insights) {
+            console.log('📊 Displaying multi-year AI insights...');
+            
+            // Create or find the insights container for multi-year
+            let insightsContainer = document.getElementById('aiMultiYearInsightsContainer');
+            
+            if (!insightsContainer) {
+                // Create the insights container after the multi-year tables
+                const multiYearContainer = document.getElementById('multi-year-container');
+                
+                insightsContainer = document.createElement('div');
+                insightsContainer.id = 'aiMultiYearInsightsContainer';
+                insightsContainer.className = 'ai-insights-container';
+                insightsContainer.style.marginTop = '2rem';
+                
+                // Insert after the multi-year container
+                multiYearContainer.parentNode.insertBefore(insightsContainer, multiYearContainer.nextSibling);
+            }
+            
+            // Populate the insights
+            insightsContainer.innerHTML = `
+                <div class="insights-header-AIinsight">
+                    <h4><i class="fas fa-brain"></i> Multi-Year AI Analysis & Strategic Insights (2027-2030)</h4>
+                    <div class="insights-meta">
+                        <span class="confidence-badge">Confidence: ${insights.confidence || '85'}%</span>
+                        <span class="forecast-date">Generated: ${new Date().toLocaleDateString()}</span>
+                    </div>
+                </div>
+                
+                <div class="insights-content">
+                    <div class="insight-card key-trends-card">
+                        <div class="insight-header">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Long-term Growth Trends</span>
+                        </div>
+                        <div class="insight-content">
+                            ${insights.key_trends || 'Multi-year analysis shows consistent growth patterns with seasonal variations across quarters.'}
+                        </div>
+                    </div>
+                    
+                    <div class="insight-card risk-factors-card">
+                        <div class="insight-header">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span>Strategic Risk Factors</span>
+                        </div>
+                        <div class="insight-content">
+                            ${insights.risk_factors || 'Market volatility and competitive pressure may impact long-term projections.'}
+                        </div>
+                    </div>
+                    
+                    <div class="insight-card opportunities-card">
+                        <div class="insight-header">
+                            <i class="fas fa-lightbulb"></i>
+                            <span>Strategic Opportunities</span>
+                        </div>
+                        <div class="insight-content">
+                            ${insights.opportunities || 'Multi-year planning enables strategic investments and market expansion opportunities.'}
+                        </div>
+                    </div>
+                    
+                    <div class="insight-card methodology-card">
+                        <div class="insight-header">
+                            <i class="fas fa-cogs"></i>
+                            <span>Forecast Methodology</span>
+                        </div>
+                        <div class="insight-content">
+                            ${insights.methodology || 'Quarterly projections based on historical trends, industry patterns, and strategic context provided.'}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            console.log('✅ Multi-year insights displayed successfully');
+        }
+        
+        async function saveMultiYearForecastToSupabase(aiResult) {
+            try {
+                console.log('💾 Saving multi-year forecast to Supabase...');
+                
+                // Get current user
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) {
+                    throw new Error('User not authenticated');
+                }
+                
+                if (!aiResult.forecast_data) {
+                    throw new Error('Invalid AI result format');
+                }
+                
+                // Prepare the forecast data for Supabase
+                const forecastData = {
+                    user_id: user.id,
+                    forecast_period: 'multi_year_quarterly',
+                    forecast_years: [2027, 2028, 2029, 2030],
+                    industry_context: document.getElementById('forecastMultiYearIndustrySelect').value,
+                    additional_context: document.getElementById('forecastMultiYearContext').value,
+                    forecast_style: document.getElementById('forecastMultiYearStyleSelect').value,
+                    confidence_level: aiResult.confidence,
+                    generated_at: new Date().toISOString(),
+                    model_version: aiResult.model_version || 'ai-agent-v1',
+                    
+                    // Multi-year quarterly data
+                    forecast_data: {
+                        year_2027: aiResult.forecast_data.year_2027,
+                        year_2028: aiResult.forecast_data.year_2028,
+                        year_2029: aiResult.forecast_data.year_2029,
+                        year_2030: aiResult.forecast_data.year_2030
+                    },
+                    
+                    // AI insights
+                    ai_insights: {
+                        key_trends: aiResult.insights?.key_trends || '',
+                        risk_factors: aiResult.insights?.risk_factors || '',
+                        opportunities: aiResult.insights?.opportunities || '',
+                        methodology: aiResult.insights?.methodology || ''
+                    }
+                };
+                
+                // Save to Supabase (assuming you have a table for multi-year forecasts)
+                const { data, error } = await supabase
+                    .from('ai_forecasts_multiyear_meridash')
+                    .insert([forecastData])
+                    .select();
+                
+                if (error) {
+                    throw error;
+                }
+                
+                console.log('✅ Multi-year forecast saved to Supabase:', data);
+                return data;
+                
+            } catch (error) {
+                console.error('❌ Error saving multi-year forecast to Supabase:', error);
+                throw error;
+            }
+        }
+        
+        async function loadLatestMultiYearForecastFromSupabase() {
+            try {
+                console.log('📥 Loading latest multi-year forecast from Supabase...');
+                
+                // Get current user
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) {
+                    throw new Error('User not authenticated');
+                }
+                
+                // Fetch the latest multi-year forecast
+                const { data, error } = await supabase
+                    .from('ai_forecasts_multiyear_meridash')
+                    .select('*')
+                    .eq('user_id', user.id)
+                    .order('generated_at', { ascending: false })
+                    .limit(1);
+                
+                if (error) {
+                    throw error;
+                }
+                
+                if (!data || data.length === 0) {
+                    alert('No saved multi-year forecasts found. Generate a forecast first.');
+                    return;
+                }
+                
+                const latestForecast = data[0];
+                console.log('📊 Latest multi-year forecast loaded:', latestForecast);
+                
+                // Convert Supabase data back to AI result format
+                const aiResult = {
+                    success: true,
+                    confidence: latestForecast.confidence_level,
+                    forecast_data: latestForecast.forecast_data,
+                    insights: latestForecast.ai_insights,
+                    generated_at: latestForecast.generated_at,
+                    model_version: latestForecast.model_version || 'ai-agent-v1'
+                };
+                
+                // Populate the multi-year tables with loaded data
+                populateMultiYearTablesWithAI(aiResult);
+                
+                // Create the trending chart
+                createMultiYearTrendingChart(aiResult);
+                
+                // Show insights
+                if (aiResult.insights) {
+                    showMultiYearInsights(aiResult.insights);
+                }
+                
+                // Restore the form values
+                document.getElementById('forecastMultiYearIndustrySelect').value = latestForecast.industry_context || '';
+                document.getElementById('forecastMultiYearContext').value = latestForecast.additional_context || '';
+                document.getElementById('forecastMultiYearStyleSelect').value = latestForecast.forecast_style || '';
+                
+                // Show success notification
+                showForecastLoadedNotification(new Date(latestForecast.generated_at));
+                
+                console.log('✅ Multi-year forecast loaded and displayed successfully');
+                
+            } catch (error) {
+                console.error('❌ Error loading multi-year forecast:', error);
+                alert('Failed to load multi-year forecast. Please try again.');
+            }
+        }
+        
+        function exportMultiYearTrendingChart() {
+            if (window.multiYearTrendingChartInstance) {
+                const link = document.createElement('a');
+                link.download = 'multi-year-quarterly-trending-chart.png';
+                link.href = window.multiYearTrendingChartInstance.toBase64Image();
+                link.click();
+            }
+        }
+        
+        // Initialize multi-year forecast functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const generateMultiYearButton = document.getElementById('generateAIMultiYearForecast');
+            if (generateMultiYearButton) {
+                generateMultiYearButton.addEventListener('click', generateAIMultiYearForecast);
+            }
+        });
         
     </script>
 
