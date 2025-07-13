@@ -5535,8 +5535,92 @@
         .trending-chart-container {
             padding: 2rem;
             height: 450px;
+            margin-bottom: 2rem;
         }
 
+        .multiyear-summary-cards-container {
+            display: flex;
+            justify-content: space-around;
+            gap: 1.5rem;
+            margin-top: 2rem; /* Additional spacing from chart */
+            flex-wrap: wrap;
+        }
+
+        .multiyear-summary-cards-container .summary-card {
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border: 1px solid #e2e8f0;
+            flex: 1;
+            min-width: 250px;
+            max-width: 300px;
+        }
+        
+        .multiyear-summary-cards-container .summary-card.revenue {
+            border-left: 4px solid #3b82f6;
+        }
+        
+        .multiyear-summary-cards-container .summary-card.efficiency {
+            border-left: 4px solid #10b981;
+        }
+        
+        .multiyear-summary-cards-container .summary-card.opex {
+            border-left: 4px solid #8b5cf6;
+        }
+        
+        .multiyear-summary-cards-container .summary-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .multiyear-summary-cards-container .summary-header h4 {
+            margin: 0;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .multiyear-summary-cards-container .summary-amount {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        
+        .multiyear-summary-cards-container .summary-change {
+            font-size: 0.8rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+        
+        .multiyear-summary-cards-container .summary-change.positive {
+            color: #059669;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .multiyear-summary-cards-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .multiyear-summary-cards-container .summary-card {
+                min-width: 100%;
+                max-width: 100%;
+            }
+            
+            .trending-chart-container {
+                height: 300px;
+            }
+        }
+        
         /* Forecasting Module - Unique Classes */
         .forecasting-module-controls {
             display: flex;
@@ -10132,12 +10216,14 @@
                             </button>
                         </div>
                         <div class="trending-chart-divider"></div>
+                        
+                        <!-- Chart Container -->
                         <div class="trending-chart-container">
                             <canvas id="multiYearTrendingChart" width="800" height="400"></canvas>
                         </div>
                         
-                        <!-- Enhanced Metrics Summary for Multi-Year -->
-                        <div class="breakdown-summary-row" style="margin-top: 1.5rem;">
+                        <!-- Summary Cards Below Chart -->
+                        <div class="multiyear-summary-cards-container">
                             <div class="summary-card revenue">
                                 <div class="summary-header">
                                     <h4><i class="fas fa-chart-line"></i> CAGR (2027-2030)</h4>
@@ -25090,6 +25176,8 @@
             const tbody = document.getElementById(`plForecast${year}Body`);
             if (!tbody) return;
             
+            console.log(`📊 Populating ${year} table with data:`, quarterlyData);
+            
             // Clear placeholder
             tbody.innerHTML = '';
             
@@ -25109,8 +25197,11 @@
                 { name: 'EBITDA Margin %', id: 'ebitda-margin', type: 'percentage', isPercentage: true }
             ];
             
-            // Calculate quarterly data with totals
-            const quarterlyCalculations = quarterlyData.map(quarter => {
+            // Extract and calculate quarterly data - FIXED DATA EXTRACTION
+            const quarterlyCalculations = quarterlyData.map((quarter, index) => {
+                console.log(`📈 Processing Q${quarter.quarter} data:`, quarter);
+                
+                // Extract values directly from the quarter object
                 const salesRevenue = quarter.revenue_accounts?.['4010'] || 0;
                 const serviceRevenue = quarter.revenue_accounts?.['4020'] || 0;
                 const totalRevenue = salesRevenue + serviceRevenue;
@@ -25129,7 +25220,8 @@
                 const opexToSales = totalRevenue > 0 ? (totalOpex / totalRevenue) * 100 : 0;
                 const ebitdaMargin = totalRevenue > 0 ? (ebitda / totalRevenue) * 100 : 0;
                 
-                return {
+                const calculations = {
+                    quarter: quarter.quarter,
                     salesRevenue,
                     serviceRevenue,
                     totalRevenue,
@@ -25143,6 +25235,9 @@
                     ebitda,
                     ebitdaMargin
                 };
+                
+                console.log(`✅ Q${quarter.quarter} calculations:`, calculations);
+                return calculations;
             });
             
             // Calculate year totals
@@ -25169,6 +25264,8 @@
             yearTotals.opexToSales = yearTotals.totalRevenue > 0 ? (yearTotals.totalOpex / yearTotals.totalRevenue) * 100 : 0;
             yearTotals.ebitdaMargin = yearTotals.totalRevenue > 0 ? (yearTotals.ebitda / yearTotals.totalRevenue) * 100 : 0;
             
+            console.log(`💰 ${year} Year totals:`, yearTotals);
+            
             // Build table rows
             lineItems.forEach(item => {
                 const row = document.createElement('tr');
@@ -25177,9 +25274,51 @@
                 
                 let rowHTML = `<td class="pl-line-item ${item.isBold ? 'bold' : ''}">${item.name}</td>`;
                 
-                // Add quarterly data
+                // Add quarterly data - FIXED VALUE MAPPING
                 quarterlyCalculations.forEach(quarter => {
-                    let value = quarter[item.id.replace('-', '_')] || 0;
+                    let value = 0;
+                    
+                    // Map the item.id to the correct property name
+                    switch(item.id) {
+                        case 'sales-revenue':
+                            value = quarter.salesRevenue;
+                            break;
+                        case 'service-revenue':
+                            value = quarter.serviceRevenue;
+                            break;
+                        case 'total-revenue':
+                            value = quarter.totalRevenue;
+                            break;
+                        case 'direct-costs':
+                            value = quarter.directCosts;
+                            break;
+                        case 'total-cogs':
+                            value = quarter.totalCogs;
+                            break;
+                        case 'gross-profit':
+                            value = quarter.grossProfit;
+                            break;
+                        case 'gross-profit-margin':
+                            value = quarter.grossProfitMargin;
+                            break;
+                        case 'operating-expenses':
+                            value = quarter.operatingExpenses;
+                            break;
+                        case 'total-opex':
+                            value = quarter.totalOpex;
+                            break;
+                        case 'opex-to-sales':
+                            value = quarter.opexToSales;
+                            break;
+                        case 'ebitda':
+                            value = quarter.ebitda;
+                            break;
+                        case 'ebitda-margin':
+                            value = quarter.ebitdaMargin;
+                            break;
+                        default:
+                            value = 0;
+                    }
                     
                     if (item.isPercentage) {
                         rowHTML += `<td class="pl-forecast-cell">${value.toFixed(1)}%</td>`;
@@ -25188,8 +25327,49 @@
                     }
                 });
                 
-                // Add year total
-                const yearValue = yearTotals[item.id.replace('-', '_')] || 0;
+                // Add year total - FIXED VALUE MAPPING
+                let yearValue = 0;
+                switch(item.id) {
+                    case 'sales-revenue':
+                        yearValue = yearTotals.salesRevenue;
+                        break;
+                    case 'service-revenue':
+                        yearValue = yearTotals.serviceRevenue;
+                        break;
+                    case 'total-revenue':
+                        yearValue = yearTotals.totalRevenue;
+                        break;
+                    case 'direct-costs':
+                        yearValue = yearTotals.directCosts;
+                        break;
+                    case 'total-cogs':
+                        yearValue = yearTotals.totalCogs;
+                        break;
+                    case 'gross-profit':
+                        yearValue = yearTotals.grossProfit;
+                        break;
+                    case 'gross-profit-margin':
+                        yearValue = yearTotals.grossProfitMargin;
+                        break;
+                    case 'operating-expenses':
+                        yearValue = yearTotals.operatingExpenses;
+                        break;
+                    case 'total-opex':
+                        yearValue = yearTotals.totalOpex;
+                        break;
+                    case 'opex-to-sales':
+                        yearValue = yearTotals.opexToSales;
+                        break;
+                    case 'ebitda':
+                        yearValue = yearTotals.ebitda;
+                        break;
+                    case 'ebitda-margin':
+                        yearValue = yearTotals.ebitdaMargin;
+                        break;
+                    default:
+                        yearValue = 0;
+                }
+                
                 if (item.isPercentage) {
                     rowHTML += `<td class="pl-total-cell">${yearValue.toFixed(1)}%</td>`;
                 } else {
@@ -25199,6 +25379,8 @@
                 row.innerHTML = rowHTML;
                 tbody.appendChild(row);
             });
+            
+            console.log(`✅ ${year} table populated successfully`);
         }
         
         function createMultiYearTrendingChart(aiResult) {
