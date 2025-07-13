@@ -10143,11 +10143,13 @@
                             </button>
                         </div>
                         <div class="trending-chart-divider"></div>
+                        
+                        <!-- Chart Container - NO summary cards inside -->
                         <div class="trending-chart-container">
                             <canvas id="multiYearTrendingChart" width="800" height="400"></canvas>
                         </div>
                         
-                        <!-- Use Same Summary Cards Structure as 2025/2026 Forecasts -->
+                        <!-- Summary Cards OUTSIDE the chart container -->
                         <div class="breakdown-summary-row" style="margin-top: 1.5rem;">
                             <div class="summary-card revenue">
                                 <div class="summary-header">
@@ -23234,22 +23236,36 @@
             });
             document.querySelector(`[data-period="${period}"]`).classList.add('active');
         
-            // Hide all containers
+            // Hide all containers INCLUDING multi-year trending section
             document.querySelectorAll('.pl-forecast-container').forEach(container => {
                 container.style.display = 'none';
             });
+            
+            // IMPORTANT: Hide multi-year trending section when switching away from multi-year
+            const multiYearTrendingSection = document.getElementById('multiYearTrendingSection');
+            if (multiYearTrendingSection && period !== 'multi-year') {
+                multiYearTrendingSection.style.display = 'none';
+            }
         
             // Show selected container
             const periodMap = {
-                'current-year': '#current-year-container', // Fixed this
+                'current-year': '#current-year-container',
                 'next-year': '#next-year-container',
-                'multi-year': '#multi-year-container', 
+                'multi-year': '#multi-year-container',
                 'summary': '#summary-container'
             };
         
             const targetContainer = document.querySelector(periodMap[period]);
             if (targetContainer) {
                 targetContainer.style.display = 'block';
+            }
+            
+            // Show multi-year trending section only for multi-year tab
+            if (period === 'multi-year' && multiYearTrendingSection) {
+                // Only show if there's data (check if chart exists)
+                if (window.multiYearTrendingChartInstance) {
+                    multiYearTrendingSection.style.display = 'block';
+                }
             }
         }
 
@@ -25312,7 +25328,10 @@
             console.log('📈 Creating multi-year trending chart...');
             
             // Show the trending section
-            document.getElementById('multiYearTrendingSection').style.display = 'block';
+            const trendingSection = document.getElementById('multiYearTrendingSection');
+            if (trendingSection) {
+                trendingSection.style.display = 'block';
+            }
             
             const ctx = document.getElementById('multiYearTrendingChart').getContext('2d');
             
