@@ -25337,7 +25337,7 @@
             
             // Find or create the trending section
             let trendingSection = document.getElementById('multiYearTrendingSection');
-    
+        
             if (!trendingSection) {
                 trendingSection = document.createElement('div');
                 trendingSection.id = 'multiYearTrendingSection';
@@ -25348,7 +25348,7 @@
                 multiYearContainer.parentNode.insertBefore(trendingSection, multiYearContainer.nextSibling);
             }
             
-            // Set the correct HTML structure - summary cards OUTSIDE chart container
+            // Set the correct HTML structure - INCLUDING summary cards
             trendingSection.innerHTML = `
                 <div class="trending-chart-header">
                     <div class="trending-title-section">
@@ -25362,6 +25362,31 @@
                 <div class="trending-chart-divider"></div>
                 <div class="trending-chart-container">
                     <canvas id="multiYearTrendingChart" width="800" height="400"></canvas>
+                </div>
+                
+                <!-- Enhanced Metrics Summary for Multi-Year -->
+                <div class="breakdown-summary-row" style="margin-top: 1.5rem;">
+                    <div class="summary-card revenue">
+                        <div class="summary-header">
+                            <h4><i class="fas fa-chart-line"></i> CAGR (2027-2030)</h4>
+                            <span class="summary-amount" id="multiYearRevenueCAGR">+0%</span>
+                        </div>
+                        <div class="summary-change positive" id="multiYearCAGRDirection">Compound Growth</div>
+                    </div>
+                    <div class="summary-card efficiency">
+                        <div class="summary-header">
+                            <h4><i class="fas fa-percentage"></i> Avg Gross Margin</h4>
+                            <span class="summary-amount" id="multiYearGrossMargin">0%</span>
+                        </div>
+                        <div class="summary-change" id="multiYearGrossMarginTrend">4-Year Average</div>
+                    </div>
+                    <div class="summary-card opex">
+                        <div class="summary-header">
+                            <h4><i class="fas fa-chart-bar"></i> Avg EBITDA Margin</h4>
+                            <span class="summary-amount" id="multiYearEbitdaMargin">0%</span>
+                        </div>
+                        <div class="summary-change" id="multiYearEbitdaMarginTrend">4-Year Average</div>
+                    </div>
                 </div>
             `;
             
@@ -25414,8 +25439,8 @@
                             label: 'Revenue',
                             data: revenueData,
                             borderColor: '#3b82f6',
-                            backgroundColor: 'rgba(59, 130, 246, 0.3)', // Increased opacity
-                            fill: true, // Changed to true for area fill
+                            backgroundColor: 'rgba(59, 130, 246, 0.3)',
+                            fill: true,
                             tension: 0.4,
                             borderWidth: 2,
                             pointBackgroundColor: '#3b82f6',
@@ -25427,8 +25452,8 @@
                             label: 'Gross Profit',
                             data: grossProfitData,
                             borderColor: '#10b981',
-                            backgroundColor: 'rgba(16, 185, 129, 0.3)', // Increased opacity
-                            fill: true, // Changed to true for area fill
+                            backgroundColor: 'rgba(16, 185, 129, 0.3)',
+                            fill: true,
                             tension: 0.4,
                             borderWidth: 2,
                             pointBackgroundColor: '#10b981',
@@ -25440,8 +25465,8 @@
                             label: 'OPEX',
                             data: opexData,
                             borderColor: '#f59e0b',
-                            backgroundColor: 'rgba(245, 158, 11, 0.3)', // Increased opacity
-                            fill: true, // Changed to true for area fill
+                            backgroundColor: 'rgba(245, 158, 11, 0.3)',
+                            fill: true,
                             tension: 0.4,
                             borderWidth: 2,
                             pointBackgroundColor: '#f59e0b',
@@ -25453,8 +25478,8 @@
                             label: 'EBITDA',
                             data: ebitdaData,
                             borderColor: '#8b5cf6',
-                            backgroundColor: 'rgba(139, 92, 246, 0.3)', // Increased opacity
-                            fill: true, // Changed to true for area fill
+                            backgroundColor: 'rgba(139, 92, 246, 0.3)',
+                            fill: true,
                             tension: 0.4,
                             borderWidth: 2,
                             pointBackgroundColor: '#8b5cf6',
@@ -25571,7 +25596,7 @@
                 }
             });
             
-            // Update summary metrics
+            // Update summary metrics (now the elements exist)
             updateMultiYearSummaryMetrics(aiResult);
             
             console.log('✅ Multi-year trending chart created successfully');
