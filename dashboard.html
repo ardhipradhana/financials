@@ -8253,6 +8253,30 @@
         .percentage::after {
             content: '%';
         }
+
+        .aging-chart-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            max-width: 450px; /* Limit maximum width */
+            min-height: 350px; /* Set minimum height */
+            max-height: 400px; /* Set maximum height */
+        }
+
+        .aging-chart-canvas {
+            max-height: 300px !important; /* Force maximum height */
+            width: 100% !important;
+            margin-bottom: 0;
+        }
+
+        .aging-charts-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* Keep side by side */
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            justify-items: center; /* Center the chart cards */
+        }
         
     </style>
 </head>
@@ -15399,11 +15423,11 @@
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false,
+                    maintainAspectRatio: true, // Changed back to true
                     layout: {
                         padding: {
                             top: 10,
-                            bottom: 100, // Space for legend below
+                            bottom: 20, // Reduced from 100 to 20
                             left: 10,
                             right: 10
                         }
@@ -15414,7 +15438,7 @@
                             position: 'bottom',
                             align: 'center',
                             labels: {
-                                padding: 20,
+                                padding: 15, // Reduced from 20 to 15
                                 usePointStyle: true,
                                 pointStyle: 'rect',
                                 font: {
@@ -15443,7 +15467,7 @@
                                     });
                                 }
                             },
-                            maxLines: 1,
+                            maxLines: 2, // Allow up to 2 lines for legend
                             onClick: null
                         },
                         tooltip: {
