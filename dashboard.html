@@ -3294,6 +3294,8 @@
             border-radius: 12px;
             border: 1px solid #e2e8f0;
             padding: 1.5rem;
+            overflow-y: auto !important;
+            max-height: calc(100vh - 300px) !important;
         }
         
         .buckets-header {
@@ -10266,7 +10268,7 @@
                     <div class="ro-analysis-panel-full" id="forecastTrendingContainer" style="display: none;">
                         <div class="trending-chart-header">
                             <div class="trending-title-section">
-                                <h4><i class="fas fa-chart-area"></i> Financial Performance Trends</h4>
+                                <h4>Financial Performance Trends</h4>
                                 <p class="trending-subtitle">Revenue, COGS, Gross Profit & EBITDA progression with forecast</p>
                             </div>
                             <button class="btn btn-secondary" onclick="exportForecastTrendingChart()">
@@ -15351,40 +15353,52 @@
             }
         }
         
-        function markAsPaid(company, type) {
+        async function markAsPaid(company, type) {
             if (confirm(`Mark all outstanding ${type === 'AR' ? 'receivables' : 'payables'} for ${company} as paid?`)) {
-                // Update the status in aparTransactions array
-                aparTransactions.forEach(transaction => {
-                    if (transaction.company === company && 
+                try {
+                    // Find transactions to update
+                    const transactionsToUpdate = aparTransactions.filter(transaction => 
+                        transaction.company === company && 
                         transaction.type === type && 
-                        transaction.status !== 'Paid') {
-                        transaction.status = 'Paid';
-                        
-                        // Also update due_date to today to indicate payment date
-                        transaction.payment_date = new Date().toISOString().split('T')[0];
-                        
-                        // If you want to keep the original due date, you can store it separately
-                        if (!transaction.original_due_date) {
-                            transaction.original_due_date = transaction.due_date;
-                        }
+                        transaction.status !== 'Paid'
+                    );
+        
+                    if (transactionsToUpdate.length === 0) {
+                        showToast(`No outstanding ${type} transactions found for ${company}`, 'info');
+                        return;
                     }
-                });
-                
-                // Update both the aging analysis AND the main AP/AR transactions table
-                updateAgingAnalysis();
-                
-                // Refresh the main AP/AR table 
-                renderAPARTable();
-                
-                // Update the summary cards
-                updateAPARSummary();
-                
-                // Show success message
-                showToast(`Successfully marked ${company} ${type} transactions as paid`, 'success');
-                
-                // Optionally, save to Supabase if you have that function
-                if (typeof saveAPARToSupabase === 'function') {
-                    saveAPARToSupabase();
+        
+                    // Update each transaction in the database
+                    for (const transaction of transactionsToUpdate) {
+                        const updates = {
+                            status: 'Paid',
+                            payment_date: new Date().toISOString().split('T')[0]
+                        };
+        
+                        // Save original due date if not already saved
+                        if (!transaction.original_due_date && transaction.due_date) {
+                            updates.original_due_date = transaction.due_date;
+                        }
+        
+                        // Update in Supabase
+                        await updateTransaction(transaction.id, updates);
+                    }
+        
+                    // Update both the aging analysis AND the main AP/AR transactions table
+                    updateAgingAnalysis();
+                    
+                    // Refresh the main AP/AR table 
+                    renderAPARTable();
+                    
+                    // Update the summary cards
+                    updateAPARSummary();
+                    
+                    // Show success message
+                    showToast(`Successfully marked ${transactionsToUpdate.length} ${company} ${type} transaction(s) as paid`, 'success');
+                    
+                } catch (error) {
+                    console.error('Error marking transactions as paid:', error);
+                    showToast(`Error updating transactions: ${error.message}`, 'error');
                 }
             }
         }
@@ -15397,9 +15411,16 @@
             
             const toast = document.createElement('div');
             toast.className = `toast toast-${type}`;
+            
+            const iconMap = {
+                'success': 'check-circle',
+                'error': 'exclamation-circle',
+                'info': 'info-circle'
+            };
+            
             toast.innerHTML = `
                 <div class="toast-content">
-                    <i class="fas fa-${type === 'success' ? 'check-circle' : 'info-circle'}"></i>
+                    <i class="fas fa-${iconMap[type] || 'info-circle'}"></i>
                     <span>${message}</span>
                 </div>
                 <button class="toast-close" onclick="this.parentElement.remove()">
@@ -15412,13 +15433,14 @@
             // Animate in
             setTimeout(() => toast.classList.add('show'), 100);
             
-            // Remove after 4 seconds
+            // Remove after 4 seconds (6 seconds for errors)
+            const duration = type === 'error' ? 6000 : 4000;
             setTimeout(() => {
                 if (toast.parentElement) {
                     toast.classList.remove('show');
                     setTimeout(() => toast.remove(), 300);
                 }
-            }, 4000);
+            }, duration);
         }
         
         // Update additional analytics
