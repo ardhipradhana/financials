@@ -6757,6 +6757,8 @@
             text-align: left !important;
             min-width: 200px;
             background: #f1f5f9 !important;
+            padding-left: 12px;
+            font-weight: 500;
         }
         
         .pl-month-header {
@@ -26163,27 +26165,48 @@
             
             const data = {};
             
-            // For 2025 (current-year) - look for total cells
             if (containerId === 'current-year') {
+                // 2025 data extraction
                 const totalRevenueCell = container.querySelector('#totalRevenue-total');
                 data['total-revenue'] = totalRevenueCell ? parseFloat(totalRevenueCell.textContent.replace(/,/g, '')) || 0 : 0;
                 
-                const totalCogsCell = container.querySelector('#totalCogs-total');
+                const totalCogsCell = container.querySelector('#totalCOGS-total');
                 data['total-cogs'] = totalCogsCell ? parseFloat(totalCogsCell.textContent.replace(/,/g, '')) || 0 : 0;
                 
-                const totalOpexCell = container.querySelector('#totalOpex-total');
+                const totalOpexCell = container.querySelector('#totalOPEX-total');
                 data['total-opex'] = totalOpexCell ? parseFloat(totalOpexCell.textContent.replace(/,/g, '')) || 0 : 0;
-            }
-            // For 2026 (next-year) - look for 2026 total cells
-            else if (containerId === 'next-year') {
-                const totalRevenueCell = container.querySelector('#totalRevenue2026-total');
-                data['total-revenue'] = totalRevenueCell ? parseFloat(totalRevenueCell.textContent.replace(/,/g, '')) || 0 : 0;
                 
-                const totalCogsCell = container.querySelector('#totalCogs2026-total');
-                data['total-cogs'] = totalCogsCell ? parseFloat(totalCogsCell.textContent.replace(/,/g, '')) || 0 : 0;
+            } else if (containerId === 'next-year') {
+                // 2026 data extraction - need to sum from the 2026 table
+                const table2026 = container.querySelector('#plForecast2026Table');
+                if (!table2026 || table2026.querySelector('.placeholder-row')) {
+                    console.log('❌ 2026 table not populated yet');
+                    return null;
+                }
                 
-                const totalOpexCell = container.querySelector('#totalOpex2026-total');
-                data['total-opex'] = totalOpexCell ? parseFloat(totalOpexCell.textContent.replace(/,/g, '')) || 0 : 0;
+                // Sum all revenue account rows (4xxx accounts)
+                let totalRevenue = 0;
+                let totalCogs = 0;
+                let totalOpex = 0;
+                
+                const rows = table2026.querySelectorAll('tbody tr[data-account-code]');
+                rows.forEach(row => {
+                    const accountCode = parseInt(row.getAttribute('data-account-code'));
+                    const totalCell = row.querySelector('td:last-child'); // Last column is total
+                    const value = totalCell ? parseFloat(totalCell.textContent.replace(/,/g, '')) || 0 : 0;
+                    
+                    if (accountCode >= 4000 && accountCode < 5000) {
+                        totalRevenue += value;
+                    } else if (accountCode >= 5000 && accountCode < 5100) {
+                        totalCogs += value;
+                    } else if (accountCode >= 5100 && accountCode < 6000) {
+                        totalOpex += value;
+                    }
+                });
+                
+                data['total-revenue'] = totalRevenue;
+                data['total-cogs'] = totalCogs;
+                data['total-opex'] = totalOpex;
             }
             
             // Calculate derived metrics
@@ -26198,74 +26221,64 @@
         
         // Extract data from multi-year quarterly tables
         function extractMultiYearData(year) {
-            const table = document.getElementById('plMultiYearTable');
+            const tableId = `plForecast${year}Table`;
+            const table = document.getElementById(tableId);
+            
             if (!table) {
-                console.log('❌ Multi-year table not found');
+                console.log(`❌ Table not found: ${tableId}`);
+                return null;
+            }
+            
+            // Check if table has data (not placeholder)
+            if (table.querySelector('.placeholder-row')) {
+                console.log(`❌ ${year} table not populated yet`);
                 return null;
             }
             
             const data = {};
             
-            // Map years to column ranges (this might need adjustment based on your table structure)
-            const yearColumns = {
-                2027: [2, 3, 4, 5], // Q1-Q4 2027 columns (adjust based on actual table)
-                2028: [6, 7, 8, 9], // Q1-Q4 2028 columns
-                2029: [10, 11, 12, 13], // Q1-Q4 2029 columns
-                2030: [14, 15, 16, 17] // Q1-Q4 2030 columns
-            };
-            
-            const columns = yearColumns[year];
-            if (!columns) {
-                console.log(`❌ No column mapping for year ${year}`);
-                return null;
-            }
-            
-            // Initialize totals
+            // Sum quarterly data for the year
             let totalRevenue = 0;
             let totalCogs = 0;
             let totalOpex = 0;
             
-            // Extract revenue - look for rows with revenue account codes
-            const revenueRows = table.querySelectorAll('tr[data-account-code]');
-            revenueRows.forEach(row => {
-                const accountCode = row.getAttribute('data-account-code');
-                if (accountCode && accountCode.startsWith('4')) { // Revenue accounts
-                    columns.forEach(colIndex => {
-                        const cell = row.children[colIndex];
-                        if (cell) {
-                            totalRevenue += parseFloat(cell.textContent.replace(/,/g, '')) || 0;
-                        }
-                    });
-                }
-            });
+            // Look for total row or sum quarterly columns
+            const totalRevenueRow = table.querySelector('tr[data-account="total-revenue"]');
+            const totalCogsRow = table.querySelector('tr[data-account="total-cogs"]');
+            const totalOpexRow = table.querySelector('tr[data-account="total-opex"]');
             
-            // Extract COGS - account codes 5000-5099
-            const cogsRows = table.querySelectorAll('tr[data-account-code]');
-            cogsRows.forEach(row => {
-                const accountCode = parseInt(row.getAttribute('data-account-code'));
-                if (accountCode >= 5000 && accountCode < 5100) { // COGS accounts
-                    columns.forEach(colIndex => {
-                        const cell = row.children[colIndex];
-                        if (cell) {
-                            totalCogs += parseFloat(cell.textContent.replace(/,/g, '')) || 0;
-                        }
-                    });
-                }
-            });
+            if (totalRevenueRow) {
+                const totalCell = totalRevenueRow.querySelector('td:last-child'); // Last column should be year total
+                totalRevenue = totalCell ? parseFloat(totalCell.textContent.replace(/,/g, '')) || 0 : 0;
+            }
             
-            // Extract OPEX - account codes 5100-5999
-            const opexRows = table.querySelectorAll('tr[data-account-code]');
-            opexRows.forEach(row => {
-                const accountCode = parseInt(row.getAttribute('data-account-code'));
-                if (accountCode >= 5100 && accountCode < 6000) { // OPEX accounts
-                    columns.forEach(colIndex => {
-                        const cell = row.children[colIndex];
-                        if (cell) {
-                            totalOpex += parseFloat(cell.textContent.replace(/,/g, '')) || 0;
-                        }
-                    });
-                }
-            });
+            if (totalCogsRow) {
+                const totalCell = totalCogsRow.querySelector('td:last-child');
+                totalCogs = totalCell ? parseFloat(totalCell.textContent.replace(/,/g, '')) || 0 : 0;
+            }
+            
+            if (totalOpexRow) {
+                const totalCell = totalOpexRow.querySelector('td:last-child');
+                totalOpex = totalCell ? parseFloat(totalCell.textContent.replace(/,/g, '')) || 0 : 0;
+            }
+            
+            // If no total rows found, sum from individual account rows
+            if (totalRevenue === 0 && totalCogs === 0 && totalOpex === 0) {
+                const rows = table.querySelectorAll('tbody tr[data-account-code]');
+                rows.forEach(row => {
+                    const accountCode = parseInt(row.getAttribute('data-account-code'));
+                    const totalCell = row.querySelector('td:last-child'); // Year total column
+                    const value = totalCell ? parseFloat(totalCell.textContent.replace(/,/g, '')) || 0 : 0;
+                    
+                    if (accountCode >= 4000 && accountCode < 5000) {
+                        totalRevenue += value;
+                    } else if (accountCode >= 5000 && accountCode < 5100) {
+                        totalCogs += value;
+                    } else if (accountCode >= 5100 && accountCode < 6000) {
+                        totalOpex += value;
+                    }
+                });
+            }
             
             data['total-revenue'] = totalRevenue;
             data['total-cogs'] = totalCogs;
