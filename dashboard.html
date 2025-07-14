@@ -8304,6 +8304,52 @@
             margin-left: 2rem;
             margin-right: 2rem;
         }
+
+        /* Total Row Styling for Aging Tables */
+        .aging-total-row {
+            background: #f8fafc !important;
+            border-top: 2px solid #e2e8f0 !important;
+            font-weight: 600;
+        }
+        
+        .aging-total-row:hover {
+            background: #f8fafc !important; /* Don't change on hover */
+        }
+        
+        .total-label-cell {
+            text-align: left !important;
+            font-weight: 700;
+            color: #1e40af;
+            font-size: 0.875rem;
+            letter-spacing: 0.5px;
+            padding: 1rem 0.75rem !important;
+        }
+        
+        .total-amount {
+            font-weight: 700 !important;
+            background: #f1f5f9 !important;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .grand-total {
+            background: #dbeafe !important;
+            color: #1e40af !important;
+            font-weight: 800 !important;
+            font-size: 0.95rem;
+            border: 2px solid #bfdbfe !important;
+        }
+        
+        /* Ensure total row stands out */
+        .aging-table-section .aging-table .aging-total-row td {
+            border-bottom: none !important;
+            border-top: 2px solid #cbd5e1 !important;
+        }
+        
+        /* Make sure amounts in total row are properly aligned */
+        .aging-total-row .amount-cell {
+            text-align: right !important;
+            vertical-align: middle;
+        }
         
     </style>
 </head>
@@ -15116,6 +15162,7 @@
             updateAgingTable('apAgingTableBody', apAging, 'AP');
         }
         
+        // Updated updateAgingTable function with total row
         function updateAgingTable(tableBodyId, aging, type) {
             const tableBody = document.getElementById(tableBodyId);
             tableBody.innerHTML = '';
@@ -15142,7 +15189,7 @@
             const sortedCompanies = Object.entries(companyTotals)
                 .sort((a, b) => b[1].total - a[1].total);
         
-            // Add rows with improved formatting
+            // Add company rows with improved formatting
             sortedCompanies.forEach(([company, amounts]) => {
                 const row = document.createElement('tr');
                 
@@ -15179,6 +15226,41 @@
                 
                 tableBody.appendChild(row);
             });
+        
+            // ADD TOTAL ROW
+            if (sortedCompanies.length > 0) {
+                const totalRow = document.createElement('tr');
+                totalRow.className = 'aging-total-row';
+                
+                // Calculate column totals
+                const columnTotals = {
+                    '0-30': 0, '30-60': 0, '60-90': 0, '90-120': 0, '120+': 0, total: 0
+                };
+                
+                sortedCompanies.forEach(([company, amounts]) => {
+                    columnTotals['0-30'] += amounts['0-30'];
+                    columnTotals['30-60'] += amounts['30-60'];
+                    columnTotals['60-90'] += amounts['60-90'];
+                    columnTotals['90-120'] += amounts['90-120'];
+                    columnTotals['120+'] += amounts['120+'];
+                    columnTotals.total += amounts.total;
+                });
+                
+                totalRow.innerHTML = `
+                    <td class="total-label-cell">
+                        <strong>TOTAL ${type}</strong>
+                    </td>
+                    <td class="amount-cell total-amount ${getBucketClass('0-30')}">${formatCleanAmount(columnTotals['0-30'])}</td>
+                    <td class="amount-cell total-amount ${getBucketClass('30-60')}">${formatCleanAmount(columnTotals['30-60'])}</td>
+                    <td class="amount-cell total-amount ${getBucketClass('60-90')}">${formatCleanAmount(columnTotals['60-90'])}</td>
+                    <td class="amount-cell total-amount ${getBucketClass('90-120')}">${formatCleanAmount(columnTotals['90-120'])}</td>
+                    <td class="amount-cell total-amount ${getBucketClass('120+')}">${formatCleanAmount(columnTotals['120+'])}</td>
+                    <td class="amount-cell grand-total">${formatCleanAmount(columnTotals.total)}</td>
+                    <td class="actions-cell"></td>
+                `;
+                
+                tableBody.appendChild(totalRow);
+            }
         }
 
         function getPriorityLevel(overdueAmount, totalAmount) {
