@@ -7920,6 +7920,78 @@
                 font-size: 0.85rem;
             }
         }
+
+        .pl-year-header {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            text-align: center;
+            padding: 12px 8px;
+            border: 1px solid #dee2e6;
+            min-width: 100px;
+        }
+        
+        .pl-growth-header {
+            background-color: #e8f5e8;
+            font-weight: 600;
+            text-align: center;
+            padding: 12px 8px;
+            border: 1px solid #dee2e6;
+            min-width: 80px;
+            font-size: 0.9rem;
+        }
+        
+        .pl-cagr-header {
+            background-color: #fff3cd;
+            font-weight: 600;
+            text-align: center;
+            padding: 12px 8px;
+            border: 1px solid #dee2e6;
+            min-width: 80px;
+            font-size: 0.9rem;
+        }
+        
+        .pl-year-cell, .pl-growth-cell, .pl-cagr-cell {
+            text-align: right;
+            padding: 8px;
+            border: 1px solid #dee2e6;
+            font-family: 'SF Mono', Monaco, monospace;
+        }
+        
+        .pl-growth-cell {
+            background-color: #f8fff8;
+        }
+        
+        .pl-growth-cell.positive {
+            color: #28a745;
+            font-weight: 600;
+        }
+        
+        .pl-growth-cell.negative {
+            color: #dc3545;
+            font-weight: 600;
+        }
+        
+        .pl-cagr-cell {
+            background-color: #fffbf0;
+            font-weight: 600;
+        }
+        
+        .pl-section-header td {
+            background-color: #e9ecef;
+            font-weight: 700;
+            padding: 8px;
+            border: 1px solid #dee2e6;
+            color: #495057;
+            font-size: 0.9rem;
+        }
+        
+        .pl-summary-row:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .percentage::after {
+            content: '%';
+        }
         
     </style>
 </head>
@@ -10193,23 +10265,150 @@
                             <table class="pl-forecast-table" id="plForecastSummaryTable">
                                 <thead>
                                     <tr>
-                                        <th class="pl-line-item-header">Metric</th>
-                                        <th class="year-header">2025</th>
-                                        <th class="year-header">2026</th>
-                                        <th class="change-header">YoY Change</th>
-                                        <th class="year-header">2027</th>
-                                        <th class="change-header">YoY Change</th>
-                                        <th class="year-header">2028</th>
-                                        <th class="change-header">YoY Change</th>
-                                        <th class="cagr-header">CAGR</th>
+                                        <th class="pl-account-header">P&L Line Items</th>
+                                        <th class="pl-year-header">2025</th>
+                                        <th class="pl-year-header">2026</th>
+                                        <th class="pl-growth-header">YoY Growth</th>
+                                        <th class="pl-year-header">2027</th>
+                                        <th class="pl-growth-header">YoY Growth</th>
+                                        <th class="pl-year-header">2028</th>
+                                        <th class="pl-growth-header">YoY Growth</th>
+                                        <th class="pl-year-header">2029</th>
+                                        <th class="pl-growth-header">YoY Growth</th>
+                                        <th class="pl-year-header">2030</th>
+                                        <th class="pl-growth-header">YoY Growth</th>
+                                        <th class="pl-cagr-header">6-Yr CAGR</th>
                                     </tr>
                                 </thead>
-                                <tbody id="plForecastSummaryBody">
-                                    <tr class="placeholder-row">
-                                        <td colspan="9" class="placeholder-text">
-                                            <i class="fas fa-brain"></i>
-                                            Generate AI forecast to view growth analysis
-                                        </td>
+                                <tbody id="plSummaryTableBody">
+                                    <!-- Revenue Section -->
+                                    <tr class="pl-section-header">
+                                        <td colspan="13"><strong>REVENUE</strong></td>
+                                    </tr>
+                                    <tr data-account="total-revenue" class="pl-summary-row revenue-row">
+                                        <td class="pl-account-name">Total Revenue</td>
+                                        <td class="pl-year-cell" data-year="2025">-</td>
+                                        <td class="pl-year-cell" data-year="2026">-</td>
+                                        <td class="pl-growth-cell" data-growth="2026">-</td>
+                                        <td class="pl-year-cell" data-year="2027">-</td>
+                                        <td class="pl-growth-cell" data-growth="2027">-</td>
+                                        <td class="pl-year-cell" data-year="2028">-</td>
+                                        <td class="pl-growth-cell" data-growth="2028">-</td>
+                                        <td class="pl-year-cell" data-year="2029">-</td>
+                                        <td class="pl-growth-cell" data-growth="2029">-</td>
+                                        <td class="pl-year-cell" data-year="2030">-</td>
+                                        <td class="pl-growth-cell" data-growth="2030">-</td>
+                                        <td class="pl-cagr-cell" data-cagr="total-revenue">-</td>
+                                    </tr>
+                                    
+                                    <!-- COGS Section -->
+                                    <tr class="pl-section-header">
+                                        <td colspan="13"><strong>COST OF GOODS SOLD</strong></td>
+                                    </tr>
+                                    <tr data-account="total-cogs" class="pl-summary-row cogs-row">
+                                        <td class="pl-account-name">Total COGS</td>
+                                        <td class="pl-year-cell" data-year="2025">-</td>
+                                        <td class="pl-year-cell" data-year="2026">-</td>
+                                        <td class="pl-growth-cell" data-growth="2026">-</td>
+                                        <td class="pl-year-cell" data-year="2027">-</td>
+                                        <td class="pl-growth-cell" data-growth="2027">-</td>
+                                        <td class="pl-year-cell" data-year="2028">-</td>
+                                        <td class="pl-growth-cell" data-growth="2028">-</td>
+                                        <td class="pl-year-cell" data-year="2029">-</td>
+                                        <td class="pl-growth-cell" data-growth="2029">-</td>
+                                        <td class="pl-year-cell" data-year="2030">-</td>
+                                        <td class="pl-growth-cell" data-growth="2030">-</td>
+                                        <td class="pl-cagr-cell" data-cagr="total-cogs">-</td>
+                                    </tr>
+                                    
+                                    <!-- Gross Profit Section -->
+                                    <tr class="pl-section-header">
+                                        <td colspan="13"><strong>GROSS PROFIT</strong></td>
+                                    </tr>
+                                    <tr data-account="gross-profit" class="pl-summary-row profit-row">
+                                        <td class="pl-account-name">Gross Profit</td>
+                                        <td class="pl-year-cell" data-year="2025">-</td>
+                                        <td class="pl-year-cell" data-year="2026">-</td>
+                                        <td class="pl-growth-cell" data-growth="2026">-</td>
+                                        <td class="pl-year-cell" data-year="2027">-</td>
+                                        <td class="pl-growth-cell" data-growth="2027">-</td>
+                                        <td class="pl-year-cell" data-year="2028">-</td>
+                                        <td class="pl-growth-cell" data-growth="2028">-</td>
+                                        <td class="pl-year-cell" data-year="2029">-</td>
+                                        <td class="pl-growth-cell" data-growth="2029">-</td>
+                                        <td class="pl-year-cell" data-year="2030">-</td>
+                                        <td class="pl-growth-cell" data-growth="2030">-</td>
+                                        <td class="pl-cagr-cell" data-cagr="gross-profit">-</td>
+                                    </tr>
+                                    <tr data-account="gross-margin" class="pl-summary-row margin-row">
+                                        <td class="pl-account-name">Gross Margin %</td>
+                                        <td class="pl-year-cell percentage" data-year="2025">-</td>
+                                        <td class="pl-year-cell percentage" data-year="2026">-</td>
+                                        <td class="pl-growth-cell percentage" data-growth="2026">-</td>
+                                        <td class="pl-year-cell percentage" data-year="2027">-</td>
+                                        <td class="pl-growth-cell percentage" data-growth="2027">-</td>
+                                        <td class="pl-year-cell percentage" data-year="2028">-</td>
+                                        <td class="pl-growth-cell percentage" data-growth="2028">-</td>
+                                        <td class="pl-year-cell percentage" data-year="2029">-</td>
+                                        <td class="pl-growth-cell percentage" data-growth="2029">-</td>
+                                        <td class="pl-year-cell percentage" data-year="2030">-</td>
+                                        <td class="pl-growth-cell percentage" data-growth="2030">-</td>
+                                        <td class="pl-cagr-cell percentage" data-cagr="gross-margin">-</td>
+                                    </tr>
+                                    
+                                    <!-- Operating Expenses Section -->
+                                    <tr class="pl-section-header">
+                                        <td colspan="13"><strong>OPERATING EXPENSES</strong></td>
+                                    </tr>
+                                    <tr data-account="total-opex" class="pl-summary-row opex-row">
+                                        <td class="pl-account-name">Total OPEX</td>
+                                        <td class="pl-year-cell" data-year="2025">-</td>
+                                        <td class="pl-year-cell" data-year="2026">-</td>
+                                        <td class="pl-growth-cell" data-growth="2026">-</td>
+                                        <td class="pl-year-cell" data-year="2027">-</td>
+                                        <td class="pl-growth-cell" data-growth="2027">-</td>
+                                        <td class="pl-year-cell" data-year="2028">-</td>
+                                        <td class="pl-growth-cell" data-growth="2028">-</td>
+                                        <td class="pl-year-cell" data-year="2029">-</td>
+                                        <td class="pl-growth-cell" data-growth="2029">-</td>
+                                        <td class="pl-year-cell" data-year="2030">-</td>
+                                        <td class="pl-growth-cell" data-growth="2030">-</td>
+                                        <td class="pl-cagr-cell" data-cagr="total-opex">-</td>
+                                    </tr>
+                                    
+                                    <!-- EBITDA Section -->
+                                    <tr class="pl-section-header">
+                                        <td colspan="13"><strong>EBITDA</strong></td>
+                                    </tr>
+                                    <tr data-account="ebitda" class="pl-summary-row ebitda-row">
+                                        <td class="pl-account-name">EBITDA</td>
+                                        <td class="pl-year-cell" data-year="2025">-</td>
+                                        <td class="pl-year-cell" data-year="2026">-</td>
+                                        <td class="pl-growth-cell" data-growth="2026">-</td>
+                                        <td class="pl-year-cell" data-year="2027">-</td>
+                                        <td class="pl-growth-cell" data-growth="2027">-</td>
+                                        <td class="pl-year-cell" data-year="2028">-</td>
+                                        <td class="pl-growth-cell" data-growth="2028">-</td>
+                                        <td class="pl-year-cell" data-year="2029">-</td>
+                                        <td class="pl-growth-cell" data-growth="2029">-</td>
+                                        <td class="pl-year-cell" data-year="2030">-</td>
+                                        <td class="pl-growth-cell" data-growth="2030">-</td>
+                                        <td class="pl-cagr-cell" data-cagr="ebitda">-</td>
+                                    </tr>
+                                    <tr data-account="ebitda-margin" class="pl-summary-row margin-row">
+                                        <td class="pl-account-name">EBITDA Margin %</td>
+                                        <td class="pl-year-cell percentage" data-year="2025">-</td>
+                                        <td class="pl-year-cell percentage" data-year="2026">-</td>
+                                        <td class="pl-growth-cell percentage" data-growth="2026">-</td>
+                                        <td class="pl-year-cell percentage" data-year="2027">-</td>
+                                        <td class="pl-growth-cell percentage" data-growth="2027">-</td>
+                                        <td class="pl-year-cell percentage" data-year="2028">-</td>
+                                        <td class="pl-growth-cell percentage" data-growth="2028">-</td>
+                                        <td class="pl-year-cell percentage" data-year="2029">-</td>
+                                        <td class="pl-growth-cell percentage" data-growth="2029">-</td>
+                                        <td class="pl-year-cell percentage" data-year="2030">-</td>
+                                        <td class="pl-growth-cell percentage" data-growth="2030">-</td>
+                                        <td class="pl-cagr-cell percentage" data-cagr="ebitda-margin">-</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -21404,6 +21603,11 @@
                     // Show multi-year insights and trending if they exist
                     if (multiYearTrendingSection) multiYearTrendingSection.style.display = 'block';
                     if (aiMultiYearInsightsContainer) aiMultiYearInsightsContainer.style.display = 'block';
+                } else if (period === 'summary') {
+                    // Populate Annual Summary table when summary tab is selected
+                    setTimeout(() => {
+                        populateAnnualSummaryTable();
+                    }, 100);
                 }
             }
         }
@@ -25921,6 +26125,190 @@
                 generateMultiYearButton.addEventListener('click', generateAIMultiYearForecast);
             }
         });
+
+        // Annual Summary Table Population Function
+        function populateAnnualSummaryTable() {
+            console.log('🔄 Populating Annual Summary table...');
+            
+            // Collect data from all forecast periods
+            const summaryData = {
+                2025: extractYearlyData('current-year'),
+                2026: extractYearlyData('next-year'),
+                2027: extractMultiYearData(2027),
+                2028: extractMultiYearData(2028),
+                2029: extractMultiYearData(2029),
+                2030: extractMultiYearData(2030)
+            };
+            
+            console.log('📊 Summary data collected:', summaryData);
+            
+            // Populate the table rows
+            populateSummaryRow('total-revenue', summaryData);
+            populateSummaryRow('total-cogs', summaryData);
+            populateSummaryRow('gross-profit', summaryData);
+            populateSummaryRow('gross-margin', summaryData);
+            populateSummaryRow('total-opex', summaryData);
+            populateSummaryRow('ebitda', summaryData);
+            populateSummaryRow('ebitda-margin', summaryData);
+        }
+        
+        // Extract yearly totals from current year (2025) table
+        function extractYearlyData(containerId) {
+            const container = document.getElementById(containerId + '-container');
+            if (!container) return null;
+            
+            const data = {};
+            
+            // Get total revenue (sum of all revenue accounts)
+            const totalRevenueCell = container.querySelector('#totalRevenue-total');
+            data['total-revenue'] = totalRevenueCell ? parseFloat(totalRevenueCell.textContent.replace(/,/g, '')) || 0 : 0;
+            
+            // Get total COGS
+            const totalCogsCell = container.querySelector('#totalCogs-total');
+            data['total-cogs'] = totalCogsCell ? parseFloat(totalCogsCell.textContent.replace(/,/g, '')) || 0 : 0;
+            
+            // Calculate gross profit
+            data['gross-profit'] = data['total-revenue'] - data['total-cogs'];
+            
+            // Calculate gross margin %
+            data['gross-margin'] = data['total-revenue'] > 0 ? (data['gross-profit'] / data['total-revenue']) * 100 : 0;
+            
+            // Get total OPEX
+            const totalOpexCell = container.querySelector('#totalOpex-total');
+            data['total-opex'] = totalOpexCell ? parseFloat(totalOpexCell.textContent.replace(/,/g, '')) || 0 : 0;
+            
+            // Calculate EBITDA
+            data['ebitda'] = data['gross-profit'] - data['total-opex'];
+            
+            // Calculate EBITDA margin %
+            data['ebitda-margin'] = data['total-revenue'] > 0 ? (data['ebitda'] / data['total-revenue']) * 100 : 0;
+            
+            return data;
+        }
+        
+        // Extract data from multi-year quarterly tables
+        function extractMultiYearData(year) {
+            const table = document.getElementById('plMultiYearTable');
+            if (!table) return null;
+            
+            const data = {};
+            const yearColumns = {
+                2027: [1, 2, 3, 4], // Q1-Q4 2027
+                2028: [5, 6, 7, 8], // Q1-Q4 2028
+                2029: [9, 10, 11, 12], // Q1-Q4 2029
+                2030: [13, 14, 15, 16] // Q1-Q4 2030
+            };
+            
+            const columns = yearColumns[year];
+            if (!columns) return null;
+            
+            // Sum quarterly data for the year
+            let totalRevenue = 0;
+            let totalCogs = 0;
+            let totalOpex = 0;
+            
+            // Extract revenue (assuming row with total-revenue id)
+            const revenueRow = table.querySelector('tr[data-account="total-revenue"]');
+            if (revenueRow) {
+                columns.forEach(colIndex => {
+                    const cell = revenueRow.children[colIndex];
+                    if (cell) {
+                        totalRevenue += parseFloat(cell.textContent.replace(/,/g, '')) || 0;
+                    }
+                });
+            }
+            
+            // Extract COGS
+            const cogsRow = table.querySelector('tr[data-account="total-cogs"]');
+            if (cogsRow) {
+                columns.forEach(colIndex => {
+                    const cell = cogsRow.children[colIndex];
+                    if (cell) {
+                        totalCogs += parseFloat(cell.textContent.replace(/,/g, '')) || 0;
+                    }
+                });
+            }
+            
+            // Extract OPEX
+            const opexRow = table.querySelector('tr[data-account="total-opex"]');
+            if (opexRow) {
+                columns.forEach(colIndex => {
+                    const cell = opexRow.children[colIndex];
+                    if (cell) {
+                        totalOpex += parseFloat(cell.textContent.replace(/,/g, '')) || 0;
+                    }
+                });
+            }
+            
+            data['total-revenue'] = totalRevenue;
+            data['total-cogs'] = totalCogs;
+            data['gross-profit'] = totalRevenue - totalCogs;
+            data['gross-margin'] = totalRevenue > 0 ? ((totalRevenue - totalCogs) / totalRevenue) * 100 : 0;
+            data['total-opex'] = totalOpex;
+            data['ebitda'] = (totalRevenue - totalCogs) - totalOpex;
+            data['ebitda-margin'] = totalRevenue > 0 ? (((totalRevenue - totalCogs) - totalOpex) / totalRevenue) * 100 : 0;
+            
+            return data;
+        }
+        
+        // Populate individual summary row with calculations
+        function populateSummaryRow(accountType, summaryData) {
+            const row = document.querySelector(`tr[data-account="${accountType}"]`);
+            if (!row) return;
+            
+            const years = [2025, 2026, 2027, 2028, 2029, 2030];
+            const values = [];
+            
+            // Populate year values and calculate growth
+            years.forEach((year, index) => {
+                const yearData = summaryData[year];
+                const value = yearData ? yearData[accountType] : 0;
+                values.push(value);
+                
+                // Update year cell
+                const yearCell = row.querySelector(`[data-year="${year}"]`);
+                if (yearCell) {
+                    if (accountType.includes('margin')) {
+                        yearCell.textContent = value.toFixed(1);
+                    } else {
+                        yearCell.textContent = Math.round(value).toLocaleString();
+                    }
+                }
+                
+                // Calculate and update growth cell (except for first year)
+                if (index > 0) {
+                    const previousValue = values[index - 1];
+                    const growthCell = row.querySelector(`[data-growth="${year}"]`);
+                    
+                    if (growthCell && previousValue !== 0) {
+                        const growthPercent = ((value - previousValue) / Math.abs(previousValue)) * 100;
+                        const growthValue = value - previousValue;
+                        
+                        if (accountType.includes('margin')) {
+                            growthCell.textContent = `${growthPercent >= 0 ? '+' : ''}${growthPercent.toFixed(1)}pp`;
+                        } else {
+                            growthCell.textContent = `${growthPercent >= 0 ? '+' : ''}${growthPercent.toFixed(1)}%`;
+                        }
+                        
+                        // Add color coding
+                        growthCell.className = growthCell.className.replace(/positive|negative/g, '');
+                        growthCell.classList.add(growthPercent >= 0 ? 'positive' : 'negative');
+                    }
+                }
+            });
+            
+            // Calculate and populate CAGR
+            const startValue = values[0]; // 2025
+            const endValue = values[5];   // 2030
+            const cagrCell = row.querySelector(`[data-cagr="${accountType}"]`);
+            
+            if (cagrCell && startValue > 0 && endValue > 0) {
+                const cagr = (Math.pow(endValue / startValue, 1/5) - 1) * 100; // 5 years growth
+                cagrCell.textContent = `${cagr >= 0 ? '+' : ''}${cagr.toFixed(1)}%`;
+                cagrCell.className = cagrCell.className.replace(/positive|negative/g, '');
+                cagrCell.classList.add(cagr >= 0 ? 'positive' : 'negative');
+            }
+        }
         
     </script>
 
