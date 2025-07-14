@@ -10423,21 +10423,21 @@
                             <div class="breakdown-summary-row" style="grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem;">
                                 <div class="summary-card revenue">
                                     <div class="summary-header">
-                                        <h4><i class="fas fa-chart-line"></i> 6-Year CAGR</h4>
+                                        <h4>6-Year CAGR</h4>
                                         <span class="summary-amount" id="annualSummaryCAGR">+0%</span>
                                     </div>
                                     <div class="summary-change positive" id="cagrDirection">Revenue Growth</div>
                                 </div>
                                 <div class="summary-card efficiency">
                                     <div class="summary-header">
-                                        <h4><i class="fas fa-percentage"></i> Avg Gross Margin</h4>
+                                        <h4>Avg Gross Margin</h4>
                                         <span class="summary-amount" id="annualSummaryGrossMargin">0%</span>
                                     </div>
                                     <div class="summary-change" id="avgGrossMarginTrend">6-Year Average</div>
                                 </div>
                                 <div class="summary-card opex">
                                     <div class="summary-header">
-                                        <h4><i class="fas fa-chart-bar"></i> Avg EBITDA Margin</h4>
+                                        <h4>Avg EBITDA Margin</h4>
                                         <span class="summary-amount" id="annualSummaryEbitdaMargin">0%</span>
                                     </div>
                                     <div class="summary-change" id="avgEbitdaMarginTrend">6-Year Average</div>
@@ -10448,77 +10448,77 @@
                             <div class="breakdown-summary-row" style="grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem;">
                                 <div class="summary-card growth">
                                     <div class="summary-header">
-                                        <h4><i class="fas fa-trending-up"></i> Total Growth</h4>
+                                        <h4>Total Growth</h4>
                                         <span class="summary-amount" id="annualSummaryTotalGrowth">+0%</span>
                                     </div>
                                     <div class="summary-change positive" id="totalGrowthDirection">2025 vs 2030</div>
                                 </div>
                                 <div class="summary-card efficiency">
                                     <div class="summary-header">
-                                        <h4><i class="fas fa-coins"></i> Operating Leverage</h4>
+                                        <h4>Operating Leverage</h4>
                                         <span class="summary-amount" id="annualSummaryOpLeverage">0x</span>
                                     </div>
                                     <div class="summary-change" id="opLeverageTrend">Revenue vs OPEX</div>
                                 </div>
                                 <div class="summary-card profitability">
                                     <div class="summary-header">
-                                        <h4><i class="fas fa-money-bill-wave"></i> Profit Growth</h4>
+                                        <h4>Profit Growth</h4>
                                         <span class="summary-amount" id="annualSummaryProfitGrowth">+0%</span>
                                     </div>
                                     <div class="summary-change positive" id="profitGrowthDirection">EBITDA CAGR</div>
                                 </div>
                             </div>
-                        
-                            <!-- Strategic Insights Panel (reusing existing structure) -->
-                            <div class="ai-insights-container" id="annualSummaryInsightsContainer" style="display: block;">
-                                <div class="insights-header-AIinsight">
-                                    <h4><i class="fas fa-brain"></i> 6-Year Strategic Analysis & Growth Insights</h4>
-                                    <div class="insights-meta">
-                                        <span class="confidence-badge">Analysis: Comprehensive</span>
-                                        <span class="forecast-date">Generated: Now</span>
+                        </div>
+
+                        <!-- Strategic Insights Panel (reusing existing structure) -->
+                        <div class="ai-insights-container" id="annualSummaryInsightsContainer" style="display: block;">
+                            <div class="insights-header-AIinsight">
+                                <h4><i class="fas fa-brain"></i> 6-Year Strategic Analysis & Growth Insights</h4>
+                                <div class="insights-meta">
+                                    <span class="confidence-badge">Analysis: Comprehensive</span>
+                                    <span class="forecast-date">Generated: Now</span>
+                                </div>
+                            </div>
+                            
+                            <div class="insights-content">
+                                <div class="insight-card key-trends-card">
+                                    <div class="insight-header">
+                                        <i class="fas fa-chart-line insight-icon"></i>
+                                        <h5>Growth Trajectory Analysis</h5>
+                                    </div>
+                                    <div class="insight-text" id="annualGrowthTrends">
+                                        Analyzing 6-year growth patterns and performance trajectory...
                                     </div>
                                 </div>
                                 
-                                <div class="insights-content">
-                                    <div class="insight-card key-trends-card">
-                                        <div class="insight-header">
-                                            <i class="fas fa-chart-line insight-icon"></i>
-                                            <h5>Growth Trajectory Analysis</h5>
-                                        </div>
-                                        <div class="insight-text" id="annualGrowthTrends">
-                                            Analyzing 6-year growth patterns and performance trajectory...
-                                        </div>
+                                <div class="insight-card opportunities-card">
+                                    <div class="insight-header">
+                                        <i class="fas fa-lightbulb insight-icon"></i>
+                                        <h5>Strategic Opportunities</h5>
                                     </div>
-                                    
-                                    <div class="insight-card opportunities-card">
-                                        <div class="insight-header">
-                                            <i class="fas fa-lightbulb insight-icon"></i>
-                                            <h5>Strategic Opportunities</h5>
-                                        </div>
-                                        <div class="insight-text" id="annualStrategicOpportunities">
-                                            Identifying key opportunities for sustainable growth and market expansion...
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="insight-card methodology-card">
-                                        <div class="insight-header">
-                                            <i class="fas fa-cogs insight-icon"></i>
-                                            <h5>Performance Highlights</h5>
-                                        </div>
-                                        <div class="insight-text" id="annualPerformanceHighlights">
-                                            Key performance metrics and operational efficiency improvements...
-                                        </div>
+                                    <div class="insight-text" id="annualStrategicOpportunities">
+                                        Identifying key opportunities for sustainable growth and market expansion...
                                     </div>
                                 </div>
                                 
-                                <div class="insights-actions">
-                                    <button class="btn btn-secondary" onclick="exportAnnualSummaryToPDF()">
-                                        <i class="fas fa-file-pdf"></i> Export Summary
-                                    </button>
-                                    <button class="btn btn-secondary" onclick="copyAnnualSummaryToClipboard()">
-                                        <i class="fas fa-copy"></i> Copy Analysis
-                                    </button>
+                                <div class="insight-card methodology-card">
+                                    <div class="insight-header">
+                                        <i class="fas fa-cogs insight-icon"></i>
+                                        <h5>Performance Highlights</h5>
+                                    </div>
+                                    <div class="insight-text" id="annualPerformanceHighlights">
+                                        Key performance metrics and operational efficiency improvements...
+                                    </div>
                                 </div>
+                            </div>
+                            
+                            <div class="insights-actions">
+                                <button class="btn btn-secondary" onclick="exportAnnualSummaryToPDF()">
+                                    <i class="fas fa-file-pdf"></i> Export Summary
+                                </button>
+                                <button class="btn btn-secondary" onclick="copyAnnualSummaryToClipboard()">
+                                    <i class="fas fa-copy"></i> Copy Analysis
+                                </button>
                             </div>
                         </div>
                     </div>
