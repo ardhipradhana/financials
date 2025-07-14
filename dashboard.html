@@ -10416,6 +10416,111 @@
                                 </tbody>
                             </table>
                         </div>
+
+                        <div class="annual-summary-insights-section" style="margin-top: 2rem;">
+                            
+                            <!-- Enhanced Summary Cards Grid (6 cards) -->
+                            <div class="breakdown-summary-row" style="grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem;">
+                                <div class="summary-card revenue">
+                                    <div class="summary-header">
+                                        <h4><i class="fas fa-chart-line"></i> 6-Year CAGR</h4>
+                                        <span class="summary-amount" id="annualSummaryCAGR">+0%</span>
+                                    </div>
+                                    <div class="summary-change positive" id="cagrDirection">Revenue Growth</div>
+                                </div>
+                                <div class="summary-card efficiency">
+                                    <div class="summary-header">
+                                        <h4><i class="fas fa-percentage"></i> Avg Gross Margin</h4>
+                                        <span class="summary-amount" id="annualSummaryGrossMargin">0%</span>
+                                    </div>
+                                    <div class="summary-change" id="avgGrossMarginTrend">6-Year Average</div>
+                                </div>
+                                <div class="summary-card opex">
+                                    <div class="summary-header">
+                                        <h4><i class="fas fa-chart-bar"></i> Avg EBITDA Margin</h4>
+                                        <span class="summary-amount" id="annualSummaryEbitdaMargin">0%</span>
+                                    </div>
+                                    <div class="summary-change" id="avgEbitdaMarginTrend">6-Year Average</div>
+                                </div>
+                            </div>
+                        
+                            <!-- Second Row of Summary Cards -->
+                            <div class="breakdown-summary-row" style="grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem;">
+                                <div class="summary-card growth">
+                                    <div class="summary-header">
+                                        <h4><i class="fas fa-trending-up"></i> Total Growth</h4>
+                                        <span class="summary-amount" id="annualSummaryTotalGrowth">+0%</span>
+                                    </div>
+                                    <div class="summary-change positive" id="totalGrowthDirection">2025 vs 2030</div>
+                                </div>
+                                <div class="summary-card efficiency">
+                                    <div class="summary-header">
+                                        <h4><i class="fas fa-coins"></i> Operating Leverage</h4>
+                                        <span class="summary-amount" id="annualSummaryOpLeverage">0x</span>
+                                    </div>
+                                    <div class="summary-change" id="opLeverageTrend">Revenue vs OPEX</div>
+                                </div>
+                                <div class="summary-card profitability">
+                                    <div class="summary-header">
+                                        <h4><i class="fas fa-money-bill-wave"></i> Profit Growth</h4>
+                                        <span class="summary-amount" id="annualSummaryProfitGrowth">+0%</span>
+                                    </div>
+                                    <div class="summary-change positive" id="profitGrowthDirection">EBITDA CAGR</div>
+                                </div>
+                            </div>
+                        
+                            <!-- Strategic Insights Panel (reusing existing structure) -->
+                            <div class="ai-insights-container" id="annualSummaryInsightsContainer" style="display: block;">
+                                <div class="insights-header-AIinsight">
+                                    <h4><i class="fas fa-brain"></i> 6-Year Strategic Analysis & Growth Insights</h4>
+                                    <div class="insights-meta">
+                                        <span class="confidence-badge">Analysis: Comprehensive</span>
+                                        <span class="forecast-date">Generated: Now</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="insights-content">
+                                    <div class="insight-card key-trends-card">
+                                        <div class="insight-header">
+                                            <i class="fas fa-chart-line insight-icon"></i>
+                                            <h5>Growth Trajectory Analysis</h5>
+                                        </div>
+                                        <div class="insight-text" id="annualGrowthTrends">
+                                            Analyzing 6-year growth patterns and performance trajectory...
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="insight-card opportunities-card">
+                                        <div class="insight-header">
+                                            <i class="fas fa-lightbulb insight-icon"></i>
+                                            <h5>Strategic Opportunities</h5>
+                                        </div>
+                                        <div class="insight-text" id="annualStrategicOpportunities">
+                                            Identifying key opportunities for sustainable growth and market expansion...
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="insight-card methodology-card">
+                                        <div class="insight-header">
+                                            <i class="fas fa-cogs insight-icon"></i>
+                                            <h5>Performance Highlights</h5>
+                                        </div>
+                                        <div class="insight-text" id="annualPerformanceHighlights">
+                                            Key performance metrics and operational efficiency improvements...
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="insights-actions">
+                                    <button class="btn btn-secondary" onclick="exportAnnualSummaryToPDF()">
+                                        <i class="fas fa-file-pdf"></i> Export Summary
+                                    </button>
+                                    <button class="btn btn-secondary" onclick="copyAnnualSummaryToClipboard()">
+                                        <i class="fas fa-copy"></i> Copy Analysis
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -26153,6 +26258,8 @@
             populateSummaryRow('total-opex', summaryData);
             populateSummaryRow('ebitda', summaryData);
             populateSummaryRow('ebitda-margin', summaryData);
+
+            populateAnnualSummaryInsights(summaryData);
         }
         
         // Extract yearly totals from current year (2025) table
@@ -26414,6 +26521,74 @@
                 cagrCell.className = cagrCell.className.replace(/positive|negative/g, '');
                 cagrCell.classList.add(cagr >= 0 ? 'positive' : 'negative');
             }
+        }
+
+        // Calculate and populate annual summary insights
+        function populateAnnualSummaryInsights(summaryData) {
+            const years = [2025, 2026, 2027, 2028, 2029, 2030];
+            const revenueValues = years.map(year => summaryData[year]?.['total-revenue'] || 0).filter(v => v > 0);
+            const ebitdaValues = years.map(year => summaryData[year]?.['ebitda'] || 0).filter(v => v !== 0);
+            const grossMargins = years.map(year => summaryData[year]?.['gross-margin'] || 0).filter(v => v > 0);
+            const ebitdaMargins = years.map(year => summaryData[year]?.['ebitda-margin'] || 0).filter(v => v !== 0);
+            
+            if (revenueValues.length < 2) return;
+            
+            // Calculate 6-Year Revenue CAGR
+            const startRevenue = revenueValues[0];
+            const endRevenue = revenueValues[revenueValues.length - 1];
+            const yearsCount = revenueValues.length - 1;
+            const cagr = ((Math.pow(endRevenue / startRevenue, 1 / yearsCount) - 1) * 100);
+            
+            // Calculate Total Growth (2025 vs 2030)
+            const totalGrowth = ((endRevenue - startRevenue) / startRevenue) * 100;
+            
+            // Calculate Average Margins
+            const avgGrossMargin = grossMargins.reduce((a, b) => a + b, 0) / grossMargins.length;
+            const avgEbitdaMargin = ebitdaMargins.reduce((a, b) => a + b, 0) / ebitdaMargins.length;
+            
+            // Calculate Operating Leverage (Revenue growth vs OPEX growth)
+            const startOpex = summaryData[2025]?.['total-opex'] || 0;
+            const endOpex = summaryData[2030]?.['total-opex'] || 0;
+            const opexGrowth = startOpex > 0 ? ((endOpex - startOpex) / startOpex) * 100 : 0;
+            const operatingLeverage = opexGrowth > 0 ? (totalGrowth / opexGrowth) : 0;
+            
+            // Calculate EBITDA CAGR
+            const startEbitda = ebitdaValues[0];
+            const endEbitda = ebitdaValues[ebitdaValues.length - 1];
+            const ebitdaCagr = startEbitda > 0 && endEbitda > 0 ? ((Math.pow(Math.abs(endEbitda) / Math.abs(startEbitda), 1 / yearsCount) - 1) * 100) : 0;
+            
+            // Update summary cards
+            document.getElementById('annualSummaryCAGR').textContent = `${cagr >= 0 ? '+' : ''}${cagr.toFixed(1)}%`;
+            document.getElementById('annualSummaryGrossMargin').textContent = `${avgGrossMargin.toFixed(1)}%`;
+            document.getElementById('annualSummaryEbitdaMargin').textContent = `${avgEbitdaMargin.toFixed(1)}%`;
+            document.getElementById('annualSummaryTotalGrowth').textContent = `${totalGrowth >= 0 ? '+' : ''}${totalGrowth.toFixed(1)}%`;
+            document.getElementById('annualSummaryOpLeverage').textContent = `${operatingLeverage.toFixed(1)}x`;
+            document.getElementById('annualSummaryProfitGrowth').textContent = `${ebitdaCagr >= 0 ? '+' : ''}${ebitdaCagr.toFixed(1)}%`;
+            
+            // Generate insights text
+            generateAnnualSummaryInsights(cagr, totalGrowth, avgGrossMargin, avgEbitdaMargin, operatingLeverage);
+        }
+        
+        // Generate insights text for annual summary
+        function generateAnnualSummaryInsights(cagr, totalGrowth, avgGrossMargin, avgEbitdaMargin, operatingLeverage) {
+            const growthTrends = `The company demonstrates ${cagr > 10 ? 'exceptional' : cagr > 5 ? 'strong' : 'moderate'} growth with a ${cagr.toFixed(1)}% revenue CAGR over the 6-year period. Total revenue is projected to grow ${totalGrowth.toFixed(1)}% from 2025 to 2030, indicating ${totalGrowth > 100 ? 'aggressive expansion' : totalGrowth > 50 ? 'solid growth trajectory' : 'steady development'}.`;
+            
+            const opportunities = `Key opportunities include ${avgGrossMargin > 65 ? 'maintaining premium pricing power' : avgGrossMargin > 50 ? 'optimizing product mix and pricing' : 'improving operational efficiency'}. With an average gross margin of ${avgGrossMargin.toFixed(1)}%, there's potential for ${avgGrossMargin < 60 ? 'margin expansion through cost optimization' : 'maintaining competitive positioning'}.`;
+            
+            const highlights = `Operating leverage of ${operatingLeverage.toFixed(1)}x demonstrates ${operatingLeverage > 1.5 ? 'excellent operational efficiency' : operatingLeverage > 1 ? 'good cost control' : 'opportunity for better expense management'}. Average EBITDA margin of ${avgEbitdaMargin.toFixed(1)}% reflects ${avgEbitdaMargin > 25 ? 'strong profitability' : avgEbitdaMargin > 15 ? 'healthy operations' : 'developing profitability'}.`;
+            
+            document.getElementById('annualGrowthTrends').textContent = growthTrends;
+            document.getElementById('annualStrategicOpportunities').textContent = opportunities;
+            document.getElementById('annualPerformanceHighlights').textContent = highlights;
+        }
+        
+        // Export functions (placeholders)
+        function exportAnnualSummaryToPDF() {
+            alert('Export Annual Summary to PDF - Feature coming soon!');
+        }
+        
+        function copyAnnualSummaryToClipboard() {
+            alert('Copy Annual Summary - Feature coming soon!');
         }
         
     </script>
