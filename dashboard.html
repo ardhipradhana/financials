@@ -2794,6 +2794,19 @@
                 font-size: 0.5rem;
                 padding: 0.125rem 0.25rem;
             }
+
+            .aging-charts-container {
+                grid-template-columns: 1fr; /* Stack on mobile */
+                gap: 1rem;
+            }
+            
+            .aging-chart-card {
+                min-height: 400px;
+            }
+            
+            .aging-chart-canvas {
+                height: 300px !important;
+            }
         }
 
         .collection-efficiency-excellent { color: #059669 !important; font-weight: 700; }
@@ -8256,26 +8269,40 @@
 
         .aging-chart-card {
             background: white;
-            padding: 1rem;
+            padding: 1.5rem;
             border-radius: 8px;
             border: 1px solid #e2e8f0;
-            max-width: 450px; /* Limit maximum width */
-            min-height: 350px; /* Set minimum height */
-            max-height: 400px; /* Set maximum height */
+            width: 100%;
+            min-height: 450px; /* Increased to accommodate legend */
+            display: flex;
+            flex-direction: column;
         }
 
+        .aging-chart-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 1rem;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        
         .aging-chart-canvas {
-            max-height: 300px !important; /* Force maximum height */
+            flex: 1;
+            position: relative;
+            height: 350px !important; /* Fixed height for chart area */
             width: 100% !important;
-            margin-bottom: 0;
         }
 
         .aging-charts-container {
             display: grid;
-            grid-template-columns: 1fr 1fr; /* Keep side by side */
-            gap: 1.5rem;
+            grid-template-columns: 1fr 1fr; /* Equal width columns */
+            gap: 2rem;
             margin-bottom: 2rem;
-            justify-items: center; /* Center the chart cards */
+            width: 100%;
+            max-width: 1200px; /* Prevent too wide on large screens */
+            margin-left: auto;
+            margin-right: auto;
         }
         
     </style>
@@ -15244,29 +15271,58 @@
         
         function markAsPaid(company, type) {
             if (confirm(`Mark all outstanding ${type === 'AR' ? 'receivables' : 'payables'} for ${company} as paid?`)) {
-                // Here you would implement the actual mark as paid logic
-                // For now, we'll just show a success message and refresh the aging analysis
+                // Update the status in aparTransactions array
+                aparTransactions.forEach(transaction => {
+                    if (transaction.company === company && 
+                        transaction.type === type && 
+                        transaction.status !== 'Paid') {
+                        transaction.status = 'Paid';
+                        
+                        // Also update due_date to today to indicate payment date
+                        transaction.payment_date = new Date().toISOString().split('T')[0];
+                        
+                        // If you want to keep the original due date, you can store it separately
+                        if (!transaction.original_due_date) {
+                            transaction.original_due_date = transaction.due_date;
+                        }
+                    }
+                });
                 
-                // Remove the transactions from aparTransactions array
-                aparTransactions = aparTransactions.filter(t => 
-                    !(t.company === company && t.type === type && t.status !== 'Paid')
-                );
-                
-                // Update the aging analysis
+                // Update both the aging analysis AND the main AP/AR transactions table
                 updateAgingAnalysis();
+                
+                // Refresh the main AP/AR table 
+                renderAPARTable();
+                
+                // Update the summary cards
+                updateAPARSummary();
                 
                 // Show success message
                 showToast(`Successfully marked ${company} ${type} transactions as paid`, 'success');
+                
+                // Optionally, save to Supabase if you have that function
+                if (typeof saveAPARToSupabase === 'function') {
+                    saveAPARToSupabase();
+                }
             }
         }
         
         // Toast notification function
         function showToast(message, type = 'info') {
+            // Remove any existing toasts
+            const existingToasts = document.querySelectorAll('.toast');
+            existingToasts.forEach(toast => toast.remove());
+            
             const toast = document.createElement('div');
             toast.className = `toast toast-${type}`;
             toast.innerHTML = `
-                <i class="fas fa-${type === 'success' ? 'check-circle' : 'info-circle'}"></i>
-                <span>${message}</span>
+                <div class="toast-content">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : 'info-circle'}"></i>
+                    <span>${message}</span>
+                </div>
+                <button class="toast-close" onclick="this.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
             `;
             
             document.body.appendChild(toast);
@@ -15274,11 +15330,13 @@
             // Animate in
             setTimeout(() => toast.classList.add('show'), 100);
             
-            // Remove after 3 seconds
+            // Remove after 4 seconds
             setTimeout(() => {
-                toast.classList.remove('show');
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
+                if (toast.parentElement) {
+                    toast.classList.remove('show');
+                    setTimeout(() => toast.remove(), 300);
+                }
+            }, 4000);
         }
         
         // Update additional analytics
@@ -15417,35 +15475,39 @@
                         backgroundColor: [
                             '#10b981', '#f59e0b', '#ea580c', '#dc2626', '#991b1b'
                         ],
-                        borderWidth: 2,
-                        borderColor: '#ffffff'
+                        borderWidth: 3,
+                        borderColor: '#ffffff',
+                        hoverBorderWidth: 4,
+                        hoverBorderColor: '#f8fafc'
                     }]
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: true, // Changed back to true
+                    maintainAspectRatio: false,
                     layout: {
                         padding: {
-                            top: 10,
-                            bottom: 20, // Reduced from 100 to 20
-                            left: 10,
-                            right: 10
+                            top: 20,
+                            bottom: 10,
+                            left: 20,
+                            right: 20
                         }
                     },
                     plugins: {
                         legend: {
                             display: true,
                             position: 'bottom',
-                            align: 'center',
+                            align: 'start',
                             labels: {
-                                padding: 15, // Reduced from 20 to 15
+                                padding: 15,
                                 usePointStyle: true,
-                                pointStyle: 'rect',
+                                pointStyle: 'circle',
                                 font: {
-                                    size: 11
+                                    size: 12,
+                                    family: 'Inter, sans-serif'
                                 },
                                 boxWidth: 12,
-                                boxHeight: 10,
+                                boxHeight: 12,
+                                textAlign: 'left',
                                 generateLabels: function(chart) {
                                     const data = chart.data;
                                     const total = data.datasets[0].data.reduce((sum, val) => sum + val, 0);
@@ -15460,17 +15522,23 @@
                                             fillStyle: data.datasets[0].backgroundColor[index],
                                             strokeStyle: '#ffffff',
                                             lineWidth: 2,
-                                            pointStyle: 'rect',
+                                            pointStyle: 'circle',
                                             hidden: false,
                                             index: index
                                         };
                                     });
                                 }
                             },
-                            maxLines: 2, // Allow up to 2 lines for legend
                             onClick: null
                         },
                         tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleColor: '#ffffff',
+                            bodyColor: '#ffffff',
+                            borderColor: '#e5e7eb',
+                            borderWidth: 1,
+                            cornerRadius: 8,
+                            displayColors: true,
                             callbacks: {
                                 label: function(context) {
                                     const value = context.parsed;
@@ -15480,7 +15548,13 @@
                                 }
                             }
                         }
-                    }
+                    },
+                    elements: {
+                        arc: {
+                            borderWidth: 3
+                        }
+                    },
+                    cutout: '65%' // Slightly larger center hole for better proportion
                 }
             });
         }
