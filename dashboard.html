@@ -2411,6 +2411,7 @@
             margin: 0;
         }
         
+        /* Enhanced Aging Table Styles */
         .aging-table {
             width: 100%;
             border-collapse: collapse;
@@ -2418,41 +2419,123 @@
         
         .aging-table th {
             background: #f9fafb;
-            padding: 0.75rem 0.5rem;
-            text-align: left;
+            padding: 1rem 0.75rem;
+            text-align: center;
             font-weight: 600;
             color: #374151;
-            border-bottom: 1px solid #e5e7eb;
-            font-size: 0.75rem;
+            border-bottom: 2px solid #e5e7eb;
+            font-size: 0.875rem;
             letter-spacing: 0.5px;
+            height: 3rem; /* Fixed height for consistency */
+            vertical-align: middle;
+        }
+        
+        .aging-table th:first-child {
+            text-align: left;
+            position: sticky;
+            left: 0;
+            background: #f9fafb;
+            z-index: 2;
+            min-width: 200px;
+        }
+        
+        .aging-table th:last-child {
+            text-align: center;
+            min-width: 120px;
         }
         
         .aging-table td {
-            padding: 0.75rem 0.5rem;
+            padding: 0.75rem;
             border-bottom: 1px solid #f3f4f6;
             font-size: 0.875rem;
+            height: 3.5rem; /* Fixed height for consistency */
+            vertical-align: middle;
         }
         
         .aging-table tbody tr:hover {
-            background: #f9fafb;
+            background: #f8fafc;
         }
         
-        .aging-table .company-name {
+        /* Company Cell Styling */
+        .company-cell {
+            text-align: left !important;
+            position: sticky;
+            left: 0;
+            background: white;
+            z-index: 1;
+            min-width: 200px;
+        }
+        
+        .aging-table tbody tr:hover .company-cell {
+            background: #f8fafc;
+        }
+        
+        .company-info {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+        }
+        
+        .company-name {
             font-weight: 500;
             color: #1f2937;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex: 1;
         }
         
-        .aging-table .amount-cell {
-            text-align: right;
+        /* Priority Badges */
+        .priority-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.625rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+        
+        .high-priority {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+        
+        .medium-priority {
+            background: #fef3c7;
+            color: #d97706;
+            border: 1px solid #fed7aa;
+        }
+        
+        .low-priority {
+            background: #dbeafe;
+            color: #1d4ed8;
+            border: 1px solid #bfdbfe;
+        }
+        
+        /* Amount Cell Styling */
+        .amount-cell {
+            text-align: right !important;
             font-weight: 600;
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
         }
         
-        .aging-table .amount-total {
-            background: #f8fafc;
+        .total-cell {
+            background: #f8fafc !important;
             font-weight: 700;
             color: #1e40af;
+            border-left: 2px solid #e2e8f0;
         }
         
+        .zero-amount {
+            color: #9ca3af;
+            font-weight: normal;
+        }
+        
+        /* Aging Bucket Colors */
         .aging-bucket-0-30 {
             color: #059669;
         }
@@ -2474,64 +2557,213 @@
             font-weight: 700;
         }
         
-        /* Charts Container */
-        .aging-charts-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
+        /* Action Buttons */
+        .actions-cell {
+            text-align: center !important;
+            padding: 0.5rem !important;
         }
         
-        .aging-chart-card {
+        .action-buttons {
+            display: flex;
+            gap: 0.25rem;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .action-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 2rem;
+            height: 2rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.75rem;
+        }
+        
+        .email-btn {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+        
+        .email-btn:hover {
+            background: #bfdbfe;
+            color: #1e3a8a;
+        }
+        
+        .mark-paid-btn {
+            background: #dcfce7;
+            color: #15803d;
+        }
+        
+        .mark-paid-btn:hover {
+            background: #bbf7d0;
+            color: #14532d;
+        }
+        
+        /* Email Modal Styles */
+        .email-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .email-modal {
             background: white;
-            padding: 1rem 1rem 0 1rem;
             border-radius: 8px;
-            border: 1px solid #e2e8f0;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
         }
         
-        .aging-chart-title {
-            font-size: 1rem;
+        .email-modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .email-modal-header h4 {
+            margin: 0;
+            font-size: 1.125rem;
             font-weight: 600;
             color: #1f2937;
-            margin-bottom: 1rem;
-            text-align: center;
         }
         
-        .aging-chart-canvas {
-            max-height: 400px;
-            margin-bottom: -2rem;
+        .modal-close {
+            background: none;
+            border: none;
+            color: #6b7280;
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+        
+        .modal-close:hover {
+            background: #f3f4f6;
+            color: #374151;
+        }
+        
+        .email-modal-body {
+            padding: 1.5rem;
+        }
+        
+        .email-modal-body label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #374151;
+        }
+        
+        .email-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+        }
+        
+        .email-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .email-preview {
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            color: #4b5563;
+        }
+        
+        .email-modal-footer {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: flex-end;
+            padding: 1.5rem;
+            border-top: 1px solid #e5e7eb;
+            background: #f9fafb;
+            border-radius: 0 0 8px 8px;
+        }
+        
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 1.25rem;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            z-index: 1001;
+            max-width: 350px;
+        }
+        
+        .toast.show {
+            transform: translateX(0);
+        }
+        
+        .toast-success {
+            border-left: 4px solid #10b981;
+        }
+        
+        .toast-success i {
+            color: #10b981;
+        }
+        
+        .toast-info {
+            border-left: 4px solid #3b82f6;
+        }
+        
+        .toast-info i {
+            color: #3b82f6;
         }
         
         /* Responsive Design */
-        @media (max-width: 1024px) {
-            .aging-tables-container {
-                grid-template-columns: 1fr;
-                gap: 1.5rem;
-            }
-            
-            .aging-summary-grid {
-                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            }
-        }
-        
         @media (max-width: 768px) {
-            .tab-btn {
-                padding: 0.75rem 1rem;
-                font-size: 0.8rem;
+            .aging-table th:first-child {
+                min-width: 150px;
             }
             
-            .tab-content {
-                padding: 1rem;
+            .company-info {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.25rem;
             }
             
-            .aging-table th,
-            .aging-table td {
-                padding: 0.5rem 0.25rem;
-                font-size: 0.8rem;
+            .action-buttons {
+                flex-direction: column;
             }
             
-            .aging-amount {
-                font-size: 1rem;
+            .email-modal {
+                width: 95%;
+                margin: 1rem;
+            }
+            
+            .priority-badge {
+                font-size: 0.5rem;
+                padding: 0.125rem 0.25rem;
             }
         }
 
@@ -8576,6 +8808,7 @@
                                                 <th style="text-align: center;">90-120</th>
                                                 <th style="text-align: center;">120+</th>
                                                 <th style="text-align: center;">Total</th>
+                                                <th style="text-align: center;">Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody id="arAgingTableBody">
@@ -8604,6 +8837,7 @@
                                                 <th style="text-align: center;">90-120</th>
                                                 <th style="text-align: center;">120+</th>
                                                 <th style="text-align: center;">Total</th>
+                                                <th style="text-align: center;">Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody id="apAgingTableBody">
@@ -14814,11 +15048,13 @@
                     const company = transaction.company || 'Unknown';
                     if (!companyTotals[company]) {
                         companyTotals[company] = {
-                            '0-30': 0, '30-60': 0, '60-90': 0, '90-120': 0, '120+': 0, total: 0
+                            '0-30': 0, '30-60': 0, '60-90': 0, '90-120': 0, '120+': 0, total: 0,
+                            transactions: [] // Store transactions for actions
                         };
                     }
                     companyTotals[company][bucket] += transaction.amount;
                     companyTotals[company].total += transaction.amount;
+                    companyTotals[company].transactions.push({...transaction, bucket});
                 });
             });
         
@@ -14826,39 +15062,170 @@
             const sortedCompanies = Object.entries(companyTotals)
                 .sort((a, b) => b[1].total - a[1].total);
         
-            // Add rows
-            sortedCompanies.forEach(([company, totals]) => {
+            // Add rows with improved formatting
+            sortedCompanies.forEach(([company, amounts]) => {
                 const row = document.createElement('tr');
+                
+                // Determine priority level based on overdue amounts
+                const overdueAmount = amounts['60-90'] + amounts['90-120'] + amounts['120+'];
+                const priorityLevel = getPriorityLevel(overdueAmount, amounts.total);
+                
                 row.innerHTML = `
-                    <td class="company-name">${company}</td>
-                    <td class="amount-cell aging-bucket-0-30">${formatCompactCurrency(totals['0-30'], 'IDR')}</td>
-                    <td class="amount-cell aging-bucket-30-60">${formatCompactCurrency(totals['30-60'], 'IDR')}</td>
-                    <td class="amount-cell aging-bucket-60-90">${formatCompactCurrency(totals['60-90'], 'IDR')}</td>
-                    <td class="amount-cell aging-bucket-90-120">${formatCompactCurrency(totals['90-120'], 'IDR')}</td>
-                    <td class="amount-cell aging-bucket-120-plus">${formatCompactCurrency(totals['120+'], 'IDR')}</td>
-                    <td class="amount-cell amount-total">${formatCompactCurrency(totals.total, 'IDR')}</td>
+                    <td class="company-cell">
+                        <div class="company-info">
+                            <span class="company-name">${company}</span>
+                            ${priorityLevel.badge}
+                        </div>
+                    </td>
+                    <td class="amount-cell ${getBucketClass('0-30')}">${formatCleanAmount(amounts['0-30'])}</td>
+                    <td class="amount-cell ${getBucketClass('30-60')}">${formatCleanAmount(amounts['30-60'])}</td>
+                    <td class="amount-cell ${getBucketClass('60-90')}">${formatCleanAmount(amounts['60-90'])}</td>
+                    <td class="amount-cell ${getBucketClass('90-120')}">${formatCleanAmount(amounts['90-120'])}</td>
+                    <td class="amount-cell ${getBucketClass('120+')}">${formatCleanAmount(amounts['120+'])}</td>
+                    <td class="amount-cell total-cell">${formatCleanAmount(amounts.total)}</td>
+                    <td class="actions-cell">
+                        <div class="action-buttons">
+                            ${overdueAmount > 0 ? `
+                                <button class="action-btn email-btn" onclick="sendEmailReminder('${company}', '${type}')" title="Send Email Reminder">
+                                    <i class="fas fa-envelope"></i>
+                                </button>
+                            ` : ''}
+                            <button class="action-btn mark-paid-btn" onclick="markAsPaid('${company}', '${type}')" title="Mark as Paid">
+                                <i class="fas fa-check"></i>
+                            </button>
+                        </div>
+                    </td>
                 `;
+                
                 tableBody.appendChild(row);
             });
-        
-            // Add totals row
-            const totalRow = document.createElement('tr');
-            totalRow.className = 'amount-total';
-            const bucketTotals = ['0-30', '30-60', '60-90', '90-120', '120+'].map(bucket => 
-                Object.values(companyTotals).reduce((sum, company) => sum + company[bucket], 0)
-            );
-            const grandTotal = bucketTotals.reduce((sum, total) => sum + total, 0);
-        
-            totalRow.innerHTML = `
-                <td style="font-weight: 700;">TOTAL</td>
-                <td class="amount-cell">${formatCompactCurrency(bucketTotals[0], 'IDR')}</td>
-                <td class="amount-cell">${formatCompactCurrency(bucketTotals[1], 'IDR')}</td>
-                <td class="amount-cell">${formatCompactCurrency(bucketTotals[2], 'IDR')}</td>
-                <td class="amount-cell">${formatCompactCurrency(bucketTotals[3], 'IDR')}</td>
-                <td class="amount-cell">${formatCompactCurrency(bucketTotals[4], 'IDR')}</td>
-                <td class="amount-cell" style="font-weight: 700;">${formatCompactCurrency(grandTotal, 'IDR')}</td>
+        }
+
+        function getPriorityLevel(overdueAmount, totalAmount) {
+            const overduePercentage = totalAmount > 0 ? (overdueAmount / totalAmount) * 100 : 0;
+            
+            if (overdueAmount > 50000000 || overduePercentage > 50) { // 50M+ or 50%+ overdue
+                return {
+                    level: 'high',
+                    badge: '<span class="priority-badge high-priority">HIGH RISK</span>'
+                };
+            } else if (overdueAmount > 10000000 || overduePercentage > 25) { // 10M+ or 25%+ overdue
+                return {
+                    level: 'medium',
+                    badge: '<span class="priority-badge medium-priority">WATCH</span>'
+                };
+            } else if (overdueAmount > 0) {
+                return {
+                    level: 'low',
+                    badge: '<span class="priority-badge low-priority">FOLLOW UP</span>'
+                };
+            }
+            
+            return { level: 'none', badge: '' };
+        }
+
+        function getBucketClass(bucket) {
+            return `aging-bucket-${bucket.replace('+', '-plus').replace('-', '-')}`;
+        }
+
+        function formatCleanAmount(amount) {
+            if (amount === 0) return '<span class="zero-amount">-</span>';
+            
+            const formatted = formatCompactCurrency(amount, 'IDR');
+            // Remove "Rp" prefix for cleaner look, add it back in shorter format
+            return formatted.replace('Rp ', 'Rp&nbsp;').replace(' Mn', 'M').replace(' Bn', 'B');
+        }
+
+        function sendEmailReminder(company, type) {
+            // Simple modal for email input
+            const modal = document.createElement('div');
+            modal.className = 'email-modal-overlay';
+            modal.innerHTML = `
+                <div class="email-modal">
+                    <div class="email-modal-header">
+                        <h4>Send Payment Reminder</h4>
+                        <button class="modal-close" onclick="closeEmailModal()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="email-modal-body">
+                        <label for="reminderEmail">Email Address:</label>
+                        <input type="email" id="reminderEmail" placeholder="Enter email address" class="email-input">
+                        <div class="email-preview">
+                            <strong>Subject:</strong> Payment Reminder - ${company}<br>
+                            <strong>Message:</strong> This is a friendly reminder about your outstanding ${type === 'AR' ? 'invoice' : 'payment'} with us.
+                        </div>
+                    </div>
+                    <div class="email-modal-footer">
+                        <button class="btn btn-secondary" onclick="closeEmailModal()">Cancel</button>
+                        <button class="btn btn-primary" onclick="openEmailClient('${company}', '${type}')">Send Reminder</button>
+                    </div>
+                </div>
             `;
-            tableBody.appendChild(totalRow);
+            
+            document.body.appendChild(modal);
+        }
+
+        function openEmailClient(company, type) {
+            const email = document.getElementById('reminderEmail').value;
+            if (!email) {
+                alert('Please enter an email address');
+                return;
+            }
+            
+            const subject = `Payment Reminder - ${company}`;
+            const body = `Dear ${company},\n\nThis is a friendly reminder about your outstanding ${type === 'AR' ? 'invoice' : 'payment'} with us.\n\nPlease contact us if you have any questions.\n\nBest regards,\nYour Finance Team`;
+            
+            const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            window.open(mailtoLink);
+            
+            closeEmailModal();
+        }
+        
+        function closeEmailModal() {
+            const modal = document.querySelector('.email-modal-overlay');
+            if (modal) {
+                modal.remove();
+            }
+        }
+        
+        function markAsPaid(company, type) {
+            if (confirm(`Mark all outstanding ${type === 'AR' ? 'receivables' : 'payables'} for ${company} as paid?`)) {
+                // Here you would implement the actual mark as paid logic
+                // For now, we'll just show a success message and refresh the aging analysis
+                
+                // Remove the transactions from aparTransactions array
+                aparTransactions = aparTransactions.filter(t => 
+                    !(t.company === company && t.type === type && t.status !== 'Paid')
+                );
+                
+                // Update the aging analysis
+                updateAgingAnalysis();
+                
+                // Show success message
+                showToast(`Successfully marked ${company} ${type} transactions as paid`, 'success');
+            }
+        }
+        
+        // Toast notification function
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'info-circle'}"></i>
+                <span>${message}</span>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            // Animate in
+            setTimeout(() => toast.classList.add('show'), 100);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
         }
         
         // Update additional analytics
