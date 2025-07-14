@@ -27543,9 +27543,18 @@
         }
 
         document.addEventListener('wheel', function(e) {
-            // Allow wheel scrolling even during drag operations
-            e.stopPropagation();
-        }, { passive: true });
+            if (isDragging) {
+                // Find the scrollable container
+                const scrollContainer = document.querySelector('.scenarios-new-container') || 
+                                       document.querySelector('.buckets-section') || 
+                                       document.documentElement;
+                
+                // Scroll the container
+                scrollContainer.scrollTop += e.deltaY * 0.5; // Adjust scroll speed
+                
+                e.preventDefault(); // Prevent default scroll behavior
+            }
+        }, { passive: false });
         
     </script>
 
