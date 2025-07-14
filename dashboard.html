@@ -27555,6 +27555,47 @@
                 e.preventDefault(); // Prevent default scroll behavior
             }
         }, { passive: false });
+
+        let isDragActive = false;
+
+        // Listen for any dragstart event on the page
+        document.addEventListener('dragstart', function(e) {
+            // Check if it's a transaction card being dragged
+            if (e.target.classList.contains('bucket-transaction-card')) {
+                isDragActive = true;
+                console.log('Drag started - enabling manual scroll');
+            }
+        });
+        
+        // Listen for any dragend event on the page
+        document.addEventListener('dragend', function(e) {
+            if (e.target.classList.contains('bucket-transaction-card')) {
+                isDragActive = false;
+                console.log('Drag ended - disabling manual scroll');
+            }
+        });
+        
+        // Enable mouse wheel scrolling during drag
+        document.addEventListener('wheel', function(e) {
+            if (isDragActive) {
+                console.log('Manual scroll during drag');
+                
+                // Find the main container to scroll
+                const container = document.querySelector('.scenarios-new-container') || 
+                                 document.querySelector('.buckets-section') || 
+                                 document.body;
+                
+                // Scroll the container manually
+                const scrollAmount = e.deltaY * 3; // Adjust multiplier for scroll speed
+                container.scrollTop += scrollAmount;
+                
+                // Prevent default browser scroll behavior
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        }, { passive: false });
+        
+        console.log('Manual scroll during drag initialized');
         
     </script>
 
