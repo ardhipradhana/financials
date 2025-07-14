@@ -381,7 +381,8 @@
             font-size: 1.25rem;
             font-weight: 600;
             color: #1e293b;
-            margin: 0;
+            margin: 0 0 1.5rem 0;
+            padding: 0;
         }
 
         .section-actions {
@@ -5136,7 +5137,9 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid #e2e8f0; /* Optional: adds visual separation */
         }
         
         .section-subtitle {
@@ -6277,12 +6280,6 @@
             text-align: left;
             padding: 0.75rem 1rem;
             border-bottom: 2px solid #e2e8f0;
-        }
-        
-        .section-header {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
         }
         
         .line-item {
@@ -9925,21 +9922,21 @@
                         <div class="breakdown-summary-row" style="margin-top: 1.5rem;">
                             <div class="summary-card revenue">
                                 <div class="summary-header">
-                                    <h4><i class="fas fa-chart-line"></i> Revenue Growth</h4>
+                                    <h4>Revenue Growth</h4>
                                     <span class="summary-amount" id="forecastRevenueGrowth">+0%</span>
                                 </div>
                                 <div class="summary-change positive" id="revenueGrowthDirection">Year-over-year</div>
                             </div>
                             <div class="summary-card efficiency">
                                 <div class="summary-header">
-                                    <h4><i class="fas fa-percentage"></i> Gross Margin</h4>
+                                    <h4>Gross Margin</h4>
                                     <span class="summary-amount" id="forecastGrossMargin">0%</span>
                                 </div>
                                 <div class="summary-change" id="grossMarginTrend">Average forecast</div>
                             </div>
                             <div class="summary-card opex">
                                 <div class="summary-header">
-                                    <h4><i class="fas fa-chart-bar"></i> EBITDA Margin</h4>
+                                    <h4>EBITDA Margin</h4>
                                     <span class="summary-amount" id="forecastEbitdaMargin">0%</span>
                                 </div>
                                 <div class="summary-change" id="ebitdaMarginTrend">Forecast average</div>
@@ -24710,21 +24707,21 @@
                 <div class="breakdown-summary-row" style="margin-top: 1.5rem;">
                     <div class="summary-card revenue">
                         <div class="summary-header">
-                            <h4><i class="fas fa-chart-line"></i> Projected Growth</h4>
+                            <h4>Projected Growth</h4>
                             <span class="summary-amount" id="forecast2026RevenueGrowth">+0%</span>
                         </div>
                         <div class="summary-change positive" id="revenue2026GrowthDirection">vs 2025</div>
                     </div>
                     <div class="summary-card efficiency">
                         <div class="summary-header">
-                            <h4><i class="fas fa-percentage"></i> Avg Gross Margin</h4>
+                            <h4>Avg Gross Margin</h4>
                             <span class="summary-amount" id="forecast2026GrossMargin">0%</span>
                         </div>
                         <div class="summary-change" id="grossMargin2026Trend">2026 Average</div>
                     </div>
                     <div class="summary-card opex">
                         <div class="summary-header">
-                            <h4><i class="fas fa-chart-bar"></i> Avg EBITDA Margin</h4>
+                            <h4>Avg EBITDA Margin</h4>
                             <span class="summary-amount" id="forecast2026EbitdaMargin">0%</span>
                         </div>
                         <div class="summary-change" id="ebitdaMargin2026Trend">2026 Average</div>
@@ -25561,21 +25558,21 @@
                 <div class="breakdown-summary-row" style="margin-top: 1.5rem;">
                     <div class="summary-card revenue">
                         <div class="summary-header">
-                            <h4><i class="fas fa-chart-line"></i> CAGR (2027-2030)</h4>
+                            <h4>CAGR (2027-2030)</h4>
                             <span class="summary-amount" id="multiYearRevenueCAGR">+0%</span>
                         </div>
                         <div class="summary-change positive" id="multiYearCAGRDirection">Compound Growth</div>
                     </div>
                     <div class="summary-card efficiency">
                         <div class="summary-header">
-                            <h4><i class="fas fa-percentage"></i> Avg Gross Margin</h4>
+                            <h4>Avg Gross Margin</h4>
                             <span class="summary-amount" id="multiYearGrossMargin">0%</span>
                         </div>
                         <div class="summary-change" id="multiYearGrossMarginTrend">4-Year Average</div>
                     </div>
                     <div class="summary-card opex">
                         <div class="summary-header">
-                            <h4><i class="fas fa-chart-bar"></i> Avg EBITDA Margin</h4>
+                            <h4>Avg EBITDA Margin</h4>
                             <span class="summary-amount" id="multiYearEbitdaMargin">0%</span>
                         </div>
                         <div class="summary-change" id="multiYearEbitdaMarginTrend">4-Year Average</div>
