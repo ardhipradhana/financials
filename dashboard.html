@@ -7983,6 +7983,7 @@
             border: 1px solid #dee2e6;
             color: #495057;
             font-size: 0.9rem;
+            text-align: left !important;
         }
         
         .pl-summary-row:hover {
@@ -10265,7 +10266,7 @@
                             <table class="pl-forecast-table" id="plForecastSummaryTable">
                                 <thead>
                                     <tr>
-                                        <th class="pl-account-header">P&L Line Items</th>
+                                        <th class="pl-line-item-header">P&L Line Items</th>
                                         <th class="pl-year-header">2025</th>
                                         <th class="pl-year-header">2026</th>
                                         <th class="pl-growth-header">YoY Growth</th>
@@ -10286,7 +10287,7 @@
                                         <td colspan="13"><strong>REVENUE</strong></td>
                                     </tr>
                                     <tr data-account="total-revenue" class="pl-summary-row revenue-row">
-                                        <td class="pl-account-name">Total Revenue</td>
+                                        <td class="pl-line-item-header">Total Revenue</td>
                                         <td class="pl-year-cell" data-year="2025">-</td>
                                         <td class="pl-year-cell" data-year="2026">-</td>
                                         <td class="pl-growth-cell" data-growth="2026">-</td>
@@ -10306,7 +10307,7 @@
                                         <td colspan="13"><strong>COST OF GOODS SOLD</strong></td>
                                     </tr>
                                     <tr data-account="total-cogs" class="pl-summary-row cogs-row">
-                                        <td class="pl-account-name">Total COGS</td>
+                                        <td class="pl-line-item-header">Total COGS</td>
                                         <td class="pl-year-cell" data-year="2025">-</td>
                                         <td class="pl-year-cell" data-year="2026">-</td>
                                         <td class="pl-growth-cell" data-growth="2026">-</td>
@@ -10326,7 +10327,7 @@
                                         <td colspan="13"><strong>GROSS PROFIT</strong></td>
                                     </tr>
                                     <tr data-account="gross-profit" class="pl-summary-row profit-row">
-                                        <td class="pl-account-name">Gross Profit</td>
+                                        <td class="pl-line-item-header">Gross Profit</td>
                                         <td class="pl-year-cell" data-year="2025">-</td>
                                         <td class="pl-year-cell" data-year="2026">-</td>
                                         <td class="pl-growth-cell" data-growth="2026">-</td>
@@ -10341,7 +10342,7 @@
                                         <td class="pl-cagr-cell" data-cagr="gross-profit">-</td>
                                     </tr>
                                     <tr data-account="gross-margin" class="pl-summary-row margin-row">
-                                        <td class="pl-account-name">Gross Margin %</td>
+                                        <td class="pl-line-item-header">Gross Margin %</td>
                                         <td class="pl-year-cell percentage" data-year="2025">-</td>
                                         <td class="pl-year-cell percentage" data-year="2026">-</td>
                                         <td class="pl-growth-cell percentage" data-growth="2026">-</td>
@@ -10361,7 +10362,7 @@
                                         <td colspan="13"><strong>OPERATING EXPENSES</strong></td>
                                     </tr>
                                     <tr data-account="total-opex" class="pl-summary-row opex-row">
-                                        <td class="pl-account-name">Total OPEX</td>
+                                        <td class="pl-line-item-header">Total OPEX</td>
                                         <td class="pl-year-cell" data-year="2025">-</td>
                                         <td class="pl-year-cell" data-year="2026">-</td>
                                         <td class="pl-growth-cell" data-growth="2026">-</td>
@@ -10381,7 +10382,7 @@
                                         <td colspan="13"><strong>EBITDA</strong></td>
                                     </tr>
                                     <tr data-account="ebitda" class="pl-summary-row ebitda-row">
-                                        <td class="pl-account-name">EBITDA</td>
+                                        <td class="pl-line-item-header">EBITDA</td>
                                         <td class="pl-year-cell" data-year="2025">-</td>
                                         <td class="pl-year-cell" data-year="2026">-</td>
                                         <td class="pl-growth-cell" data-growth="2026">-</td>
@@ -10396,7 +10397,7 @@
                                         <td class="pl-cagr-cell" data-cagr="ebitda">-</td>
                                     </tr>
                                     <tr data-account="ebitda-margin" class="pl-summary-row margin-row">
-                                        <td class="pl-account-name">EBITDA Margin %</td>
+                                        <td class="pl-line-item-header">EBITDA Margin %</td>
                                         <td class="pl-year-cell percentage" data-year="2025">-</td>
                                         <td class="pl-year-cell percentage" data-year="2026">-</td>
                                         <td class="pl-growth-cell percentage" data-growth="2026">-</td>
@@ -26155,90 +26156,116 @@
         // Extract yearly totals from current year (2025) table
         function extractYearlyData(containerId) {
             const container = document.getElementById(containerId + '-container');
-            if (!container) return null;
+            if (!container) {
+                console.log(`❌ Container not found: ${containerId}-container`);
+                return null;
+            }
             
             const data = {};
             
-            // Get total revenue (sum of all revenue accounts)
-            const totalRevenueCell = container.querySelector('#totalRevenue-total');
-            data['total-revenue'] = totalRevenueCell ? parseFloat(totalRevenueCell.textContent.replace(/,/g, '')) || 0 : 0;
+            // For 2025 (current-year) - look for total cells
+            if (containerId === 'current-year') {
+                const totalRevenueCell = container.querySelector('#totalRevenue-total');
+                data['total-revenue'] = totalRevenueCell ? parseFloat(totalRevenueCell.textContent.replace(/,/g, '')) || 0 : 0;
+                
+                const totalCogsCell = container.querySelector('#totalCogs-total');
+                data['total-cogs'] = totalCogsCell ? parseFloat(totalCogsCell.textContent.replace(/,/g, '')) || 0 : 0;
+                
+                const totalOpexCell = container.querySelector('#totalOpex-total');
+                data['total-opex'] = totalOpexCell ? parseFloat(totalOpexCell.textContent.replace(/,/g, '')) || 0 : 0;
+            }
+            // For 2026 (next-year) - look for 2026 total cells
+            else if (containerId === 'next-year') {
+                const totalRevenueCell = container.querySelector('#totalRevenue2026-total');
+                data['total-revenue'] = totalRevenueCell ? parseFloat(totalRevenueCell.textContent.replace(/,/g, '')) || 0 : 0;
+                
+                const totalCogsCell = container.querySelector('#totalCogs2026-total');
+                data['total-cogs'] = totalCogsCell ? parseFloat(totalCogsCell.textContent.replace(/,/g, '')) || 0 : 0;
+                
+                const totalOpexCell = container.querySelector('#totalOpex2026-total');
+                data['total-opex'] = totalOpexCell ? parseFloat(totalOpexCell.textContent.replace(/,/g, '')) || 0 : 0;
+            }
             
-            // Get total COGS
-            const totalCogsCell = container.querySelector('#totalCogs-total');
-            data['total-cogs'] = totalCogsCell ? parseFloat(totalCogsCell.textContent.replace(/,/g, '')) || 0 : 0;
-            
-            // Calculate gross profit
+            // Calculate derived metrics
             data['gross-profit'] = data['total-revenue'] - data['total-cogs'];
-            
-            // Calculate gross margin %
             data['gross-margin'] = data['total-revenue'] > 0 ? (data['gross-profit'] / data['total-revenue']) * 100 : 0;
-            
-            // Get total OPEX
-            const totalOpexCell = container.querySelector('#totalOpex-total');
-            data['total-opex'] = totalOpexCell ? parseFloat(totalOpexCell.textContent.replace(/,/g, '')) || 0 : 0;
-            
-            // Calculate EBITDA
             data['ebitda'] = data['gross-profit'] - data['total-opex'];
-            
-            // Calculate EBITDA margin %
             data['ebitda-margin'] = data['total-revenue'] > 0 ? (data['ebitda'] / data['total-revenue']) * 100 : 0;
             
+            console.log(`📊 ${containerId} data extracted:`, data);
             return data;
         }
         
         // Extract data from multi-year quarterly tables
         function extractMultiYearData(year) {
             const table = document.getElementById('plMultiYearTable');
-            if (!table) return null;
+            if (!table) {
+                console.log('❌ Multi-year table not found');
+                return null;
+            }
             
             const data = {};
+            
+            // Map years to column ranges (this might need adjustment based on your table structure)
             const yearColumns = {
-                2027: [1, 2, 3, 4], // Q1-Q4 2027
-                2028: [5, 6, 7, 8], // Q1-Q4 2028
-                2029: [9, 10, 11, 12], // Q1-Q4 2029
-                2030: [13, 14, 15, 16] // Q1-Q4 2030
+                2027: [2, 3, 4, 5], // Q1-Q4 2027 columns (adjust based on actual table)
+                2028: [6, 7, 8, 9], // Q1-Q4 2028 columns
+                2029: [10, 11, 12, 13], // Q1-Q4 2029 columns
+                2030: [14, 15, 16, 17] // Q1-Q4 2030 columns
             };
             
             const columns = yearColumns[year];
-            if (!columns) return null;
+            if (!columns) {
+                console.log(`❌ No column mapping for year ${year}`);
+                return null;
+            }
             
-            // Sum quarterly data for the year
+            // Initialize totals
             let totalRevenue = 0;
             let totalCogs = 0;
             let totalOpex = 0;
             
-            // Extract revenue (assuming row with total-revenue id)
-            const revenueRow = table.querySelector('tr[data-account="total-revenue"]');
-            if (revenueRow) {
-                columns.forEach(colIndex => {
-                    const cell = revenueRow.children[colIndex];
-                    if (cell) {
-                        totalRevenue += parseFloat(cell.textContent.replace(/,/g, '')) || 0;
-                    }
-                });
-            }
+            // Extract revenue - look for rows with revenue account codes
+            const revenueRows = table.querySelectorAll('tr[data-account-code]');
+            revenueRows.forEach(row => {
+                const accountCode = row.getAttribute('data-account-code');
+                if (accountCode && accountCode.startsWith('4')) { // Revenue accounts
+                    columns.forEach(colIndex => {
+                        const cell = row.children[colIndex];
+                        if (cell) {
+                            totalRevenue += parseFloat(cell.textContent.replace(/,/g, '')) || 0;
+                        }
+                    });
+                }
+            });
             
-            // Extract COGS
-            const cogsRow = table.querySelector('tr[data-account="total-cogs"]');
-            if (cogsRow) {
-                columns.forEach(colIndex => {
-                    const cell = cogsRow.children[colIndex];
-                    if (cell) {
-                        totalCogs += parseFloat(cell.textContent.replace(/,/g, '')) || 0;
-                    }
-                });
-            }
+            // Extract COGS - account codes 5000-5099
+            const cogsRows = table.querySelectorAll('tr[data-account-code]');
+            cogsRows.forEach(row => {
+                const accountCode = parseInt(row.getAttribute('data-account-code'));
+                if (accountCode >= 5000 && accountCode < 5100) { // COGS accounts
+                    columns.forEach(colIndex => {
+                        const cell = row.children[colIndex];
+                        if (cell) {
+                            totalCogs += parseFloat(cell.textContent.replace(/,/g, '')) || 0;
+                        }
+                    });
+                }
+            });
             
-            // Extract OPEX
-            const opexRow = table.querySelector('tr[data-account="total-opex"]');
-            if (opexRow) {
-                columns.forEach(colIndex => {
-                    const cell = opexRow.children[colIndex];
-                    if (cell) {
-                        totalOpex += parseFloat(cell.textContent.replace(/,/g, '')) || 0;
-                    }
-                });
-            }
+            // Extract OPEX - account codes 5100-5999
+            const opexRows = table.querySelectorAll('tr[data-account-code]');
+            opexRows.forEach(row => {
+                const accountCode = parseInt(row.getAttribute('data-account-code'));
+                if (accountCode >= 5100 && accountCode < 6000) { // OPEX accounts
+                    columns.forEach(colIndex => {
+                        const cell = row.children[colIndex];
+                        if (cell) {
+                            totalOpex += parseFloat(cell.textContent.replace(/,/g, '')) || 0;
+                        }
+                    });
+                }
+            });
             
             data['total-revenue'] = totalRevenue;
             data['total-cogs'] = totalCogs;
@@ -26248,6 +26275,7 @@
             data['ebitda'] = (totalRevenue - totalCogs) - totalOpex;
             data['ebitda-margin'] = totalRevenue > 0 ? (((totalRevenue - totalCogs) - totalOpex) / totalRevenue) * 100 : 0;
             
+            console.log(`📊 ${year} data extracted:`, data);
             return data;
         }
         
