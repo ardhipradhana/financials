@@ -7995,71 +7995,6 @@
         .percentage::after {
             content: '%';
         }
-
-        /* Fix overlapping insight containers */
-        .annual-summary-insights-section {
-            margin-top: 2rem;
-            width: 100%;
-            overflow: hidden;
-        }
-        
-        .insights-content {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        
-        .insight-card {
-            min-height: 120px;
-            display: flex;
-            flex-direction: column;
-            box-sizing: border-box;
-        }
-        
-        .insight-header {
-            flex-shrink: 0;
-            margin-bottom: 0.75rem;
-        }
-        
-        .insight-text {
-            flex-grow: 1;
-            line-height: 1.5;
-            word-wrap: break-word;
-        }
-        
-        /* Ensure consistent card heights */
-        .insight-card.key-trends-card,
-        .insight-card.opportunities-card,
-        .insight-card.methodology-card {
-            min-height: 140px;
-        }
-        
-        /* Fix the summary cards grid */
-        .breakdown-summary-row {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1rem;
-            margin-bottom: 2rem;
-            width: 100%;
-        }
-        
-        /* Responsive adjustments */
-        @media (max-width: 1200px) {
-            .insights-content {
-                grid-template-columns: 1fr;
-            }
-            
-            .breakdown-summary-row {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-        
-        @media (max-width: 768px) {
-            .breakdown-summary-row {
-                grid-template-columns: 1fr;
-            }
-        }
         
     </style>
 </head>
@@ -10482,62 +10417,60 @@
                             </table>
                         </div>
 
-                        <div class="annual-summary-insights-section">
+                        <div class="annual-summary-insights-section" style="margin-top: 2rem;">
     
                             <!-- Enhanced Summary Cards Grid (6 cards) -->
-                            <div class="summary-cards-section">
-                                <div class="breakdown-summary-row">
-                                    <div class="summary-card revenue">
-                                        <div class="summary-header">
-                                            <h4><i class="fas fa-chart-line"></i> 6-Year CAGR</h4>
-                                            <span class="summary-amount" id="annualSummaryCAGR">+0%</span>
-                                        </div>
-                                        <div class="summary-change positive" id="cagrDirection">Revenue Growth</div>
+                            <div class="breakdown-summary-row" style="grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem;">
+                                <div class="summary-card revenue">
+                                    <div class="summary-header">
+                                        <h4><i class="fas fa-chart-line"></i> 6-Year CAGR</h4>
+                                        <span class="summary-amount" id="annualSummaryCAGR">+0%</span>
                                     </div>
-                                    <div class="summary-card efficiency">
-                                        <div class="summary-header">
-                                            <h4><i class="fas fa-percentage"></i> Avg Gross Margin</h4>
-                                            <span class="summary-amount" id="annualSummaryGrossMargin">0%</span>
-                                        </div>
-                                        <div class="summary-change" id="avgGrossMarginTrend">6-Year Average</div>
-                                    </div>
-                                    <div class="summary-card opex">
-                                        <div class="summary-header">
-                                            <h4><i class="fas fa-chart-bar"></i> Avg EBITDA Margin</h4>
-                                            <span class="summary-amount" id="annualSummaryEbitdaMargin">0%</span>
-                                        </div>
-                                        <div class="summary-change" id="avgEbitdaMarginTrend">6-Year Average</div>
-                                    </div>
+                                    <div class="summary-change positive" id="cagrDirection">Revenue Growth</div>
                                 </div>
-                        
-                                <!-- Second Row of Summary Cards -->
-                                <div class="breakdown-summary-row">
-                                    <div class="summary-card growth">
-                                        <div class="summary-header">
-                                            <h4><i class="fas fa-trending-up"></i> Total Growth</h4>
-                                            <span class="summary-amount" id="annualSummaryTotalGrowth">+0%</span>
-                                        </div>
-                                        <div class="summary-change positive" id="totalGrowthDirection">2025 vs 2030</div>
+                                <div class="summary-card efficiency">
+                                    <div class="summary-header">
+                                        <h4><i class="fas fa-percentage"></i> Avg Gross Margin</h4>
+                                        <span class="summary-amount" id="annualSummaryGrossMargin">0%</span>
                                     </div>
-                                    <div class="summary-card efficiency">
-                                        <div class="summary-header">
-                                            <h4><i class="fas fa-coins"></i> Operating Leverage</h4>
-                                            <span class="summary-amount" id="annualSummaryOpLeverage">0x</span>
-                                        </div>
-                                        <div class="summary-change" id="opLeverageTrend">Revenue vs OPEX</div>
+                                    <div class="summary-change" id="avgGrossMarginTrend">6-Year Average</div>
+                                </div>
+                                <div class="summary-card opex">
+                                    <div class="summary-header">
+                                        <h4><i class="fas fa-chart-bar"></i> Avg EBITDA Margin</h4>
+                                        <span class="summary-amount" id="annualSummaryEbitdaMargin">0%</span>
                                     </div>
-                                    <div class="summary-card profitability">
-                                        <div class="summary-header">
-                                            <h4><i class="fas fa-money-bill-wave"></i> Profit Growth</h4>
-                                            <span class="summary-amount" id="annualSummaryProfitGrowth">+0%</span>
-                                        </div>
-                                        <div class="summary-change positive" id="profitGrowthDirection">EBITDA CAGR</div>
-                                    </div>
+                                    <div class="summary-change" id="avgEbitdaMarginTrend">6-Year Average</div>
                                 </div>
                             </div>
                         
-                            <!-- Strategic Insights Panel -->
-                            <div class="ai-insights-container" id="annualSummaryInsightsContainer">
+                            <!-- Second Row of Summary Cards -->
+                            <div class="breakdown-summary-row" style="grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem;">
+                                <div class="summary-card growth">
+                                    <div class="summary-header">
+                                        <h4><i class="fas fa-trending-up"></i> Total Growth</h4>
+                                        <span class="summary-amount" id="annualSummaryTotalGrowth">+0%</span>
+                                    </div>
+                                    <div class="summary-change positive" id="totalGrowthDirection">2025 vs 2030</div>
+                                </div>
+                                <div class="summary-card efficiency">
+                                    <div class="summary-header">
+                                        <h4><i class="fas fa-coins"></i> Operating Leverage</h4>
+                                        <span class="summary-amount" id="annualSummaryOpLeverage">0x</span>
+                                    </div>
+                                    <div class="summary-change" id="opLeverageTrend">Revenue vs OPEX</div>
+                                </div>
+                                <div class="summary-card profitability">
+                                    <div class="summary-header">
+                                        <h4><i class="fas fa-money-bill-wave"></i> Profit Growth</h4>
+                                        <span class="summary-amount" id="annualSummaryProfitGrowth">+0%</span>
+                                    </div>
+                                    <div class="summary-change positive" id="profitGrowthDirection">EBITDA CAGR</div>
+                                </div>
+                            </div>
+                        
+                            <!-- Strategic Insights Panel (reusing existing structure) -->
+                            <div class="ai-insights-container" id="annualSummaryInsightsContainer" style="display: block;">
                                 <div class="insights-header-AIinsight">
                                     <h4><i class="fas fa-brain"></i> 6-Year Strategic Analysis & Growth Insights</h4>
                                     <div class="insights-meta">
