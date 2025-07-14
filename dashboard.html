@@ -2385,7 +2385,7 @@
         }
         
         .aging-tables-container {
-            display: grid;
+            display: block;
             grid-template-columns: 1fr 1fr;
             gap: 2rem;
             margin-bottom: 2rem;
@@ -2396,6 +2396,39 @@
             border-radius: 8px;
             border: 1px solid #e2e8f0;
             overflow: hidden;
+            margin-bottom: 1.5rem; /* Add space between tables */
+            width: 100%;
+        }
+
+        .aging-table-section .aging-table th {
+            background: #f9fafb;
+            padding: 1rem 0.75rem;
+            text-align: center;
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 2px solid #e5e7eb;
+            font-size: 0.875rem;
+            letter-spacing: 0.5px;
+            height: 3rem;
+            vertical-align: middle;
+        }
+
+        .aging-table-section .aging-table th:first-child {
+            text-align: left;
+            min-width: 200px;
+        }
+        
+        .aging-table-section .aging-table th:last-child {
+            text-align: center;
+            min-width: 120px;
+        }
+
+        .aging-table-section .aging-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #f3f4f6;
+            font-size: 0.875rem;
+            height: 3.5rem;
+            vertical-align: middle;
         }
         
         .aging-table-header {
@@ -2459,10 +2492,6 @@
         /* Company Cell Styling */
         .company-cell {
             text-align: left !important;
-            position: sticky;
-            left: 0;
-            background: white;
-            z-index: 1;
             min-width: 200px;
         }
         
