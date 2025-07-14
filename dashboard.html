@@ -27567,14 +27567,6 @@
             }
         });
         
-        // Listen for any dragend event on the page
-        document.addEventListener('dragend', function(e) {
-            if (e.target.classList.contains('bucket-transaction-card')) {
-                isDragActive = false;
-                console.log('Drag ended - disabling manual scroll');
-            }
-        });
-        
         // Enable mouse wheel scrolling during drag
         document.addEventListener('wheel', function(e) {
             if (isDragActive) {
