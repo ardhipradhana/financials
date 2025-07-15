@@ -28425,7 +28425,7 @@
         // Update year buttons based on affected years
         function updateYearButtons() {
             [2026, 2027, 2028, 2029, 2030].forEach(year => {
-                const btn = document.querySelector(`[data-year="${year}"]`);
+                const btn = document.querySelector(`button[data-year="${year}"]`);  // ← Add "button"
                 if (scenarioState.affectedYears.includes(year)) {
                     btn.classList.add('active');
                 } else {
