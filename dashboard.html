@@ -9270,7 +9270,7 @@
                                     <div class="scenario-actions"></div>
                                 </div>
                                 <div class="scenario-chart-full">
-                                    <canvas id="scenarioForecastChart" width="800" height="300"></canvas>
+                                    <canvas id="scenarioImpactChart" width="800" height="300"></canvas>
                                 </div>
                             </div>
                             
@@ -15300,22 +15300,52 @@
         function createScenarioCashFlowChart() {
             console.log('Creating scenario cash flow chart...');
             
-            const canvas = document.getElementById('scenarioForecastChart');
-            if (!canvas) {
-                console.error('Canvas not found!');
-                return;
+            // THIS IS THE CORRECTED LINE - it now targets the new ID.
+            const ctx = document.getElementById('scenarioImpactChart').getContext('2d');
+        
+            const forecast = generateScenarioForecastData(); // This function is correct.
+        
+            if (scenarioChart) {
+                scenarioChart.destroy(); // Destroy previous instance.
             }
-            
-            // Check if Chart.js is available (like your existing charts)
-            if (typeof Chart !== 'undefined') {
-                // Use Chart.js like your existing cashflow chart
-                createScenarioChartJS();
-            } else {
-                // Fallback to canvas drawing
-                createScenarioCanvasChart();
-            }
+        
+            scenarioChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: forecast.map(d => d.week),
+                    datasets: [{
+                        label: 'Projected Cash Position',
+                        data: forecast.map(d => d.cashPosition),
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 4,
+                        pointBackgroundColor: (context) => context.raw >= 0 ? '#3b82f6' : '#ef4444',
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => `Cash: Rp ${context.raw.toLocaleString()}`
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            ticks: {
+                                // Using your existing formatNumber function for consistency
+                                callback: (value) => `Rp ${formatNumber(value)}`
+                            }
+                        }
+                    }
+                }
+            });
         }
-
         function createScenarioChartJS() {
             const ctx = document.getElementById('scenarioForecastChart');
             if (!ctx) return;
