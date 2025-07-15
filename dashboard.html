@@ -10915,6 +10915,7 @@
                             <div class="scenario-year-selector">
                                 <label class="filter-label">Select years affected by changes:</label>
                                 <div class="filter-row" style="gap: 0.5rem; flex-wrap: wrap;">
+                                    <button class="btn btn-outline scenario-year-btn active" data-year="2026" onclick="toggleYear(2026)">2026</button>
                                     <button class="btn btn-outline scenario-year-btn active" data-year="2027" onclick="toggleYear(2027)">2027</button>
                                     <button class="btn btn-outline scenario-year-btn active" data-year="2028" onclick="toggleYear(2028)">2028</button>
                                     <button class="btn btn-outline scenario-year-btn active" data-year="2029" onclick="toggleYear(2029)">2029</button>
@@ -10991,7 +10992,11 @@
                                 <div class="metric-content">
                                     <div class="filter-section">
                                         <label class="filter-label">Growth Rate (%)</label>
-                                        <input type="range" id="revenueSlider" class="scenario-slider" min="-50" max="100" value="0" oninput="updateCustomScenario('revenue', this.value)">
+                                        <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                            <input type="range" id="revenueSlider" class="scenario-slider" min="-50" max="100" value="0" oninput="updateCustomScenario('revenue', this.value)" style="flex: 1;">
+                                            <input type="number" id="revenueInput" class="filter-input" min="-50" max="100" value="0" oninput="updateCustomScenarioFromInput('revenue', this.value)" style="width: 80px;">
+                                            <span>%</span>
+                                        </div>
                                         <div class="slider-value"><span id="revenueValue">0%</span></div>
                                     </div>
                                 </div>
@@ -11008,7 +11013,11 @@
                                 <div class="metric-content">
                                     <div class="filter-section">
                                         <label class="filter-label">Change (%)</label>
-                                        <input type="range" id="cogsSlider" class="scenario-slider" min="-50" max="100" value="0" oninput="updateCustomScenario('cogs', this.value)">
+                                        <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                            <input type="range" id="cogsSlider" class="scenario-slider" min="-50" max="100" value="0" oninput="updateCustomScenario('cogs', this.value)" style="flex: 1;">
+                                            <input type="number" id="cogsInput" class="filter-input" min="-50" max="100" value="0" oninput="updateCustomScenarioFromInput('cogs', this.value)" style="width: 80px;">
+                                            <span>%</span>
+                                        </div>
                                         <div class="slider-value"><span id="cogsValue">0%</span></div>
                                     </div>
                                 </div>
@@ -11025,7 +11034,11 @@
                                 <div class="metric-content">
                                     <div class="filter-section">
                                         <label class="filter-label">Change (%)</label>
-                                        <input type="range" id="opexSlider" class="scenario-slider" min="-50" max="100" value="0" oninput="updateCustomScenario('opex', this.value)">
+                                        <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                            <input type="range" id="opexSlider" class="scenario-slider" min="-50" max="100" value="0" oninput="updateCustomScenario('opex', this.value)" style="flex: 1;">
+                                            <input type="number" id="opexInput" class="filter-input" min="-50" max="100" value="0" oninput="updateCustomScenarioFromInput('opex', this.value)" style="width: 80px;">
+                                            <span>%</span>
+                                        </div>
                                         <div class="slider-value"><span id="opexValue">0%</span></div>
                                     </div>
                                 </div>
@@ -11047,6 +11060,7 @@
                                 <div class="input-group">
                                     <label class="filter-label">Year</label>
                                     <select id="eventYear" class="filter-input">
+                                        <option value="2026">2026</option>
                                         <option value="2027">2027</option>
                                         <option value="2028">2028</option>
                                         <option value="2029">2029</option>
@@ -11095,6 +11109,9 @@
                                 <thead>
                                     <tr>
                                         <th style="text-align: left;">Financial Item</th>
+                                        <th>2026 Base</th>
+                                        <th>2026 Scenario</th>
+                                        <th>Change</th>
                                         <th>2027 Base</th>
                                         <th>2027 Scenario</th>
                                         <th>Change</th>
@@ -11278,7 +11295,7 @@
         let scenarioState = {
             baseCase: null,
             currentScenario: null,
-            affectedYears: [2027, 2028, 2029, 2030],
+            affectedYears: [2026, 2027, 2028, 2029, 2030],
             adjustments: {
                 revenue: 0,
                 cogs: 0,
@@ -14574,14 +14591,11 @@
         let isDragging = false;
         
         // Initialize scenario analysis when tab is switched
-        function initializeScenarioAnalysis() {
-            console.log('=== INITIALIZING SCENARIO ANALYSIS ===');
-            
-            loadScenarioTransactions();
-            setupBucketDragAndDrop();
-            populateTransactionBuckets();
-            updateScenarioChart();
-            clearChangeLog();
+       function initializeScenarioAnalysis() {
+            // Get base case data from existing forecast
+            scenarioState.baseCase = getBaseCaseData();
+            scenarioState.currentScenario = JSON.parse(JSON.stringify(scenarioState.baseCase));
+            updateScenarioComparison();
         }
         
         function loadScenarioTransactions() {
@@ -27865,38 +27879,45 @@
         
         // Get base case data from existing annual summary
         function getBaseCaseData() {
-            // This should extract data from your existing annual forecast
-            // Assuming you have annual data available globally or can access it
-            return {
-                2027: {
-                    revenue: 2400000,
-                    cogs: 1200000,
-                    grossProfit: 1200000,
-                    opex: 800000,
-                    netIncome: 400000
-                },
-                2028: {
-                    revenue: 2880000,
-                    cogs: 1440000,
-                    grossProfit: 1440000,
-                    opex: 960000,
-                    netIncome: 480000
-                },
-                2029: {
-                    revenue: 3456000,
-                    cogs: 1728000,
-                    grossProfit: 1728000,
-                    opex: 1152000,
-                    netIncome: 576000
-                },
-                2030: {
-                    revenue: 4147200,
-                    cogs: 2073600,
-                    grossProfit: 2073600,
-                    opex: 1382400,
-                    netIncome: 691200
+            // Extract real data from your annual summary
+            const baseData = {};
+            const years = [2026, 2027, 2028, 2029, 2030];
+            
+            years.forEach(year => {
+                let data = null;
+                
+                if (year === 2026) {
+                    data = extractYearlyData('next-year');
+                } else {
+                    data = extractMultiYearData(year);
                 }
-            };
+                
+                if (data) {
+                    baseData[year] = {
+                        revenue: data['total-revenue'] || 0,
+                        cogs: data['total-cogs'] || 0,
+                        grossProfit: data['gross-profit'] || 0,
+                        opex: data['total-opex'] || 0,
+                        netIncome: data['ebitda'] || 0  // Using EBITDA as net income equivalent
+                    };
+                } else {
+                    // Fallback default values if data not available
+                    const baseRevenue = 2400000000; // 2.4B IDR
+                    const growthRate = 0.2; // 20% growth
+                    const yearIndex = year - 2026;
+                    
+                    baseData[year] = {
+                        revenue: baseRevenue * Math.pow(1 + growthRate, yearIndex),
+                        cogs: baseRevenue * Math.pow(1 + growthRate, yearIndex) * 0.5,
+                        grossProfit: baseRevenue * Math.pow(1 + growthRate, yearIndex) * 0.5,
+                        opex: baseRevenue * Math.pow(1 + growthRate, yearIndex) * 0.33,
+                        netIncome: baseRevenue * Math.pow(1 + growthRate, yearIndex) * 0.17
+                    };
+                }
+            });
+            
+            console.log('📊 Base case data extracted:', baseData);
+            return baseData;
         }
         
         // Toggle year selection
@@ -27959,10 +27980,14 @@
                 scenarioState.scenarioName = scenario.name;
                 scenarioState.adjustments = scenario.adjustments;
                 
-                // Update sliders
+                // Update sliders and inputs
                 document.getElementById('revenueSlider').value = scenario.adjustments.revenue;
                 document.getElementById('cogsSlider').value = scenario.adjustments.cogs;
                 document.getElementById('opexSlider').value = scenario.adjustments.opex;
+                
+                document.getElementById('revenueInput').value = scenario.adjustments.revenue;
+                document.getElementById('cogsInput').value = scenario.adjustments.cogs;
+                document.getElementById('opexInput').value = scenario.adjustments.opex;
                 
                 // Update slider displays
                 document.getElementById('revenueValue').textContent = scenario.adjustments.revenue + '%';
@@ -27978,8 +28003,25 @@
             scenarioState.adjustments[type] = parseFloat(value);
             scenarioState.scenarioName = 'Custom Scenario';
             
-            // Update display
+            // Update displays
             document.getElementById(type + 'Value').textContent = value + '%';
+            document.getElementById(type + 'Input').value = value;
+            
+            recalculateScenario();
+        }
+
+        function updateCustomScenarioFromInput(type, value) {
+            const numValue = parseFloat(value) || 0;
+            // Clamp value between -50 and 100
+            const clampedValue = Math.max(-50, Math.min(100, numValue));
+            
+            scenarioState.adjustments[type] = clampedValue;
+            scenarioState.scenarioName = 'Custom Scenario';
+            
+            // Update displays
+            document.getElementById(type + 'Value').textContent = clampedValue + '%';
+            document.getElementById(type + 'Slider').value = clampedValue;
+            document.getElementById(type + 'Input').value = clampedValue;
             
             recalculateScenario();
         }
@@ -28047,10 +28089,14 @@
             scenarioState.scenarioName = 'Base Case';
             scenarioState.currentScenario = JSON.parse(JSON.stringify(scenarioState.baseCase));
             
-            // Reset sliders
+            // Reset sliders and inputs
             document.getElementById('revenueSlider').value = 0;
             document.getElementById('cogsSlider').value = 0;
             document.getElementById('opexSlider').value = 0;
+            
+            document.getElementById('revenueInput').value = 0;
+            document.getElementById('cogsInput').value = 0;
+            document.getElementById('opexInput').value = 0;
             
             // Reset displays
             document.getElementById('revenueValue').textContent = '0%';
@@ -28065,9 +28111,12 @@
         function recalculateScenario() {
             scenarioState.currentScenario = JSON.parse(JSON.stringify(scenarioState.baseCase));
             
-            // Apply percentage adjustments to affected years
-            scenarioState.affectedYears.forEach(year => {
-                if (scenarioState.currentScenario[year]) {
+            // Apply percentage adjustments ONLY to affected years
+            Object.keys(scenarioState.currentScenario).forEach(year => {
+                const yearNum = parseInt(year);
+                
+                // Only apply changes to years that are selected in affectedYears
+                if (scenarioState.affectedYears.includes(yearNum)) {
                     const data = scenarioState.currentScenario[year];
                     
                     // Apply adjustments
@@ -28079,9 +28128,9 @@
                     data.grossProfit = data.revenue - data.cogs;
                     data.netIncome = data.grossProfit - data.opex;
                     
-                    // Apply one-time events
+                    // Apply one-time events for this year
                     scenarioState.oneTimeEvents.forEach(event => {
-                        if (event.year === year) {
+                        if (event.year === yearNum) {
                             data.netIncome += event.amount;
                         }
                     });
@@ -28094,7 +28143,7 @@
         // Update scenario comparison display
         function updateScenarioComparison() {
             const tbody = document.getElementById('scenarioComparisonBody');
-            const years = [2027, 2028, 2029, 2030];
+            const years = [2026, 2027, 2028, 2029, 2030];
             
             // Update active scenario name
             document.getElementById('activeScenarioName').textContent = scenarioState.scenarioName;
@@ -28117,10 +28166,10 @@
                     const changePercent = base !== 0 ? ((change / base) * 100) : 0;
                     
                     row += `
-                        <td>$${formatNumber(base)}</td>
-                        <td>$${formatNumber(scenario)}</td>
+                        <td>Rp ${formatNumber(base)}</td>
+                        <td>Rp ${formatNumber(scenario)}</td>
                         <td class="${change >= 0 ? 'positive' : 'negative'}">
-                            ${change >= 0 ? '+' : ''}$${formatNumber(change)}
+                            ${change >= 0 ? '+' : ''}Rp ${formatNumber(change)}
                             <br><small>(${changePercent >= 0 ? '+' : ''}${changePercent.toFixed(1)}%)</small>
                         </td>
                     `;
@@ -28135,7 +28184,7 @@
         
         // Update summary impact cards
         function updateSummaryCards() {
-            const years = [2027, 2028, 2029, 2030];
+            const years = [2026, 2027, 2028, 2029, 2030];
             
             // Calculate total impacts
             let totalRevenueBase = 0;
@@ -28160,12 +28209,12 @@
             const scenarioMargin = (totalNetIncomeScenario / totalRevenueScenario) * 100;
             const marginImpact = scenarioMargin - baseMargin;
             
-            // Update displays
-            document.getElementById('revenueImpact').textContent = (revenueImpact >= 0 ? '+' : '') + '$' + formatNumber(revenueImpact);
+            // Update displays with IDR currency
+            document.getElementById('revenueImpact').textContent = (revenueImpact >= 0 ? '+' : '') + 'Rp ' + formatNumber(revenueImpact);
             document.getElementById('revenueImpactPercent').textContent = (revenueImpactPercent >= 0 ? '+' : '') + revenueImpactPercent.toFixed(1) + '%';
             document.getElementById('revenueImpactPercent').className = revenueImpact >= 0 ? 'metric-change positive' : 'metric-change negative';
             
-            document.getElementById('netIncomeImpact').textContent = (netIncomeImpact >= 0 ? '+' : '') + '$' + formatNumber(netIncomeImpact);
+            document.getElementById('netIncomeImpact').textContent = (netIncomeImpact >= 0 ? '+' : '') + 'Rp ' + formatNumber(netIncomeImpact);
             document.getElementById('netIncomeImpactPercent').textContent = (netIncomeImpactPercent >= 0 ? '+' : '') + netIncomeImpactPercent.toFixed(1) + '%';
             document.getElementById('netIncomeImpactPercent').className = netIncomeImpact >= 0 ? 'metric-change positive' : 'metric-change negative';
             
@@ -28315,7 +28364,7 @@
         
         // Update year buttons based on affected years
         function updateYearButtons() {
-            [2027, 2028, 2029, 2030].forEach(year => {
+            [2026, 2027, 2028, 2029, 2030].forEach(year => {
                 const btn = document.querySelector(`[data-year="${year}"]`);
                 if (scenarioState.affectedYears.includes(year)) {
                     btn.classList.add('active');
@@ -28330,6 +28379,10 @@
             document.getElementById('revenueSlider').value = scenarioState.adjustments.revenue;
             document.getElementById('cogsSlider').value = scenarioState.adjustments.cogs;
             document.getElementById('opexSlider').value = scenarioState.adjustments.opex;
+            
+            document.getElementById('revenueInput').value = scenarioState.adjustments.revenue;
+            document.getElementById('cogsInput').value = scenarioState.adjustments.cogs;
+            document.getElementById('opexInput').value = scenarioState.adjustments.opex;
             
             document.getElementById('revenueValue').textContent = scenarioState.adjustments.revenue + '%';
             document.getElementById('cogsValue').textContent = scenarioState.adjustments.cogs + '%';
