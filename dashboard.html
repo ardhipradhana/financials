@@ -8273,8 +8273,9 @@
         .aging-chart-card {
             background: white;
             padding: 1.5rem;
-            border-radius: 8px;
+            border-radius: 12px;
             border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
             width: 100%;
             min-height: 450px; /* Increased to accommodate legend */
             display: flex;
@@ -8291,7 +8292,7 @@
         }
         
         .aging-chart-canvas {
-            flex: 1;
+            flex-grow: 1;
             position: relative;
             height: 300px !important; /* Fixed height for chart area */
             width: 100% !important;
@@ -16206,10 +16207,36 @@
             const ctx = document.getElementById(canvasId);
             if (!ctx) return;
         
-            // Destroy existing chart if it exists
+            // Destroy any existing chart on this canvas to prevent conflicts
             if (window[canvasId + 'Instance']) {
                 window[canvasId + 'Instance'].destroy();
             }
+        
+            const totalAmount = data.reduce((sum, value) => sum + value, 0);
+        
+            // This is a custom Chart.js plugin to draw the total value in the middle
+            const centerTextPlugin = {
+                id: 'centerText',
+                afterDraw: (chart) => {
+                    const { ctx, chartArea: { top, width, height } } = chart;
+                    ctx.save();
+        
+                    // Main Total Value
+                    ctx.font = 'bold 1.75rem Inter, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillStyle = '#1e293b';
+                    // Use your existing formatNumber function for consistency
+                    const formattedTotal = 'Rp ' + formatNumber(totalAmount);
+                    ctx.fillText(formattedTotal, width / 2, height / 2 + top - 10);
+        
+                    // Subtitle
+                    ctx.font = '0.9rem Inter, sans-serif';
+                    ctx.fillStyle = '#64748b';
+                    ctx.fillText('Total', width / 2, height / 2 + top + 20);
+                    ctx.restore();
+                }
+            };
         
             window[canvasId + 'Instance'] = new Chart(ctx, {
                 type: 'doughnut',
@@ -16218,90 +16245,76 @@
                     datasets: [{
                         data: data,
                         backgroundColor: [
-                            '#10b981', '#f59e0b', '#ea580c', '#dc2626', '#991b1b'
+                            '#10b981', // 0-30 Days (Green)
+                            '#f59e0b', // 30-60 Days (Yellow)
+                            '#ea580c', // 60-90 Days (Orange)
+                            '#dc2626', // 90-120 Days (Red)
+                            '#991b1b'  // 120+ Days (Dark Red)
                         ],
-                        borderWidth: 3,
                         borderColor: '#ffffff',
-                        hoverBorderWidth: 4,
-                        hoverBorderColor: '#f8fafc'
+                        borderWidth: 4,      // Creates a nice visual separation between slices
+                        hoverOffset: 10,
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: true,
-                    layout: {
-                        padding: {
-                            top: 20,
-                            bottom: 10,
-                            left: 20,
-                            right: 20
-                        }
-                    },
+                    cutout: '75%', // This makes the doughnut ring thinner
                     plugins: {
+                        centerText: centerTextPlugin, // Enable our custom plugin
                         legend: {
                             display: true,
                             position: 'bottom',
-                            align: 'start',
                             labels: {
-                                padding: 15,
+                                padding: 20,
                                 usePointStyle: true,
                                 pointStyle: 'circle',
-                                font: {
-                                    size: 12,
-                                    family: 'Inter, sans-serif'
-                                },
-                                boxWidth: 12,
-                                boxHeight: 12,
-                                textAlign: 'left',
+                                boxWidth: 10,
+                                font: { size: 12 },
+                                // Custom label shows percentage and value
                                 generateLabels: function(chart) {
                                     const data = chart.data;
-                                    const total = data.datasets[0].data.reduce((sum, val) => sum + val, 0);
-                                    
-                                    return data.labels.map((label, index) => {
-                                        const value = data.datasets[0].data[index];
-                                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-                                        const compactValue = formatCompactCurrency(value, 'IDR');
-                                        
+                                    return data.labels.map((label, i) => {
+                                        const value = data.datasets[0].data[i];
+                                        const percentage = totalAmount > 0 ? (value / totalAmount * 100).toFixed(1) : 0;
                                         return {
-                                            text: `${label}: ${compactValue} (${percentage}%)`,
-                                            fillStyle: data.datasets[0].backgroundColor[index],
-                                            strokeStyle: '#ffffff',
-                                            lineWidth: 2,
-                                            pointStyle: 'circle',
-                                            hidden: false,
-                                            index: index
+                                            text: `${label} (${percentage}%)`,
+                                            fillStyle: data.datasets[0].backgroundColor[i],
+                                            hidden: isNaN(value),
+                                            index: i
                                         };
                                     });
                                 }
-                            },
-                            onClick: null
+                            }
                         },
                         tooltip: {
-                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            backgroundColor: '#1e293b',
                             titleColor: '#ffffff',
-                            bodyColor: '#ffffff',
-                            borderColor: '#e5e7eb',
-                            borderWidth: 1,
+                            bodyColor: '#cbd5e1',
+                            padding: 12,
                             cornerRadius: 8,
-                            displayColors: true,
                             callbacks: {
+                                // Tooltip shows both amount and percentage
                                 label: function(context) {
                                     const value = context.parsed;
-                                    const total = context.dataset.data.reduce((sum, val) => sum + val, 0);
-                                    const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-                                    return `${context.label}: ${formatCompactCurrency(value, 'IDR')} (${percentage}%)`;
+                                    const percentage = totalAmount > 0 ? (value / totalAmount * 100).toFixed(1) : 0;
+                                    return ` ${context.label}: Rp ${formatNumber(value)} (${percentage}%)`;
                                 }
                             }
                         }
-                    },
-                    elements: {
-                        arc: {
-                            borderWidth: 3
-                        }
-                    },
-                    cutout: '65%' // Slightly larger center hole for better proportion
-                }
+                    }
+                },
+                plugins: [centerTextPlugin] // IMPORTANT: Register the custom plugin
             });
+        
+            // Helper function for compact number formatting
+            function formatNumber(num) {
+                const absNum = Math.abs(num);
+                if (absNum >= 1e9) return (num / 1e9).toFixed(1) + 'B';
+                if (absNum >= 1e6) return (num / 1e6).toFixed(1) + 'M';
+                if (absNum >= 1e3) return (num / 1e3).toFixed(0) + 'K';
+                return num.toLocaleString('id-ID');
+            }
         }
 
         // Connection Status Functions
