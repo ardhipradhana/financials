@@ -28189,7 +28189,34 @@
                     // Apply one-time events for this year
                     scenarioState.oneTimeEvents.forEach(event => {
                         if (event.year === yearNum) {
-                            data.netIncome += event.amount;
+                            const data = scenarioState.currentScenario[year];
+                            
+                            if (event.percentage && event.percentage !== 0) {
+                                // Percentage-based events from Apply Scenario
+                                if (event.plLine === 'revenue') {
+                                    data.revenue *= (1 + event.percentage / 100);
+                                } else if (event.plLine === 'cogs') {
+                                    data.cogs *= (1 + event.percentage / 100);
+                                } else if (event.plLine === 'opex') {
+                                    data.opex *= (1 + event.percentage / 100);
+                                }
+                            } else {
+                                // Absolute amount events from One-time Events
+                                if (event.plLine === 'revenue') {
+                                    data.revenue += event.amount;
+                                } else if (event.plLine === 'cogs') {
+                                    data.cogs += event.amount;
+                                } else if (event.plLine === 'opex') {
+                                    data.opex += event.amount;
+                                } else {
+                                    // Default to net income for 'other' or legacy events
+                                    data.netIncome += event.amount;
+                                }
+                            }
+                            
+                            // Recalculate derived values after applying events
+                            data.grossProfit = data.revenue - data.cogs;
+                            data.netIncome = data.grossProfit - data.opex;
                         }
                     });
                 }
@@ -28790,8 +28817,18 @@
                 }
             });
             
-            // Reset sliders
-            resetScenario();
+            // Reset sliders but DON'T clear events
+            scenarioState.adjustments = { revenue: 0, cogs: 0, opex: 0 };
+            scenarioState.scenarioName = 'Base Case';
+            
+            // Reset sliders and inputs
+            document.getElementById('revenueSlider').value = 0;
+            document.getElementById('cogsSlider').value = 0;
+            document.getElementById('opexSlider').value = 0;
+            
+            document.getElementById('revenueInput').value = 0;
+            document.getElementById('cogsInput').value = 0;
+            document.getElementById('opexInput').value = 0;
             
             // Update events list
             updateEventsList();
