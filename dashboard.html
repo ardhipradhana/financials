@@ -28134,19 +28134,39 @@
             }
             
             eventsContainer.style.display = 'block';
-            eventsList.innerHTML = scenarioState.oneTimeEvents.map(event => `
-                <div class="event-item" style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; background: #f8fafc; border-radius: 4px; margin-bottom: 0.5rem;">
-                    <div>
-                        <strong>${event.description}</strong> - ${event.year}
-                        <div style="font-size: 0.875rem; color: #64748b;">
-                            ${event.amount >= 0 ? '+' : ''}$${event.amount.toLocaleString()}
+            eventsList.innerHTML = scenarioState.oneTimeEvents.map(event => {
+                let impactText = '';
+                
+                if (event.percentage && event.percentage !== 0) {
+                    // Calculate actual impact for percentage-based events
+                    const baseValue = scenarioState.baseCase[event.year];
+                    let impact = 0;
+                    
+                    if (event.plLine === 'revenue' && baseValue) {
+                        impact = baseValue.revenue * (event.percentage / 100);
+                    } else if (event.plLine === 'cogs' && baseValue) {
+                        impact = baseValue.cogs * (event.percentage / 100);
+                    } else if (event.plLine === 'opex' && baseValue) {
+                        impact = baseValue.opex * (event.percentage / 100);
+                    }
+                    
+                    impactText = `${impact >= 0 ? '+' : ''}Rp ${Math.abs(impact).toLocaleString()}`;
+                } else {
+                    // Absolute amount events
+                    impactText = `${event.amount >= 0 ? '+' : ''}Rp ${Math.abs(event.amount).toLocaleString()}`;
+                }
+                
+                return `
+                    <div class="event-item" style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; background: #f8fafc; border-radius: 4px; margin-bottom: 0.5rem;">
+                        <div style="flex: 1;">
+                            <strong>${event.description}</strong> - ${event.year} - ${impactText}
                         </div>
+                        <button class="btn btn-outline" onclick="removeOneTimeEvent(${event.id})" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">
+                            <i class="fas fa-times"></i>
+                        </button>
                     </div>
-                    <button class="btn btn-outline" onclick="removeOneTimeEvent(${event.id})" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
         
         // Remove one-time event
