@@ -28605,17 +28605,29 @@
                     background: #f8fafc;
                     border-color: #3b82f6 !important;
                 }
-
+        
+                /* MISSING CSS - Add this for year button active state */
+                .scenario-year-btn.active {
+                    background: #1e40af !important;
+                    color: white !important;
+                    border-color: #1e40af !important;
+                }
+        
+                .scenario-year-btn {
+                    transition: all 0.2s ease;
+                }
+        
+                /* Fix z-index issues */
                 .metric-card .metric-icon.icon-calendar {
                     pointer-events: none;
                     z-index: 1;
                 }
-                
+        
                 .scenario-year-selector {
                     position: relative;
                     z-index: 10;
                 }
-                
+        
                 .scenario-year-btn {
                     position: relative;
                     z-index: 10;
