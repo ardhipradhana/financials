@@ -11146,11 +11146,14 @@
                                     </div>
                                 </div>
                                 <div class="metric-content">
-                                    <div class="metric-value" id="revenueImpact">$0</div>
-                                    <div class="metric-change" id="revenueImpactPercent">0%</div>
+                                    <div class="metric-value" id="revenueImpact">Rp 0</div>
+                                    <div class="metric-change" id="revenueImpactPercent">+0.0%</div>
+                                    <div style="font-size: 0.75rem; color: #64748b; margin-top: 0.5rem;">
+                                        <div id="revenueYearBreakdown">2026-2030 Combined</div>
+                                    </div>
                                 </div>
                             </div>
-            
+                        
                             <div class="metric-card">
                                 <div class="metric-header">
                                     <div class="metric-title">Net Income Impact</div>
@@ -11159,11 +11162,14 @@
                                     </div>
                                 </div>
                                 <div class="metric-content">
-                                    <div class="metric-value" id="netIncomeImpact">$0</div>
-                                    <div class="metric-change" id="netIncomeImpactPercent">0%</div>
+                                    <div class="metric-value" id="netIncomeImpact">Rp 0</div>
+                                    <div class="metric-change" id="netIncomeImpactPercent">+0.0%</div>
+                                    <div style="font-size: 0.75rem; color: #64748b; margin-top: 0.5rem;">
+                                        <div id="netIncomeYearBreakdown">2026-2030 Combined</div>
+                                    </div>
                                 </div>
                             </div>
-            
+                        
                             <div class="metric-card">
                                 <div class="metric-header">
                                     <div class="metric-title">Margin Impact</div>
@@ -11174,6 +11180,9 @@
                                 <div class="metric-content">
                                     <div class="metric-value" id="marginImpact">0%</div>
                                     <div class="metric-change" id="marginImpactChange">No change</div>
+                                    <div style="font-size: 0.75rem; color: #64748b; margin-top: 0.5rem;">
+                                        <div id="marginYearBreakdown">Average across all years</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -28301,17 +28310,36 @@
         function updateSummaryCards() {
             const years = [2026, 2027, 2028, 2029, 2030];
             
-            // Calculate total impacts
+            // Calculate total impacts and year-by-year breakdown
             let totalRevenueBase = 0;
             let totalRevenueScenario = 0;
             let totalNetIncomeBase = 0;
             let totalNetIncomeScenario = 0;
+            let yearlyImpacts = [];
             
             years.forEach(year => {
-                totalRevenueBase += scenarioState.baseCase[year].revenue;
-                totalRevenueScenario += scenarioState.currentScenario[year].revenue;
-                totalNetIncomeBase += scenarioState.baseCase[year].netIncome;
-                totalNetIncomeScenario += scenarioState.currentScenario[year].netIncome;
+                const baseRev = scenarioState.baseCase[year].revenue;
+                const scenarioRev = scenarioState.currentScenario[year].revenue;
+                const baseNet = scenarioState.baseCase[year].netIncome;
+                const scenarioNet = scenarioState.currentScenario[year].netIncome;
+                
+                totalRevenueBase += baseRev;
+                totalRevenueScenario += scenarioRev;
+                totalNetIncomeBase += baseNet;
+                totalNetIncomeScenario += scenarioNet;
+                
+                const revImpact = scenarioRev - baseRev;
+                const netImpact = scenarioNet - baseNet;
+                
+                if (revImpact !== 0 || netImpact !== 0) {
+                    yearlyImpacts.push({
+                        year,
+                        revImpact,
+                        netImpact,
+                        revPercent: ((revImpact / baseRev) * 100).toFixed(1),
+                        netPercent: ((netImpact / baseNet) * 100).toFixed(1)
+                    });
+                }
             });
             
             const revenueImpact = totalRevenueScenario - totalRevenueBase;
@@ -28336,6 +28364,18 @@
             document.getElementById('marginImpact').textContent = scenarioMargin.toFixed(1) + '%';
             document.getElementById('marginImpactChange').textContent = (marginImpact >= 0 ? '+' : '') + marginImpact.toFixed(1) + 'pp';
             document.getElementById('marginImpactChange').className = marginImpact >= 0 ? 'metric-change positive' : 'metric-change negative';
+            
+            // Update year breakdowns
+            if (yearlyImpacts.length > 0) {
+                const affectedYears = yearlyImpacts.map(y => y.year).join(', ');
+                document.getElementById('revenueYearBreakdown').textContent = `Affected years: ${affectedYears}`;
+                document.getElementById('netIncomeYearBreakdown').textContent = `Affected years: ${affectedYears}`;
+                document.getElementById('marginYearBreakdown').textContent = `Impact across: ${affectedYears}`;
+            } else {
+                document.getElementById('revenueYearBreakdown').textContent = 'No changes applied';
+                document.getElementById('netIncomeYearBreakdown').textContent = 'No changes applied';
+                document.getElementById('marginYearBreakdown').textContent = 'No changes applied';
+            }
         }
         
         // Format number for display
@@ -28619,6 +28659,19 @@
                     z-index: 2;
                     background-color: #ffffff;
                     width: 200px; /* Set a fixed width for the first column */
+                }
+
+                .scenario-comparison-table th:not(:first-child),
+                .scenario-comparison-table td:not(:first-child) {
+                    width: 110px !important; /* All other columns */
+                }
+
+                @media (max-width: 1400px) {
+                    .scenario-comparison-table th:not(:first-child),
+                    .scenario-comparison-table td:not(:first-child) {
+                        width: 90px !important;
+                        font-size: 0.8rem !important;
+                    }
                 }
 
                 .scenario-comparison-table .year-group-header {
