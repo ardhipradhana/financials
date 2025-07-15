@@ -11922,6 +11922,20 @@
         let aparTransactions = [];
         let scenarioFinancingItems = [];
         let scenarioCashImpact = 0;
+        let scenarioImpactChartInstance = null;
+
+        function initializeCashFlowScenario() {
+            console.log("🚀 Initializing Cash Flow Scenario module...");
+            // Load AP/AR data into the buckets
+            loadScenarioTransactions();
+            // Set up the drag-and-drop functionality
+            setupBucketDragAndDrop();
+            // Create the cash flow chart
+            updateScenarioImpactChart();
+            // Update the impact and change log sections
+            updateImpactAnalysis();
+            updateChangeLogDisplay();
+        }
 
         // Add this function globally (outside any other function)
         function assignOverdueToRealisticWeek(transaction, dueDate) {
@@ -14798,39 +14812,7 @@
             document.body.removeChild(link);
             URL.revokeObjectURL(url);
         }
-
-        // Tab switching function
-        function switchAPARTab(tabName) {
-            const section = document.getElementById('ap-ar-section');
-            section.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-            section.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            section.querySelector('#' + tabName + '-tab').classList.add('active');
-            section.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
         
-            // Initialize aging analysis when aging tab is selected
-            if (tabName === 'aging') {
-                console.log('Aging tab selected, ensuring data is loaded...');
-                
-                // Check if data is loaded, if not load it
-                if (!aparTransactions || aparTransactions.length === 0) {
-                    console.log('No data found, loading from Supabase...');
-                    loadAPARData().then(() => {
-                        updateAgingAnalysis();
-                    });
-                } else {
-                    console.log('Data already loaded, updating aging analysis...');
-                    updateAgingAnalysis();
-                }
-            }
-        
-            // Initialize scenario analysis if scenarios tab is selected
-            if (tabName === 'scenarios') {
-                setTimeout(() => {
-                    initializeScenarioAnalysis();
-                    initializeScenarioFinancing();
-                }, 100);
-            }
-        }
         // Scenario Analysis - New Bucket-based Structure
         let scenarioData = [];
         let originalData = [];
@@ -14846,21 +14828,107 @@
         }
         
         function loadScenarioTransactions() {
-            console.log('Loading scenario transactions...');
-            
-            // Use the same data source as the working Transaction and Aging tabs
             if (!aparTransactions || aparTransactions.length === 0) {
-                console.log('No aparTransactions found, trying to load from Supabase...');
-                // If no data loaded yet, trigger a load (but this should already be loaded)
-                loadAPARData().then(() => {
-                    if (aparTransactions.length > 0) {
-                        processTransactionsForScenario();
-                    }
-                });
+                console.warn("AP/AR data not available for scenarios.");
                 return;
             }
             
-            processTransactionsForScenario();
+            // Filter for only unpaid transactions
+            const unpaidTransactions = aparTransactions.filter(
+                t => t.status === 'Unpaid' || t.status === 'Overdue'
+            );
+        
+            // Convert to the scenario data format and assign to weeks
+            originalData = unpaidTransactions.map(transaction => {
+                let dueDate = transaction.due_date;
+                if (!dueDate && transaction.payment_terms && transaction.invoice_date) {
+                    const invoiceDate = new Date(transaction.invoice_date);
+                    dueDate = new Date(invoiceDate.getTime() + (parseInt(transaction.payment_terms) * 24 * 60 * 60 * 1000)).toISOString().split('T')[0];
+                }
+                const weekNumber = assignOverdueToRealisticWeek(transaction, dueDate);
+                return {
+                    id: transaction.id.toString(),
+                    type: transaction.type,
+                    vendor: transaction.company,
+                    amount: Math.abs(transaction.amount),
+                    description: transaction.description,
+                    originalWeek: weekNumber,
+                    currentWeek: weekNumber,
+                };
+            });
+        
+            scenarioData = JSON.parse(JSON.stringify(originalData));
+            populateTransactionBuckets();
+        }
+
+        function generateScenarioImpactForecastData() {
+            const startingCash = getStartingCash();
+            let forecast = [];
+            let currentCash = startingCash;
+        
+            for (let i = 1; i <= 13; i++) {
+                const weeklyFlows = calculateScenarioWeeklyFlows(i);
+                currentCash += weeklyFlows.inflows - weeklyFlows.outflows;
+                forecast.push({
+                    week: `Week ${i}`,
+                    cashPosition: currentCash,
+                });
+            }
+            return forecast;
+        }
+
+        function createScenarioImpactChart() {
+            const forecast = generateScenarioImpactForecastData();
+            const canvas = document.getElementById('scenarioImpactChart');
+            if (!canvas) {
+                console.error('Scenario Impact Chart canvas not found!');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+        
+            if (scenarioImpactChartInstance) {
+                scenarioImpactChartInstance.destroy();
+            }
+        
+            scenarioImpactChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: forecast.map(d => d.week),
+                    datasets: [{
+                        label: 'Projected Cash Position',
+                        data: forecast.map(d => d.cashPosition),
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 4,
+                        pointBackgroundColor: (context) => context.raw >= 0 ? '#3b82f6' : '#ef4444',
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => `Cash: Rp ${context.raw.toLocaleString()}`
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            ticks: {
+                                callback: (value) => `Rp ${formatNumber(value)}`
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateScenarioImpactChart() {
+            createScenarioImpactChart();
         }
         
         function processTransactionsForScenario() {
@@ -15552,11 +15620,16 @@
             section.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             section.querySelector('#' + tabName + '-tab').classList.add('active');
             section.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
-            
-            // Initialize scenario analysis if scenarios tab is selected
+        
+            if (tabName === 'aging') {
+                updateAgingAnalysis();
+            }
+        
+            // When the scenarios tab is clicked...
             if (tabName === 'scenarios') {
                 setTimeout(() => {
-                    initializeScenarioAnalysis();
+                    // ...call the NEW, dedicated function.
+                    initializeCashFlowScenario(); // <-- THIS IS THE ONLY LINE TO CHANGE
                 }, 100);
             }
         }
