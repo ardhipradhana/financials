@@ -8353,55 +8353,56 @@
             vertical-align: middle;
         }
 
-        .scenario-comparison-table-wrapper {
+        #scenarioAnalysisWrapper .scenario-comparison-table-wrapper {
             overflow-x: auto;
             border: 1px solid #e2e8f0;
             border-radius: 8px;
         }
         
-        .scenario-comparison-table {
+        #scenarioAnalysisWrapper .scenario-comparison-table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 1800px; /* Enforces horizontal scroll for wide data */
+            min-width: 1800px; /* Force horizontal scroll */
         }
         
-        /* --- General header and cell styling --- */
-        .scenario-comparison-table th,
-        .scenario-comparison-table td {
+        /* General header and cell styling */
+        #scenarioAnalysisWrapper .scenario-comparison-table th,
+        #scenarioAnalysisWrapper .scenario-comparison-table td {
             padding: 0.75rem 1rem;
             white-space: nowrap;
             vertical-align: middle;
         }
         
-        /* --- Freeze the first column (Financial Item) --- */
-        .scenario-comparison-table th:first-child,
-        .scenario-comparison-table td:first-child {
+        /* Freeze the first column ("Financial Item") */
+        #scenarioAnalysisWrapper .scenario-comparison-table th:first-child,
+        #scenarioAnalysisWrapper .scenario-comparison-table td:first-child {
             position: sticky;
             left: 0;
             z-index: 2;
             background-color: #ffffff;
             text-align: left;
             font-weight: 600;
-            width: 200px; /* Fixed width for the first column */
+            width: 200px;
+            min-width: 200px;
             border-right: 2px solid #e2e8f0;
         }
         
-        /* --- Header Styling --- */
-        .scenario-comparison-table thead {
+        /* Header Styling */
+        #scenarioAnalysisWrapper .scenario-comparison-table thead {
             position: sticky;
             top: 0;
             z-index: 3;
             background-color: #f8fafc;
         }
         
-        .scenario-comparison-table .year-header th {
+        #scenarioAnalysisWrapper .year-header th {
             border-bottom: 2px solid #e2e8f0;
             font-size: 0.9rem;
             color: #1e293b;
             text-align: center;
         }
         
-        .scenario-comparison-table .sub-header th {
+        #scenarioAnalysisWrapper .sub-header th {
             font-size: 0.8rem;
             font-weight: 500;
             color: #475569;
@@ -8409,25 +8410,29 @@
             border-bottom: 1px solid #e2e8f0;
         }
         
-        /* --- SOLVING THE WIDTH ISSUE --- */
-        /* Explicitly set widths for the base, scenario, and change columns */
-        .scenario-comparison-table .base-col,
-        .scenario-comparison-table .scenario-col {
-            width: 150px;
+        /* UNIFORM COLUMN WIDTHS */
+        #scenarioAnalysisWrapper .base-col,
+        #scenarioAnalysisWrapper .scenario-col,
+        #scenarioAnalysisWrapper .change-col {
+            width: 180px; /* Set a uniform width for all data columns */
+            min-width: 180px;
             text-align: right;
         }
         
-        .scenario-comparison-table .change-col {
-            width: 180px; /* Slightly wider to accommodate value and percentage */
-            text-align: right;
+        /* Styling for Readability */
+        #scenarioAnalysisWrapper .change-col {
             border-right: 2px solid #e2e8f0;
         }
         
-        /* --- Readability Styling --- */
-        .scenario-comparison-table tbody tr:hover td,
-        .scenario-comparison-table tbody tr:hover th {
+        #scenarioAnalysisWrapper tbody tr:hover td,
+        #scenarioAnalysisWrapper tbody tr:hover th {
             background-color: #f0f9ff;
         }
+        
+        /* COLORING FIX for "Change" column */
+        #scenarioAnalysisWrapper .positive { color: #10b981; font-weight: 600; }
+        #scenarioAnalysisWrapper .negative { color: #ef4444; font-weight: 600; }
+        #scenarioAnalysisWrapper .neutral { color: #64748b; }
 
         .scenario-status {
             display: flex;
@@ -11194,13 +11199,15 @@
                         </div>
             
                         <!-- P&L Comparison Table -->
-                        <div class="table-container scenario-comparison-table-wrapper">
-                            <table class="financial-table scenario-comparison-table">
-                                <thead id="scenarioComparisonHeader">
-                                    </thead>
-                                <tbody id="scenarioComparisonBody">
-                                    </tbody>
-                            </table>
+                        <div id="scenarioAnalysisWrapper">
+                            <div class="table-container scenario-comparison-table-wrapper">
+                                <table class="financial-table scenario-comparison-table">
+                                    <thead id="scenarioComparisonHeader">
+                                        </thead>
+                                    <tbody id="scenarioComparisonBody">
+                                        </tbody>
+                                </table>
+                            </div>
                         </div>
             
                         <!-- Summary Impact Cards -->
@@ -28328,14 +28335,15 @@
             const bodyTbody = document.getElementById('scenarioComparisonBody');
             const years = [2026, 2027, 2028, 2029, 2030];
         
-            // --- 1. Generate the new, grouped header ---
+            // 1. Generate the grouped header
             let headerHTML = `
                 <tr class="year-header">
                     <th>Financial Item</th>
                     ${years.map(year => `<th colspan="3">${year}</th>`).join('')}
                 </tr>
                 <tr class="sub-header">
-                    <th></th> ${years.map(() => `
+                    <th></th>
+                    ${years.map(() => `
                         <th>Base</th>
                         <th>Scenario</th>
                         <th>Change</th>
@@ -28344,7 +28352,7 @@
             `;
             headerTbody.innerHTML = headerHTML;
         
-            // --- 2. Generate the table body with conditional coloring ---
+            // 2. Generate the table body with conditional coloring
             const lineItems = [
                 { key: 'revenue', label: 'Revenue' },
                 { key: 'cogs', label: 'Cost of Goods Sold' },
@@ -28354,7 +28362,7 @@
             ];
         
             bodyTbody.innerHTML = lineItems.map(item => {
-                let row = `<tr><td>${item.label}</td>`;
+                let rowHTML = `<tr><td>${item.label}</td>`;
         
                 years.forEach(year => {
                     const base = scenarioState.baseCase[year] ? scenarioState.baseCase[year][item.key] : 0;
@@ -28362,19 +28370,23 @@
                     const change = scenario - base;
                     const changePercent = base !== 0 ? (change / Math.abs(base)) * 100 : 0;
         
-                    // --- THIS IS THE NEW LOGIC ---
+                    // --- CONDITIONAL COLORING LOGIC ---
                     let changeClass = '';
-                    // For expenses, an increase is negative (red) and a decrease is positive (green).
+                    // For COGS and OPEX, an increase is negative (bad).
                     if (item.key === 'cogs' || item.key === 'opex') {
-                        changeClass = change > 0 ? 'negative' : change < 0 ? 'positive' : 'neutral';
+                        if (change > 0) changeClass = 'negative';
+                        else if (change < 0) changeClass = 'positive';
+                        else changeClass = 'neutral';
                     } 
-                    // For revenue and profit, an increase is positive (green).
+                    // For Revenue and Profit, an increase is positive (good).
                     else {
-                        changeClass = change > 0 ? 'positive' : change < 0 ? 'negative' : 'neutral';
+                        if (change > 0) changeClass = 'positive';
+                        else if (change < 0) changeClass = 'negative';
+                        else changeClass = 'neutral';
                     }
                     // --- END OF NEW LOGIC ---
         
-                    row += `
+                    rowHTML += `
                         <td class="base-col">Rp ${formatNumber(base)}</td>
                         <td class="scenario-col">Rp ${formatNumber(scenario)}</td>
                         <td class="change-col ${changeClass}">
@@ -28384,14 +28396,14 @@
                     `;
                 });
         
-                row += '</tr>';
-                return row;
+                rowHTML += '</tr>';
+                return rowHTML;
             }).join('');
             
             // Update active scenario name display
             document.getElementById('activeScenarioName').textContent = scenarioState.scenarioName;
         
-            // Update the summary cards as well
+            // Update the summary cards
             updateSummaryCards();
         }
         
@@ -28727,82 +28739,6 @@
                     text-align: center;
                     font-weight: 600;
                     color: #1f2937;
-                }
-                
-                .scenario-comparison-table-wrapper {
-                    overflow-x: auto;
-                    border: 1px solid #e2e8f0;
-                    border-radius: 8px;
-                }
-                
-                .scenario-comparison-table {
-                    width: 100%;
-                    border-collapse: collapse;
-                    min-width: 1800px; /* Enforces horizontal scroll for wide data */
-                }
-                
-                /* --- General header and cell styling --- */
-                .scenario-comparison-table th,
-                .scenario-comparison-table td {
-                    padding: 0.75rem 1rem;
-                    white-space: nowrap;
-                    vertical-align: middle;
-                }
-                
-                /* --- Freeze the first column (Financial Item) --- */
-                .scenario-comparison-table th:first-child,
-                .scenario-comparison-table td:first-child {
-                    position: sticky;
-                    left: 0;
-                    z-index: 2;
-                    background-color: #ffffff;
-                    text-align: left;
-                    font-weight: 600;
-                    width: 200px; /* Fixed width for the first column */
-                    border-right: 2px solid #e2e8f0;
-                }
-                
-                /* --- Header Styling --- */
-                .scenario-comparison-table thead {
-                    position: sticky;
-                    top: 0;
-                    z-index: 3;
-                    background-color: #f8fafc;
-                }
-                
-                .scenario-comparison-table .year-header th {
-                    border-bottom: 2px solid #e2e8f0;
-                    font-size: 0.9rem;
-                    color: #1e293b;
-                    text-align: center;
-                }
-                
-                .scenario-comparison-table .sub-header th {
-                    font-size: 0.8rem;
-                    font-weight: 500;
-                    color: #475569;
-                    text-align: right;
-                    border-bottom: 1px solid #e2e8f0;
-                }
-                
-                /* --- SOLVING THE WIDTH ISSUE --- */
-                /* Explicitly set widths for the base, scenario, and change columns */
-                .scenario-comparison-table .base-col,
-                .scenario-comparison-table .scenario-col {
-                    width: 150px;
-                    text-align: right;
-                }
-                
-                .scenario-comparison-table .change-col {
-                    width: 180px; /* Slightly wider to accommodate value and percentage */
-                    text-align: right;
-                    border-right: 2px solid #e2e8f0;
-                }
-                
-                /* --- Readability Styling --- */
-                .scenario-comparison-table tbody tr:hover td,
-                .scenario-comparison-table tbody tr:hover th {
-                    background-color: #f0f9ff;
                 }
                 
                 .positive {
