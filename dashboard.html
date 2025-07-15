@@ -28621,6 +28621,43 @@
                 .content-card + .content-card {
                     margin-top: 2rem;
                 }
+    
+                .scenario-input-group {
+                    display: flex;
+                    gap: 0.5rem;
+                    align-items: center;
+                    margin-top: 0.75rem;
+                }
+                
+                .scenario-input-group input[type="number"] {
+                    width: 80px;
+                    text-align: center;
+                    font-weight: 700;
+                    font-size: 1.1rem;
+                    color: #1e40af;
+                    background: #f0f9ff;
+                    border: 2px solid #bfdbfe;
+                    border-radius: 8px;
+                    padding: 0.5rem;
+                    transition: all 0.2s ease;
+                }
+                
+                .scenario-input-group input[type="number"]:focus {
+                    outline: none;
+                    border-color: #3b82f6;
+                    background: #ffffff;
+                    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+                }
+                
+                .scenario-input-group span {
+                    font-weight: 700;
+                    font-size: 1.1rem;
+                    color: #1e40af;
+                    background: #dbeafe;
+                    padding: 0.5rem 0.75rem;
+                    border-radius: 6px;
+                    border: 1px solid #bfdbfe;
+                }            
             `;
             
             document.head.appendChild(style);
