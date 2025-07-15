@@ -28622,42 +28622,36 @@
                     margin-top: 2rem;
                 }
     
-                .scenario-input-group {
-                    display: flex;
-                    gap: 0.5rem;
-                    align-items: center;
-                    margin-top: 0.75rem;
+                /* Enhanced percentage input styling - target actual classes */
+                input.filter-input[type="number"] {
+                    text-align: center !important;
+                    font-weight: 700 !important;
+                    font-size: 1.1rem !important;
+                    color: #1e40af !important;
+                    background: #f0f9ff !important;
+                    border: 2px solid #bfdbfe !important;
+                    border-radius: 8px !important;
+                    padding: 0.5rem !important;
+                    transition: all 0.2s ease !important;
                 }
                 
-                .scenario-input-group input[type="number"] {
-                    width: 80px;
-                    text-align: center;
-                    font-weight: 700;
-                    font-size: 1.1rem;
-                    color: #1e40af;
-                    background: #f0f9ff;
-                    border: 2px solid #bfdbfe;
-                    border-radius: 8px;
-                    padding: 0.5rem;
-                    transition: all 0.2s ease;
+                input.filter-input[type="number"]:focus {
+                    outline: none !important;
+                    border-color: #3b82f6 !important;
+                    background: #ffffff !important;
+                    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
                 }
                 
-                .scenario-input-group input[type="number"]:focus {
-                    outline: none;
-                    border-color: #3b82f6;
-                    background: #ffffff;
-                    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-                }
-                
-                .scenario-input-group span {
-                    font-weight: 700;
-                    font-size: 1.1rem;
-                    color: #1e40af;
-                    background: #dbeafe;
-                    padding: 0.5rem 0.75rem;
-                    border-radius: 6px;
-                    border: 1px solid #bfdbfe;
-                }            
+                /* Style the % symbol next to sliders */
+                .metric-content div[style*="display: flex"] span {
+                    font-weight: 700 !important;
+                    font-size: 1.1rem !important;
+                    color: #1e40af !important;
+                    background: #dbeafe !important;
+                    padding: 0.5rem 0.75rem !important;
+                    border-radius: 6px !important;
+                    border: 1px solid #bfdbfe !important;
+                }         
             `;
             
             document.head.appendChild(style);
