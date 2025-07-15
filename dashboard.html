@@ -11110,11 +11110,6 @@
                     </div>
                 
                     <div class="panel-content">
-                        <div class="scenario-status">
-                            <span class="filter-label">Active Scenario:</span>
-                            <span id="activeScenarioName" class="metric-value">Revenue Boost +20%</span>
-                        </div>
-                
                         <div class="timeframe-selector">
                             <label class="filter-label">Impact Timeframe (Years):</label>
                             <div class="year-toggle-group">
@@ -11141,179 +11136,177 @@
                             </div>
                         </div>
                     </div>
-                </div>
-            
-                <!-- Quick Actions -->
-                <div class="content-card">
-                    <div class="card-header">
-                        <h3>Quick Scenario Actions</h3>
-                        <p class="card-subtitle">Apply common business scenarios instantly</p>
-                    </div>
-                    <div class="card-content">
-                        <!-- Favorable Scenarios -->
-                        <div class="filter-section">
-                            <h4 class="filter-label" style="color: #059669;">Favorable Scenarios</h4>
-                            <div class="filter-row" style="gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem;">
-                                <button class="btn btn-outline" onclick="applyQuickScenario('revenue_boost')" style="border-color: #059669; color: #059669;">
-                                    <i class="fas fa-arrow-up"></i> Revenue Boost +20%
-                                </button>
-                                <button class="btn btn-outline" onclick="applyQuickScenario('cost_reduction')" style="border-color: #059669; color: #059669;">
-                                    <i class="fas fa-arrow-down"></i> Cost Reduction -10%
-                                </button>
-                                <button class="btn btn-outline" onclick="applyQuickScenario('new_product')" style="border-color: #059669; color: #059669;">
-                                    <i class="fas fa-plus"></i> New Product Launch
-                                </button>
-                                <button class="btn btn-outline" onclick="applyQuickScenario('market_expansion')" style="border-color: #059669; color: #059669;">
-                                    <i class="fas fa-expand"></i> Market Expansion
-                                </button>
-                            </div>
-                        </div>
-            
-                        <!-- Unfavorable Scenarios -->
-                        <div class="filter-section">
-                            <h4 class="filter-label" style="color: #dc2626;">Unfavorable Scenarios</h4>
-                            <div class="filter-row" style="gap: 0.5rem; flex-wrap: wrap;">
-                                <button class="btn btn-outline" onclick="applyQuickScenario('price_drop')" style="border-color: #dc2626; color: #dc2626;">
-                                    <i class="fas fa-arrow-down"></i> Price Drop -15%
-                                </button>
-                                <button class="btn btn-outline" onclick="applyQuickScenario('supply_constraints')" style="border-color: #dc2626; color: #dc2626;">
-                                    <i class="fas fa-exclamation-triangle"></i> Supply Constraints +25%
-                                </button>
-                                <button class="btn btn-outline" onclick="applyQuickScenario('contract_lost')" style="border-color: #dc2626; color: #dc2626;">
-                                    <i class="fas fa-times"></i> Key Contract Lost -30%
-                                </button>
-                                <button class="btn btn-outline" onclick="applyQuickScenario('economic_downturn')" style="border-color: #dc2626; color: #dc2626;">
-                                    <i class="fas fa-chart-line-down"></i> Economic Downturn -20%
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            
-                <!-- Custom Adjustments -->
-                <div class="content-card">
-                    <div class="card-header">
-                        <h3>Custom Adjustments</h3>
-                        <p class="card-subtitle">Fine-tune specific financial parameters</p>
-                    </div>
-                    <div class="card-content">
-                        <div class="metrics-grid">
-                            <!-- Revenue Adjustments -->
-                            <div class="metric-card">
-                                <div class="metric-header">
-                                    <div class="metric-title">Revenue</div>  
-                                </div>
-                                <div class="metric-content">
-                                    <div class="filter-section">
-                                        <label class="filter-label">Growth Rate (%)</label>
-                                        <div style="display: flex; gap: 0.5rem; align-items: center;">
-                                            <input type="range" id="revenueSlider" class="scenario-slider" min="-50" max="100" value="0" oninput="updateCustomScenario('revenue', this.value)" style="flex: 1;">
-                                            <input type="number" id="revenueInput" class="filter-input" min="-50" max="100" value="0" oninput="updateCustomScenarioFromInput('revenue', this.value)" style="width: 80px;">
-                                            <span>%</span>
-                                        </div>
-                                        <div class="slider-value"></div>
-                                    </div>
-                                </div>
-                            </div>
-            
-                            <!-- COGS Adjustments -->
-                            <div class="metric-card">
-                                <div class="metric-header">
-                                    <div class="metric-title">Cost of Goods Sold</div>
-                                </div>
-                                <div class="metric-content">
-                                    <div class="filter-section">
-                                        <label class="filter-label">Change (%)</label>
-                                        <div style="display: flex; gap: 0.5rem; align-items: center;">
-                                            <input type="range" id="cogsSlider" class="scenario-slider" min="-50" max="100" value="0" oninput="updateCustomScenario('cogs', this.value)" style="flex: 1;">
-                                            <input type="number" id="cogsInput" class="filter-input" min="-50" max="100" value="0" oninput="updateCustomScenarioFromInput('cogs', this.value)" style="width: 80px;">
-                                            <span>%</span>
-                                        </div>
-                                        <div class="slider-value"></div>
-                                    </div>
-                                </div>
-                            </div>
-            
-                            <!-- Operating Expenses -->
-                            <div class="metric-card">
-                                <div class="metric-header">
-                                    <div class="metric-title">Operating Expenses</div>
-                                </div>
-                                <div class="metric-content">
-                                    <div class="filter-section">
-                                        <label class="filter-label">Change (%)</label>
-                                        <div style="display: flex; gap: 0.5rem; align-items: center;">
-                                            <input type="range" id="opexSlider" class="scenario-slider" min="-50" max="100" value="0" oninput="updateCustomScenario('opex', this.value)" style="flex: 1;">
-                                            <input type="number" id="opexInput" class="filter-input" min="-50" max="100" value="0" oninput="updateCustomScenarioFromInput('opex', this.value)" style="width: 80px;">
-                                            <span>%</span>
-                                        </div>
-                                        <div class="slider-value"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
 
-                        <!-- Apply Scenario Button -->
-                        <div class="filter-section" style="margin-top: 2rem; text-align: center;">
-                            <button class="btn btn-primary" onclick="applyCurrentScenario()" style="font-size: 1rem; padding: 0.75rem 2rem;">
-                                <i class="fas fa-check"></i> Apply Scenario to Selected Years
-                            </button>
-                            <p style="font-size: 0.875rem; color: #64748b; margin-top: 0.5rem;">
-                                This will log your current adjustments as events and reset the sliders
-                            </p>
+                    <div class="content-card">
+                        <div class="card-header">
+                            <h3>Quick Scenario Actions</h3>
+                            <p class="card-subtitle">Apply common business scenarios instantly</p>
                         </div>
-                        
-                        <!-- Section Divider -->
-                        <hr style="margin: 2rem 0; border: 1px solid #d1d5db;">
-            
-                        <!-- One-time Events -->
-                        <div class="filter-section" style="margin-top: 1rem;">
-                            <h4 class="filter-label">One-time Events</h4>
-                            <div class="filter-row" style="gap: 1rem;">
-                                <div class="input-group">
-                                    <label class="filter-label">Description</label>
-                                    <input type="text" id="eventDescription" class="filter-input" placeholder="e.g., Equipment purchase, Legal settlement">
+                        <div class="card-content">
+                            <!-- Favorable Scenarios -->
+                            <div class="filter-section">
+                                <h4 class="filter-label" style="color: #059669;">Favorable Scenarios</h4>
+                                <div class="filter-row" style="gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                                    <button class="btn btn-outline" onclick="applyQuickScenario('revenue_boost')" style="border-color: #059669; color: #059669;">
+                                        <i class="fas fa-arrow-up"></i> Revenue Boost +20%
+                                    </button>
+                                    <button class="btn btn-outline" onclick="applyQuickScenario('cost_reduction')" style="border-color: #059669; color: #059669;">
+                                        <i class="fas fa-arrow-down"></i> Cost Reduction -10%
+                                    </button>
+                                    <button class="btn btn-outline" onclick="applyQuickScenario('new_product')" style="border-color: #059669; color: #059669;">
+                                        <i class="fas fa-plus"></i> New Product Launch
+                                    </button>
+                                    <button class="btn btn-outline" onclick="applyQuickScenario('market_expansion')" style="border-color: #059669; color: #059669;">
+                                        <i class="fas fa-expand"></i> Market Expansion
+                                    </button>
                                 </div>
-                                <div class="input-group">
-                                    <label class="filter-label">P&L Line</label>
-                                    <select id="eventPLLine" class="filter-input">
-                                        <option value="revenue">Revenue</option>
-                                        <option value="cogs">Cost of Goods Sold</option>
-                                        <option value="opex">Operating Expenses</option>
-                                        <option value="other">Other</option>
-                                    </select>
+                            </div>
+                
+                            <!-- Unfavorable Scenarios -->
+                            <div class="filter-section">
+                                <h4 class="filter-label" style="color: #dc2626;">Unfavorable Scenarios</h4>
+                                <div class="filter-row" style="gap: 0.5rem; flex-wrap: wrap;">
+                                    <button class="btn btn-outline" onclick="applyQuickScenario('price_drop')" style="border-color: #dc2626; color: #dc2626;">
+                                        <i class="fas fa-arrow-down"></i> Price Drop -15%
+                                    </button>
+                                    <button class="btn btn-outline" onclick="applyQuickScenario('supply_constraints')" style="border-color: #dc2626; color: #dc2626;">
+                                        <i class="fas fa-exclamation-triangle"></i> Supply Constraints +25%
+                                    </button>
+                                    <button class="btn btn-outline" onclick="applyQuickScenario('contract_lost')" style="border-color: #dc2626; color: #dc2626;">
+                                        <i class="fas fa-times"></i> Key Contract Lost -30%
+                                    </button>
+                                    <button class="btn btn-outline" onclick="applyQuickScenario('economic_downturn')" style="border-color: #dc2626; color: #dc2626;">
+                                        <i class="fas fa-chart-line-down"></i> Economic Downturn -20%
+                                    </button>
                                 </div>
-                                <div class="input-group">
-                                    <label class="filter-label">Amount</label>
-                                    <input type="number" id="eventAmount" class="filter-input" placeholder="0">
-                                </div>
-                                <div class="input-group">
-                                    <label class="filter-label">Year</label>
-                                    <select id="eventYear" class="filter-input">
-                                        <option value="2026">2026</option>
-                                        <option value="2027">2027</option>
-                                        <option value="2028">2028</option>
-                                        <option value="2029">2029</option>
-                                        <option value="2030">2030</option>
-                                    </select>
-                                </div>
-                                <button class="btn btn-primary" onclick="addOneTimeEvent()" style="align-self: flex-end;">
-                                    <i class="fas fa-plus"></i> Add Event
-                                </button>
                             </div>
                         </div>
-            
-                        <!-- Added Events Display -->
-                        <div id="oneTimeEvents" class="filter-section" style="margin-top: 1rem; display: none;">
-                            <h4 class="filter-label">Added Events</h4>
-                            <div id="eventsList" class="events-list"></div>
+                    </div>
+
+                    <div class="content-card">
+                        <div class="card-header">
+                            <h3>Custom Adjustments</h3>
+                            <p class="card-subtitle">Fine-tune specific financial parameters</p>
                         </div>
-            
-                        <!-- Reset Button -->
-                        <div class="filter-section" style="margin-top: 1rem; text-align: center;">
-                            <button class="btn btn-secondary" onclick="resetAllScenarios()">
-                                <i class="fas fa-undo"></i> Reset All Scenarios
-                            </button>
+                        <div class="card-content">
+                            <div class="metrics-grid">
+                                <!-- Revenue Adjustments -->
+                                <div class="metric-card">
+                                    <div class="metric-header">
+                                        <div class="metric-title">Revenue</div>  
+                                    </div>
+                                    <div class="metric-content">
+                                        <div class="filter-section">
+                                            <label class="filter-label">Growth Rate (%)</label>
+                                            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                                <input type="range" id="revenueSlider" class="scenario-slider" min="-50" max="100" value="0" oninput="updateCustomScenario('revenue', this.value)" style="flex: 1;">
+                                                <input type="number" id="revenueInput" class="filter-input" min="-50" max="100" value="0" oninput="updateCustomScenarioFromInput('revenue', this.value)" style="width: 80px;">
+                                                <span>%</span>
+                                            </div>
+                                            <div class="slider-value"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                
+                                <!-- COGS Adjustments -->
+                                <div class="metric-card">
+                                    <div class="metric-header">
+                                        <div class="metric-title">Cost of Goods Sold</div>
+                                    </div>
+                                    <div class="metric-content">
+                                        <div class="filter-section">
+                                            <label class="filter-label">Change (%)</label>
+                                            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                                <input type="range" id="cogsSlider" class="scenario-slider" min="-50" max="100" value="0" oninput="updateCustomScenario('cogs', this.value)" style="flex: 1;">
+                                                <input type="number" id="cogsInput" class="filter-input" min="-50" max="100" value="0" oninput="updateCustomScenarioFromInput('cogs', this.value)" style="width: 80px;">
+                                                <span>%</span>
+                                            </div>
+                                            <div class="slider-value"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                
+                                <!-- Operating Expenses -->
+                                <div class="metric-card">
+                                    <div class="metric-header">
+                                        <div class="metric-title">Operating Expenses</div>
+                                    </div>
+                                    <div class="metric-content">
+                                        <div class="filter-section">
+                                            <label class="filter-label">Change (%)</label>
+                                            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                                <input type="range" id="opexSlider" class="scenario-slider" min="-50" max="100" value="0" oninput="updateCustomScenario('opex', this.value)" style="flex: 1;">
+                                                <input type="number" id="opexInput" class="filter-input" min="-50" max="100" value="0" oninput="updateCustomScenarioFromInput('opex', this.value)" style="width: 80px;">
+                                                <span>%</span>
+                                            </div>
+                                            <div class="slider-value"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+    
+                            <!-- Apply Scenario Button -->
+                            <div class="filter-section" style="margin-top: 2rem; text-align: center;">
+                                <button class="btn btn-primary" onclick="applyCurrentScenario()" style="font-size: 1rem; padding: 0.75rem 2rem;">
+                                    <i class="fas fa-check"></i> Apply Scenario to Selected Years
+                                </button>
+                                <p style="font-size: 0.875rem; color: #64748b; margin-top: 0.5rem;">
+                                    This will log your current adjustments as events and reset the sliders
+                                </p>
+                            </div>
+                            
+                            <!-- Section Divider -->
+                            <hr style="margin: 2rem 0; border: 1px solid #d1d5db;">
+                
+                            <!-- One-time Events -->
+                            <div class="filter-section" style="margin-top: 1rem;">
+                                <h4 class="filter-label">One-time Events</h4>
+                                <div class="filter-row" style="gap: 1rem;">
+                                    <div class="input-group">
+                                        <label class="filter-label">Description</label>
+                                        <input type="text" id="eventDescription" class="filter-input" placeholder="e.g., Equipment purchase, Legal settlement">
+                                    </div>
+                                    <div class="input-group">
+                                        <label class="filter-label">P&L Line</label>
+                                        <select id="eventPLLine" class="filter-input">
+                                            <option value="revenue">Revenue</option>
+                                            <option value="cogs">Cost of Goods Sold</option>
+                                            <option value="opex">Operating Expenses</option>
+                                            <option value="other">Other</option>
+                                        </select>
+                                    </div>
+                                    <div class="input-group">
+                                        <label class="filter-label">Amount</label>
+                                        <input type="number" id="eventAmount" class="filter-input" placeholder="0">
+                                    </div>
+                                    <div class="input-group">
+                                        <label class="filter-label">Year</label>
+                                        <select id="eventYear" class="filter-input">
+                                            <option value="2026">2026</option>
+                                            <option value="2027">2027</option>
+                                            <option value="2028">2028</option>
+                                            <option value="2029">2029</option>
+                                            <option value="2030">2030</option>
+                                        </select>
+                                    </div>
+                                    <button class="btn btn-primary" onclick="addOneTimeEvent()" style="align-self: flex-end;">
+                                        <i class="fas fa-plus"></i> Add Event
+                                    </button>
+                                </div>
+                            </div>
+                
+                            <!-- Added Events Display -->
+                            <div id="oneTimeEvents" class="filter-section" style="margin-top: 1rem; display: none;">
+                                <h4 class="filter-label">Added Events</h4>
+                                <div id="eventsList" class="events-list"></div>
+                            </div>
+                
+                            <!-- Reset Button -->
+                            <div class="filter-section" style="margin-top: 1rem; text-align: center;">
+                                <button class="btn btn-secondary" onclick="resetAllScenarios()">
+                                    <i class="fas fa-undo"></i> Reset All Scenarios
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
