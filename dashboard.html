@@ -11086,8 +11086,8 @@
             
                         <!-- Reset Button -->
                         <div class="filter-section" style="margin-top: 1rem; text-align: center;">
-                            <button class="btn btn-secondary" onclick="resetScenario()">
-                                <i class="fas fa-undo"></i> Reset to Base Case
+                            <button class="btn btn-secondary" onclick="resetAllScenarios()">
+                                <i class="fas fa-undo"></i> Reset All Scenarios
                             </button>
                         </div>
                     </div>
@@ -27987,7 +27987,18 @@
         
         // Apply quick scenario actions
         function applyQuickScenario(scenarioType) {
-            resetScenario();
+            // Reset sliders but DON'T clear logged events
+            scenarioState.adjustments = { revenue: 0, cogs: 0, opex: 0 };
+            scenarioState.scenarioName = 'Base Case';
+            
+            // Reset sliders and inputs
+            document.getElementById('revenueSlider').value = 0;
+            document.getElementById('cogsSlider').value = 0;
+            document.getElementById('opexSlider').value = 0;
+            
+            document.getElementById('revenueInput').value = 0;
+            document.getElementById('cogsInput').value = 0;
+            document.getElementById('opexInput').value = 0;
             
             const scenarios = {
                 revenue_boost: {
@@ -28836,7 +28847,25 @@
             showSuccessMessage('Scenario applied to selected years!');
         }
 
-        
+        // Function to reset everything including logged events
+        function resetAllScenarios() {
+            scenarioState.adjustments = { revenue: 0, cogs: 0, opex: 0 };
+            scenarioState.oneTimeEvents = [];
+            scenarioState.scenarioName = 'Base Case';
+            scenarioState.currentScenario = JSON.parse(JSON.stringify(scenarioState.baseCase));
+            
+            // Reset sliders and inputs
+            document.getElementById('revenueSlider').value = 0;
+            document.getElementById('cogsSlider').value = 0;
+            document.getElementById('opexSlider').value = 0;
+            
+            document.getElementById('revenueInput').value = 0;
+            document.getElementById('cogsInput').value = 0;
+            document.getElementById('opexInput').value = 0;
+            
+            updateEventsList();
+            updateScenarioComparison();
+        }
         
     </script>
 
