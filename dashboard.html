@@ -15122,39 +15122,24 @@
         
         function handleBucketDrop(e) {
             e.preventDefault();
-            
             const bucket = e.target.closest('.week-bucket');
             if (!bucket) return;
-            
+        
             const transactionId = e.dataTransfer.getData('text/plain');
             const newWeek = bucket.dataset.week;
-            
-            // Update scenario data
             const transaction = scenarioData.find(t => t.id === transactionId);
+        
             if (transaction && transaction.currentWeek != newWeek) {
                 const oldWeek = transaction.currentWeek;
                 transaction.currentWeek = newWeek;
-                
-                // Add to change log
+        
                 addToChangeLog(transaction, oldWeek, newWeek);
-                
-                // Visual feedback
-                bucket.style.background = '#10b981';
-                bucket.style.color = 'white';
-                setTimeout(() => {
-                    bucket.style.background = '';
-                    bucket.style.color = '';
-                }, 300);
-                
-                // Update displays
-                populateTransactionBuckets();
-                updateScenarioChart();
-                updateImpactAnalysis();
-
-                if (transaction.isFinancing) {
-                    calculateScenarioImpact();
-                }
+                populateTransactionBuckets(); // Re-render the cards in their new positions
+                updateScenarioImpactChart(); // Update the main cash flow chart
+                updateImpactAnalysis();      // <-- FIX: This call updates the Impact Analysis card.
+                calculateScenarioImpact();   // <-- FIX: This call updates the Projected Impact card.
             }
+            bucket.classList.remove('drag-over');
         }
         
         function handleBucketDragEnd(e) {
@@ -15235,9 +15220,10 @@
         function updateImpactAnalysis() {
             const impactContent = document.getElementById('impactAnalysisContent');
             if (!impactContent) return;
-            
+        
+            // Find all transactions that have been moved from their original week.
             const changes = scenarioData.filter(t => t.currentWeek !== t.originalWeek);
-            
+        
             if (changes.length === 0) {
                 impactContent.innerHTML = `
                     <div class="impact-item neutral">
@@ -15247,51 +15233,35 @@
                 `;
                 return;
             }
-            
-            let impacts = [];
-            
+        
+            let impactsHTML = '';
             changes.forEach(change => {
-                const isLater = (change.currentWeek === 'parked') || 
-                               (change.currentWeek !== 'parked' && change.originalWeek !== 'parked' && 
-                                parseInt(change.currentWeek) > parseInt(change.originalWeek));
+                const isDelayed = (change.currentWeek === 'parked') || 
+                                  (change.currentWeek > change.originalWeek);
                 
-                if (change.type === 'AP') {
-                    if (isLater) {
-                        impacts.push({
-                            type: 'risk',
-                            icon: '⚠️',
-                            text: `Late payment risk: ${change.vendor} - Check contract for potential penalties`
-                        });
-                    } else {
-                        impacts.push({
-                            type: 'benefit',
-                            icon: '✓',
-                            text: `Early payment opportunity: ${change.vendor} - Check for available discounts`
-                        });
-                    }
-                } else {
-                    if (isLater) {
-                        impacts.push({
-                            type: 'risk',
-                            icon: '❗',
-                            text: `Collection delay: ${change.vendor} - Monitor cash flow impact and follow up`
-                        });
-                    } else {
-                        impacts.push({
-                            type: 'benefit',
-                            icon: '✅',
-                            text: `Accelerated collection: ${change.vendor} - Improved cash position`
-                        });
-                    }
+                let impactType = isDelayed ? 'risk' : 'benefit';
+                let icon = isDelayed ? '⚠️' : '✅';
+                let text = '';
+        
+                if (change.type === 'AP') { // Accounts Payable (Money Out)
+                    text = isDelayed ? 
+                        `Payment to <strong>${change.vendor}</strong> delayed, improving short-term cash.` :
+                        `Payment to <strong>${change.vendor}</strong> accelerated, check for early payment discounts.`;
+                } else { // Accounts Receivable (Money In)
+                     text = isDelayed ? 
+                        `Collection from <strong>${change.vendor}</strong> delayed, negatively impacting cash flow.` :
+                        `Collection from <strong>${change.vendor}</strong> accelerated, improving cash position.`;
+                     if(isDelayed) impactType = 'risk'; else impactType = 'benefit';
                 }
+                
+                impactsHTML += `
+                    <div class="impact-item ${impactType}">
+                        <span class="impact-icon">${icon}</span>
+                        <span>${text}</span>
+                    </div>
+                `;
             });
-            
-            impactContent.innerHTML = impacts.map(impact => `
-                <div class="impact-item ${impact.type}">
-                    <span class="impact-icon">${impact.icon}</span>
-                    <span>${impact.text}</span>
-                </div>
-            `).join('');
+            impactContent.innerHTML = impactsHTML;
         }
         
         function resetScenario() {
@@ -22577,53 +22547,25 @@
                 id: 'financing_' + Date.now(),
                 type: document.getElementById('financingType').value,
                 amount: parseInt(document.getElementById('financingAmount').value),
-                term: parseInt(document.getElementById('financingTerm').value),
-                rate: parseFloat(document.getElementById('financingRate').value),
-                purpose: document.getElementById('financingPurpose').value,
-                availableDate: document.getElementById('financingAvailableDate').value,
-                addedAt: new Date().toISOString()
+                availableDate: document.getElementById('financingAvailableDate').value
             };
-            
-            // Create financing transaction compatible with your existing system
+        
+            // Create a transaction card for this financing event. It starts as "parked".
             const financingTransaction = {
                 id: financing.id,
-                type: 'AR', // Positive cash flow
+                type: 'AR', // All financing is treated as an inflow (AR)
                 vendor: `${getFinancingTypeName(financing.type)}`,
-                reference: financing.type.toUpperCase() + '-' + Date.now().toString().slice(-6),
-                description: financing.purpose,
                 amount: financing.amount,
-                invoice_date: financing.availableDate,
-                due_date: financing.availableDate,
-                payment_terms: 0,
-                status: 'Unpaid',
-                currency: 'IDR',
-                isScenario: true,
-                isFinancing: true,
-                currentWeek: 'parked', // Start in parked section
-                originalData: financing
+                description: `Financing injection of Rp ${financing.amount.toLocaleString()}`,
+                originalWeek: 'parked',
+                currentWeek: 'parked',
+                isFinancing: true // Custom flag to identify these items
             };
-            
-            // Add to scenario data
-            if (typeof scenarioData !== 'undefined') {
-                scenarioData.push(financingTransaction);
-            } else {
-                // Initialize if doesn't exist
-                window.scenarioData = [financingTransaction];
-            }
-            
-            // Add to financing items for impact calculation
-            scenarioFinancingItems.push(financing);
-            
-            // Create and append the card directly to parked bucket
-            createFinancingCard(financingTransaction);
-            
-            // Calculate impact
-            calculateScenarioImpact();
-            
-            // Close modal
+        
+            scenarioData.push(financingTransaction);
+            populateTransactionBuckets(); // Re-render buckets to show the new card
+            calculateScenarioImpact();    // <-- FIX: This call updates the Projected Impact card.
             closeFinancingModal();
-            
-            console.log('Added financing to parked bucket:', financingTransaction);
         }
 
         function createFinancingCard(transaction) {
@@ -22732,67 +22674,34 @@
         
         function calculateScenarioImpact() {
             let totalCashIncrease = 0;
-            
-            // Check all financing items that are active in the scenario
-            if (typeof scenarioData !== 'undefined') {
-                scenarioData.forEach(transaction => {
-                    if (transaction.isFinancing && transaction.currentWeek !== 'parked' && transaction.currentWeek <= 13) {
-                        totalCashIncrease += transaction.amount;
-                    }
-                });
-            }
-            
-            // Also check for any financing items in the buckets
-            for (let week = 1; week <= 13; week++) {
-                const weekBucket = document.getElementById(`bucket-week-${week}`);
-                if (weekBucket) {
-                    const financingItems = weekBucket.querySelectorAll('[data-financing="true"]');
-                    financingItems.forEach(item => {
-                        const transactionId = item.dataset.transactionId || item.dataset.id;
-                        const transaction = scenarioData.find(t => t.id === transactionId);
-                        if (transaction && transaction.isFinancing) {
-                            // Avoid double counting
-                            if (!transaction.counted) {
-                                totalCashIncrease += transaction.amount;
-                                transaction.counted = true;
-                            }
-                        }
-                    });
+        
+            // Find all financing items that have been moved out of the "parked" bucket.
+            scenarioData.forEach(transaction => {
+                if (transaction.isFinancing && transaction.currentWeek !== 'parked') {
+                    totalCashIncrease += transaction.amount;
                 }
-            }
-            
-            // Reset counted flag for next calculation
-            if (typeof scenarioData !== 'undefined') {
-                scenarioData.forEach(transaction => {
-                    if (transaction.isFinancing) {
-                        transaction.counted = false;
-                    }
-                });
-            }
-            
-            // Calculate runway extension more accurately
+            });
+        
+            // Calculate how many days of runway this new cash provides.
             const currentMonthlyBurn = getCurrentMonthlyBurn();
-            const runwayExtensionDays = totalCashIncrease > 0 && currentMonthlyBurn > 0 ?
-                Math.floor((totalCashIncrease / currentMonthlyBurn) * 30) : 0;
-            
-            // Update display
-            document.getElementById('cashImprovementAmount').textContent = 
-                formatCurrencyFull(totalCashIncrease, 'IDR');
-            document.getElementById('runwayExtension').textContent = 
-                `+${runwayExtensionDays} days`;
+            const runwayExtensionDays = totalCashIncrease > 0 && currentMonthlyBurn > 0 
+                ? Math.floor((totalCashIncrease / currentMonthlyBurn) * 30) 
+                : 0;
+        
+            // Update the "Projected Impact" card in the UI.
+            document.getElementById('cashImprovementAmount').textContent = `Rp ${totalCashIncrease.toLocaleString()}`;
+            document.getElementById('runwayExtension').textContent = `+${runwayExtensionDays} days`;
         }
         
         function getCurrentMonthlyBurn() {
-            // Calculate average monthly burn from AP data
-            if (aparTransactions && aparTransactions.length > 0) {
-                const monthlyExpenses = aparTransactions
-                    .filter(t => t.type === 'AP' && t.status === 'Unpaid' || t.status === 'Overdue')
-                    .reduce((sum, t) => sum + Math.abs(t.amount), 0);
-                
-                return monthlyExpenses / 3; // Rough monthly average
-            }
+            if (!aparTransactions || aparTransactions.length === 0) return 10000000; // Default burn if no data
+        
+            const monthlyOutflows = aparTransactions
+                .filter(t => t.type === 'AP' && (t.status === 'Unpaid' || t.status === 'Overdue'))
+                .reduce((sum, t) => sum + Math.abs(t.amount), 0);
             
-            return 10000000; // Default 10M IDR if no data
+            // Assume AP data represents roughly one month of expenses for a simple burn rate.
+            return monthlyOutflows > 0 ? monthlyOutflows : 10000000;
         }
         
         // Initialize
