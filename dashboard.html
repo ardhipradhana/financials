@@ -11094,88 +11094,93 @@
                 </div>
             
                 <!-- P&L Comparison -->
-                <div class="content-card">
+                <div class="content-card" id="impactAnalysisSection">
                     <div class="card-header">
                         <h3>Financial Impact Analysis</h3>
+                        <p class="card-subtitle">Comparing the current scenario against the base case.</p>
                     </div>
                     <div class="card-content">
-                        <!-- Active Scenario Indicator -->
-                        <div class="filter-section" style="margin-bottom: 1rem;">
-                            <div class="scenario-status">
+                        <div class="filter-section" style="margin-bottom: 2rem;">
+                            <div class="scenario-status" style="background: #f0f9ff; border: 1px solid #bae6fd; padding: 0.75rem; border-radius: 8px;">
                                 <span class="filter-label">Active Scenario: </span>
-                                <span id="activeScenarioName" class="metric-value">Base Case</span>
+                                <span id="activeScenarioName" class="metric-value" style="color: #1e40af;">Base Case</span>
                             </div>
                         </div>
-            
-                        <!-- P&L Comparison Table -->
+                
+                        <div class="metrics-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                            <div class="metric-card enhanced-card" style="background: #f8fafc; border-left: 4px solid #1e40af;">
+                                <div class="card-main">
+                                    <div class="metric-title-group">
+                                        <div class="metric-title" style="color: #1e40af;">Overall Impact (All Years)</div>
+                                    </div>
+                                    <div class="metric-primary-group">
+                                        <div class="metric-breakdown">
+                                            <span class="breakdown-item">
+                                                <span class="breakdown-label">Total Revenue Change:</span>
+                                                <span class="breakdown-value" id="overallRevenueImpact">+Rp 1.2T (+15.2%)</span>
+                                            </span>
+                                            <span class="breakdown-item">
+                                                <span class="breakdown-label">Total Net Income Change:</span>
+                                                <span class="breakdown-value" id="overallNetIncomeImpact">+Rp 350B (+25.1%)</span>
+                                            </span>
+                                            <span class="breakdown-item">
+                                                <span class="breakdown-label">Average Margin Change:</span>
+                                                <span class="breakdown-value" id="overallMarginImpact">+2.5pp</span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                
+                            <div id="perYearImpactCards" class="metrics-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem;">
+                                <div class="metric-card">
+                                    <div class="metric-title-group">
+                                        <div class="metric-title">2026 Impact</div>
+                                    </div>
+                                    <div class="metric-primary-group">
+                                         <div class="metric-breakdown">
+                                            <span class="breakdown-item">
+                                                <span class="breakdown-label">Revenue:</span>
+                                                <span class="breakdown-value" id="impact_2026_revenue">+Rp 200B (+18.0%)</span>
+                                            </span>
+                                            <span class="breakdown-item">
+                                                <span class="breakdown-label">Net Income:</span>
+                                                <span class="breakdown-value" id="impact_2026_netIncome">+Rp 50B (+22.0%)</span>
+                                            </span>
+                                             <span class="breakdown-item">
+                                                <span class="breakdown-label">Net Margin:</span>
+                                                <span class="breakdown-value" id="impact_2026_margin">+1.8pp</span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="metric-card">
+                                    <div class="metric-title-group">
+                                        <div class="metric-title">2027 Impact</div>
+                                    </div>
+                                    <div class="metric-primary-group">
+                                         <div class="metric-breakdown">
+                                            <span class="breakdown-item">
+                                                <span class="breakdown-label">Revenue:</span>
+                                                <span class="breakdown-value" id="impact_2027_revenue">+Rp 250B (+17.5%)</span>
+                                            </span>
+                                            <span class="breakdown-item">
+                                                <span class="breakdown-label">Net Income:</span>
+                                                <span class="breakdown-value" id="impact_2027_netIncome">+Rp 70B (+24.0%)</span>
+                                            </span>
+                                             <span class="breakdown-item">
+                                                <span class="breakdown-label">Net Margin:</span>
+                                                <span class="breakdown-value" id="impact_2027_margin">+2.2pp</span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                </div>
+                        </div>
+                
                         <div class="table-container">
                             <table class="financial-table scenario-comparison-table">
-                                <thead>
-                                    <tr>
-                                        <th style="text-align: left;">Financial Item</th>
-                                        <th>2026 Base</th>
-                                        <th>2026 Scenario</th>
-                                        <th>Change</th>
-                                        <th>2027 Base</th>
-                                        <th>2027 Scenario</th>
-                                        <th>Change</th>
-                                        <th>2028 Base</th>
-                                        <th>2028 Scenario</th>
-                                        <th>Change</th>
-                                        <th>2029 Base</th>
-                                        <th>2029 Scenario</th>
-                                        <th>Change</th>
-                                        <th>2030 Base</th>
-                                        <th>2030 Scenario</th>
-                                        <th>Change</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="scenarioComparisonBody">
-                                    <!-- Will be populated by JavaScript -->
-                                </tbody>
-                            </table>
-                        </div>
-            
-                        <!-- Summary Impact Cards -->
-                        <div class="metrics-grid" style="margin-top: 1.5rem;">
-                            <div class="metric-card">
-                                <div class="metric-header">
-                                    <div class="metric-title">Total Revenue Impact</div>
-                                    <div class="metric-icon icon-revenue">
-                                        <i class="fas fa-chart-line"></i>
-                                    </div>
-                                </div>
-                                <div class="metric-content">
-                                    <div class="metric-value" id="revenueImpact">$0</div>
-                                    <div class="metric-change" id="revenueImpactPercent">0%</div>
-                                </div>
-                            </div>
-            
-                            <div class="metric-card">
-                                <div class="metric-header">
-                                    <div class="metric-title">Net Income Impact</div>
-                                    <div class="metric-icon icon-profit">
-                                        <i class="fas fa-coins"></i>
-                                    </div>
-                                </div>
-                                <div class="metric-content">
-                                    <div class="metric-value" id="netIncomeImpact">$0</div>
-                                    <div class="metric-change" id="netIncomeImpactPercent">0%</div>
-                                </div>
-                            </div>
-            
-                            <div class="metric-card">
-                                <div class="metric-header">
-                                    <div class="metric-title">Margin Impact</div>
-                                    <div class="metric-icon icon-efficiency">
-                                        <i class="fas fa-percentage"></i>
-                                    </div>
-                                </div>
-                                <div class="metric-content">
-                                    <div class="metric-value" id="marginImpact">0%</div>
-                                    <div class="metric-change" id="marginImpactChange">No change</div>
-                                </div>
-                            </div>
+                                </table>
                         </div>
                     </div>
                 </div>
@@ -28297,45 +28302,124 @@
             updateSummaryCards();
         }
         
-        // Update summary impact cards
+        // This function calculates and displays the financial impact of the current scenario.
         function updateSummaryCards() {
-            const years = [2026, 2027, 2028, 2029, 2030];
-            
-            // Calculate total impacts
-            let totalRevenueBase = 0;
-            let totalRevenueScenario = 0;
-            let totalNetIncomeBase = 0;
-            let totalNetIncomeScenario = 0;
-            
+            // Ensure the necessary data structures are available before proceeding.
+            if (!scenarioState || !scenarioState.baseCase || !scenarioState.currentScenario) {
+                console.error("Scenario data is not initialized. Cannot update summary cards.");
+                return;
+            }
+        
+            const years = scenarioState.affectedYears.sort(); // Use only the selected years for calculation.
+            let overallImpact = { revenue: 0, netIncome: 0, marginPoints: 0 };
+            let perYearImpacts = {};
+        
+            // --- 1. CALCULATE IMPACTS ---
+        
+            // a. Calculate the impact for each selected year.
             years.forEach(year => {
-                totalRevenueBase += scenarioState.baseCase[year].revenue;
-                totalRevenueScenario += scenarioState.currentScenario[year].revenue;
-                totalNetIncomeBase += scenarioState.baseCase[year].netIncome;
-                totalNetIncomeScenario += scenarioState.currentScenario[year].netIncome;
+                const base = scenarioState.baseCase[year];
+                const scenario = scenarioState.currentScenario[year];
+        
+                if (!base || !scenario) return; // Skip if data for a year is missing.
+        
+                const revenueChange = scenario.revenue - base.revenue;
+                const netIncomeChange = scenario.netIncome - base.netIncome;
+        
+                const baseMargin = base.revenue !== 0 ? (base.netIncome / base.revenue) * 100 : 0;
+                const scenarioMargin = scenario.revenue !== 0 ? (scenario.netIncome / scenario.revenue) * 100 : 0;
+                const marginChange = scenarioMargin - baseMargin;
+        
+                perYearImpacts[year] = {
+                    revenue: revenueChange,
+                    revenuePercent: base.revenue !== 0 ? (revenueChange / Math.abs(base.revenue)) * 100 : 0,
+                    netIncome: netIncomeChange,
+                    netIncomePercent: base.netIncome !== 0 ? (netIncomeChange / Math.abs(base.netIncome)) * 100 : 0,
+                    margin: marginChange,
+                };
+        
+                // b. Add this year's impact to the overall totals.
+                overallImpact.revenue += revenueChange;
+                overallImpact.netIncome += netIncomeChange;
             });
-            
-            const revenueImpact = totalRevenueScenario - totalRevenueBase;
-            const revenueImpactPercent = ((revenueImpact / totalRevenueBase) * 100);
-            const netIncomeImpact = totalNetIncomeScenario - totalNetIncomeBase;
-            const netIncomeImpactPercent = ((netIncomeImpact / totalNetIncomeBase) * 100);
-            
-            // Calculate margin impact
-            const baseMargin = (totalNetIncomeBase / totalRevenueBase) * 100;
-            const scenarioMargin = (totalNetIncomeScenario / totalRevenueScenario) * 100;
-            const marginImpact = scenarioMargin - baseMargin;
-            
-            // Update displays with IDR currency
-            document.getElementById('revenueImpact').textContent = (revenueImpact >= 0 ? '+' : '') + 'Rp ' + formatNumber(revenueImpact);
-            document.getElementById('revenueImpactPercent').textContent = (revenueImpactPercent >= 0 ? '+' : '') + revenueImpactPercent.toFixed(1) + '%';
-            document.getElementById('revenueImpactPercent').className = revenueImpact >= 0 ? 'metric-change positive' : 'metric-change negative';
-            
-            document.getElementById('netIncomeImpact').textContent = (netIncomeImpact >= 0 ? '+' : '') + 'Rp ' + formatNumber(netIncomeImpact);
-            document.getElementById('netIncomeImpactPercent').textContent = (netIncomeImpactPercent >= 0 ? '+' : '') + netIncomeImpactPercent.toFixed(1) + '%';
-            document.getElementById('netIncomeImpactPercent').className = netIncomeImpact >= 0 ? 'metric-change positive' : 'metric-change negative';
-            
-            document.getElementById('marginImpact').textContent = scenarioMargin.toFixed(1) + '%';
-            document.getElementById('marginImpactChange').textContent = (marginImpact >= 0 ? '+' : '') + marginImpact.toFixed(1) + 'pp';
-            document.getElementById('marginImpactChange').className = marginImpact >= 0 ? 'metric-change positive' : 'metric-change negative';
+        
+            // c. Calculate overall percentage changes and average margin change.
+            const overallBaseRevenue = years.reduce((sum, year) => sum + (scenarioState.baseCase[year]?.revenue || 0), 0);
+            const overallBaseNetIncome = years.reduce((sum, year) => sum + (scenarioState.baseCase[year]?.netIncome || 0), 0);
+        
+            const overallRevenuePercent = overallBaseRevenue !== 0 ? (overallImpact.revenue / Math.abs(overallBaseRevenue)) * 100 : 0;
+            const overallNetIncomePercent = overallBaseNetIncome !== 0 ? (overallImpact.netIncome / Math.abs(overallBaseNetIncome)) * 100 : 0;
+            const averageMarginChange = years.length > 0 ? Object.values(perYearImpacts).reduce((sum, year) => sum + year.margin, 0) / years.length : 0;
+        
+        
+            // --- 2. POPULATE THE OVERALL IMPACT CARD ---
+        
+            document.getElementById('overallRevenueImpact').innerHTML =
+                `${overallImpact.revenue >= 0 ? '+' : ''}Rp ${formatNumber(overallImpact.revenue)} <span class="(${getChangeClass(overallImpact.revenue)}">${overallRevenuePercent >= 0 ? '+' : ''}${overallRevenuePercent.toFixed(1)}%)</span>`;
+        
+            document.getElementById('overallNetIncomeImpact').innerHTML =
+                `${overallImpact.netIncome >= 0 ? '+' : ''}Rp ${formatNumber(overallImpact.netIncome)} <span class="(${getChangeClass(overallImpact.netIncome)}">${overallNetIncomePercent >= 0 ? '+' : ''}${overallNetIncomePercent.toFixed(1)}%)</span>`;
+        
+            document.getElementById('overallMarginImpact').innerHTML =
+                `<span class="${getChangeClass(averageMarginChange)}">${averageMarginChange >= 0 ? '+' : ''}${averageMarginChange.toFixed(1)}pp</span>`;
+        
+        
+            // --- 3. DYNAMICALLY CREATE AND POPULATE PER-YEAR CARDS ---
+        
+            const perYearContainer = document.getElementById('perYearImpactCards');
+            perYearContainer.innerHTML = ''; // Clear previous cards.
+        
+            Object.keys(perYearImpacts).forEach(year => {
+                const impact = perYearImpacts[year];
+                const cardHTML = `
+                    <div class="metric-card">
+                        <div class="metric-title-group">
+                            <div class="metric-title">${year} Impact</div>
+                        </div>
+                        <div class="metric-primary-group">
+                             <div class="metric-breakdown">
+                                <span class="breakdown-item">
+                                    <span class="breakdown-label">Revenue:</span>
+                                    <span class="breakdown-value ${getChangeClass(impact.revenue)}">
+                                        ${impact.revenue >= 0 ? '+' : ''}Rp ${formatNumber(impact.revenue)} (${impact.revenuePercent >= 0 ? '+' : ''}${impact.revenuePercent.toFixed(1)}%)
+                                    </span>
+                                </span>
+                                <span class="breakdown-item">
+                                    <span class="breakdown-label">Net Income:</span>
+                                    <span class="breakdown-value ${getChangeClass(impact.netIncome)}">
+                                        ${impact.netIncome >= 0 ? '+' : ''}Rp ${formatNumber(impact.netIncome)} (${impact.netIncomePercent >= 0 ? '+' : ''}${impact.netIncomePercent.toFixed(1)}%)
+                                    </span>
+                                </span>
+                                 <span class="breakdown-item">
+                                    <span class="breakdown-label">Net Margin:</span>
+                                    <span class="breakdown-value ${getChangeClass(impact.margin)}">
+                                        ${impact.margin >= 0 ? '+' : ''}${impact.margin.toFixed(1)}pp
+                                    </span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                perYearContainer.innerHTML += cardHTML;
+            });
+        
+            // Helper function to get the correct CSS class for positive/negative change
+            function getChangeClass(value) {
+                if (value > 0) return 'positive';
+                if (value < 0) return 'negative';
+                return 'neutral';
+            }
+        
+            // Helper function for number formatting (already in your code)
+            function formatNumber(num) {
+                if (num === 0) return '0';
+                const absNum = Math.abs(num);
+                if (absNum >= 1e12) return (num / 1e12).toFixed(1) + 'T';
+                if (absNum >= 1e9) return (num / 1e9).toFixed(1) + 'B';
+                if (absNum >= 1e6) return (num / 1e6).toFixed(1) + 'M';
+                if (absNum >= 1e3) return (num / 1e3).toFixed(0) + 'K';
+                return num.toFixed(0);
+            }
         }
         
         // Format number for display
@@ -28598,17 +28682,32 @@
                     color: #1f2937;
                 }
                 
+                .scenario-comparison-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    font-size: 0.875rem;
+                    table-layout: fixed; /* Important for horizontal scrolling */
+                }
+                
                 .scenario-comparison-table th,
                 .scenario-comparison-table td {
                     text-align: center;
-                    padding: 0.5rem;
-                    font-size: 0.875rem;
+                    padding: 0.75rem 0.5rem;
+                    white-space: nowrap;
                 }
                 
                 .scenario-comparison-table th:first-child,
                 .scenario-comparison-table td:first-child {
-                    text-align: left;
-                    font-weight: 600;
+                    position: sticky;
+                    left: 0;
+                    z-index: 2;
+                    background-color: #ffffff;
+                    width: 200px; /* Set a fixed width for the first column */
+                }
+
+                .scenario-comparison-table .year-group-header {
+                    background-color: #f8fafc;
+                    border-bottom: 2px solid #e2e8f0;
                 }
                 
                 .positive {
