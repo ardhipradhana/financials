@@ -27953,7 +27953,8 @@
                 initializeScenarioAnalysis();
             }
             
-            const yearBtn = document.querySelector(`[data-year="${year}"]`);
+            // Use more specific selector for buttons only
+            const yearBtn = document.querySelector(`button[data-year="${year}"]`);
             if (!yearBtn) {
                 console.log('❌ Year button not found for:', year);
                 return;
