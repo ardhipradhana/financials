@@ -27879,7 +27879,15 @@
         
         // Get base case data from existing annual summary
         function getBaseCaseData() {
-            // Extract real data from your annual summary
+            console.log('🔍 Getting base case data...');
+            
+            // Try to get real data first
+            try {
+                populateAnnualSummaryTable(); // Make sure this runs first
+            } catch (error) {
+                console.log('⚠️ Could not populate annual summary:', error);
+            }
+            
             const baseData = {};
             const years = [2026, 2027, 2028, 2029, 2030];
             
@@ -27892,18 +27900,20 @@
                     data = extractMultiYearData(year);
                 }
                 
-                if (data) {
+                console.log(`📊 Year ${year} data:`, data);
+                
+                if (data && data['total-revenue'] && data['total-revenue'] > 0) {
                     baseData[year] = {
-                        revenue: data['total-revenue'] || 0,
+                        revenue: data['total-revenue'],
                         cogs: data['total-cogs'] || 0,
                         grossProfit: data['gross-profit'] || 0,
                         opex: data['total-opex'] || 0,
-                        netIncome: data['ebitda'] || 0  // Using EBITDA as net income equivalent
+                        netIncome: data['ebitda'] || 0
                     };
                 } else {
-                    // Fallback default values if data not available
+                    // Use realistic fallback for Indonesia
                     const baseRevenue = 2400000000; // 2.4B IDR
-                    const growthRate = 0.2; // 20% growth
+                    const growthRate = 0.2;
                     const yearIndex = year - 2026;
                     
                     baseData[year] = {
@@ -27916,12 +27926,17 @@
                 }
             });
             
-            console.log('📊 Base case data extracted:', baseData);
+            console.log('📊 Final base case data:', baseData);
             return baseData;
         }
         
         // Toggle year selection
         function toggleYear(year) {
+            // Add this check first
+            if (!scenarioState.baseCase) {
+                initializeScenarioAnalysis();
+            }
+            
             const yearBtn = document.querySelector(`[data-year="${year}"]`);
             const index = scenarioState.affectedYears.indexOf(year);
             
@@ -28003,25 +28018,31 @@
             scenarioState.adjustments[type] = parseFloat(value);
             scenarioState.scenarioName = 'Custom Scenario';
             
-            // Update displays
-            document.getElementById(type + 'Value').textContent = value + '%';
-            document.getElementById(type + 'Input').value = value;
+            // Update displays - make sure elements exist
+            const valueDisplay = document.getElementById(type + 'Value');
+            const inputField = document.getElementById(type + 'Input');
+            
+            if (valueDisplay) valueDisplay.textContent = value + '%';
+            if (inputField) inputField.value = value;
             
             recalculateScenario();
         }
 
         function updateCustomScenarioFromInput(type, value) {
             const numValue = parseFloat(value) || 0;
-            // Clamp value between -50 and 100
             const clampedValue = Math.max(-50, Math.min(100, numValue));
             
             scenarioState.adjustments[type] = clampedValue;
             scenarioState.scenarioName = 'Custom Scenario';
             
             // Update displays
-            document.getElementById(type + 'Value').textContent = clampedValue + '%';
-            document.getElementById(type + 'Slider').value = clampedValue;
-            document.getElementById(type + 'Input').value = clampedValue;
+            const valueDisplay = document.getElementById(type + 'Value');
+            const slider = document.getElementById(type + 'Slider');
+            const inputField = document.getElementById(type + 'Input');
+            
+            if (valueDisplay) valueDisplay.textContent = clampedValue + '%';
+            if (slider) slider.value = clampedValue;
+            if (inputField) inputField.value = clampedValue;
             
             recalculateScenario();
         }
@@ -28546,9 +28567,16 @@
         
         // Initialize everything when the scenarios section is first shown
         function initializeScenarios() {
+            console.log('🚀 Initializing scenarios...');
+            
             if (!scenarioState.baseCase) {
                 initializeScenarioAnalysis();
                 addScenarioStyles();
+            }
+            
+            // Force a recalculation to populate the table
+            if (scenarioState.baseCase) {
+                updateScenarioComparison();
             }
         }
 
