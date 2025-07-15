@@ -28016,11 +28016,6 @@
                 document.getElementById('cogsInput').value = scenario.adjustments.cogs;
                 document.getElementById('opexInput').value = scenario.adjustments.opex;
                 
-                // Update slider displays
-                document.getElementById('revenueValue').textContent = scenario.adjustments.revenue + '%';
-                document.getElementById('cogsValue').textContent = scenario.adjustments.cogs + '%';
-                document.getElementById('opexValue').textContent = scenario.adjustments.opex + '%';
-                
                 recalculateScenario();
             }
         }
