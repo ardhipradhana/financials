@@ -12279,7 +12279,7 @@
             }
             
             async sendToBackend(message) {
-                const webhookUrl = 'https://montpro.app.n8n.cloud/webhook/meridash_chat_assistant';
+                const webhookUrl = 'https://n8n.srv909550.hstgr.cloud/webhook/meridash_chat_assistant';
                 
                 const payload = {
                     user_message: message,
@@ -22376,7 +22376,7 @@
                 });
         
                 // Call the webhook
-                const response = await fetch('https://montpro.app.n8n.cloud/webhook/ai-forecast', {
+                const response = await fetch('https://n8n.srv909550.hstgr.cloud/webhook/ai-forecast', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -22486,7 +22486,7 @@
         
         // Call the n8n AI forecast API
         async function callAIForecastAPI(payload) {
-            const N8N_WEBHOOK_URL = 'https://montpro.app.n8n.cloud/webhook/ai-forecast';
+            const N8N_WEBHOOK_URL = 'https://n8n.srv909550.hstgr.cloud/webhook/ai-forecast';
             
             console.log('🌐 Calling n8n with payload:', payload);
             
@@ -24937,7 +24937,7 @@
                 console.log('📤 Sending 2026 forecast request:', payload);
                 
                 // Call n8n webhook
-                const response = await fetch('https://montpro.app.n8n.cloud/webhook/ai-forecast-2026', {
+                const response = await fetch('https://n8n.srv909550.hstgr.cloud/webhook/ai-forecast-2026', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -25741,7 +25741,7 @@
                 console.log('📤 Sending multi-year forecast request:', payload);
                 
                 // Call the AI endpoint
-                const response = await fetch('https://montpro.app.n8n.cloud/webhook/ai-forecast-Y2-Y5', {
+                const response = await fetch('https://n8n.srv909550.hstgr.cloud/webhook/ai-forecast-Y2-Y5', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
