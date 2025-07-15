@@ -8352,6 +8352,92 @@
             text-align: right !important;
             vertical-align: middle;
         }
+
+        .scenario-comparison-table-wrapper {
+            overflow-x: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+        }
+        
+        .scenario-comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1800px; /* Enforces horizontal scroll for wide data */
+        }
+        
+        /* --- General header and cell styling --- */
+        .scenario-comparison-table th,
+        .scenario-comparison-table td {
+            padding: 0.75rem 1rem;
+            white-space: nowrap;
+            vertical-align: middle;
+        }
+        
+        /* --- Freeze the first column (Financial Item) --- */
+        .scenario-comparison-table th:first-child,
+        .scenario-comparison-table td:first-child {
+            position: sticky;
+            left: 0;
+            z-index: 2;
+            background-color: #ffffff;
+            text-align: left;
+            font-weight: 600;
+            width: 200px; /* Fixed width for the first column */
+            border-right: 2px solid #e2e8f0;
+        }
+        
+        /* --- Header Styling --- */
+        .scenario-comparison-table thead {
+            position: sticky;
+            top: 0;
+            z-index: 3;
+            background-color: #f8fafc;
+        }
+        
+        .scenario-comparison-table .year-header th {
+            border-bottom: 2px solid #e2e8f0;
+            font-size: 0.9rem;
+            color: #1e293b;
+            text-align: center;
+        }
+        
+        .scenario-comparison-table .sub-header th {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #475569;
+            text-align: right;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        /* --- SOLVING THE WIDTH ISSUE --- */
+        /* Explicitly set widths for the base, scenario, and change columns */
+        .scenario-comparison-table .base-col,
+        .scenario-comparison-table .scenario-col {
+            width: 150px;
+            text-align: right;
+        }
+        
+        .scenario-comparison-table .change-col {
+            width: 180px; /* Slightly wider to accommodate value and percentage */
+            text-align: right;
+            border-right: 2px solid #e2e8f0;
+        }
+        
+        /* --- Readability Styling --- */
+        .scenario-comparison-table tbody tr:hover td,
+        .scenario-comparison-table tbody tr:hover th {
+            background-color: #f0f9ff;
+        }
+
+        .scenario-status {
+            display: flex;
+            align-items: center; /* This is the fix */
+            gap: 0.5rem;
+            background: #f0f9ff; 
+            border: 1px solid #bae6fd; 
+            padding: 0.75rem; 
+            border-radius: 8px;
+        }
         
     </style>
 </head>
