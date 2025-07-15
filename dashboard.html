@@ -11108,31 +11108,12 @@
                         </div>
             
                         <!-- P&L Comparison Table -->
-                        <div class="table-container">
+                        <div class="table-container scenario-comparison-table-wrapper">
                             <table class="financial-table scenario-comparison-table">
-                                <thead>
-                                    <tr>
-                                        <th style="text-align: left;">Financial Item</th>
-                                        <th>2026 Base</th>
-                                        <th>2026 Scenario</th>
-                                        <th>Change</th>
-                                        <th>2027 Base</th>
-                                        <th>2027 Scenario</th>
-                                        <th>Change</th>
-                                        <th>2028 Base</th>
-                                        <th>2028 Scenario</th>
-                                        <th>Change</th>
-                                        <th>2029 Base</th>
-                                        <th>2029 Scenario</th>
-                                        <th>Change</th>
-                                        <th>2030 Base</th>
-                                        <th>2030 Scenario</th>
-                                        <th>Change</th>
-                                    </tr>
-                                </thead>
+                                <thead id="scenarioComparisonHeader">
+                                    </thead>
                                 <tbody id="scenarioComparisonBody">
-                                    <!-- Will be populated by JavaScript -->
-                                </tbody>
+                                    </tbody>
                             </table>
                         </div>
             
@@ -28257,12 +28238,27 @@
         
         // Update scenario comparison display
         function updateScenarioComparison() {
-            const tbody = document.getElementById('scenarioComparisonBody');
+            const headerTbody = document.getElementById('scenarioComparisonHeader');
+            const bodyTbody = document.getElementById('scenarioComparisonBody');
             const years = [2026, 2027, 2028, 2029, 2030];
-            
-            // Update active scenario name
-            document.getElementById('activeScenarioName').textContent = scenarioState.scenarioName;
-            
+        
+            // --- 1. Generate the new, grouped header ---
+            let headerHTML = `
+                <tr class="year-header">
+                    <th>Financial Item</th>
+                    ${years.map(year => `<th colspan="3">${year}</th>`).join('')}
+                </tr>
+                <tr class="sub-header">
+                    <th></th> ${years.map(year => `
+                        <th>Base</th>
+                        <th>Scenario</th>
+                        <th class="change-col">Change</th>
+                    `).join('')}
+                </tr>
+            `;
+            headerTbody.innerHTML = headerHTML;
+        
+            // --- 2. Generate the table body ---
             const lineItems = [
                 { key: 'revenue', label: 'Revenue' },
                 { key: 'cogs', label: 'Cost of Goods Sold' },
@@ -28270,30 +28266,35 @@
                 { key: 'opex', label: 'Operating Expenses' },
                 { key: 'netIncome', label: 'Net Income' }
             ];
-            
-            tbody.innerHTML = lineItems.map(item => {
-                let row = `<tr><td style="font-weight: 600;">${item.label}</td>`;
-                
-                years.forEach(year => {
-                    const base = scenarioState.baseCase[year][item.key];
-                    const scenario = scenarioState.currentScenario[year][item.key];
+        
+            bodyTbody.innerHTML = lineItems.map(item => {
+                let row = `<tr><td>${item.label}</td>`;
+        
+                years.forEach((year, index) => {
+                    const base = scenarioState.baseCase[year] ? scenarioState.baseCase[year][item.key] : 0;
+                    const scenario = scenarioState.currentScenario[year] ? scenarioState.currentScenario[year][item.key] : 0;
                     const change = scenario - base;
-                    const changePercent = base !== 0 ? ((change / base) * 100) : 0;
-                    
+                    const changePercent = base !== 0 ? (change / Math.abs(base)) * 100 : 0;
+                    const groupClass = `year-group-${index + 1}`;
+        
                     row += `
-                        <td>Rp ${formatNumber(base)}</td>
-                        <td>Rp ${formatNumber(scenario)}</td>
-                        <td class="${change >= 0 ? 'positive' : 'negative'}">
+                        <td class="${groupClass}">Rp ${formatNumber(base)}</td>
+                        <td class="${groupClass}">Rp ${formatNumber(scenario)}</td>
+                        <td class="${groupClass} change-col ${change >= 0 ? 'positive' : 'negative'}">
                             ${change >= 0 ? '+' : ''}Rp ${formatNumber(change)}
                             <br><small>(${changePercent >= 0 ? '+' : ''}${changePercent.toFixed(1)}%)</small>
                         </td>
                     `;
                 });
-                
+        
                 row += '</tr>';
                 return row;
             }).join('');
             
+            // Update active scenario name display
+            document.getElementById('activeScenarioName').textContent = scenarioState.scenarioName;
+        
+            // Update the summary cards as well
             updateSummaryCards();
         }
         
@@ -28371,11 +28372,13 @@
         
         // Format number for display
         function formatNumber(num) {
-            return Math.abs(num) >= 1000000 
-                ? (num / 1000000).toFixed(1) + 'M'
-                : Math.abs(num) >= 1000
-                ? (num / 1000).toFixed(0) + 'K'
-                : num.toFixed(0);
+            if (num === 0) return '0';
+            const absNum = Math.abs(num);
+            // Use 'B' for billion and 'M' for million for shorter text
+            if (absNum >= 1e9) return (num / 1e9).toFixed(1) + 'B';
+            if (absNum >= 1e6) return (num / 1e6).toFixed(1) + 'M';
+            if (absNum >= 1e3) return (num / 1e3).toFixed(0) + 'K';
+            return num.toFixed(0);
         }
         
         // Save scenario functions
@@ -28629,46 +28632,76 @@
                     color: #1f2937;
                 }
                 
+                .scenario-comparison-table-wrapper {
+                    overflow-x: auto;
+                    border: 1px solid #e2e8f0;
+                    border-radius: 8px;
+                    background: white;
+                }
+                
                 .scenario-comparison-table {
                     width: 100%;
                     border-collapse: collapse;
-                    font-size: 0.875rem;
-                    table-layout: fixed; /* Important for horizontal scrolling */
-                    resize: horizontal;
+                    min-width: 1800px; /* Set a minimum width to enforce scrolling */
                 }
                 
                 .scenario-comparison-table th,
                 .scenario-comparison-table td {
-                    text-align: center;
-                    padding: 0.75rem 0.5rem;
+                    padding: 0.75rem 1rem;
                     white-space: nowrap;
+                    text-align: right;
+                    border-bottom: 1px solid #f1f5f9;
                 }
                 
+                /* Freeze the first column */
                 .scenario-comparison-table th:first-child,
                 .scenario-comparison-table td:first-child {
                     position: sticky;
                     left: 0;
                     z-index: 2;
-                    background-color: #ffffff;
-                    width: 200px; /* Set a fixed width for the first column */
+                    background-color: #ffffff; /* Background to hide content scrolling underneath */
+                    text-align: left;
+                    font-weight: 600;
+                    width: 200px; /* Fixed width for the item column */
+                    border-right: 1px solid #e2e8f0;
                 }
-
-                .scenario-comparison-table th:not(:first-child),
-                .scenario-comparison-table td:not(:first-child) {
-                    width: 110px !important; /* All other columns */
+                
+                .scenario-comparison-table thead {
+                    position: sticky;
+                    top: 0;
+                    z-index: 3;
                 }
-
-                @media (max-width: 1400px) {
-                    .scenario-comparison-table th:not(:first-child),
-                    .scenario-comparison-table td:not(:first-child) {
-                        width: 90px !important;
-                        font-size: 0.8rem !important;
-                    }
-                }
-
-                .scenario-comparison-table .year-group-header {
+                
+                /* Year Headers */
+                .scenario-comparison-table .year-header {
                     background-color: #f8fafc;
+                    color: #1e293b;
                     border-bottom: 2px solid #e2e8f0;
+                    font-size: 0.9rem;
+                }
+                
+                /* Sub-headers (Base, Scenario, Change) */
+                .scenario-comparison-table .sub-header {
+                    background-color: #f8fafc;
+                    font-size: 0.8rem;
+                    font-weight: 500;
+                    color: #475569;
+                }
+                
+                /* Column group styling */
+                .scenario-comparison-table td {
+                    border-right: 1px solid #f1f5f9;
+                }
+                
+                .scenario-comparison-table .change-col {
+                    border-right: 2px solid #e2e8f0; /* Thicker border to separate year groups */
+                }
+                
+                /* Alternating background for year groups for better readability */
+                .scenario-comparison-table .year-group-1,
+                .scenario-comparison-table .year-group-3,
+                .scenario-comparison-table .year-group-5 {
+                    background-color: #fafbfc;
                 }
                 
                 .positive {
