@@ -27881,13 +27881,6 @@
         function getBaseCaseData() {
             console.log('🔍 Getting base case data...');
             
-            // Try to get real data first
-            try {
-                populateAnnualSummaryTable(); // Make sure this runs first
-            } catch (error) {
-                console.log('⚠️ Could not populate annual summary:', error);
-            }
-            
             const baseData = {};
             const years = [2026, 2027, 2028, 2029, 2030];
             
@@ -27895,7 +27888,20 @@
                 let data = null;
                 
                 if (year === 2026) {
-                    data = extractYearlyData('next-year');
+                    // Try to get from the loaded forecast data first
+                    if (window.latest2026Forecast && window.latest2026Forecast.year_totals) {
+                        const forecast = window.latest2026Forecast.year_totals;
+                        data = {
+                            'total-revenue': forecast.total_revenue,
+                            'total-cogs': forecast.total_cogs,
+                            'gross-profit': forecast.gross_profit,
+                            'total-opex': forecast.total_opex,
+                            'ebitda': forecast.ebitda
+                        };
+                    } else {
+                        // Fallback to extractYearlyData
+                        data = extractYearlyData('next-year');
+                    }
                 } else {
                     data = extractMultiYearData(year);
                 }
@@ -27932,22 +27938,33 @@
         
         // Toggle year selection
         function toggleYear(year) {
-            // Add this check first
-            if (!scenarioState.baseCase) {
+            console.log('🔄 Toggling year:', year);
+            
+            // Ensure scenarioState is initialized
+            if (!scenarioState || !scenarioState.baseCase) {
+                console.log('⚠️ Scenario state not initialized, initializing...');
                 initializeScenarioAnalysis();
             }
             
             const yearBtn = document.querySelector(`[data-year="${year}"]`);
+            if (!yearBtn) {
+                console.log('❌ Year button not found for:', year);
+                return;
+            }
+            
             const index = scenarioState.affectedYears.indexOf(year);
             
             if (index > -1) {
                 scenarioState.affectedYears.splice(index, 1);
                 yearBtn.classList.remove('active');
+                console.log('➖ Removed year from affected years:', year);
             } else {
                 scenarioState.affectedYears.push(year);
                 yearBtn.classList.add('active');
+                console.log('➕ Added year to affected years:', year);
             }
             
+            console.log('📅 Current affected years:', scenarioState.affectedYears);
             recalculateScenario();
         }
         
@@ -28015,15 +28032,29 @@
         
         // Update custom scenario adjustments
         function updateCustomScenario(type, value) {
+            console.log('🎚️ Updating custom scenario:', type, value);
+            
+            // Ensure scenarioState is initialized
+            if (!scenarioState || !scenarioState.baseCase) {
+                console.log('⚠️ Scenario state not initialized, initializing...');
+                initializeScenarioAnalysis();
+            }
+            
             scenarioState.adjustments[type] = parseFloat(value);
             scenarioState.scenarioName = 'Custom Scenario';
             
-            // Update displays - make sure elements exist
+            // Update displays
             const valueDisplay = document.getElementById(type + 'Value');
             const inputField = document.getElementById(type + 'Input');
             
-            if (valueDisplay) valueDisplay.textContent = value + '%';
-            if (inputField) inputField.value = value;
+            if (valueDisplay) {
+                valueDisplay.textContent = value + '%';
+                console.log('✅ Updated value display for', type);
+            }
+            if (inputField) {
+                inputField.value = value;
+                console.log('✅ Updated input field for', type);
+            }
             
             recalculateScenario();
         }
@@ -28569,19 +28600,24 @@
         function initializeScenarios() {
             console.log('🚀 Initializing scenarios...');
             
-            if (!scenarioState.baseCase) {
-                initializeScenarioAnalysis();
-                addScenarioStyles();
-            }
+            // Always reinitialize to get fresh data
+            initializeScenarioAnalysis();
+            addScenarioStyles();
             
             // Force a recalculation to populate the table
-            if (scenarioState.baseCase) {
-                updateScenarioComparison();
-            }
+            setTimeout(() => {
+                if (scenarioState.baseCase) {
+                    updateScenarioComparison();
+                }
+            }, 100);
         }
 
         window.initializeScenarios = initializeScenarios;
         window.initializeScenarioAnalysis = initializeScenarioAnalysis;
+        window.toggleYear = toggleYear;
+        window.updateCustomScenario = updateCustomScenario;
+        window.updateCustomScenarioFromInput = updateCustomScenarioFromInput;
+        window.applyQuickScenario = applyQuickScenario;
         
     </script>
 
