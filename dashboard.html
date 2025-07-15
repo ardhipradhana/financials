@@ -8430,13 +8430,21 @@
         }
         
         /* COLORING FIX for "Change" column */
-        #scenarioAnalysisWrapper .positive { color: #10b981; font-weight: 600; }
-        #scenarioAnalysisWrapper .negative { color: #ef4444; font-weight: 600; }
-        #scenarioAnalysisWrapper .neutral { color: #64748b; }
-
+        #scenarioAnalysisWrapper .positive {
+            color: #10b981 !important; /* Green for good changes */
+            font-weight: 600;
+        }
+        #scenarioAnalysisWrapper .negative {
+            color: #ef4444 !important; /* Red for bad changes */
+            font-weight: 600;
+        }
+        #scenarioAnalysisWrapper .neutral {
+            color: #64748b; /* Neutral for no change */
+        }
+        
         .scenario-status {
             display: flex;
-            align-items: center; /* This is the fix */
+            align-items: baseline; /* This is the fix */
             gap: 0.5rem;
             background: #f0f9ff; 
             border: 1px solid #bae6fd; 
@@ -28747,16 +28755,6 @@
                 
                 .negative {
                     color: #dc2626;
-                }
-                
-                .scenario-status {
-                    display: flex;
-                    align-items: center; /* This is the fix */
-                    gap: 0.5rem;
-                    background: #f0f9ff; 
-                    border: 1px solid #bae6fd; 
-                    padding: 0.75rem; 
-                    border-radius: 8px;
                 }
                 
                 .events-list {
