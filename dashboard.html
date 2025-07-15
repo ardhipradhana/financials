@@ -10887,8 +10887,8 @@
             <!-- Scenario Analysis Section - Add this to your scenarios section in dashboard.html -->
             <div id="scenarios-section" class="section-content" style="display: none;">
                 <!-- Scenario Header -->
-                <div class="section-header">
-                    <div class="section-actions">
+                <div class="section-header" style="display: flex; justify-content: flex-end; align-items: center;">
+                    <div class="section-actions" style="display: flex; gap: 0.75rem;">
                         <button class="btn btn-secondary" onclick="loadSavedScenarios()">
                             <i class="fas fa-folder-open"></i> Load Saved
                         </button>
@@ -28039,13 +28039,8 @@
             scenarioState.scenarioName = 'Custom Scenario';
             
             // Update displays
-            const valueDisplay = document.getElementById(type + 'Value');
             const inputField = document.getElementById(type + 'Input');
             
-            if (valueDisplay) {
-                valueDisplay.textContent = value + '%';
-                console.log('✅ Updated value display for', type);
-            }
             if (inputField) {
                 inputField.value = value;
                 console.log('✅ Updated input field for', type);
@@ -28144,11 +28139,6 @@
             document.getElementById('revenueInput').value = 0;
             document.getElementById('cogsInput').value = 0;
             document.getElementById('opexInput').value = 0;
-            
-            // Reset displays
-            document.getElementById('revenueValue').textContent = '0%';
-            document.getElementById('cogsValue').textContent = '0%';
-            document.getElementById('opexValue').textContent = '0%';
             
             updateEventsList();
             updateScenarioComparison();
@@ -28432,10 +28422,6 @@
             document.getElementById('revenueInput').value = scenarioState.adjustments.revenue;
             document.getElementById('cogsInput').value = scenarioState.adjustments.cogs;
             document.getElementById('opexInput').value = scenarioState.adjustments.opex;
-            
-            document.getElementById('revenueValue').textContent = scenarioState.adjustments.revenue + '%';
-            document.getElementById('cogsValue').textContent = scenarioState.adjustments.cogs + '%';
-            document.getElementById('opexValue').textContent = scenarioState.adjustments.opex + '%';
         }
         
         // Delete saved scenario
@@ -28635,6 +28621,10 @@
                 .metric-content {
                     position: relative;
                     z-index: 10;
+                }
+
+                .content-card + .content-card {
+                    margin-top: 2rem;
                 }
             `;
             
