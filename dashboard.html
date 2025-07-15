@@ -8451,6 +8451,113 @@
             padding: 0.75rem; 
             border-radius: 8px;
         }
+
+        /* --- ADD this CSS block for the new Scenario Control Panel --- */
+
+        #scenarioControlPanel {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 0;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        
+        #scenarioControlPanel .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        #scenarioControlPanel .panel-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        #scenarioControlPanel .panel-title i {
+            color: #1e40af;
+            font-size: 1.25rem;
+        }
+        
+        #scenarioControlPanel .panel-title h3 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        #scenarioControlPanel .panel-content {
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        #scenarioControlPanel .scenario-status {
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e2e8f0;
+        }
+        
+        #scenarioControlPanel .timeframe-selector {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        
+        #scenarioControlPanel .filter-label {
+            font-weight: 500;
+            color: #475569;
+            font-size: 0.875rem;
+        }
+        
+        #scenarioControlPanel .year-toggle-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        #scenarioControlPanel .scenario-year-btn {
+            background-color: #ffffff;
+            border: 1px solid #d1d5db;
+            color: #4b5563;
+            padding: 0.5rem 1rem;
+            border-radius: 20px; /* Pill shape */
+            font-weight: 600;
+            transition: all 0.2s ease-in-out;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        #scenarioControlPanel .scenario-year-btn .check-icon {
+            display: none; /* Hide checkmark by default */
+            color: #ffffff;
+            font-size: 0.8rem;
+        }
+        
+        #scenarioControlPanel .scenario-year-btn.active {
+            background-color: #1e40af;
+            border-color: #1e40af;
+            color: #ffffff;
+            box-shadow: 0 4px 8px rgba(30, 64, 175, 0.2);
+        }
+        
+        #scenarioControlPanel .scenario-year-btn.active .check-icon {
+            display: inline-block; /* Show checkmark when active */
+        }
+        
+        #scenarioControlPanel .scenario-year-btn:hover:not(.active) {
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+        
+        #scenarioControlPanel .scenario-actions .btn {
+            font-size: 0.875rem;
+        }
         
     </style>
 </head>
@@ -10986,32 +11093,51 @@
             <!-- Scenario Analysis Section - Add this to your scenarios section in dashboard.html -->
             <div id="scenarios-section" class="section-content" style="display: none;">
                 <!-- Scenario Header -->
-                <div class="section-header" style="display: flex; justify-content: flex-end; align-items: center; background: #f8fafc; padding: 1rem 0;">
-                    <div class="section-actions" style="display: flex; gap: 0.75rem;">
-                        <button class="btn btn-secondary" onclick="loadSavedScenarios()">
-                            <i class="fas fa-folder-open"></i> Load Saved
-                        </button>
-                        <button class="btn btn-primary" onclick="saveCurrentScenario()">
-                            <i class="fas fa-save"></i> Save Scenario
-                        </button>
-                    </div>
-                </div>
-            
-                <!-- Year Selection -->
-                <div class="metrics-grid" style="margin-bottom: 1.5rem;">
-                    <div class="metric-card">
-                        <div class="metric-header">
-                            <div class="metric-title">Impact Timeframe</div>
+                <div class="content-card" id="scenarioControlPanel">
+                    <div class="panel-header">
+                        <div class="panel-title">
+                            <i class="fas fa-sitemap"></i>
+                            <h3>Scenario Control Panel</h3>
                         </div>
-                        <div class="metric-content">
-                            <div class="scenario-year-selector">
-                                <div class="filter-row" style="gap: 0.5rem; flex-wrap: wrap;">
-                                    <button class="btn btn-outline scenario-year-btn active" data-year="2026" onclick="toggleYear(2026)">2026</button>
-                                    <button class="btn btn-outline scenario-year-btn active" data-year="2027" onclick="toggleYear(2027)">2027</button>
-                                    <button class="btn btn-outline scenario-year-btn active" data-year="2028" onclick="toggleYear(2028)">2028</button>
-                                    <button class="btn btn-outline scenario-year-btn active" data-year="2029" onclick="toggleYear(2029)">2029</button>
-                                    <button class="btn btn-outline scenario-year-btn active" data-year="2030" onclick="toggleYear(2030)">2030</button>
-                                </div>
+                        <div class="scenario-actions">
+                            <button class="btn btn-secondary" onclick="loadSavedScenarios()">
+                                <i class="fas fa-folder-open"></i> Load Saved
+                            </button>
+                            <button class="btn btn-primary" onclick="saveCurrentScenario()">
+                                <i class="fas fa-save"></i> Save Scenario
+                            </button>
+                        </div>
+                    </div>
+                
+                    <div class="panel-content">
+                        <div class="scenario-status">
+                            <span class="filter-label">Active Scenario:</span>
+                            <span id="activeScenarioName" class="metric-value">Revenue Boost +20%</span>
+                        </div>
+                
+                        <div class="timeframe-selector">
+                            <label class="filter-label">Impact Timeframe (Years):</label>
+                            <div class="year-toggle-group">
+                                <button class="btn scenario-year-btn active" data-year="2026" onclick="toggleYear(2026)">
+                                    <span class="year-text">2026</span>
+                                    <i class="fas fa-check-circle check-icon"></i>
+                                </button>
+                                <button class="btn scenario-year-btn active" data-year="2027" onclick="toggleYear(2027)">
+                                    <span class="year-text">2027</span>
+                                    <i class="fas fa-check-circle check-icon"></i>
+                                </button>
+                                <button class="btn scenario-year-btn active" data-year="2028" onclick="toggleYear(2028)">
+                                    <span class="year-text">2028</span>
+                                    <i class="fas fa-check-circle check-icon"></i>
+                                </button>
+                                <button class="btn scenario-year-btn active" data-year="2029" onclick="toggleYear(2029)">
+                                    <span class="year-text">2029</span>
+                                    <i class="fas fa-check-circle check-icon"></i>
+                                </button>
+                                <button class="btn scenario-year-btn active" data-year="2030" onclick="toggleYear(2030)">
+                                    <span class="year-text">2030</span>
+                                    <i class="fas fa-check-circle check-icon"></i>
+                                </button>
                             </div>
                         </div>
                     </div>
