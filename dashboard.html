@@ -8892,6 +8892,197 @@
         .scenario-delete-btn:hover {
             background: #fecaca;
         }
+
+        /* Budget Management Unique Styles */
+        .budget-mgmt-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .budget-mgmt-meta {
+            padding: 1rem 0;
+        }
+        
+        /* Budget Table Unique Styles */
+        .budget-table-wrapper {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .budget-detail-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+            background: white;
+        }
+        
+        .budget-detail-table th {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 0.75rem 0.5rem;
+            text-align: center;
+            font-weight: 600;
+            color: #475569;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .budget-line-header {
+            min-width: 200px;
+            text-align: left !important;
+        }
+        
+        .budget-month-header {
+            min-width: 80px;
+        }
+        
+        .budget-total-header {
+            min-width: 100px;
+            background: #fef3c7 !important;
+        }
+        
+        .budget-actions-header {
+            width: 60px;
+        }
+        
+        /* Budget Category Rows */
+        .budget-category-row {
+            background: #f1f5f9;
+            border-top: 2px solid #cbd5e1;
+        }
+        
+        .budget-category-cell {
+            padding: 0.75rem;
+            font-weight: 600;
+            color: #1e293b;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .budget-category-toggle {
+            cursor: pointer;
+            margin-right: 0.5rem;
+            color: #64748b;
+            transition: transform 0.2s ease;
+        }
+        
+        .budget-category-toggle.collapsed i {
+            transform: rotate(-90deg);
+        }
+        
+        .budget-category-title {
+            color: #1e293b;
+        }
+        
+        .budget-category-total {
+            text-align: center;
+            font-weight: 600;
+            color: #059669;
+            border: 1px solid #e2e8f0;
+        }
+        
+        /* Budget Line Item Rows */
+        .budget-line-row {
+            transition: background-color 0.2s ease;
+        }
+        
+        .budget-line-row:hover {
+            background: #fafafa;
+        }
+        
+        .budget-line-row.hidden {
+            display: none;
+        }
+        
+        .budget-line-cell {
+            padding: 0.5rem;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .budget-line-name {
+            padding-left: 2rem;
+            font-weight: 500;
+            color: #374151;
+        }
+        
+        .budget-amount-input {
+            width: 80px;
+            padding: 0.25rem;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            text-align: right;
+            font-size: 0.875rem;
+        }
+        
+        .budget-amount-input:focus {
+            outline: none;
+            border-color: #fbbf24;
+            box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.1);
+        }
+        
+        /* Budget Summary Rows */
+        .budget-summary-row {
+            background: #fef9e7;
+            border-top: 1px solid #fbbf24;
+        }
+        
+        .budget-final-row {
+            background: #f0f9f4;
+            border-top: 2px solid #059669;
+        }
+        
+        .budget-summary-label {
+            padding: 0.75rem;
+            font-weight: 700;
+            color: #1e293b;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .budget-summary-cell {
+            padding: 0.75rem 0.5rem;
+            text-align: center;
+            font-weight: 600;
+            color: #059669;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .budget-summary-total {
+            padding: 0.75rem 0.5rem;
+            text-align: center;
+            font-weight: 700;
+            color: #059669;
+            background: #fef3c7;
+            border: 1px solid #fbbf24;
+        }
+        
+        /* Budget Action Buttons */
+        .budget-line-actions {
+            display: flex;
+            gap: 0.25rem;
+            justify-content: center;
+        }
+        
+        .budget-action-btn {
+            background: none;
+            border: none;
+            color: #64748b;
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+        
+        .budget-action-btn:hover {
+            background: #f1f5f9;
+            color: #475569;
+        }
+        
+        .budget-action-btn.delete:hover {
+            background: #fef2f2;
+            color: #dc2626;
+        }
         
     </style>
 </head>
@@ -8928,6 +9119,12 @@
                 <a href="#reports" class="nav-link" data-section="reports" data-tooltip="Reports & Analytics">
                     <i class="nav-icon fas fa-chart-bar"></i>
                     <span>Reports & Analytics</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="#budgets" class="nav-link" data-section="budgets" data-tooltip="Budgets & Planning">
+                    <i class="nav-icon fas fa-calendar-alt"></i>
+                    <span>Budgeting & Planning</span>
                 </a>
             </div>
             <div class="nav-item">
@@ -10616,6 +10813,194 @@
                 </div>
             </div>
 
+            <!-- Budgets & Planning Section -->
+            <div id="budgets-section" class="section-content" style="display: none;">
+                <!-- Budget Management Header Card -->
+                <div class="content-card">
+                    <div class="card-header">
+                        <div class="panel-title">
+                            <i class="fas fa-calendar-alt"></i>
+                            <h3>Budgeting & Planning</h3> <!-- Updated title -->
+                        </div>
+                        <div class="budget-mgmt-controls">
+                            <select id="budgetYearSelect" class="filter-input" onchange="loadBudgetYear()" style="width: auto; margin-right: 1rem;">
+                                <option value="2025">Budget 2025</option>
+                                <option value="2026">Budget 2026</option>
+                                <option value="2027">Budget 2027</option>
+                            </select>
+                            <div class="priority-badge medium-priority" id="budgetStatus">Draft</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Rest of the HTML remains the same -->
+                    <div class="panel-content">
+                        <div class="budget-mgmt-meta">
+                            <div class="metric-breakdown">
+                                <span class="breakdown-item">
+                                    <span class="breakdown-label">Source: </span>
+                                    <span class="breakdown-value" id="budgetSource">AI Forecast (SaaS Industry)</span>
+                                </span>
+                                <span class="breakdown-item">
+                                    <span class="breakdown-label">Last Updated: </span>
+                                    <span class="breakdown-value" id="budgetLastUpdated">Today</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            
+                <!-- Budget Summary Cards -->
+                <div class="metrics-grid" style="margin-bottom: 2rem;">
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div class="metric-title">Total Revenue</div>
+                            <i class="fas fa-chart-line metric-icon"></i>
+                        </div>
+                        <div class="metric-value" id="budgetTotalRevenue">Rp 0</div>
+                        <div class="metric-change positive" id="budgetRevenueChange">vs Forecast</div>
+                    </div>
+                    
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div class="metric-title">Total Expenses</div>
+                            <i class="fas fa-chart-bar metric-icon"></i>
+                        </div>
+                        <div class="metric-value" id="budgetTotalExpenses">Rp 0</div>
+                        <div class="metric-change" id="budgetExpenseChange">vs Forecast</div>
+                    </div>
+                    
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div class="metric-title">Net Profit</div>
+                            <i class="fas fa-trophy metric-icon"></i>
+                        </div>
+                        <div class="metric-value" id="budgetNetProfit">Rp 0</div>
+                        <div class="metric-change" id="budgetProfitChange">vs Forecast</div>
+                    </div>
+                </div>
+            
+                <!-- Detailed Budget Breakdown -->
+                <div class="content-card">
+                    <div class="card-header">
+                        <div class="panel-title">
+                            <i class="fas fa-edit"></i>
+                            <h3>Detailed Budget Breakdown</h3>
+                        </div>
+                        <div class="scenario-actions">
+                            <button class="btn btn-secondary" onclick="addBudgetLine()">
+                                <i class="fas fa-plus"></i> Add Line Item
+                            </button>
+                            <button class="btn btn-primary" onclick="saveBudget()">
+                                <i class="fas fa-save"></i> Save Budget
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="panel-content">
+                        <div class="budget-table-wrapper">
+                            <table class="budget-detail-table" id="budgetTable">
+                                <thead>
+                                    <tr>
+                                        <th class="budget-line-header">Line Item</th>
+                                        <th class="budget-month-header">Jan</th>
+                                        <th class="budget-month-header">Feb</th>
+                                        <th class="budget-month-header">Mar</th>
+                                        <th class="budget-month-header">Apr</th>
+                                        <th class="budget-month-header">May</th>
+                                        <th class="budget-month-header">Jun</th>
+                                        <th class="budget-month-header">Jul</th>
+                                        <th class="budget-month-header">Aug</th>
+                                        <th class="budget-month-header">Sep</th>
+                                        <th class="budget-month-header">Oct</th>
+                                        <th class="budget-month-header">Nov</th>
+                                        <th class="budget-month-header">Dec</th>
+                                        <th class="budget-total-header">Total</th>
+                                        <th class="budget-actions-header"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="budgetTableBody">
+                                    <!-- Revenue Section -->
+                                    <tr class="budget-category-row" data-category="revenue">
+                                        <td class="budget-category-cell">
+                                            <span class="budget-category-toggle" onclick="toggleBudgetCategory('revenue')">
+                                                <i class="fas fa-chevron-down"></i>
+                                            </span>
+                                            <strong class="budget-category-title">REVENUE</strong>
+                                        </td>
+                                        <td colspan="14" class="budget-category-total" id="revenueCategoryTotal">Rp 0</td>
+                                    </tr>
+                                    
+                                    <!-- Revenue line items will be inserted here -->
+                                    
+                                    <!-- COGS Section -->
+                                    <tr class="budget-category-row" data-category="cogs">
+                                        <td class="budget-category-cell">
+                                            <span class="budget-category-toggle" onclick="toggleBudgetCategory('cogs')">
+                                                <i class="fas fa-chevron-down"></i>
+                                            </span>
+                                            <strong class="budget-category-title">COST OF GOODS SOLD</strong>
+                                        </td>
+                                        <td colspan="14" class="budget-category-total" id="cogsCategoryTotal">Rp 0</td>
+                                    </tr>
+                                    
+                                    <!-- COGS line items will be inserted here -->
+                                    
+                                    <!-- OpEx Section -->
+                                    <tr class="budget-category-row" data-category="opex">
+                                        <td class="budget-category-cell">
+                                            <span class="budget-category-toggle" onclick="toggleBudgetCategory('opex')">
+                                                <i class="fas fa-chevron-down"></i>
+                                            </span>
+                                            <strong class="budget-category-title">OPERATING EXPENSES</strong>
+                                        </td>
+                                        <td colspan="14" class="budget-category-total" id="opexCategoryTotal">Rp 0</td>
+                                    </tr>
+                                    
+                                    <!-- OpEx line items will be inserted here -->
+                                    
+                                    <!-- Summary Rows -->
+                                    <tr class="budget-summary-row">
+                                        <td class="budget-summary-label"><strong>GROSS PROFIT</strong></td>
+                                        <td class="budget-summary-cell" id="grossProfitJan">Rp 0</td>
+                                        <td class="budget-summary-cell" id="grossProfitFeb">Rp 0</td>
+                                        <td class="budget-summary-cell" id="grossProfitMar">Rp 0</td>
+                                        <td class="budget-summary-cell" id="grossProfitApr">Rp 0</td>
+                                        <td class="budget-summary-cell" id="grossProfitMay">Rp 0</td>
+                                        <td class="budget-summary-cell" id="grossProfitJun">Rp 0</td>
+                                        <td class="budget-summary-cell" id="grossProfitJul">Rp 0</td>
+                                        <td class="budget-summary-cell" id="grossProfitAug">Rp 0</td>
+                                        <td class="budget-summary-cell" id="grossProfitSep">Rp 0</td>
+                                        <td class="budget-summary-cell" id="grossProfitOct">Rp 0</td>
+                                        <td class="budget-summary-cell" id="grossProfitNov">Rp 0</td>
+                                        <td class="budget-summary-cell" id="grossProfitDec">Rp 0</td>
+                                        <td class="budget-summary-total" id="grossProfitTotal">Rp 0</td>
+                                        <td></td>
+                                    </tr>
+                                    
+                                    <tr class="budget-summary-row budget-final-row">
+                                        <td class="budget-summary-label"><strong>NET PROFIT</strong></td>
+                                        <td class="budget-summary-cell" id="netProfitJan">Rp 0</td>
+                                        <td class="budget-summary-cell" id="netProfitFeb">Rp 0</td>
+                                        <td class="budget-summary-cell" id="netProfitMar">Rp 0</td>
+                                        <td class="budget-summary-cell" id="netProfitApr">Rp 0</td>
+                                        <td class="budget-summary-cell" id="netProfitMay">Rp 0</td>
+                                        <td class="budget-summary-cell" id="netProfitJun">Rp 0</td>
+                                        <td class="budget-summary-cell" id="netProfitJul">Rp 0</td>
+                                        <td class="budget-summary-cell" id="netProfitAug">Rp 0</td>
+                                        <td class="budget-summary-cell" id="netProfitSep">Rp 0</td>
+                                        <td class="budget-summary-cell" id="netProfitOct">Rp 0</td>
+                                        <td class="budget-summary-cell" id="netProfitNov">Rp 0</td>
+                                        <td class="budget-summary-cell" id="netProfitDec">Rp 0</td>
+                                        <td class="budget-summary-total" id="netProfitTotal">Rp 0</td>
+                                        <td></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Forecasting Section -->
             <div id="forecasting-section" class="section-content" style="display: none;">
                 <div class="dashboard-section">             
@@ -10699,6 +11084,9 @@
                                 </button>
                             </div>
                             <div class="forecasting-ai-controls-right">
+                                <button class="btn btn-outline" onclick="convertForecastToBudget()">
+                                    <i class="fas fa-download"></i> Convert to Budget
+                                </button>
                                 <button class="btn btn-primary" id="generateAIForecast">
                                     <i class="fas fa-brain"></i>
                                     Generate AI Forecast
@@ -29668,6 +30056,459 @@
             
             updateEventsList();
             updateScenarioComparison();
+        }
+
+        // Convert current forecast to budget
+        async function convertForecastToBudget() {
+            // Check if forecast exists
+            const forecastTable = document.getElementById('plForecastTable');
+            if (!forecastTable || forecastTable.rows.length <= 1) {
+                alert('Please generate a forecast first');
+                return;
+            }
+            
+            // Get current forecast details
+            const industry = document.getElementById('forecastIndustrySelect')?.value || 'saas';
+            const forecastStyle = document.getElementById('forecastStyleSelect')?.value || 'normal';
+            
+            if (!confirm('Convert current forecast to budget? This will create a new budget plan for 2026.')) {
+                return;
+            }
+            
+            const button = event.target;
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Converting...';
+            button.disabled = true;
+            
+            try {
+                // Get current user
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) {
+                    throw new Error('User not authenticated');
+                }
+                
+                // Get the latest forecast ID (you'll need to track this when generating forecasts)
+                const latestForecastId = localStorage.getItem('latest_forecast_id') || '1';
+                const forecastTable = 'ai_forecasts_2026_meridash'; // or determine dynamically
+                
+                // Call Supabase function to convert forecast to budget
+                const { data, error } = await supabase.rpc('convert_forecast_to_budget', {
+                    p_user_id: user.id,
+                    p_forecast_id: latestForecastId,
+                    p_forecast_table: forecastTable,
+                    p_budget_year: 2026,
+                    p_budget_name: `Budget 2026 (${industry} - ${forecastStyle})`,
+                    p_description: `Budget converted from AI forecast on ${new Date().toLocaleDateString()}`
+                });
+                
+                if (error) {
+                    throw error;
+                }
+                
+                console.log('✅ Forecast converted to budget successfully');
+                
+                // Switch to Budget tab
+                showSection('budgets');
+                loadBudgetYear(); // Load the newly created budget
+                
+                showSuccessMessage('Forecast converted to budget successfully! Check the Budgeting & Planning tab.');
+                
+            } catch (error) {
+                console.error('Error converting forecast:', error);
+                if (error.message.includes('already exists')) {
+                    showErrorMessage('Budget for 2026 already exists. Please delete it first or choose a different year.');
+                } else {
+                    showErrorMessage('Failed to convert forecast: ' + error.message);
+                }
+            } finally {
+                button.innerHTML = originalText;
+                button.disabled = false;
+            }
+        }
+        
+        // Helper function to track latest forecast ID
+        function trackLatestForecastId(forecastId, forecastTable) {
+            localStorage.setItem('latest_forecast_id', forecastId);
+            localStorage.setItem('latest_forecast_table', forecastTable);
+        }
+        
+        function extractForecastData() {
+            // Extract data from your current forecast table
+            const table = document.getElementById('plForecastTable');
+            // Implementation depends on your current forecast table structure
+            return forecastData;
+        }
+        
+        function convertToDetailedBudget(forecastData) {
+            // Convert forecast data to detailed budget structure
+            const budgetData = [];
+            const currentYear = new Date().getFullYear() + 1; // Next year
+            
+            // For each month, create detailed budget entries
+            for (let month = 1; month <= 12; month++) {
+                budgetData.push({
+                    budget_year: currentYear,
+                    budget_month: month,
+                    source: 'ai_forecast',
+                    // Revenue breakdown (start with forecast total, allow editing)
+                    revenue_total: forecastData.revenue[month] || 0,
+                    revenue_products: forecastData.revenue[month] * 0.6 || 0, // Default splits
+                    revenue_services: forecastData.revenue[month] * 0.3 || 0,
+                    revenue_subscriptions: forecastData.revenue[month] * 0.1 || 0,
+                    // COGS
+                    cogs_total: forecastData.cogs[month] || 0,
+                    // OpEx breakdown
+                    opex_total: forecastData.opex[month] || 0,
+                    opex_salaries: forecastData.opex[month] * 0.6 || 0, // Default splits
+                    opex_marketing: forecastData.opex[month] * 0.2 || 0,
+                    opex_office: forecastData.opex[month] * 0.1 || 0,
+                    opex_technology: forecastData.opex[month] * 0.1 || 0,
+                    status: 'draft'
+                });
+            }
+            
+            return budgetData;
+        }
+
+        // Save budget data to Supabase
+        async function saveBudgetToSupabase(budgetData) {
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) {
+                    throw new Error('User not authenticated');
+                }
+        
+                // Add user_id to each budget entry
+                const budgetEntries = budgetData.map(entry => ({
+                    ...entry,
+                    user_id: user.id
+                }));
+        
+                const { data, error } = await supabase
+                    .from('budgets')
+                    .upsert(budgetEntries, { 
+                        onConflict: 'user_id,budget_year,budget_month' 
+                    });
+        
+                if (error) throw error;
+                
+                console.log('Budget saved successfully:', data);
+                return data;
+                
+            } catch (error) {
+                console.error('Error saving budget:', error);
+                throw error;
+            }
+        }
+        
+        // Load budget data from Supabase
+        async function loadBudgetFromSupabase(year) {
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) {
+                    throw new Error('User not authenticated');
+                }
+        
+                const { data, error } = await supabase
+                    .from('budgets')
+                    .select('*')
+                    .eq('user_id', user.id)
+                    .eq('budget_year', year)
+                    .order('budget_month');
+        
+                if (error) throw error;
+                
+                return data || [];
+                
+            } catch (error) {
+                console.error('Error loading budget:', error);
+                return [];
+            }
+        }
+
+        // Toggle budget category expand/collapse
+        function toggleBudgetCategory(category) {
+            const categoryRows = document.querySelectorAll(`tr[data-parent-category="${category}"]`);
+            const toggleIcon = document.querySelector(`tr[data-category="${category}"] .budget-category-toggle i`);
+            
+            categoryRows.forEach(row => {
+                if (row.classList.contains('hidden')) {
+                    row.classList.remove('hidden');
+                    toggleIcon.style.transform = 'rotate(0deg)';
+                } else {
+                    row.classList.add('hidden');
+                    toggleIcon.style.transform = 'rotate(-90deg)';
+                }
+            });
+        }
+        
+        // Add new budget line item
+        function addBudgetLine() {
+            const category = prompt('Select category:\n1. Revenue\n2. COGS\n3. OpEx\n\nEnter 1, 2, or 3:');
+            const categoryMap = { '1': 'revenue', '2': 'cogs', '3': 'opex' };
+            const selectedCategory = categoryMap[category];
+            
+            if (!selectedCategory) {
+                alert('Invalid category selection');
+                return;
+            }
+            
+            const lineName = prompt('Enter line item name:');
+            if (!lineName) return;
+            
+            addBudgetLineToTable(selectedCategory, lineName);
+        }
+        
+        function addBudgetLineToTable(category, lineName, values = {}) {
+            const tableBody = document.getElementById('budgetTableBody');
+            const categoryRow = document.querySelector(`tr[data-category="${category}"]`);
+            
+            // Create new line item row
+            const newRow = document.createElement('tr');
+            newRow.className = 'budget-line-row';
+            newRow.setAttribute('data-parent-category', category);
+            newRow.setAttribute('data-line-name', lineName);
+            
+            newRow.innerHTML = `
+                <td class="budget-line-cell">
+                    <div class="budget-line-name">${lineName}</div>
+                </td>
+                <td class="budget-line-cell"><input type="number" class="budget-amount-input" data-month="1" value="${values.jan || 0}" oninput="updateBudgetCalculations()"></td>
+                <td class="budget-line-cell"><input type="number" class="budget-amount-input" data-month="2" value="${values.feb || 0}" oninput="updateBudgetCalculations()"></td>
+                <td class="budget-line-cell"><input type="number" class="budget-amount-input" data-month="3" value="${values.mar || 0}" oninput="updateBudgetCalculations()"></td>
+                <td class="budget-line-cell"><input type="number" class="budget-amount-input" data-month="4" value="${values.apr || 0}" oninput="updateBudgetCalculations()"></td>
+                <td class="budget-line-cell"><input type="number" class="budget-amount-input" data-month="5" value="${values.may || 0}" oninput="updateBudgetCalculations()"></td>
+                <td class="budget-line-cell"><input type="number" class="budget-amount-input" data-month="6" value="${values.jun || 0}" oninput="updateBudgetCalculations()"></td>
+                <td class="budget-line-cell"><input type="number" class="budget-amount-input" data-month="7" value="${values.jul || 0}" oninput="updateBudgetCalculations()"></td>
+                <td class="budget-line-cell"><input type="number" class="budget-amount-input" data-month="8" value="${values.aug || 0}" oninput="updateBudgetCalculations()"></td>
+                <td class="budget-line-cell"><input type="number" class="budget-amount-input" data-month="9" value="${values.sep || 0}" oninput="updateBudgetCalculations()"></td>
+                <td class="budget-line-cell"><input type="number" class="budget-amount-input" data-month="10" value="${values.oct || 0}" oninput="updateBudgetCalculations()"></td>
+                <td class="budget-line-cell"><input type="number" class="budget-amount-input" data-month="11" value="${values.nov || 0}" oninput="updateBudgetCalculations()"></td>
+                <td class="budget-line-cell"><input type="number" class="budget-amount-input" data-month="12" value="${values.dec || 0}" oninput="updateBudgetCalculations()"></td>
+                <td class="budget-line-cell budget-line-total" data-line="${lineName}">Rp 0</td>
+                <td class="budget-line-cell">
+                    <div class="budget-line-actions">
+                        <button class="budget-action-btn delete" onclick="deleteBudgetLine(this)" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            `;
+            
+            // Insert after the category row
+            categoryRow.parentNode.insertBefore(newRow, categoryRow.nextSibling);
+            
+            // Update calculations
+            updateBudgetCalculations();
+        }
+        
+        // Delete budget line
+        function deleteBudgetLine(button) {
+            if (confirm('Delete this budget line item?')) {
+                button.closest('tr').remove();
+                updateBudgetCalculations();
+            }
+        }
+
+        // Update all budget calculations
+        function updateBudgetCalculations() {
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            
+            // Calculate totals for each category and month
+            const totals = {
+                revenue: Array(12).fill(0),
+                cogs: Array(12).fill(0),
+                opex: Array(12).fill(0)
+            };
+            
+            // Sum up all line items
+            document.querySelectorAll('.budget-line-row').forEach(row => {
+                const category = row.getAttribute('data-parent-category');
+                const inputs = row.querySelectorAll('.budget-amount-input');
+                let lineTotal = 0;
+                
+                inputs.forEach((input, index) => {
+                    const value = parseFloat(input.value) || 0;
+                    totals[category][index] += value;
+                    lineTotal += value;
+                });
+                
+                // Update line total
+                const lineTotalCell = row.querySelector('.budget-line-total');
+                if (lineTotalCell) {
+                    lineTotalCell.textContent = formatCurrencyFull(lineTotal, 'IDR');
+                }
+            });
+            
+            // Update category totals
+            updateCategoryTotals(totals);
+            
+            // Update summary calculations
+            updateSummaryCalculations(totals, months);
+            
+            // Update dashboard cards
+            updateBudgetDashboardCards(totals);
+        }
+        
+        function updateCategoryTotals(totals) {
+            ['revenue', 'cogs', 'opex'].forEach(category => {
+                const categoryTotal = totals[category].reduce((sum, month) => sum + month, 0);
+                const categoryTotalCell = document.getElementById(`${category}CategoryTotal`);
+                if (categoryTotalCell) {
+                    categoryTotalCell.textContent = formatCurrencyFull(categoryTotal, 'IDR');
+                }
+            });
+        }
+        
+        function updateSummaryCalculations(totals, months) {
+            months.forEach((month, index) => {
+                const monthKey = month.toLowerCase();
+                
+                // Gross Profit = Revenue - COGS
+                const grossProfit = totals.revenue[index] - totals.cogs[index];
+                const grossProfitCell = document.getElementById(`grossProfit${month}`);
+                if (grossProfitCell) {
+                    grossProfitCell.textContent = formatCurrencyFull(grossProfit, 'IDR');
+                }
+                
+                // Net Profit = Gross Profit - OpEx
+                const netProfit = grossProfit - totals.opex[index];
+                const netProfitCell = document.getElementById(`netProfit${month}`);
+                if (netProfitCell) {
+                    netProfitCell.textContent = formatCurrencyFull(netProfit, 'IDR');
+                }
+            });
+            
+            // Update totals
+            const totalGrossProfit = totals.revenue.reduce((sum, rev, i) => sum + (rev - totals.cogs[i]), 0);
+            const totalNetProfit = totalGrossProfit - totals.opex.reduce((sum, opex) => sum + opex, 0);
+            
+            document.getElementById('grossProfitTotal').textContent = formatCurrencyFull(totalGrossProfit, 'IDR');
+            document.getElementById('netProfitTotal').textContent = formatCurrencyFull(totalNetProfit, 'IDR');
+        }
+        
+        function updateBudgetDashboardCards(totals) {
+            const totalRevenue = totals.revenue.reduce((sum, month) => sum + month, 0);
+            const totalExpenses = totals.cogs.reduce((sum, month) => sum + month, 0) + 
+                                 totals.opex.reduce((sum, month) => sum + month, 0);
+            const netProfit = totalRevenue - totalExpenses;
+            
+            document.getElementById('budgetTotalRevenue').textContent = formatCurrencyFull(totalRevenue, 'IDR');
+            document.getElementById('budgetTotalExpenses').textContent = formatCurrencyFull(totalExpenses, 'IDR');
+            document.getElementById('budgetNetProfit').textContent = formatCurrencyFull(netProfit, 'IDR');
+        }
+
+        // Load budget for selected year
+        async function loadBudgetYear() {
+            const selectedYear = document.getElementById('budgetYearSelect').value;
+            
+            try {
+                // Get current user
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) {
+                    throw new Error('User not authenticated');
+                }
+                
+                // Clear existing line items
+                document.querySelectorAll('.budget-line-row').forEach(row => row.remove());
+                
+                // Load budget metadata
+                const { data: budgetMeta, error: metaError } = await supabase
+                    .from('budget_metadata')
+                    .select('*')
+                    .eq('user_id', user.id)
+                    .eq('budget_year', selectedYear)
+                    .single();
+                
+                if (metaError && metaError.code !== 'PGRST116') {
+                    throw metaError;
+                }
+                
+                if (budgetMeta) {
+                    // Update budget info
+                    document.getElementById('budgetSource').textContent = `Source: ${budgetMeta.source_type || 'Manual'}`;
+                    document.getElementById('budgetLastUpdated').textContent = new Date(budgetMeta.updated_at).toLocaleDateString();
+                    updateBudgetStatus(budgetMeta.status);
+                    
+                    // Update summary cards
+                    document.getElementById('budgetTotalRevenue').textContent = formatCurrencyFull(budgetMeta.total_revenue || 0, 'IDR');
+                    document.getElementById('budgetTotalExpenses').textContent = formatCurrencyFull(budgetMeta.total_expenses || 0, 'IDR');
+                    document.getElementById('budgetNetProfit').textContent = formatCurrencyFull(budgetMeta.net_profit || 0, 'IDR');
+                    
+                    // Load budget line items
+                    const { data: budgetItems, error: itemsError } = await supabase
+                        .from('budgets')
+                        .select('*')
+                        .eq('user_id', user.id)
+                        .eq('budget_year', selectedYear)
+                        .order('category, account_code, budget_month');
+                    
+                    if (itemsError) {
+                        throw itemsError;
+                    }
+                    
+                    if (budgetItems && budgetItems.length > 0) {
+                        populateBudgetTable(budgetItems);
+                    }
+                } else {
+                    // No budget found
+                    updateBudgetStatus('draft');
+                    document.getElementById('budgetSource').textContent = 'No budget created yet';
+                    document.getElementById('budgetTotalRevenue').textContent = formatCurrencyFull(0, 'IDR');
+                    document.getElementById('budgetTotalExpenses').textContent = formatCurrencyFull(0, 'IDR');
+                    document.getElementById('budgetNetProfit').textContent = formatCurrencyFull(0, 'IDR');
+                }
+                
+            } catch (error) {
+                console.error('Error loading budget year:', error);
+                showErrorMessage('Failed to load budget data: ' + error.message);
+            }
+        }
+        
+        function populateBudgetTable(budgetItems) {
+            // Group budget items by line item and account
+            const groupedItems = {};
+            
+            budgetItems.forEach(item => {
+                const key = `${item.category}_${item.account_code}_${item.line_item_name}`;
+                if (!groupedItems[key]) {
+                    groupedItems[key] = {
+                        category: item.category,
+                        account_code: item.account_code,
+                        line_item_name: item.line_item_name,
+                        months: {}
+                    };
+                }
+                groupedItems[key].months[item.budget_month] = item.amount;
+            });
+            
+            // Add line items to table
+            Object.values(groupedItems).forEach(itemGroup => {
+                const monthlyValues = {};
+                for (let month = 1; month <= 12; month++) {
+                    monthlyValues[getMonthKey(month)] = itemGroup.months[month] || 0;
+                }
+                
+                addBudgetLineToTable(
+                    itemGroup.category, 
+                    itemGroup.line_item_name, 
+                    monthlyValues,
+                    itemGroup.account_code
+                );
+            });
+            
+            updateBudgetCalculations();
+        }
+
+        function getMonthKey(monthNumber) {
+            const months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+            return months[monthNumber - 1];
+        }
+        
+        function updateBudgetStatus(status) {
+            const statusBadge = document.getElementById('budgetStatus');
+            statusBadge.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+            statusBadge.className = `priority-badge ${status === 'approved' ? 'low-priority' : 'medium-priority'}`;
         }
         
     </script>
