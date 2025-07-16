@@ -31318,7 +31318,7 @@
         function clearBudgetTable() {
             document.querySelectorAll('.budget-line-row').forEach(row => row.remove());
             document.querySelectorAll('.budget-category-subtotal').forEach(row => row.remove()); // Remove existing subtotals
-            addCategorySubtotals();  // Add this line
+            addCategorySubtotals();  // Add fresh subtotals
             updateBudgetCalculations(); // Recalculate to zero out totals
         }
 
@@ -31497,7 +31497,6 @@
                 const selectedYear = parseInt(document.getElementById('budgetYearSelect').value);
                 
                 clearBudgetTable();
-                addCategorySubtotals();
 
                 if (!selectedYear || isNaN(selectedYear)) {
                     updateBudgetStatus('draft');
@@ -31670,6 +31669,9 @@
         }
 
         function addCategorySubtotals() {
+            // Remove existing subtotal rows first
+            document.querySelectorAll('.budget-category-subtotal').forEach(row => row.remove());
+            
             const categories = ['revenue', 'cogs', 'opex'];
             
             categories.forEach(category => {
