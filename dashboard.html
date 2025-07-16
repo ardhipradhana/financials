@@ -11280,6 +11280,9 @@
                                 </button>
                             </div>
                             <div class="forecasting-ai-controls-right">
+                                <button class="btn btn-outline" onclick="convert2026ForecastToBudget()">
+                                    <i class="fas fa-download"></i> Convert to Budget
+                                </button>
                                 <button class="btn btn-primary" id="generateAI2026Forecast">
                                     <i class="fas fa-brain"></i>
                                     Generate AI Forecast
@@ -11366,6 +11369,9 @@
                                 </button>
                             </div>
                             <div class="forecasting-ai-controls-right">
+                                <button class="btn btn-outline" onclick="convertMultiYearForecastToBudget()">
+                                    <i class="fas fa-download"></i> Convert to Budget
+                                </button>
                                 <button class="btn btn-primary" id="generateAIMultiYearForecast">
                                     <i class="fas fa-brain"></i>
                                     Generate AI Forecast
@@ -24056,6 +24062,8 @@
                     console.error('Error saving forecast metadata:', forecastError);
                     throw forecastError;
                 }
+
+                trackLatestForecastId(forecastRecord[0].id, 'ai_forecasts_meridash');
                 
                 console.log('✅ Forecast metadata saved to Supabase');
                 
@@ -26846,6 +26854,8 @@
                 if (error) {
                     throw error;
                 }
+
+                trackLatestForecastId(data[0].id, 'ai_forecasts_2026_meridash');
                 
                 console.log('✅ 2026 forecast saved to Supabase:', data);
                 return data;
@@ -27846,6 +27856,8 @@
                 if (error) {
                     throw error;
                 }
+
+                trackLatestForecastId(data[0].id, 'ai_forecasts_multiyear_meridash');
                 
                 console.log('✅ Multi-year forecast saved to Supabase:', data);
                 return data;
@@ -30071,7 +30083,11 @@
             const industry = document.getElementById('forecastIndustrySelect')?.value || 'saas';
             const forecastStyle = document.getElementById('forecastStyleSelect')?.value || 'normal';
             
-            if (!confirm('Convert current forecast to budget? This will create a new budget plan for 2026.')) {
+            // Determine the budget year based on current forecast
+            const currentYear = new Date().getFullYear();
+            const budgetYear = currentYear; // For 2025 forecasts, create 2025 budget
+            
+            if (!confirm(`Convert current forecast to budget for ${budgetYear}? This will create a new budget plan.`)) {
                 return;
             }
             
@@ -30083,21 +30099,19 @@
             try {
                 // Get current user
                 const { data: { user } } = await supabase.auth.getUser();
-                if (!user) {
-                    throw new Error('User not authenticated');
-                }
+                if (!user) throw new Error('User not authenticated');
                 
-                // Get the latest forecast ID (you'll need to track this when generating forecasts)
-                const latestForecastId = localStorage.getItem('latest_forecast_id') || '1';
-                const forecastTable = 'ai_forecasts_2026_meridash'; // or determine dynamically
+                // Get the latest forecast ID 
+                const latestForecastId = localStorage.getItem('latest_2025_forecast_id') || localStorage.getItem('latest_forecast_id') || '1';
+                const forecastTableName = 'ai_forecasts_meridash';
                 
-                // Call Supabase function to convert forecast to budget
+                // Call Supabase function with proper parameters
                 const { data, error } = await supabase.rpc('convert_forecast_to_budget', {
                     p_user_id: user.id,
                     p_forecast_id: latestForecastId,
-                    p_forecast_table: forecastTable,
-                    p_budget_year: 2026,
-                    p_budget_name: `Budget 2026 (${industry} - ${forecastStyle})`,
+                    p_forecast_table: forecastTableName,
+                    p_budget_year: budgetYear,
+                    p_budget_name: `Budget ${budgetYear} (${industry} - ${forecastStyle})`,
                     p_description: `Budget converted from AI forecast on ${new Date().toLocaleDateString()}`
                 });
                 
@@ -30107,16 +30121,19 @@
                 
                 console.log('✅ Forecast converted to budget successfully');
                 
-                // Switch to Budget tab
-                showSection('budgets');
-                loadBudgetYear(); // Load the newly created budget
+                // Update budget year selector to show the new budget
+                document.getElementById('budgetYearSelect').value = budgetYear;
                 
-                showSuccessMessage('Forecast converted to budget successfully! Check the Budgeting & Planning tab.');
+                // Switch to Budget tab and load
+                showSection('budgets');
+                await loadBudgetYear();
+                
+                showSuccessMessage(`Forecast converted to ${budgetYear} budget successfully!`);
                 
             } catch (error) {
                 console.error('Error converting forecast:', error);
-                if (error.message.includes('already exists')) {
-                    showErrorMessage('Budget for 2026 already exists. Please delete it first or choose a different year.');
+                if (error.message && error.message.includes('already exists')) {
+                    showErrorMessage(`Budget for ${budgetYear} already exists. Please delete it first.`);
                 } else {
                     showErrorMessage('Failed to convert forecast: ' + error.message);
                 }
@@ -30125,11 +30142,145 @@
                 button.disabled = false;
             }
         }
+
+        async function convert2026ForecastToBudget() {
+            const forecastTable = document.getElementById('plForecast2026Table');
+            if (!forecastTable || forecastTable.rows.length <= 1) {
+                alert('Please generate a 2026 forecast first');
+                return;
+            }
+            
+            const industry = document.getElementById('forecast2026IndustrySelect')?.value || 'saas';
+            const forecastStyle = document.getElementById('forecast2026StyleSelect')?.value || 'normal';
+            
+            if (!confirm('Convert 2026 forecast to budget? This will create a budget plan for 2026.')) {
+                return;
+            }
+            
+            const button = event.target;
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Converting...';
+            button.disabled = true;
+            
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) throw new Error('User not authenticated');
+                
+                const latest2026ForecastId = localStorage.getItem('latest_2026_forecast_id') || '1';
+                
+                const { data, error } = await supabase.rpc('convert_forecast_to_budget', {
+                    p_user_id: user.id,
+                    p_forecast_id: latest2026ForecastId,
+                    p_forecast_table: 'ai_forecasts_2026_meridash',
+                    p_budget_year: 2026,
+                    p_budget_name: `Budget 2026 (${industry} - ${forecastStyle})`,
+                    p_description: `Budget converted from 2026 AI forecast on ${new Date().toLocaleDateString()}`
+                });
+                
+                if (error) throw error;
+                
+                document.getElementById('budgetYearSelect').value = 2026;
+                showSection('budgets');
+                await loadBudgetYear();
+                showSuccessMessage('2026 forecast converted to budget successfully!');
+                
+            } catch (error) {
+                console.error('Error converting 2026 forecast:', error);
+                showErrorMessage('Failed to convert 2026 forecast: ' + error.message);
+            } finally {
+                button.innerHTML = originalText;
+                button.disabled = false;
+            }
+        }
+        
+        // Multi-year forecast conversion
+        async function convertMultiYearForecastToBudget() {
+            const selectedYear = prompt('Which year do you want to convert to budget?\nEnter: 2027, 2028, 2029, or 2030');
+            const year = parseInt(selectedYear);
+            
+            if (!year || year < 2027 || year > 2030) {
+                alert('Please enter a valid year (2027-2030)');
+                return;
+            }
+            
+            const forecastTable = document.getElementById(`plForecast${year}Table`);
+            if (!forecastTable || forecastTable.rows.length <= 1) {
+                alert(`Please generate a multi-year forecast first`);
+                return;
+            }
+            
+            const industry = document.getElementById('forecastMultiYearIndustrySelect')?.value || 'saas';
+            const forecastStyle = document.getElementById('forecastMultiYearStyleSelect')?.value || 'normal';
+            
+            if (!confirm(`Convert ${year} forecast to budget?`)) {
+                return;
+            }
+            
+            const button = event.target;
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Converting...';
+            button.disabled = true;
+            
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) throw new Error('User not authenticated');
+                
+                const latestMultiYearForecastId = localStorage.getItem('latest_multiyear_forecast_id') || '1';
+                
+                const { data, error } = await supabase.rpc('convert_forecast_to_budget', {
+                    p_user_id: user.id,
+                    p_forecast_id: latestMultiYearForecastId,
+                    p_forecast_table: 'ai_forecasts_multiyear_meridash',
+                    p_budget_year: year,
+                    p_budget_name: `Budget ${year} (${industry} - ${forecastStyle})`,
+                    p_description: `Budget converted from multi-year forecast on ${new Date().toLocaleDateString()}`
+                });
+                
+                if (error) throw error;
+                
+                // Add the year to budget selector if not present
+                const budgetYearSelect = document.getElementById('budgetYearSelect');
+                if (!Array.from(budgetYearSelect.options).some(option => option.value == year)) {
+                    const newOption = document.createElement('option');
+                    newOption.value = year;
+                    newOption.textContent = `Budget ${year}`;
+                    budgetYearSelect.appendChild(newOption);
+                }
+                
+                budgetYearSelect.value = year;
+                showSection('budgets');
+                await loadBudgetYear();
+                showSuccessMessage(`${year} forecast converted to budget successfully!`);
+                
+            } catch (error) {
+                console.error(`Error converting ${year} forecast:`, error);
+                showErrorMessage(`Failed to convert ${year} forecast: ` + error.message);
+            } finally {
+                button.innerHTML = originalText;
+                button.disabled = false;
+            }
+        }
         
         // Helper function to track latest forecast ID
         function trackLatestForecastId(forecastId, forecastTable) {
+            // Store the general latest forecast info (keep your existing functionality)
             localStorage.setItem('latest_forecast_id', forecastId);
             localStorage.setItem('latest_forecast_table', forecastTable);
+            
+            // Also store specific forecast type IDs for easier retrieval
+            switch(forecastTable) {
+                case 'ai_forecasts_meridash':
+                    localStorage.setItem('latest_2025_forecast_id', forecastId);
+                    break;
+                case 'ai_forecasts_2026_meridash':
+                    localStorage.setItem('latest_2026_forecast_id', forecastId);
+                    break;
+                case 'ai_forecasts_multiyear_meridash':
+                    localStorage.setItem('latest_multiyear_forecast_id', forecastId);
+                    break;
+            }
+            
+            console.log(`📊 Tracked forecast ID: ${forecastId} for table: ${forecastTable}`);
         }
         
         function extractForecastData() {
