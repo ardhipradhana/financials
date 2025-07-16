@@ -31166,11 +31166,18 @@
                         button.style.cssText = 'text-align: left; padding: 0.5rem; font-size: 0.875rem;';
                         button.textContent = `${account.account_code} - ${account.account_name}`;
                         button.onclick = () => {
+                            console.log('Button clicked for account:', account);
+                            console.log('Key (category):', key);
+                            console.log('Account code:', account.account_code);
+                            console.log('Account name:', account.account_name);
+                            
                             const existingRow = document.querySelector(`tr[data-account-code="${account.account_code}"]`);
                             if (existingRow && existingRow.dataset.lineName && existingRow.dataset.lineName !== 'undefined') {
                                 alert('This line item already exists in the budget.');
                                 return;
                             }
+                            
+                            console.log('About to call addBudgetLineToTable with:', key, `${account.account_code} - ${account.account_name}`, {}, account.account_code);
                             addBudgetLineToTable(key, `${account.account_code} - ${account.account_name}`, {}, account.account_code);
                             closeAddBudgetLineModal();
                             updateBudgetCalculations();
