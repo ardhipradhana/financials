@@ -13541,6 +13541,10 @@
                     }, 100);
                 }
 
+                if (this.dataset.section === 'budgets') {
+                    initializeBudgetsSection();
+                }
+
                 if (this.dataset.section === 'scenarios') {
                     initializeScenarios();
                 }
@@ -30981,20 +30985,9 @@
         }
 
         function clearBudgetTable() {
-            console.log('🧹 Clearing budget table...');
-            
-            // Remove all budget line rows but keep category headers
             const budgetLineRows = document.querySelectorAll('.budget-line-row');
-            console.log(`🗑️ Removing ${budgetLineRows.length} budget line rows`);
-            
-            budgetLineRows.forEach(row => {
-                row.remove();
-            });
-            
-            // Also clear any cached calculations
+            budgetLineRows.forEach(row => row.remove());
             updateBudgetCalculations();
-            
-            console.log('✅ Budget table cleared');
         }
         
         // Delete budget line
@@ -31101,10 +31094,9 @@
                     throw new Error('User not authenticated');
                 }
                 
-                // Use override year if provided, otherwise get from selector
                 const selectedYear = overrideYear || parseInt(document.getElementById('budgetYearSelect').value);
                 
-                if (!selectedYear || selectedYear === 0) {
+                if (!selectedYear || isNaN(selectedYear)) {
                     // No year selected, show empty state
                     updateBudgetStatus('draft');
                     document.getElementById('budgetSource').textContent = 'No budget selected';
@@ -31114,13 +31106,11 @@
                     clearBudgetTable(); // Clear table for empty state
                     return;
                 }
-                
+        
                 console.log(`📊 Loading budget for year: ${selectedYear}`);
                 
-                // FORCE CLEAR existing line items - be more aggressive
                 clearBudgetTable();
                 
-                // Load budget metadata
                 const { data: budgetMeta, error: metaError } = await supabase
                     .from('budget_metadata')
                     .select('*')
@@ -31128,22 +31118,13 @@
                     .eq('budget_year', selectedYear)
                     .single();
                 
-                if (metaError && metaError.code !== 'PGRST116') {
-                    throw metaError;
-                }
+                if (metaError && metaError.code !== 'PGRST116') throw metaError;
                 
                 if (budgetMeta) {
-                    // Update budget info
                     document.getElementById('budgetSource').textContent = `Source: ${budgetMeta.source_type || 'Manual'}`;
-                    document.getElementById('budgetLastUpdated').textContent = new Date(budgetMeta.updated_at).toLocaleDateString();
+                    document.getElementById('budgetLastUpdated').textContent = `Last Updated: ${new Date(budgetMeta.updated_at).toLocaleDateString()}`;
                     updateBudgetStatus(budgetMeta.status);
                     
-                    // Update summary cards
-                    document.getElementById('budgetTotalRevenue').textContent = formatCurrencyFull(budgetMeta.total_revenue || 0, 'IDR');
-                    document.getElementById('budgetTotalExpenses').textContent = formatCurrencyFull(budgetMeta.total_expenses || 0, 'IDR');
-                    document.getElementById('budgetNetProfit').textContent = formatCurrencyFull(budgetMeta.net_profit || 0, 'IDR');
-                    
-                    // Load budget line items
                     const { data: budgetItems, error: itemsError } = await supabase
                         .from('budgets')
                         .select('*')
@@ -31151,119 +31132,87 @@
                         .eq('budget_year', selectedYear)
                         .order('category, account_code, budget_month');
                     
-                    if (itemsError) {
-                        throw itemsError;
-                    }
-                    
-                    console.log(`📋 Found ${budgetItems?.length || 0} budget items for year ${selectedYear}`);
+                    if (itemsError) throw itemsError;
                     
                     if (budgetItems && budgetItems.length > 0) {
                         populateBudgetTable(budgetItems);
-                    } else {
-                        console.log('⚠️ No budget line items found for year', selectedYear);
                     }
                 } else {
-                    // No budget found
                     updateBudgetStatus('draft');
                     document.getElementById('budgetSource').textContent = 'No budget created yet';
-                    document.getElementById('budgetTotalRevenue').textContent = formatCurrencyFull(0, 'IDR');
-                    document.getElementById('budgetTotalExpenses').textContent = formatCurrencyFull(0, 'IDR');
-                    document.getElementById('budgetNetProfit').textContent = formatCurrencyFull(0, 'IDR');
-                    console.log('📝 No budget metadata found for year', selectedYear);
                 }
+                updateBudgetCalculations();
                 
             } catch (error) {
                 console.error('Error loading budget year:', error);
-                showErrorMessage('Failed to load budget data: ' + error.message);
             }
         }
         
         function populateBudgetTable(budgetItems) {
-            console.log(`📊 Populating budget table with ${budgetItems.length} items`);
-            
-            // Double-check we're starting with a clean table
-            clearBudgetTable();
-            
-            // Group budget items by line item and account
             const groupedItems = {};
-            
             budgetItems.forEach(item => {
-                console.log(`Processing item: Year ${item.budget_year}, Month ${item.budget_month}, Category ${item.category}, Account ${item.account_code}`);
-                
-                const key = `${item.category}_${item.account_code}_${item.line_item_name}`;
+                const key = `${item.category}_${item.line_item_name}`;
                 if (!groupedItems[key]) {
                     groupedItems[key] = {
                         category: item.category,
-                        account_code: item.account_code,
                         line_item_name: item.line_item_name,
                         months: {}
                     };
                 }
                 groupedItems[key].months[item.budget_month] = item.amount;
             });
-            
-            console.log(`📋 Grouped into ${Object.keys(groupedItems).length} line items`);
-            
-            // Add line items to table
+        
             Object.values(groupedItems).forEach(itemGroup => {
                 const monthlyValues = {};
-                for (let month = 1; month <= 12; month++) {
-                    monthlyValues[getMonthKey(month)] = itemGroup.months[month] || 0;
+                for (let i = 1; i <= 12; i++) {
+                    monthlyValues[getMonthKey(i)] = itemGroup.months[i] || 0;
                 }
-                
-                addBudgetLineToTable(
-                    itemGroup.category, 
-                    itemGroup.line_item_name, 
-                    monthlyValues,
-                    itemGroup.account_code
-                );
+                addBudgetLineToTable(itemGroup.category, itemGroup.line_item_name, monthlyValues);
             });
-            
-            updateBudgetCalculations();
-            console.log('✅ Budget table populated successfully');
         }
 
         async function populateBudgetYearSelector() {
             try {
                 const { data: { user } } = await supabase.auth.getUser();
                 if (!user) return;
-                
+        
                 const { data: budgets, error } = await supabase
                     .from('budget_metadata')
-                    .select('budget_year, budget_name, source_type')
+                    .select('budget_year')
                     .eq('user_id', user.id)
-                    .order('budget_year');
+                    .order('budget_year', { ascending: false });
                     
                 if (error) throw error;
-                
+        
                 const selector = document.getElementById('budgetYearSelect');
                 
-                // Clear existing options except the first one
+                // Clear existing options except the placeholder
                 while (selector.children.length > 1) {
                     selector.removeChild(selector.lastChild);
                 }
-                
-                // Track years already added to prevent duplicates
+        
                 const addedYears = new Set();
                 
                 // Add years that have budgets
-                budgets.forEach(budget => {
-                    if (!addedYears.has(budget.budget_year)) {
-                        const option = document.createElement('option');
-                        option.value = budget.budget_year;
-                        option.textContent = `Budget ${budget.budget_year}`;
-                        selector.appendChild(option);
-                        addedYears.add(budget.budget_year);
-                    }
-                });
-                
+                if (budgets) {
+                    budgets.forEach(budget => {
+                        if (!addedYears.has(budget.budget_year)) {
+                            const option = document.createElement('option');
+                            option.value = budget.budget_year;
+                            option.textContent = `Budget ${budget.budget_year}`;
+                            selector.appendChild(option);
+                            addedYears.add(budget.budget_year);
+                        }
+                    });
+                }
+        
                 // Add future years that don't have budgets yet
                 const currentYear = new Date().getFullYear();
                 for (let year = currentYear; year <= 2030; year++) {
                     if (!addedYears.has(year)) {
                         const option = document.createElement('option');
                         option.value = year;
-                        option.textContent = `Budget ${year}`;
+                        option.textContent = `Budget ${year} (New)`;
                         option.style.color = '#64748b'; // Lighter color for years without budgets
                         selector.appendChild(option);
                         addedYears.add(year);
