@@ -30441,15 +30441,34 @@
             addBudgetLineToTable(selectedCategory, lineName);
         }
         
-        function addBudgetLineToTable(category, lineName, values = {}) {
+        function addBudgetLineToTable(category, lineName, values = {}, accountCode = null) {
             const tableBody = document.getElementById('budgetTableBody');
             const categoryRow = document.querySelector(`tr[data-category="${category}"]`);
             
-            // Create new line item row
+            // Check if line item already exists to prevent duplicates
+            const existingRow = document.querySelector(`tr[data-parent-category="${category}"][data-line-name="${lineName}"]`);
+            if (existingRow) {
+                // Update existing row with new values instead of creating duplicate
+                const inputs = existingRow.querySelectorAll('.budget-amount-input');
+                inputs.forEach(input => {
+                    const month = input.getAttribute('data-month');
+                    const monthKey = getMonthKey(parseInt(month));
+                    if (values[monthKey] !== undefined) {
+                        input.value = values[monthKey] || 0;
+                    }
+                });
+                updateBudgetCalculations();
+                return;
+            }
+            
+            // Create new line item row (only if it doesn't exist)
             const newRow = document.createElement('tr');
             newRow.className = 'budget-line-row';
             newRow.setAttribute('data-parent-category', category);
             newRow.setAttribute('data-line-name', lineName);
+            if (accountCode) {
+                newRow.setAttribute('data-account-code', accountCode);
+            }
             
             newRow.innerHTML = `
                 <td class="budget-line-cell">
@@ -30482,6 +30501,12 @@
             
             // Update calculations
             updateBudgetCalculations();
+        }
+
+        function clearBudgetTable() {
+            // Remove all budget line rows but keep category headers
+            const budgetLineRows = document.querySelectorAll('.budget-line-row');
+            budgetLineRows.forEach(row => row.remove());
         }
         
         // Delete budget line
@@ -30648,6 +30673,9 @@
         }
         
         function populateBudgetTable(budgetItems) {
+            // Clear existing budget lines first
+            clearBudgetTable();
+            
             // Group budget items by line item and account
             const groupedItems = {};
             
