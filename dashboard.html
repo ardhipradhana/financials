@@ -11084,7 +11084,7 @@
                                 </button>
                             </div>
                             <div class="forecasting-ai-controls-right">
-                                <button class="btn btn-outline" onclick="convertForecastToBudget()">
+                                <button class="btn btn-outline" onclick="convertForecastToBudget(event)">
                                     <i class="fas fa-download"></i> Convert to Budget
                                 </button>
                                 <button class="btn btn-primary" id="generateAIForecast">
@@ -11280,7 +11280,7 @@
                                 </button>
                             </div>
                             <div class="forecasting-ai-controls-right">
-                                <button class="btn btn-outline" onclick="convert2026ForecastToBudget()">
+                                <button class="btn btn-outline" onclick="convert2026ForecastToBudget(event)">
                                     <i class="fas fa-download"></i> Convert to Budget
                                 </button>
                                 <button class="btn btn-primary" id="generateAI2026Forecast">
@@ -11369,7 +11369,7 @@
                                 </button>
                             </div>
                             <div class="forecasting-ai-controls-right">
-                                <button class="btn btn-outline" onclick="convertMultiYearForecastToBudget()">
+                                <button class="btn btn-outline" onclick="convertMultiYearForecastToBudget(event)">
                                     <i class="fas fa-download"></i> Convert to Budget
                                 </button>
                                 <button class="btn btn-primary" id="generateAIMultiYearForecast">
@@ -30071,7 +30071,7 @@
         }
 
         // Convert current forecast to budget
-        async function convertForecastToBudget() {
+        async function convertForecastToBudget(event) {
             // Check if forecast exists
             const forecastTable = document.getElementById('plForecastTable');
             if (!forecastTable || forecastTable.rows.length <= 1) {
@@ -30134,7 +30134,7 @@
             }
         }
 
-        async function convert2026ForecastToBudget() {
+        async function convert2026ForecastToBudget(event) {
             const forecastTable = document.getElementById('plForecast2026Table');
             if (!forecastTable || forecastTable.rows.length <= 1) {
                 alert('Please generate a 2026 forecast first');
@@ -30190,7 +30190,7 @@
         }
         
         // Updated multi-year conversion function
-        async function convertMultiYearForecastToBudget() {
+        async function convertMultiYearForecastToBudget(event) {
             const selectedYear = prompt('Which year do you want to convert to budget?\nEnter: 2027, 2028, 2029, or 2030');
             const year = parseInt(selectedYear);
             
