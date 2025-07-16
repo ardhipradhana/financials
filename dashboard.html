@@ -30225,7 +30225,10 @@
                 const { data: { user } } = await supabase.auth.getUser();
                 if (!user) throw new Error('User not authenticated');
                 
-                const latestMultiYearForecastId = localStorage.getItem('latest_multiyear_forecast_id') || '1';
+                const latestMultiYearForecastId = localStorage.getItem('latest_multiyear_forecast_id');
+                if (!latestMultiYearForecastId) {
+                    throw new Error('No multi-year forecast found. Please generate a multi-year forecast first.');
+                }
                 
                 const { data, error } = await supabase.rpc('convert_forecast_to_budget', {
                     p_user_id: user.id,
