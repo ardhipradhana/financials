@@ -9139,6 +9139,36 @@
             border-color: #fbbf24;
             box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1);
         }
+
+        /* Add this to the existing CSS, around line where budget controls are styled */
+        .budget-controls-new .priority-badge {
+            padding: 0.6rem 1rem;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            min-width: 100px;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+        
+        .budget-controls-new .priority-badge.draft {
+            background: #fef3c7;
+            color: #92400e;
+            border-color: #fbbf24;
+        }
+        
+        .budget-controls-new .priority-badge.active {
+            background: #d1fae5;
+            color: #065f46;
+            border-color: #10b981;
+        }
+        
+        .budget-controls-new .priority-badge.completed {
+            background: #dbeafe;
+            color: #1e40af;
+            border-color: #3b82f6;
+        }
         
         /* Enhanced buttons */
         .btn-add-line {
@@ -30856,6 +30886,134 @@
             }
             
             return budgetData;
+        }
+
+        async function saveBudget() {
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) {
+                    alert('Please log in to save budget');
+                    return;
+                }
+        
+                const selectedYear = parseInt(document.getElementById('budgetYearSelect').value);
+                if (!selectedYear) {
+                    alert('Please select a budget year first');
+                    return;
+                }
+        
+                console.log(`💾 Saving budget for year: ${selectedYear}`);
+        
+                // Show loading state
+                const saveButton = document.querySelector('.btn-save-budget');
+                const originalText = saveButton.innerHTML;
+                saveButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+                saveButton.disabled = true;
+        
+                // Collect budget data from the table
+                const budgetData = [];
+                const lineRows = document.querySelectorAll('.budget-line-row');
+        
+                lineRows.forEach(row => {
+                    const accountCode = row.dataset.accountCode;
+                    const category = row.dataset.parentCategory;
+                    const lineName = row.dataset.lineName;
+        
+                    // Get monthly amounts from input fields
+                    for (let month = 1; month <= 12; month++) {
+                        const input = row.querySelector(`input[data-month="${month}"]`);
+                        const amount = parseFloat(input?.value || 0);
+        
+                        if (amount > 0) { // Only save non-zero amounts
+                            budgetData.push({
+                                budget_year: selectedYear,
+                                budget_month: month,
+                                category: category,
+                                account_code: parseInt(accountCode),
+                                line_item_name: lineName,
+                                amount: amount
+                            });
+                        }
+                    }
+                });
+        
+                if (budgetData.length === 0) {
+                    alert('No budget data to save. Please add some budget line items first.');
+                    return;
+                }
+        
+                // Use your existing saveBudgetToSupabase function
+                await saveBudgetToSupabase(budgetData);
+        
+                // Calculate totals for metadata
+                const totals = calculateBudgetTotals();
+                const totalRevenue = totals.revenue.reduce((sum, month) => sum + month, 0);
+                const totalExpenses = totals.cogs.reduce((sum, month) => sum + month, 0) + 
+                                     totals.opex.reduce((sum, month) => sum + month, 0);
+                const netProfit = totalRevenue - totalExpenses;
+        
+                // Save budget metadata
+                const { error: metaError } = await supabase
+                    .from('budget_metadata')
+                    .upsert({
+                        user_id: user.id,
+                        budget_year: selectedYear,
+                        budget_name: `Budget ${selectedYear}`,
+                        description: `Budget saved on ${new Date().toLocaleDateString()}`,
+                        status: 'active',
+                        source_type: 'manual',
+                        total_revenue: totalRevenue,
+                        total_expenses: totalExpenses,
+                        net_profit: netProfit,
+                        updated_at: new Date().toISOString()
+                    }, {
+                        onConflict: 'user_id,budget_year'
+                    });
+        
+                if (metaError) throw metaError;
+        
+                // Update status badge
+                updateBudgetStatus('active');
+        
+                console.log(`✅ Budget saved successfully: ${budgetData.length} entries`);
+                
+                // Use your existing showSuccessNotification function
+                showSuccessNotification(`Budget ${selectedYear} saved successfully!`);
+        
+            } catch (error) {
+                console.error('❌ Error saving budget:', error);
+                alert(`Failed to save budget: ${error.message}`);
+            } finally {
+                // Reset button state
+                const saveButton = document.querySelector('.btn-save-budget');
+                if (saveButton) {
+                    saveButton.innerHTML = '<i class="fas fa-save"></i> Save Budget';
+                    saveButton.disabled = false;
+                }
+            }
+        }
+
+        function calculateBudgetTotals() {
+            const totals = {
+                revenue: new Array(12).fill(0),
+                cogs: new Array(12).fill(0),
+                opex: new Array(12).fill(0)
+            };
+        
+            document.querySelectorAll('.budget-line-row').forEach(row => {
+                const category = row.dataset.parentCategory;
+                
+                for (let month = 1; month <= 12; month++) {
+                    const input = row.querySelector(`input[data-month="${month}"]`);
+                    const amount = parseFloat(input?.value || 0);
+                    
+                    if (totals[category]) {
+                        totals[category][month - 1] += amount;
+                    }
+                }
+            });
+        
+            return totals;
         }
 
         // Save budget data to Supabase
