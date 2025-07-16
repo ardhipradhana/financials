@@ -31027,14 +31027,24 @@
                 // Add user_id to each budget entry
                 const budgetEntries = budgetData.map(entry => ({
                     ...entry,
-                    user_id: user.id
+                    user_id: user.id,
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
                 }));
         
+                // First, delete existing budget entries for this year
+                const { error: deleteError } = await supabase
+                    .from('budgets')
+                    .delete()
+                    .eq('user_id', user.id)
+                    .eq('budget_year', budgetEntries[0].budget_year);
+        
+                if (deleteError) throw deleteError;
+        
+                // Then insert the new entries
                 const { data, error } = await supabase
                     .from('budgets')
-                    .upsert(budgetEntries, { 
-                        onConflict: 'user_id,budget_year,budget_month' 
-                    });
+                    .insert(budgetEntries);
         
                 if (error) throw error;
                 
@@ -31089,49 +31099,116 @@
         }
         
         // Add new budget line item
-        function addBudgetLine() {
+        async function addBudgetLine() {
+            console.log('🔄 Add Budget Line clicked');
+            
+            // Check if modal exists (using your modal structure)
             const modal = document.getElementById('addBudgetLineModal');
+            if (!modal) {
+                console.error('❌ Modal not found!');
+                alert('Modal not found.');
+                return;
+            }
+            
+            console.log('✅ Modal found');
+            
+            // Make sure GL accounts are loaded
+            if (!window.glAccounts || window.glAccounts.length === 0) {
+                console.log('🔄 Loading GL accounts...');
+                await loadGLAccounts();
+            }
+            
+            console.log('📊 GL Accounts loaded:', window.glAccounts?.length || 0);
+            
+            if (!window.glAccounts || window.glAccounts.length === 0) {
+                alert('No GL accounts found. Please create some GL accounts first.');
+                return;
+            }
+            
+            // Use your existing container ID
             const container = document.getElementById('glAccountListContainer');
             container.innerHTML = ''; 
-
-            const categories = { revenue: "Revenue", cogs: "Cost of Goods Sold", opex: "Operating Expenses" };
-
+        
+            // Add intro text
+            const intro = document.createElement('p');
+            intro.textContent = 'Select a GL account to add to your budget:';
+            intro.style.cssText = 'margin-bottom: 1rem; color: #6b7280; padding: 0 1rem;';
+            container.appendChild(intro);
+        
+            const categories = { 
+                revenue: "Revenue Accounts", 
+                cogs: "Cost of Goods Sold", 
+                opex: "Operating Expenses" 
+            };
+        
             Object.entries(categories).forEach(([key, title]) => {
                 const header = document.createElement('h4');
                 header.textContent = title;
-                header.style.cssText = 'margin-top: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid #e2e8f0;';
+                header.style.cssText = 'margin: 1rem 1rem 0.5rem 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid #e2e8f0; color: #374151; font-weight: 600;';
                 container.appendChild(header);
-
+        
                 const accountGrid = document.createElement('div');
-                accountGrid.style.cssText = 'display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.5rem;';
+                accountGrid.style.cssText = 'display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin: 0.5rem 1rem 1rem 1rem;';
                 
-                const accounts = glAccounts.filter(acc => acc.category.toLowerCase().startsWith(key));
+                const accounts = window.glAccounts.filter(acc => 
+                    acc.category && acc.category.toLowerCase().includes(key)
+                );
+                
+                console.log(`${title} accounts found:`, accounts.length);
+                
                 if (accounts.length > 0) {
                     accounts.forEach(account => {
                         const button = document.createElement('button');
                         button.className = 'btn btn-secondary';
-                        button.style.textAlign = 'left';
+                        button.style.cssText = 'text-align: left; padding: 0.75rem; font-size: 0.875rem; border: 1px solid #e2e8f0; border-radius: 6px; background: white; cursor: pointer; transition: all 0.2s ease;';
                         button.textContent = `${account.account_code} - ${account.account_name}`;
+                        
+                        // Add hover effect
+                        button.onmouseenter = () => {
+                            button.style.background = '#f8fafc';
+                            button.style.borderColor = '#fbbf24';
+                        };
+                        button.onmouseleave = () => {
+                            button.style.background = 'white';
+                            button.style.borderColor = '#e2e8f0';
+                        };
+                        
                         button.onclick = () => {
+                            // Check if line item already exists
                             if (document.querySelector(`tr[data-account-code="${account.account_code}"]`)) {
                                 alert('This line item already exists in the budget.');
                                 return;
                             }
+                            
+                            console.log(`Adding line item: ${account.account_code} - ${account.account_name}`);
+                            
+                            // Add the line item to the budget table
                             renderBudgetLine(key, `${account.account_code} - ${account.account_name}`, {}, account.account_code);
+                            
+                            // Close modal and update calculations
                             closeAddBudgetLineModal();
+                            updateBudgetCalculations();
                         };
                         accountGrid.appendChild(button);
                     });
                 } else {
-                    accountGrid.innerHTML = `<p style="grid-column: 1 / -1; color: #64748b;">No ${title} accounts found.</p>`;
+                    const noAccounts = document.createElement('p');
+                    noAccounts.textContent = `No ${title.toLowerCase()} found.`;
+                    noAccounts.style.cssText = 'grid-column: 1 / -1; color: #64748b; font-style: italic; text-align: center; padding: 1rem;';
+                    accountGrid.appendChild(noAccounts);
                 }
                 container.appendChild(accountGrid);
             });
+            
+            console.log('🎯 Showing modal...');
             modal.style.display = 'flex';
         }
 
         function closeAddBudgetLineModal() {
-            document.getElementById('addBudgetLineModal').style.display = 'none';
+            const modal = document.getElementById('addBudgetLineModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
         }
         
         function addBudgetLineToTable(category, displayName, values = {}, accountCode) {
