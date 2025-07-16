@@ -28712,12 +28712,18 @@
         
         // Save scenario functions
         function saveCurrentScenario() {
-            document.getElementById('saveScenarioModal').style.display = 'flex';
+            const modal = document.getElementById('saveScenarioModal');
+            modal.style.display = 'flex';
+            modal.classList.add('show');
             document.getElementById('scenarioName').value = scenarioState.scenarioName;
         }
         
         function closeSaveScenarioModal() {
-            document.getElementById('saveScenarioModal').style.display = 'none';
+            const modal = document.getElementById('saveScenarioModal');
+            modal.classList.remove('show');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300); // Wait for transition to finish
         }
         
         async function confirmSaveScenario() {
