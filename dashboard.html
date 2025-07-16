@@ -31164,10 +31164,16 @@
             });
             
             modal.style.display = 'flex';
+            modal.classList.add('show');
         }
         
         function closeAddBudgetLineModal() {
-            document.getElementById('addBudgetLineModal').style.display = 'none';
+            const modal = document.getElementById('addBudgetLineModal');
+            modal.classList.remove('show');
+            // Optional: Set display to none after the CSS transition completes
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300); // 300ms matches the CSS transition duration
         }
         
         function addBudgetLineToTable(category, displayName, values = {}, accountCode) {
