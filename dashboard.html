@@ -8738,6 +8738,160 @@
             transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
         }
+
+        /* Load Scenarios Modal - Unique Styles */
+        .load-scenarios-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(4px);
+        }
+        
+        .load-scenarios-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .load-scenarios-modal {
+            background: white;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow: hidden;
+            transform: scale(0.9) translateY(20px);
+            transition: all 0.3s ease;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .load-scenarios-overlay.show .load-scenarios-modal {
+            transform: scale(1) translateY(0);
+        }
+        
+        .load-scenarios-header {
+            padding: 24px 24px 16px 24px;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .load-scenarios-title {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .load-scenarios-close {
+            background: #f8fafc;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            transition: all 0.2s ease;
+        }
+        
+        .load-scenarios-close:hover {
+            background: #e2e8f0;
+            color: #475569;
+        }
+        
+        .load-scenarios-body {
+            padding: 16px 24px;
+            max-height: 50vh;
+            overflow-y: auto;
+        }
+        
+        .scenario-list-item {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .scenario-list-item:hover {
+            border-color: #fbbf24;
+            background: #fffbeb;
+            transform: translateY(-1px);
+        }
+        
+        .scenario-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+        
+        .scenario-item-name {
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 1rem;
+        }
+        
+        .scenario-item-date {
+            font-size: 0.75rem;
+            color: #64748b;
+        }
+        
+        .scenario-item-description {
+            color: #475569;
+            font-size: 0.875rem;
+            line-height: 1.4;
+            margin-bottom: 8px;
+        }
+        
+        .scenario-item-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+        
+        .scenario-action-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .scenario-load-btn {
+            background: #fbbf24;
+            color: #1e293b;
+        }
+        
+        .scenario-load-btn:hover {
+            background: #f59e0b;
+        }
+        
+        .scenario-delete-btn {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+        
+        .scenario-delete-btn:hover {
+            background: #fecaca;
+        }
         
     </style>
 </head>
@@ -28988,44 +29142,40 @@
         
         // Show saved scenarios modal
         function showSavedScenariosModal(scenarios) {
-            // Create modal HTML dynamically
+            // Create modal HTML dynamically with new classes
             const modalHTML = `
-                <div id="loadScenariosModal" class="modal-overlay">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h3>Load Saved Scenario</h3>
-                            <button class="modal-close" onclick="closeLoadScenariosModal()">
+                <div id="loadScenariosModal" class="load-scenarios-overlay">
+                    <div class="load-scenarios-modal">
+                        <div class="load-scenarios-header">
+                            <h3 class="load-scenarios-title">Load Saved Scenario</h3>
+                            <button class="load-scenarios-close" onclick="closeLoadScenariosModal()">
                                 <i class="fas fa-times"></i>
                             </button>
                         </div>
-                        <div class="modal-body">
-                            <div class="saved-scenarios-list">
-                                ${scenarios.map(scenario => `
-                                    <div class="scenario-item" style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; cursor: pointer;" onclick="loadScenario(${scenario.id})">
-                                        <div style="display: flex; justify-content: space-between; align-items: start;">
-                                            <div>
-                                                <h4 style="margin: 0 0 0.5rem 0; color: #1f2937;">${scenario.name}</h4>
-                                                ${scenario.description ? `<p style="margin: 0 0 0.5rem 0; color: #64748b; font-size: 0.875rem;">${scenario.description}</p>` : ''}
-                                                <div style="font-size: 0.75rem; color: #94a3b8;">
-                                                    Created: ${new Date(scenario.createdAt).toLocaleDateString()}
-                                                </div>
-                                            </div>
-                                            <button class="btn btn-outline" onclick="event.stopPropagation(); deleteScenario(${scenario.id})" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; color: #dc2626; border-color: #dc2626;">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </div>
+                        <div class="load-scenarios-body">
+                            ${scenarios.map(scenario => `
+                                <div class="scenario-list-item" onclick="loadScenario('${scenario.id}')">
+                                    <div class="scenario-item-header">
+                                        <div class="scenario-item-name">${scenario.name}</div>
+                                        <div class="scenario-item-date">${new Date(scenario.createdAt).toLocaleDateString()}</div>
                                     </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button class="btn btn-secondary" onclick="closeLoadScenariosModal()">Cancel</button>
+                                    <div class="scenario-item-description">${scenario.description || 'No description'}</div>
+                                    <div class="scenario-item-actions" onclick="event.stopPropagation()">
+                                        <button class="scenario-action-btn scenario-load-btn" onclick="loadScenario('${scenario.id}')">
+                                            <i class="fas fa-download"></i> Load
+                                        </button>
+                                        <button class="scenario-action-btn scenario-delete-btn" onclick="deleteScenario('${scenario.id}')">
+                                            <i class="fas fa-trash"></i> Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            `).join('')}
                         </div>
                     </div>
                 </div>
             `;
             
-            // Remove existing modal if any
+            // Remove existing modal
             const existingModal = document.getElementById('loadScenariosModal');
             if (existingModal) {
                 existingModal.remove();
@@ -29033,7 +29183,8 @@
             
             // Add modal to body
             document.body.insertAdjacentHTML('beforeend', modalHTML);
-            document.getElementById('loadScenariosModal').style.display = 'flex';
+            const modal = document.getElementById('loadScenariosModal');
+            modal.classList.add('show');
         }
         
         // Load specific scenario
@@ -29125,7 +29276,10 @@
         function closeLoadScenariosModal() {
             const modal = document.getElementById('loadScenariosModal');
             if (modal) {
-                modal.remove();
+                modal.classList.remove('show');
+                setTimeout(() => {
+                    modal.remove();
+                }, 300);
             }
         }
         
