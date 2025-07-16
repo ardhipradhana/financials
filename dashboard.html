@@ -25820,10 +25820,23 @@
                 // Apply the forecast to the P&L table
                 if (forecastData && forecastData.forecast_data && forecastData.forecast_data.monthly_forecasts) {
                     await applyStoredForecastToTable(forecastData.forecast_data.monthly_forecasts);
+                    
+                    // Show insights if available
+                    if (forecastData.insights) {
+                        displayStoredAIInsights(forecastData, forecast);
+                    }
+                    
+                    // Recalculate everything
+                    recalculateEntirePL();
+                    
+                    console.log('✅ Latest forecast loaded and applied');
+                    
+                    // Show a subtle notification
+                    showForecastLoadedNotification(forecast.forecast_date);
+                    
                 } else if (forecastData && forecastData.monthly_forecasts) {
                     // Handle direct structure (if the response was processed before storing)
                     await applyStoredForecastToTable(forecastData.monthly_forecasts);
-                }
                     
                     // Show insights if available
                     if (forecastData.insights) {
@@ -25842,7 +25855,8 @@
             } catch (error) {
                 console.error('Error loading latest forecast:', error);
             }
-            // In your loadLatestForecastFromSupabase() or similar function, add at the end:
+            
+            // Generate forecast trending chart if container exists
             if (document.getElementById('forecastTrendingContainer')) {
                 document.getElementById('forecastTrendingContainer').style.display = 'block';
                 generateForecastTrendingChart();
