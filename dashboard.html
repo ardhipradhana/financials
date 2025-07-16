@@ -31136,9 +31136,28 @@
                 const accountGrid = document.createElement('div');
                 accountGrid.style.cssText = 'display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.5rem;';
                 
-                const accounts = window.glAccounts.filter(acc => 
-                    acc.category && acc.category.toLowerCase().includes(key)
-                );
+                let accounts = [];
+                if (key === 'revenue') {
+                    // Revenue accounts start with 4xxx
+                    accounts = window.glAccounts.filter(acc => 
+                        acc.account_code && acc.account_code.startsWith('4')
+                    );
+                } else if (key === 'cogs') {
+                    // COGS is typically account 5010 and other cost-related accounts
+                    accounts = window.glAccounts.filter(acc => 
+                        acc.account_code && (
+                            acc.account_code === '5010' || // Cost of Goods Sold
+                            acc.account_code === '5020' || // Purchase Discounts  
+                            acc.account_code === '5030'    // Freight In
+                        )
+                    );
+                } else if (key === 'opex') {
+                    // All other 5xxx accounts except COGS
+                    accounts = window.glAccounts.filter(acc => 
+                        acc.account_code && acc.account_code.startsWith('5') && 
+                        !['5010', '5020', '5030'].includes(acc.account_code)
+                    );
+                }
                 
                 if (accounts.length > 0) {
                     accounts.forEach(account => {
@@ -31147,7 +31166,8 @@
                         button.style.cssText = 'text-align: left; padding: 0.5rem; font-size: 0.875rem;';
                         button.textContent = `${account.account_code} - ${account.account_name}`;
                         button.onclick = () => {
-                            if (document.querySelector(`tr[data-account-code="${account.account_code}"]`)) {
+                            const existingRow = document.querySelector(`tr[data-account-code="${account.account_code}"]`);
+                            if (existingRow && existingRow.dataset.lineName && existingRow.dataset.lineName !== 'undefined') {
                                 alert('This line item already exists in the budget.');
                                 return;
                             }
