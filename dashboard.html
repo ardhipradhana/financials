@@ -17312,16 +17312,33 @@
         // Load GL Accounts from Supabase
         async function loadGLAccounts() {
             try {
-                const { data, error } = await supabase
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) {
+                    console.log('No authenticated user for GL accounts');
+                    return [];
+                }
+        
+                console.log('🔄 Loading GL accounts for user:', user.id);
+        
+                const { data: accounts, error } = await supabase
                     .from('gl_accounts_meridash')
-                    .select('account_code, account_name, category')
+                    .select('*')
+                    .eq('user_id', user.id)
                     .eq('is_active', true)
                     .order('account_code');
-                if (error) throw error;
-                glAccounts = data || [];
-                console.log(`✅ Loaded ${glAccounts.length} GL accounts.`);
+        
+                if (error) {
+                    console.error('Error loading GL accounts:', error);
+                    throw error;
+                }
+                
+                console.log('📊 Loaded GL accounts:', accounts?.length || 0, accounts);
+                window.glAccounts = accounts || [];
+                return accounts || [];
+                
             } catch (error) {
                 console.error('Error loading GL accounts:', error);
+                return [];
             }
         }
         
@@ -31102,7 +31119,7 @@
         async function addBudgetLine() {
             console.log('🔄 Add Budget Line clicked');
             
-            // Check if modal exists (using your modal structure)
+            // Check if modal exists
             const modal = document.getElementById('addBudgetLineModal');
             if (!modal) {
                 console.error('❌ Modal not found!');
@@ -31119,13 +31136,13 @@
             }
             
             console.log('📊 GL Accounts loaded:', window.glAccounts?.length || 0);
+            console.log('📊 Sample GL account:', window.glAccounts?.[0]);
             
             if (!window.glAccounts || window.glAccounts.length === 0) {
                 alert('No GL accounts found. Please create some GL accounts first.');
                 return;
             }
             
-            // Use your existing container ID
             const container = document.getElementById('glAccountListContainer');
             container.innerHTML = ''; 
         
@@ -31135,13 +31152,36 @@
             intro.style.cssText = 'margin-bottom: 1rem; color: #6b7280; padding: 0 1rem;';
             container.appendChild(intro);
         
-            const categories = { 
-                revenue: "Revenue Accounts", 
-                cogs: "Cost of Goods Sold", 
-                opex: "Operating Expenses" 
-            };
+            // Updated categories to match your actual GL account structure
+            const categories = [
+                {
+                    key: 'revenue',
+                    title: 'Revenue Accounts',
+                    filter: (acc) => acc.category === 'Revenue'
+                },
+                {
+                    key: 'cogs',
+                    title: 'Cost of Goods Sold',
+                    filter: (acc) => acc.category === 'Expense' && (
+                        acc.account_name.toLowerCase().includes('cost of goods') ||
+                        acc.account_code === '5010' ||
+                        acc.account_code === '5020' ||
+                        acc.account_code === '5030'
+                    )
+                },
+                {
+                    key: 'opex',
+                    title: 'Operating Expenses',
+                    filter: (acc) => acc.category === 'Expense' && !(
+                        acc.account_name.toLowerCase().includes('cost of goods') ||
+                        acc.account_code === '5010' ||
+                        acc.account_code === '5020' ||
+                        acc.account_code === '5030'
+                    )
+                }
+            ];
         
-            Object.entries(categories).forEach(([key, title]) => {
+            categories.forEach(({ key, title, filter }) => {
                 const header = document.createElement('h4');
                 header.textContent = title;
                 header.style.cssText = 'margin: 1rem 1rem 0.5rem 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid #e2e8f0; color: #374151; font-weight: 600;';
@@ -31150,9 +31190,7 @@
                 const accountGrid = document.createElement('div');
                 accountGrid.style.cssText = 'display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin: 0.5rem 1rem 1rem 1rem;';
                 
-                const accounts = window.glAccounts.filter(acc => 
-                    acc.category && acc.category.toLowerCase().includes(key)
-                );
+                const accounts = window.glAccounts.filter(filter);
                 
                 console.log(`${title} accounts found:`, accounts.length);
                 
@@ -31522,6 +31560,7 @@
             
             // Initialize specific sections
             if (sectionName === 'budgets') {
+                loadGLAccounts();
                 initializeBudgetsSection();
             }
             
