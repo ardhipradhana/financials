@@ -31151,7 +31151,7 @@
                                 alert('This line item already exists in the budget.');
                                 return;
                             }
-                            renderBudgetLine(key, `${account.account_code} - ${account.account_name}`, {}, account.account_code);
+                            addBudgetLineToTable(key, `${account.account_code} - ${account.account_name}`, {}, account.account_code);
                             closeAddBudgetLineModal();
                             updateBudgetCalculations();
                         };
