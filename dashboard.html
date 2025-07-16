@@ -31167,8 +31167,8 @@
                         button.textContent = `${account.account_code} - ${account.account_name}`;
                         button.onclick = () => {
                             // Check if account already exists (any row with this account code)
-                            const existingRow = document.querySelector(`tr[data-account-code="${account.account_code}"]`);
-                            if (existingRow) {
+                            const existingBudgetRow = document.querySelector(`tr.budget-line-row[data-account-code="${account.account_code}"]`);
+                            if (existingBudgetRow) {
                                 alert('This line item already exists in the budget.');
                                 return;
                             }
@@ -31203,7 +31203,7 @@
             const categoryRow = document.querySelector(`tr[data-category="${category}"]`);
             
             // Check if row already exists
-            let row = document.querySelector(`tr[data-account-code="${accountCode}"]`);
+            let row = document.querySelector(`tr.budget-line-row[data-account-code="${accountCode}"]`);
             
             // If the row doesn't exist, create it
             if (!row) {
