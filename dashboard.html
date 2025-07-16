@@ -17333,8 +17333,12 @@
                 }
                 
                 console.log('📊 Loaded GL accounts:', accounts?.length || 0, accounts);
+                
+                // IMPORTANT: Assign to ALL variable names used in different functions
                 window.glAccounts = accounts || [];
-                glAccounts = accounts || [];
+                glAccounts = accounts || [];  // Global variable for populateBudgetTable
+                window.glAccountsData = accounts || [];  // Used in other functions
+                
                 return accounts || [];
                 
             } catch (error) {
@@ -31251,28 +31255,37 @@
         }
         
         function addBudgetLineToTable(category, displayName, values = {}, accountCode) {
+            console.log(`🔨 Adding budget line: ${category} - ${displayName} - ${accountCode}`);
+            
             const tableBody = document.getElementById('budgetTableBody');
             const categoryRow = document.querySelector(`tr[data-category="${category}"]`);
             
-            let row = document.querySelector(`tr[data-account-code="${accountCode}"]`);
-            
-            // If the row doesn't exist, create it
-            if (!row) {
-                row = document.createElement('tr');
-                row.className = 'budget-line-row';
-                row.dataset.parentCategory = category;
-                row.dataset.lineName = displayName;
-                row.dataset.accountCode = accountCode;
-                categoryRow.parentNode.insertBefore(row, categoryRow.nextSibling);
+            if (!categoryRow) {
+                console.error(`❌ Category row not found for: ${category}`);
+                return;
             }
-        
+            
+            // Check if row already exists
+            let existingRow = document.querySelector(`tr[data-account-code="${accountCode}"]`);
+            if (existingRow) {
+                console.log(`⚠️ Budget line already exists for account: ${accountCode}`);
+                return;
+            }
+            
+            const newRow = document.createElement('tr');
+            newRow.className = 'budget-line-row';
+            newRow.dataset.parentCategory = category;
+            newRow.dataset.lineName = displayName;
+            newRow.dataset.accountCode = accountCode;
+            
             let inputsHTML = '';
             for(let i = 1; i <= 12; i++) {
                 const monthKey = getMonthKey(i);
-                inputsHTML += `<td class="budget-line-cell"><input type="number" class="budget-amount-input" data-month="${i}" value="${values[monthKey] || 0}" oninput="updateBudgetCalculations()"></td>`;
+                const value = values[monthKey] || values[i] || 0; // Support both month key and number
+                inputsHTML += `<td class="budget-line-cell"><input type="number" class="budget-amount-input" data-month="${i}" value="${value}" oninput="updateBudgetCalculations()"></td>`;
             }
         
-            row.innerHTML = `
+            newRow.innerHTML = `
                 <td class="budget-line-cell">
                     <div class="budget-line-name">${displayName}</div>
                 </td>
@@ -31284,12 +31297,23 @@
                     </div>
                 </td>
             `;
+            
+            // Insert after the category row
+            categoryRow.parentNode.insertBefore(newRow, categoryRow.nextSibling);
+            console.log(`✅ Added budget line: ${displayName} to category: ${category}`);
+            
+            // Update calculations
             updateBudgetCalculations();
         }
         
         function clearBudgetTable() {
-            document.querySelectorAll('.budget-line-row').forEach(row => row.remove());
+            console.log('🧹 Clearing budget table...');
+            document.querySelectorAll('.budget-line-row').forEach(row => {
+                console.log('🗑️ Removing row:', row.dataset.lineName);
+                row.remove();
+            });
             updateBudgetCalculations(); // Recalculate to zero out totals
+            console.log('✅ Budget table cleared');
         }
 
         function deleteBudgetLine(button) {
@@ -31576,8 +31600,10 @@
             
             // Initialize specific sections
             if (sectionName === 'budgets') {
-                loadGLAccounts();
-                initializeBudgetsSection();
+                // Load GL accounts FIRST, then initialize
+                loadGLAccounts().then(() => {
+                    initializeBudgetsSection();
+                });
             }
             
             console.log(`Switched to section: ${sectionName}`);
