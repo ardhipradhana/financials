@@ -8585,6 +8585,159 @@
         .breakdown-year-value {
             font-weight: 600;
         }
+
+        /* Save Scenario Modal - Unique Styles */
+        .save-scenario-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(4px);
+        }
+        
+        .save-scenario-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .save-scenario-modal {
+            background: white;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 480px;
+            max-height: 90vh;
+            overflow: hidden;
+            transform: scale(0.9) translateY(20px);
+            transition: all 0.3s ease;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .save-scenario-overlay.show .save-scenario-modal {
+            transform: scale(1) translateY(0);
+        }
+        
+        .save-scenario-header {
+            padding: 24px 24px 16px 24px;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .save-scenario-title {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .save-scenario-close {
+            background: #f8fafc;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            transition: all 0.2s ease;
+        }
+        
+        .save-scenario-close:hover {
+            background: #e2e8f0;
+            color: #475569;
+        }
+        
+        .save-scenario-body {
+            padding: 16px 24px 24px 24px;
+        }
+        
+        .save-scenario-group {
+            margin-bottom: 20px;
+        }
+        
+        .save-scenario-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #374151;
+            font-size: 0.875rem;
+        }
+        
+        .save-scenario-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+            box-sizing: border-box;
+        }
+        
+        .save-scenario-input:focus {
+            outline: none;
+            border-color: #fbbf24;
+            box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1);
+        }
+        
+        .save-scenario-textarea {
+            resize: vertical;
+            min-height: 80px;
+            font-family: inherit;
+        }
+        
+        .save-scenario-footer {
+            padding: 16px 24px 24px 24px;
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+        
+        .save-scenario-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .save-scenario-btn-secondary {
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .save-scenario-btn-secondary:hover {
+            background: #e2e8f0;
+            color: #334155;
+        }
+        
+        .save-scenario-btn-primary {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            color: #1e293b;
+        }
+        
+        .save-scenario-btn-primary:hover {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
+        }
         
     </style>
 </head>
@@ -11419,27 +11572,27 @@
             </div>
             
             <!-- Save Scenario Modal (reusing existing modal styles) -->
-            <div id="saveScenarioModal" class="modal-overlay" style="display: none;">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h3>Save Scenario</h3>
-                        <button class="modal-close" onclick="closeSaveScenarioModal()">
+            <div id="saveScenarioModal" class="save-scenario-overlay">
+                <div class="save-scenario-modal">
+                    <div class="save-scenario-header">
+                        <h3 class="save-scenario-title">Save Scenario</h3>
+                        <button class="save-scenario-close" onclick="closeSaveScenarioModal()">
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
-                    <div class="modal-body">
-                        <div class="input-group">
-                            <label class="filter-label">Scenario Name</label>
-                            <input type="text" id="scenarioName" class="filter-input" placeholder="e.g., Q2 Expansion Plan">
+                    <div class="save-scenario-body">
+                        <div class="save-scenario-group">
+                            <label class="save-scenario-label">Scenario Name</label>
+                            <input type="text" id="scenarioName" class="save-scenario-input" placeholder="e.g., Q2 Expansion Plan">
                         </div>
-                        <div class="input-group">
-                            <label class="filter-label">Description (Optional)</label>
-                            <textarea id="scenarioDescription" class="filter-input" rows="3" placeholder="Brief description of this scenario..."></textarea>
+                        <div class="save-scenario-group">
+                            <label class="save-scenario-label">Description (Optional)</label>
+                            <textarea id="scenarioDescription" class="save-scenario-input save-scenario-textarea" rows="3" placeholder="Brief description of this scenario..."></textarea>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-secondary" onclick="closeSaveScenarioModal()">Cancel</button>
-                        <button class="btn btn-primary" onclick="confirmSaveScenario()">Save Scenario</button>
+                    <div class="save-scenario-footer">
+                        <button class="save-scenario-btn save-scenario-btn-secondary" onclick="closeSaveScenarioModal()">Cancel</button>
+                        <button class="save-scenario-btn save-scenario-btn-primary" onclick="confirmSaveScenario()">Save Scenario</button>
                     </div>
                 </div>
             </div>
