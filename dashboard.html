@@ -30160,22 +30160,38 @@
                 const { data: { user } } = await supabase.auth.getUser();
                 if (!user) throw new Error('User not authenticated');
                 
-                const latest2026ForecastId = localStorage.getItem('latest_2026_forecast_id') || '1';
+                // Get the latest 2026 forecast ID
+                let latest2026ForecastId = localStorage.getItem('latest_2026_forecast_id');
                 
-                const { data, error } = await supabase.rpc('convert_forecast_to_budget', {
-                    p_user_id: user.id,
-                    p_forecast_id: latest2026ForecastId,
-                    p_forecast_table: 'ai_forecasts_2026_meridash',
-                    p_budget_year: 2026,
-                    p_budget_name: `Budget 2026 (${industry} - ${forecastStyle})`,
-                    p_description: `Budget converted from 2026 AI forecast on ${new Date().toLocaleDateString()}`
-                });
+                if (!latest2026ForecastId) {
+                    const { data: forecasts, error: fetchError } = await supabase
+                        .from('ai_forecasts_2026_meridash')
+                        .select('id')
+                        .eq('user_id', user.id)
+                        .eq('forecast_year', 2026)
+                        .order('generated_at', { ascending: false })
+                        .limit(1);
+                    
+                    if (fetchError) throw fetchError;
+                    
+                    if (forecasts && forecasts.length > 0) {
+                        latest2026ForecastId = forecasts[0].id.toString();
+                        localStorage.setItem('latest_2026_forecast_id', latest2026ForecastId);
+                    } else {
+                        throw new Error('No 2026 forecast found. Please generate a 2026 forecast first.');
+                    }
+                }
                 
-                if (error) throw error;
+                console.log(`📊 Converting 2026 forecast ID: ${latest2026ForecastId} to budget`);
+                
+                // Use direct conversion instead of RPC
+                await convert2026ForecastToBudgetDirect(latest2026ForecastId, industry, forecastStyle);
+                
+                console.log('✅ 2026 forecast converted to budget successfully');
                 
                 document.getElementById('budgetYearSelect').value = 2026;
                 showSection('budgets');
-                await loadBudgetYear(2026); // Pass 2026 explicitly
+                await loadBudgetYear(2026);
                 
                 const resultText = existingBudget ? 'replaced' : 'created';
                 showSuccessMessage(`2026 budget ${resultText} successfully from forecast!`);
@@ -30186,6 +30202,256 @@
             } finally {
                 button.innerHTML = originalText;
                 button.disabled = false;
+            }
+        }
+
+        // Dynamic conversion function for 2026 forecasts
+        async function convert2026ForecastToBudgetDirect(forecastId = null, industry = 'saas', forecastStyle = 'normal') {
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) throw new Error('User not authenticated');
+                
+                // Use provided forecast ID or get from localStorage
+                const latest2026ForecastId = forecastId || localStorage.getItem('latest_2026_forecast_id');
+                if (!latest2026ForecastId) {
+                    throw new Error('No 2026 forecast ID available');
+                }
+                
+                console.log('🔄 Starting dynamic 2026 forecast to budget conversion...');
+                
+                // Get the 2026 forecast data
+                const { data: forecastData, error: forecastError } = await supabase
+                    .from('ai_forecasts_2026_meridash')
+                    .select('*')
+                    .eq('user_id', user.id)
+                    .eq('id', latest2026ForecastId)
+                    .single();
+                    
+                if (forecastError) throw forecastError;
+                if (!forecastData || !forecastData.monthly_data) {
+                    throw new Error('No 2026 forecast data found');
+                }
+                
+                // Get user's GL accounts for mapping
+                const { data: glAccounts, error: glError } = await supabase
+                    .from('gl_accounts_meridash')
+                    .select('account_code, account_name, category')
+                    .eq('user_id', user.id)
+                    .eq('is_active', true)
+                    .order('account_code');
+                    
+                if (glError) throw glError;
+                
+                console.log('✅ Found', glAccounts.length, 'active GL accounts');
+                
+                // Create account mapping helper
+                const getAccountByCode = (code) => glAccounts.find(acc => acc.account_code === code.toString());
+                const getAccountsByCategory = (category) => glAccounts.filter(acc => acc.category === category);
+                
+                // Delete existing 2026 budget data
+                const { error: deleteError } = await supabase
+                    .from('budgets')
+                    .delete()
+                    .eq('user_id', user.id)
+                    .eq('budget_year', 2026);
+                    
+                if (deleteError) throw deleteError;
+                
+                // Delete existing 2026 budget metadata
+                const { error: deleteMetaError } = await supabase
+                    .from('budget_metadata')
+                    .delete()
+                    .eq('user_id', user.id)
+                    .eq('budget_year', 2026);
+                    
+                if (deleteMetaError) throw deleteMetaError;
+                
+                console.log('🗑️ Cleared existing 2026 budget data');
+                
+                // Convert monthly data to budget entries dynamically
+                const budgetEntries = [];
+                
+                forecastData.monthly_data.forEach((monthData, index) => {
+                    const month = index + 1;
+                    
+                    // REVENUE MAPPING
+                    // Map sales_revenue to account 4010 if it exists
+                    if (monthData.sales_revenue && monthData.sales_revenue > 0) {
+                        const salesAccount = getAccountByCode('4010');
+                        if (salesAccount) {
+                            budgetEntries.push({
+                                user_id: user.id,
+                                budget_year: 2026,
+                                budget_month: month,
+                                category: 'revenue',
+                                account_code: parseInt(salesAccount.account_code),
+                                line_item_name: salesAccount.account_code,
+                                amount: monthData.sales_revenue,
+                                created_at: new Date().toISOString(),
+                                updated_at: new Date().toISOString()
+                            });
+                        }
+                    }
+                    
+                    // Map service_revenue to account 4020 if it exists
+                    if (monthData.service_revenue && monthData.service_revenue > 0) {
+                        const serviceAccount = getAccountByCode('4020');
+                        if (serviceAccount) {
+                            budgetEntries.push({
+                                user_id: user.id,
+                                budget_year: 2026,
+                                budget_month: month,
+                                category: 'revenue',
+                                account_code: parseInt(serviceAccount.account_code),
+                                line_item_name: serviceAccount.account_code,
+                                amount: monthData.service_revenue,
+                                created_at: new Date().toISOString(),
+                                updated_at: new Date().toISOString()
+                            });
+                        }
+                    }
+                    
+                    // If no specific revenue breakdown, use total_revenue in first available revenue account
+                    if (monthData.total_revenue && monthData.total_revenue > 0 && !monthData.sales_revenue && !monthData.service_revenue) {
+                        const revenueAccounts = getAccountsByCategory('Revenue');
+                        if (revenueAccounts.length > 0) {
+                            const primaryRevenue = revenueAccounts.find(acc => acc.account_code === '4010') || revenueAccounts[0];
+                            budgetEntries.push({
+                                user_id: user.id,
+                                budget_year: 2026,
+                                budget_month: month,
+                                category: 'revenue',
+                                account_code: parseInt(primaryRevenue.account_code),
+                                line_item_name: primaryRevenue.account_code,
+                                amount: monthData.total_revenue,
+                                created_at: new Date().toISOString(),
+                                updated_at: new Date().toISOString()
+                            });
+                        }
+                    }
+                    
+                    // COGS MAPPING
+                    // Map direct_costs to COGS account (5010 preferred, or first available expense account starting with 50xx)
+                    if (monthData.direct_costs && monthData.direct_costs > 0) {
+                        const cogsAccount = getAccountByCode('5010') || glAccounts.find(acc => 
+                            acc.category === 'Expense' && acc.account_code.startsWith('50')
+                        );
+                        if (cogsAccount) {
+                            budgetEntries.push({
+                                user_id: user.id,
+                                budget_year: 2026,
+                                budget_month: month,
+                                category: 'cogs',
+                                account_code: parseInt(cogsAccount.account_code),
+                                line_item_name: cogsAccount.account_code,
+                                amount: monthData.direct_costs,
+                                created_at: new Date().toISOString(),
+                                updated_at: new Date().toISOString()
+                            });
+                        }
+                    }
+                    
+                    // If no direct_costs but has total_cogs, use that
+                    if (monthData.total_cogs && monthData.total_cogs > 0 && !monthData.direct_costs) {
+                        const cogsAccount = getAccountByCode('5010') || glAccounts.find(acc => 
+                            acc.category === 'Expense' && acc.account_code.startsWith('50')
+                        );
+                        if (cogsAccount) {
+                            budgetEntries.push({
+                                user_id: user.id,
+                                budget_year: 2026,
+                                budget_month: month,
+                                category: 'cogs',
+                                account_code: parseInt(cogsAccount.account_code),
+                                line_item_name: cogsAccount.account_code,
+                                amount: monthData.total_cogs,
+                                created_at: new Date().toISOString(),
+                                updated_at: new Date().toISOString()
+                            });
+                        }
+                    }
+                    
+                    // OPEX MAPPING
+                    // Map operating_expenses to OpEx account (5100 preferred, or distribute across available expense accounts)
+                    if (monthData.operating_expenses && monthData.operating_expenses > 0) {
+                        const opexAccount = getAccountByCode('5100') || getAccountByCode('5200') || glAccounts.find(acc => 
+                            acc.category === 'Expense' && (acc.account_code.startsWith('51') || acc.account_code.startsWith('52'))
+                        );
+                        if (opexAccount) {
+                            budgetEntries.push({
+                                user_id: user.id,
+                                budget_year: 2026,
+                                budget_month: month,
+                                category: 'opex',
+                                account_code: parseInt(opexAccount.account_code),
+                                line_item_name: opexAccount.account_code,
+                                amount: monthData.operating_expenses,
+                                created_at: new Date().toISOString(),
+                                updated_at: new Date().toISOString()
+                            });
+                        }
+                    }
+                    
+                    // If no operating_expenses but has total_opex, use that
+                    if (monthData.total_opex && monthData.total_opex > 0 && !monthData.operating_expenses) {
+                        const opexAccount = getAccountByCode('5100') || getAccountByCode('5200') || glAccounts.find(acc => 
+                            acc.category === 'Expense' && (acc.account_code.startsWith('51') || acc.account_code.startsWith('52'))
+                        );
+                        if (opexAccount) {
+                            budgetEntries.push({
+                                user_id: user.id,
+                                budget_year: 2026,
+                                budget_month: month,
+                                category: 'opex',
+                                account_code: parseInt(opexAccount.account_code),
+                                line_item_name: opexAccount.account_code,
+                                amount: monthData.total_opex,
+                                created_at: new Date().toISOString(),
+                                updated_at: new Date().toISOString()
+                            });
+                        }
+                    }
+                });
+                
+                console.log(`💾 Inserting ${budgetEntries.length} budget entries using dynamic GL account mapping...`);
+                
+                // Insert budget entries
+                const { error: insertError } = await supabase
+                    .from('budgets')
+                    .insert(budgetEntries);
+                    
+                if (insertError) throw insertError;
+                
+                // Create budget metadata with calculated totals
+                const totalRevenue = forecastData.year_totals?.total_revenue || 0;
+                const totalExpenses = (forecastData.year_totals?.total_cogs || 0) + (forecastData.year_totals?.total_opex || 0);
+                const netProfit = totalRevenue - totalExpenses;
+                
+                const { error: metaError } = await supabase
+                    .from('budget_metadata')
+                    .insert({
+                        user_id: user.id,
+                        budget_year: 2026,
+                        budget_name: `Budget 2026 (${industry} - ${forecastStyle})`,
+                        description: `Budget converted from 2026 AI forecast on ${new Date().toLocaleDateString()}`,
+                        status: 'draft',
+                        source_type: 'ai_forecast_2026',
+                        total_revenue: totalRevenue,
+                        total_expenses: totalExpenses,
+                        net_profit: netProfit,
+                        created_at: new Date().toISOString(),
+                        updated_at: new Date().toISOString()
+                    });
+                    
+                if (metaError) throw metaError;
+                
+                console.log('✅ Dynamic 2026 budget conversion completed successfully!');
+                console.log(`📊 Mapped to ${new Set(budgetEntries.map(e => e.account_code)).size} different GL accounts`);
+                return true;
+                
+            } catch (error) {
+                console.error('❌ Error in dynamic 2026 conversion:', error);
+                throw error;
             }
         }
         
