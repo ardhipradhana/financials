@@ -31166,18 +31166,13 @@
                         button.style.cssText = 'text-align: left; padding: 0.5rem; font-size: 0.875rem;';
                         button.textContent = `${account.account_code} - ${account.account_name}`;
                         button.onclick = () => {
-                            console.log('Button clicked for account:', account);
-                            console.log('Key (category):', key);
-                            console.log('Account code:', account.account_code);
-                            console.log('Account name:', account.account_name);
-                            
+                            // Check if account already exists (any row with this account code)
                             const existingRow = document.querySelector(`tr[data-account-code="${account.account_code}"]`);
-                            if (existingRow && existingRow.dataset.lineName && existingRow.dataset.lineName !== 'undefined') {
+                            if (existingRow) {
                                 alert('This line item already exists in the budget.');
                                 return;
                             }
                             
-                            console.log('About to call addBudgetLineToTable with:', key, `${account.account_code} - ${account.account_name}`, {}, account.account_code);
                             addBudgetLineToTable(key, `${account.account_code} - ${account.account_name}`, {}, account.account_code);
                             closeAddBudgetLineModal();
                             updateBudgetCalculations();
@@ -31207,6 +31202,7 @@
             const tableBody = document.getElementById('budgetTableBody');
             const categoryRow = document.querySelector(`tr[data-category="${category}"]`);
             
+            // Check if row already exists
             let row = document.querySelector(`tr[data-account-code="${accountCode}"]`);
             
             // If the row doesn't exist, create it
@@ -31216,7 +31212,13 @@
                 row.dataset.parentCategory = category;
                 row.dataset.lineName = displayName;
                 row.dataset.accountCode = accountCode;
-                categoryRow.parentNode.insertBefore(row, categoryRow.nextSibling);
+                
+                // Insert after the category row
+                if (categoryRow) {
+                    categoryRow.parentNode.insertBefore(row, categoryRow.nextSibling);
+                } else {
+                    tableBody.appendChild(row);
+                }
             }
         
             let inputsHTML = '';
@@ -31237,6 +31239,7 @@
                     </div>
                 </td>
             `;
+            
             updateBudgetCalculations();
         }
         
