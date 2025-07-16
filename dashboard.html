@@ -29188,29 +29188,76 @@
         }
         
         // Load specific scenario
-        function loadScenario(scenarioId) {
-            const savedScenarios = JSON.parse(localStorage.getItem('montpro_scenarios') || '[]');
-            const scenario = savedScenarios.find(s => s.id === scenarioId);
-            
-            if (!scenario) {
-                showErrorMessage('Scenario not found');
-                return;
+        async function loadScenario(scenarioId) {
+            try {
+                let scenario = null;
+                
+                // Convert scenarioId to number for consistent comparison
+                const idAsNumber = Number(scenarioId);
+                
+                // First try to find in localStorage
+                const savedScenarios = JSON.parse(localStorage.getItem('montpro_scenarios') || '[]');
+                scenario = savedScenarios.find(s => Number(s.id) === idAsNumber);
+                
+                // If not found in localStorage, fetch from Supabase
+                if (!scenario) {
+                    const { data: { user } } = await supabase.auth.getUser();
+                    if (!user) {
+                        showErrorMessage('Please log in to load scenarios');
+                        return;
+                    }
+                    
+                    const { data, error } = await supabase
+                        .from('scenario_analysis')
+                        .select('*')
+                        .eq('id', idAsNumber)
+                        .single();
+                    
+                    if (error) {
+                        throw error;
+                    }
+                    
+                    if (data) {
+                        // Convert Supabase format to expected format
+                        scenario = {
+                            id: data.id,
+                            name: data.name,
+                            description: data.description,
+                            adjustments: data.adjustments,
+                            oneTimeEvents: data.one_time_events, // Convert field name
+                            affectedYears: data.affected_years,
+                            createdAt: data.created_at,
+                            currentScenario: data.current_scenario
+                        };
+                    }
+                }
+                
+                if (!scenario) {
+                    showErrorMessage('Scenario not found');
+                    return;
+                }
+                
+                console.log('Loading scenario:', scenario); // Debug log
+                
+                // Load scenario data with proper defaults
+                scenarioState.adjustments = scenario.adjustments || { revenue: 0, cogs: 0, opex: 0 };
+                scenarioState.oneTimeEvents = scenario.oneTimeEvents || [];
+                scenarioState.affectedYears = scenario.affectedYears || [2026, 2027, 2028, 2029, 2030];
+                scenarioState.scenarioName = scenario.name;
+                
+                // Update UI
+                updateYearButtons();
+                updateSliders();
+                updateEventsList();
+                recalculateScenario();
+                
+                closeLoadScenariosModal();
+                showSuccessMessage(`Loaded scenario: ${scenario.name}`);
+                
+            } catch (error) {
+                console.error('Error loading scenario:', error);
+                showErrorMessage('Failed to load scenario: ' + error.message);
             }
-            
-            // Load scenario data
-            scenarioState.adjustments = scenario.adjustments;
-            scenarioState.oneTimeEvents = scenario.oneTimeEvents;
-            scenarioState.affectedYears = scenario.affectedYears;
-            scenarioState.scenarioName = scenario.name;
-            
-            // Update UI
-            updateYearButtons();
-            updateSliders();
-            updateEventsList();
-            recalculateScenario();
-            
-            closeLoadScenariosModal();
-            showSuccessMessage(`Loaded scenario: ${scenario.name}`);
         }
         
         // Update year buttons based on affected years
