@@ -30195,17 +30195,14 @@
         
         // Multi-year forecast conversion
         async function convertMultiYearForecastToBudget() {
+            // Debug first
+            debugForecastIds();
+            
             const selectedYear = prompt('Which year do you want to convert to budget?\nEnter: 2027, 2028, 2029, or 2030');
             const year = parseInt(selectedYear);
             
             if (!year || year < 2027 || year > 2030) {
                 alert('Please enter a valid year (2027-2030)');
-                return;
-            }
-            
-            const forecastTable = document.getElementById(`plForecast${year}Table`);
-            if (!forecastTable || forecastTable.rows.length <= 1) {
-                alert(`Please generate a multi-year forecast first`);
                 return;
             }
             
@@ -30225,9 +30222,28 @@
                 const { data: { user } } = await supabase.auth.getUser();
                 if (!user) throw new Error('User not authenticated');
                 
-                const latestMultiYearForecastId = localStorage.getItem('latest_multiyear_forecast_id');
+                // Try to get the multi-year forecast ID
+                let latestMultiYearForecastId = localStorage.getItem('latest_multiyear_forecast_id');
+                
+                // If not found, try to get the latest from Supabase
                 if (!latestMultiYearForecastId) {
-                    throw new Error('No multi-year forecast found. Please generate a multi-year forecast first.');
+                    console.log('No stored multi-year forecast ID, checking Supabase...');
+                    const { data: forecasts, error } = await supabase
+                        .from('ai_forecasts_multiyear_meridash')
+                        .select('id')
+                        .eq('user_id', user.id)
+                        .order('created_at', { ascending: false })
+                        .limit(1);
+                    
+                    if (error) throw error;
+                    
+                    if (forecasts && forecasts.length > 0) {
+                        latestMultiYearForecastId = forecasts[0].id;
+                        localStorage.setItem('latest_multiyear_forecast_id', latestMultiYearForecastId);
+                        console.log('Found multi-year forecast ID from Supabase:', latestMultiYearForecastId);
+                    } else {
+                        throw new Error('No multi-year forecast found. Please generate a multi-year forecast first.');
+                    }
                 }
                 
                 const { data, error } = await supabase.rpc('convert_forecast_to_budget', {
@@ -30663,6 +30679,42 @@
             const statusBadge = document.getElementById('budgetStatus');
             statusBadge.textContent = status.charAt(0).toUpperCase() + status.slice(1);
             statusBadge.className = `priority-badge ${status === 'approved' ? 'low-priority' : 'medium-priority'}`;
+        }
+
+        function showSection(sectionName) {
+            // Remove active class from all nav links
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            // Hide all sections
+            document.querySelectorAll('.section-content').forEach(section => {
+                section.style.display = 'none';
+            });
+            
+            // Show the target section
+            const targetSection = document.getElementById(sectionName + '-section');
+            if (targetSection) {
+                targetSection.style.display = 'block';
+            }
+            
+            // Add active class to the corresponding nav link
+            const targetLink = document.querySelector(`[data-section="${sectionName}"]`);
+            if (targetLink) {
+                targetLink.classList.add('active');
+            }
+            
+            console.log(`Switched to section: ${sectionName}`);
+        }
+
+        function debugForecastIds() {
+            console.log('=== FORECAST ID DEBUG ===');
+            console.log('latest_forecast_id:', localStorage.getItem('latest_forecast_id'));
+            console.log('latest_forecast_table:', localStorage.getItem('latest_forecast_table'));
+            console.log('latest_2025_forecast_id:', localStorage.getItem('latest_2025_forecast_id'));
+            console.log('latest_2026_forecast_id:', localStorage.getItem('latest_2026_forecast_id'));
+            console.log('latest_multiyear_forecast_id:', localStorage.getItem('latest_multiyear_forecast_id'));
+            console.log('========================');
         }
         
     </script>
