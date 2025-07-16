@@ -17334,6 +17334,7 @@
                 
                 console.log('📊 Loaded GL accounts:', accounts?.length || 0, accounts);
                 window.glAccounts = accounts || [];
+                glAccounts = accounts || [];
                 return accounts || [];
                 
             } catch (error) {
@@ -31455,6 +31456,18 @@
             const tableBody = document.getElementById('budgetTableBody');
             const categoryRow = document.querySelector(`tr[data-category="${category}"]`);
             
+            if (!categoryRow) {
+                console.error(`❌ Category row not found for: ${category}`);
+                return;
+            }
+            
+            // Check if row already exists
+            let existingRow = document.querySelector(`tr[data-account-code="${accountCode}"]`);
+            if (existingRow) {
+                console.log(`⚠️ Budget line already exists for account: ${accountCode}`);
+                return;
+            }
+            
             const newRow = document.createElement('tr');
             newRow.className = 'budget-line-row';
             newRow.dataset.parentCategory = category;
@@ -31463,7 +31476,8 @@
             
             let inputsHTML = '';
             for(let i = 1; i <= 12; i++) {
-                inputsHTML += `<td class="budget-line-cell"><input type="number" class="budget-amount-input" data-month="${i}" value="${values[i] || 0}" oninput="updateBudgetCalculations()"></td>`;
+                const value = values[i] || 0;
+                inputsHTML += `<td class="budget-line-cell"><input type="number" class="budget-amount-input" data-month="${i}" value="${value}" oninput="updateBudgetCalculations()"></td>`;
             }
         
             newRow.innerHTML = `
@@ -31477,7 +31491,9 @@
                 </td>
             `;
             
+            // Insert after the category row
             categoryRow.parentNode.insertBefore(newRow, categoryRow.nextSibling);
+            console.log(`✅ Added budget line: ${displayName} to category: ${category}`);
         }
 
         async function populateBudgetYearSelector() {
