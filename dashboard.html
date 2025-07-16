@@ -9139,6 +9139,35 @@
             border-color: #fbbf24;
             box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1);
         }
+
+        .budget-controls-new .priority-badge {
+            padding: 0.6rem 1rem;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            min-width: 100px;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+        
+        .budget-controls-new .priority-badge.draft {
+            background: #fef3c7;
+            color: #92400e;
+            border-color: #fbbf24;
+        }
+        
+        .budget-controls-new .priority-badge.active {
+            background: #d1fae5;
+            color: #065f46;
+            border-color: #10b981;
+        }
+        
+        .budget-controls-new .priority-badge.completed {
+            background: #dbeafe;
+            color: #1e40af;
+            border-color: #3b82f6;
+        }
         
         /* Enhanced buttons */
         .btn-add-line {
@@ -17282,18 +17311,31 @@
         // Load GL Accounts from Supabase
         async function loadGLAccounts() {
             try {
-                const { data, error } = await supabase
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) return [];
+        
+                const { data: accounts, error } = await supabase
                     .from('gl_accounts_meridash')
-                    .select('account_code, account_name, category')
+                    .select('*')
+                    .eq('user_id', user.id)
                     .eq('is_active', true)
                     .order('account_code');
+        
                 if (error) throw error;
-                glAccounts = data || [];
-                console.log(`✅ Loaded ${glAccounts.length} GL accounts.`);
+                
+                window.glAccounts = accounts || [];
+                return accounts || [];
+                
             } catch (error) {
                 console.error('Error loading GL accounts:', error);
+                return [];
             }
         }
+        
+        // Make sure GL accounts are loaded when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadGLAccounts();
+        });
         
         // Load Financial Transactions from Supabase
         async function loadFinancialTransactions() {
@@ -30858,6 +30900,134 @@
             return budgetData;
         }
 
+        async function saveBudget() {
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) {
+                    alert('Please log in to save budget');
+                    return;
+                }
+        
+                const selectedYear = parseInt(document.getElementById('budgetYearSelect').value);
+                if (!selectedYear) {
+                    alert('Please select a budget year first');
+                    return;
+                }
+        
+                console.log(`💾 Saving budget for year: ${selectedYear}`);
+        
+                // Show loading state
+                const saveButton = document.querySelector('.btn-save-budget');
+                const originalText = saveButton.innerHTML;
+                saveButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+                saveButton.disabled = true;
+        
+                // Collect budget data from the table
+                const budgetData = [];
+                const lineRows = document.querySelectorAll('.budget-line-row');
+        
+                lineRows.forEach(row => {
+                    const accountCode = row.dataset.accountCode;
+                    const category = row.dataset.parentCategory;
+                    const lineName = row.dataset.lineName;
+        
+                    // Get monthly amounts from input fields
+                    for (let month = 1; month <= 12; month++) {
+                        const input = row.querySelector(`input[data-month="${month}"]`);
+                        const amount = parseFloat(input?.value || 0);
+        
+                        if (amount > 0) { // Only save non-zero amounts
+                            budgetData.push({
+                                budget_year: selectedYear,
+                                budget_month: month,
+                                category: category,
+                                account_code: parseInt(accountCode),
+                                line_item_name: lineName,
+                                amount: amount
+                            });
+                        }
+                    }
+                });
+        
+                if (budgetData.length === 0) {
+                    alert('No budget data to save. Please add some budget line items first.');
+                    return;
+                }
+        
+                // Use your existing saveBudgetToSupabase function
+                await saveBudgetToSupabase(budgetData);
+        
+                // Calculate totals for metadata
+                const totals = calculateBudgetTotals();
+                const totalRevenue = totals.revenue.reduce((sum, month) => sum + month, 0);
+                const totalExpenses = totals.cogs.reduce((sum, month) => sum + month, 0) + 
+                                     totals.opex.reduce((sum, month) => sum + month, 0);
+                const netProfit = totalRevenue - totalExpenses;
+        
+                // Save budget metadata
+                const { error: metaError } = await supabase
+                    .from('budget_metadata')
+                    .upsert({
+                        user_id: user.id,
+                        budget_year: selectedYear,
+                        budget_name: `Budget ${selectedYear}`,
+                        description: `Budget saved on ${new Date().toLocaleDateString()}`,
+                        status: 'active',
+                        source_type: 'manual',
+                        total_revenue: totalRevenue,
+                        total_expenses: totalExpenses,
+                        net_profit: netProfit,
+                        updated_at: new Date().toISOString()
+                    }, {
+                        onConflict: 'user_id,budget_year'
+                    });
+        
+                if (metaError) throw metaError;
+        
+                // Update status badge
+                updateBudgetStatus('active');
+        
+                console.log(`✅ Budget saved successfully: ${budgetData.length} entries`);
+                
+                // Use your existing showSuccessNotification function
+                showSuccessNotification(`Budget ${selectedYear} saved successfully!`);
+        
+            } catch (error) {
+                console.error('❌ Error saving budget:', error);
+                alert(`Failed to save budget: ${error.message}`);
+            } finally {
+                // Reset button state
+                const saveButton = document.querySelector('.btn-save-budget');
+                if (saveButton) {
+                    saveButton.innerHTML = '<i class="fas fa-save"></i> Save Budget';
+                    saveButton.disabled = false;
+                }
+            }
+        }
+
+        function calculateBudgetTotals() {
+            const totals = {
+                revenue: new Array(12).fill(0),
+                cogs: new Array(12).fill(0),
+                opex: new Array(12).fill(0)
+            };
+        
+            document.querySelectorAll('.budget-line-row').forEach(row => {
+                const category = row.dataset.parentCategory;
+                
+                for (let month = 1; month <= 12; month++) {
+                    const input = row.querySelector(`input[data-month="${month}"]`);
+                    const amount = parseFloat(input?.value || 0);
+                    
+                    if (totals[category]) {
+                        totals[category][month - 1] += amount;
+                    }
+                }
+            });
+        
+            return totals;
+        }
+
         // Save budget data to Supabase
         async function saveBudgetToSupabase(budgetData) {
             try {
@@ -30869,14 +31039,24 @@
                 // Add user_id to each budget entry
                 const budgetEntries = budgetData.map(entry => ({
                     ...entry,
-                    user_id: user.id
+                    user_id: user.id,
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
                 }));
         
+                // First, delete existing budget entries for this year
+                const { error: deleteError } = await supabase
+                    .from('budgets')
+                    .delete()
+                    .eq('user_id', user.id)
+                    .eq('budget_year', budgetEntries[0].budget_year);
+        
+                if (deleteError) throw deleteError;
+        
+                // Then insert the new entries
                 const { data, error } = await supabase
                     .from('budgets')
-                    .upsert(budgetEntries, { 
-                        onConflict: 'user_id,budget_year,budget_month' 
-                    });
+                    .insert(budgetEntries);
         
                 if (error) throw error;
                 
@@ -30931,28 +31111,40 @@
         }
         
         // Add new budget line item
-        function addBudgetLine() {
+        async function addBudgetLine() {
+            // Make sure GL accounts are loaded
+            if (!window.glAccounts || window.glAccounts.length === 0) {
+                await loadGLAccounts();
+            }
+            
             const modal = document.getElementById('addBudgetLineModal');
             const container = document.getElementById('glAccountListContainer');
             container.innerHTML = ''; 
-
-            const categories = { revenue: "Revenue", cogs: "Cost of Goods Sold", opex: "Operating Expenses" };
-
+        
+            const categories = { 
+                revenue: "Revenue Accounts", 
+                cogs: "Cost of Goods Sold", 
+                opex: "Operating Expenses" 
+            };
+        
             Object.entries(categories).forEach(([key, title]) => {
                 const header = document.createElement('h4');
                 header.textContent = title;
-                header.style.cssText = 'margin-top: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid #e2e8f0;';
+                header.style.cssText = 'margin-top: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid #e2e8f0; color: #374151;';
                 container.appendChild(header);
-
+        
                 const accountGrid = document.createElement('div');
                 accountGrid.style.cssText = 'display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.5rem;';
                 
-                const accounts = glAccounts.filter(acc => acc.category.toLowerCase().startsWith(key));
+                const accounts = window.glAccounts.filter(acc => 
+                    acc.category && acc.category.toLowerCase().includes(key)
+                );
+                
                 if (accounts.length > 0) {
                     accounts.forEach(account => {
                         const button = document.createElement('button');
                         button.className = 'btn btn-secondary';
-                        button.style.textAlign = 'left';
+                        button.style.cssText = 'text-align: left; padding: 0.5rem; font-size: 0.875rem;';
                         button.textContent = `${account.account_code} - ${account.account_name}`;
                         button.onclick = () => {
                             if (document.querySelector(`tr[data-account-code="${account.account_code}"]`)) {
@@ -30961,17 +31153,19 @@
                             }
                             renderBudgetLine(key, `${account.account_code} - ${account.account_name}`, {}, account.account_code);
                             closeAddBudgetLineModal();
+                            updateBudgetCalculations();
                         };
                         accountGrid.appendChild(button);
                     });
                 } else {
-                    accountGrid.innerHTML = `<p style="grid-column: 1 / -1; color: #64748b;">No ${title} accounts found.</p>`;
+                    accountGrid.innerHTML = `<p style="grid-column: 1 / -1; color: #64748b; font-style: italic;">No ${title} accounts found.</p>`;
                 }
                 container.appendChild(accountGrid);
             });
+            
             modal.style.display = 'flex';
         }
-
+        
         function closeAddBudgetLineModal() {
             document.getElementById('addBudgetLineModal').style.display = 'none';
         }
