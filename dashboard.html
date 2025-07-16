@@ -31221,7 +31221,7 @@
                             console.log(`Adding line item: ${account.account_code} - ${account.account_name}`);
                             
                             // Add the line item to the budget table
-                            renderBudgetLine(key, `${account.account_code} - ${account.account_name}`, {}, account.account_code);
+                            addBudgetLineToTable(key, `${account.account_code} - ${account.account_name}`, {}, account.account_code);
                             
                             // Close modal and update calculations
                             closeAddBudgetLineModal();
