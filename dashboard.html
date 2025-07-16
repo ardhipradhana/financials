@@ -30770,9 +30770,20 @@
         }
 
         function clearBudgetTable() {
+            console.log('🧹 Clearing budget table...');
+            
             // Remove all budget line rows but keep category headers
             const budgetLineRows = document.querySelectorAll('.budget-line-row');
-            budgetLineRows.forEach(row => row.remove());
+            console.log(`🗑️ Removing ${budgetLineRows.length} budget line rows`);
+            
+            budgetLineRows.forEach(row => {
+                row.remove();
+            });
+            
+            // Also clear any cached calculations
+            updateBudgetCalculations();
+            
+            console.log('✅ Budget table cleared');
         }
         
         // Delete budget line
@@ -30889,13 +30900,14 @@
                     document.getElementById('budgetTotalRevenue').textContent = formatCurrencyFull(0, 'IDR');
                     document.getElementById('budgetTotalExpenses').textContent = formatCurrencyFull(0, 'IDR');
                     document.getElementById('budgetNetProfit').textContent = formatCurrencyFull(0, 'IDR');
+                    clearBudgetTable(); // Clear table for empty state
                     return;
                 }
                 
                 console.log(`📊 Loading budget for year: ${selectedYear}`);
                 
-                // Clear existing line items
-                document.querySelectorAll('.budget-line-row').forEach(row => row.remove());
+                // FORCE CLEAR existing line items - be more aggressive
+                clearBudgetTable();
                 
                 // Load budget metadata
                 const { data: budgetMeta, error: metaError } = await supabase
@@ -30932,8 +30944,12 @@
                         throw itemsError;
                     }
                     
+                    console.log(`📋 Found ${budgetItems?.length || 0} budget items for year ${selectedYear}`);
+                    
                     if (budgetItems && budgetItems.length > 0) {
                         populateBudgetTable(budgetItems);
+                    } else {
+                        console.log('⚠️ No budget line items found for year', selectedYear);
                     }
                 } else {
                     // No budget found
@@ -30942,6 +30958,7 @@
                     document.getElementById('budgetTotalRevenue').textContent = formatCurrencyFull(0, 'IDR');
                     document.getElementById('budgetTotalExpenses').textContent = formatCurrencyFull(0, 'IDR');
                     document.getElementById('budgetNetProfit').textContent = formatCurrencyFull(0, 'IDR');
+                    console.log('📝 No budget metadata found for year', selectedYear);
                 }
                 
             } catch (error) {
@@ -30951,13 +30968,17 @@
         }
         
         function populateBudgetTable(budgetItems) {
-            // Clear existing budget lines first
+            console.log(`📊 Populating budget table with ${budgetItems.length} items`);
+            
+            // Double-check we're starting with a clean table
             clearBudgetTable();
             
             // Group budget items by line item and account
             const groupedItems = {};
             
             budgetItems.forEach(item => {
+                console.log(`Processing item: Year ${item.budget_year}, Month ${item.budget_month}, Category ${item.category}, Account ${item.account_code}`);
+                
                 const key = `${item.category}_${item.account_code}_${item.line_item_name}`;
                 if (!groupedItems[key]) {
                     groupedItems[key] = {
@@ -30969,6 +30990,8 @@
                 }
                 groupedItems[key].months[item.budget_month] = item.amount;
             });
+            
+            console.log(`📋 Grouped into ${Object.keys(groupedItems).length} line items`);
             
             // Add line items to table
             Object.values(groupedItems).forEach(itemGroup => {
@@ -30986,6 +31009,7 @@
             });
             
             updateBudgetCalculations();
+            console.log('✅ Budget table populated successfully');
         }
 
         async function populateBudgetYearSelector() {
