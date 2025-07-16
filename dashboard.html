@@ -11035,13 +11035,27 @@
                             <i class="fas fa-calendar-alt"></i>
                             <h3>Budgeting & Planning</h3> <!-- Updated title -->
                         </div>
-                        <div class="budget-mgmt-controls">
-                            <select id="budgetYearSelect" class="filter-input" onchange="loadBudgetYear()" style="width: auto; margin-right: 1rem;">
-                                <option value="2025">Budget 2025</option>
-                                <option value="2026">Budget 2026</option>
-                                <option value="2027">Budget 2027</option>
-                            </select>
-                            <div class="priority-badge medium-priority" id="budgetStatus">Draft</div>
+                        <div class="budget-controls">
+                            <div class="budget-controls-left">
+                                <div class="budget-selector-group">
+                                    <label for="budgetYearSelect" class="budget-selector-label">Budget Year</label>
+                                    <select id="budgetYearSelect" class="budget-year-select" onchange="loadBudgetYear()">
+                                        <option value="">Select Budget Year</option>
+                                    </select>
+                                </div>
+                                <div class="budget-status-group">
+                                    <span class="budget-status-label">Status:</span>
+                                    <span id="budgetStatus" class="priority-badge draft">Draft</span>
+                                </div>
+                            </div>
+                            <div class="budget-controls-right">
+                                <button class="btn btn-outline btn-add-line" onclick="addBudgetLine()">
+                                    <i class="fas fa-plus"></i> Add Line Item
+                                </button>
+                                <button class="btn btn-primary btn-save-budget" onclick="saveBudget()">
+                                    <i class="fas fa-save"></i> Save Budget
+                                </button>
+                            </div>
                         </div>
                     </div>
                     
@@ -11099,13 +11113,15 @@
                             <i class="fas fa-calculator"></i>
                             Detailed Budget Breakdown
                         </h2>
-                        <div class="budget-controls-right">
-                            <button class="btn btn-outline btn-add-line" onclick="addBudgetLine()">
-                                <i class="fas fa-plus"></i> Add Line Item
-                            </button>
-                            <button class="btn btn-primary btn-save-budget" onclick="saveBudget()">
-                                <i class="fas fa-save"></i> Save Budget
-                            </button>
+                        <div class="budget-meta-info">
+                            <span id="budgetSource">
+                                <i class="fas fa-info-circle"></i>
+                                Source: Manual
+                            </span>
+                            <span id="budgetLastUpdated">
+                                <i class="fas fa-clock"></i>
+                                Last Updated: Today
+                            </span>
                         </div>
                     </div>
                     
