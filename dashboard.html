@@ -23888,9 +23888,20 @@
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
         
-                const result = await response.json();
-                console.log('📥 AI Forecast Result:', result);
-        
+                const responseData = await response.json();
+                console.log('📥 AI Forecast Result:', responseData);
+                
+                // Handle array response - extract first element if response is an array
+                let result;
+                if (Array.isArray(responseData)) {
+                    console.log('📋 Response is array, extracting first element...');
+                    result = responseData[0];
+                } else {
+                    result = responseData;
+                }
+                
+                console.log('📊 Processed result:', result);
+                
                 // Process and display the results using the correct function names
                 if (result && result.forecast_data) {
                     await applyAIForecastToTable(result.forecast_data, payload.forecast_period);
@@ -25809,6 +25820,10 @@
                 // Apply the forecast to the P&L table
                 if (forecastData && forecastData.forecast_data && forecastData.forecast_data.monthly_forecasts) {
                     await applyStoredForecastToTable(forecastData.forecast_data.monthly_forecasts);
+                } else if (forecastData && forecastData.monthly_forecasts) {
+                    // Handle direct structure (if the response was processed before storing)
+                    await applyStoredForecastToTable(forecastData.monthly_forecasts);
+                }
                     
                     // Show insights if available
                     if (forecastData.insights) {
@@ -26451,8 +26466,19 @@
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 
-                const result = await response.json();
-                console.log('📥 2026 AI Forecast received:', result);
+                const responseData = await response.json();
+                console.log('📥 2026 AI Forecast received:', responseData);
+                
+                // Handle array response - extract first element if response is an array
+                let result;
+                if (Array.isArray(responseData)) {
+                    console.log('📋 Response is array, extracting first element...');
+                    result = responseData[0];
+                } else {
+                    result = responseData;
+                }
+                
+                console.log('📊 Processed result:', result);
                 
                 // Populate the 2026 table with AI results
                 populate2026TableWithAI(result);
