@@ -8941,7 +8941,11 @@
         
         .budget-total-header {
             min-width: 100px;
-            background: #fef3c7 !important;
+            background: #059669 !important;
+            color: white !important;
+            font-weight: 700;
+            text-align: center;
+            white-space: nowrap;
         }
         
         .budget-actions-header {
@@ -9260,6 +9264,9 @@
             padding: 1rem 0.75rem;
             border-bottom: 2px solid #fbbf24; /* Gold accent border */
             border-right: 1px solid #475569; /* Separator line */
+            position: sticky;
+            top: 0;
+            z-index: 3;
         }
 
         #budgets-section .budget-detail-table thead th:last-child {
@@ -9316,6 +9323,71 @@
         
         .budget-meta-info i {
             color: #9ca3af;
+        }
+
+        /* Freeze the first column (LINE ITEM) */
+        .budget-detail-table th:first-child,
+        .budget-detail-table td:first-child {
+            position: sticky;
+            left: 0;
+            z-index: 2;
+            background: white;
+            border-right: 2px solid #e2e8f0;
+            min-width: 200px;
+            max-width: 200px;
+        }
+        
+        .budget-detail-table th:first-child {
+            background: #1f293b;
+            z-index: 4;
+        }
+        
+        /* Category subtotal rows */
+        .budget-category-subtotal {
+            background: #f1f5f9 !important;
+            border-top: 2px solid #cbd5e1;
+            border-bottom: 2px solid #cbd5e1;
+            font-weight: 600;
+        }
+        
+        .budget-category-subtotal td {
+            padding: 0.75rem;
+            color: #1e293b;
+            text-align: center;
+            border: 1px solid #cbd5e1;
+        }
+        
+        .budget-category-subtotal td:first-child {
+            text-align: right;
+            padding-right: 1rem;
+            background: #f1f5f9 !important;
+        }
+        
+        /* Fix the total column header */
+        .budget-total-header {
+            background: #059669 !important;
+            color: white !important;
+            font-weight: 700;
+            text-align: center;
+            white-space: nowrap;
+        }
+        
+        /* Fix the total column cells */
+        .budget-total-cell {
+            background: #f0fdf4;
+            color: #059669;
+            font-weight: 600;
+            text-align: center;
+            white-space: nowrap;
+            padding: 0.75rem 0.5rem;
+            border-left: 2px solid #059669;
+        }
+        
+        /* Final totals styling */
+        .budget-final-row .budget-total-cell {
+            background: #065f46;
+            color: white;
+            font-weight: 700;
         }
         
     </style>
@@ -31245,6 +31317,8 @@
         
         function clearBudgetTable() {
             document.querySelectorAll('.budget-line-row').forEach(row => row.remove());
+            document.querySelectorAll('.budget-category-subtotal').forEach(row => row.remove()); // Remove existing subtotals
+            addCategorySubtotals();  // Add this line
             updateBudgetCalculations(); // Recalculate to zero out totals
         }
 
@@ -31260,6 +31334,7 @@
             const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
             const totals = { revenue: Array(12).fill(0), cogs: Array(12).fill(0), opex: Array(12).fill(0) };
         
+            // Calculate line totals and category totals
             document.querySelectorAll('.budget-line-row').forEach(row => {
                 const category = row.dataset.parentCategory;
                 let lineTotal = 0;
@@ -31271,29 +31346,98 @@
                 row.querySelector('.budget-line-total').textContent = formatCurrencyFull(lineTotal, 'IDR');
             });
         
-            ['revenue', 'cogs', 'opex'].forEach(category => {
-                const total = totals[category].reduce((s, v) => s + v, 0);
-                document.getElementById(`${category}CategoryTotal`).textContent = formatCurrencyFull(total, 'IDR');
+            // Calculate category subtotals
+            const categories = ['revenue', 'cogs', 'opex'];
+            categories.forEach(category => {
+                const categoryLines = document.querySelectorAll(`tr[data-parent-category="${category}"]`);
+                const subtotalRow = document.querySelector(`tr[data-subtotal="true"][data-category="${category}"]`);
+                
+                if (subtotalRow) {
+                    let yearlyTotal = 0;
+                    
+                    // Calculate monthly subtotals
+                    for (let month = 1; month <= 12; month++) {
+                        let monthlyTotal = 0;
+                        
+                        categoryLines.forEach(line => {
+                            const input = line.querySelector(`input[data-month="${month}"]`);
+                            if (input) {
+                                monthlyTotal += parseFloat(input.value) || 0;
+                            }
+                        });
+                        
+                        const subtotalCell = subtotalRow.querySelector(`td[data-month="${month}"]`);
+                        if (subtotalCell) {
+                            subtotalCell.textContent = formatCurrencyFull(monthlyTotal, 'IDR');
+                        }
+                        
+                        yearlyTotal += monthlyTotal;
+                    }
+                    
+                    // Update yearly subtotal
+                    const yearlyCell = subtotalRow.querySelector(`td[data-category-total="${category}"]`);
+                    if (yearlyCell) {
+                        yearlyCell.textContent = formatCurrencyFull(yearlyTotal, 'IDR');
+                    }
+                }
             });
         
+            // Update main category totals
+            ['revenue', 'cogs', 'opex'].forEach(category => {
+                const total = totals[category].reduce((s, v) => s + v, 0);
+                const element = document.getElementById(`${category}CategoryTotal`);
+                if (element) {
+                    element.textContent = formatCurrencyFull(total, 'IDR');
+                }
+            });
+        
+            // Calculate gross profit and net profit for each month
             months.forEach((month, index) => {
                 const gp = totals.revenue[index] - totals.cogs[index];
                 const np = gp - totals.opex[index];
-                document.getElementById(`grossProfit${month}`).textContent = formatCurrencyFull(gp, 'IDR');
-                document.getElementById(`netProfit${month}`).textContent = formatCurrencyFull(np, 'IDR');
+                
+                const grossProfitElement = document.getElementById(`grossProfit${month}`);
+                const netProfitElement = document.getElementById(`netProfit${month}`);
+                
+                if (grossProfitElement) {
+                    grossProfitElement.textContent = formatCurrencyFull(gp, 'IDR');
+                }
+                if (netProfitElement) {
+                    netProfitElement.textContent = formatCurrencyFull(np, 'IDR');
+                }
             });
         
+            // Calculate total gross profit and net profit
             const totalGrossProfit = totals.revenue.reduce((sum, val, i) => sum + (val - totals.cogs[i]), 0);
             const totalNetProfit = totalGrossProfit - totals.opex.reduce((s, v) => s + v, 0);
-            document.getElementById('grossProfitTotal').textContent = formatCurrencyFull(totalGrossProfit, 'IDR');
-            document.getElementById('netProfitTotal').textContent = formatCurrencyFull(totalNetProfit, 'IDR');
+            
+            const grossProfitTotalElement = document.getElementById('grossProfitTotal');
+            const netProfitTotalElement = document.getElementById('netProfitTotal');
+            
+            if (grossProfitTotalElement) {
+                grossProfitTotalElement.textContent = formatCurrencyFull(totalGrossProfit, 'IDR');
+            }
+            if (netProfitTotalElement) {
+                netProfitTotalElement.textContent = formatCurrencyFull(totalNetProfit, 'IDR');
+            }
         
-            document.getElementById('budgetTotalRevenue').textContent = formatCurrencyFull(totals.revenue.reduce((s, v) => s + v, 0), 'IDR');
-            document.getElementById('budgetTotalExpenses').textContent = formatCurrencyFull(
-                totals.cogs.reduce((s, v) => s + v, 0) + totals.opex.reduce((s, v) => s + v, 0), 
-                'IDR'
-            );
-            document.getElementById('budgetNetProfit').textContent = formatCurrencyFull(totalNetProfit, 'IDR');
+            // Update budget summary totals
+            const budgetTotalRevenueElement = document.getElementById('budgetTotalRevenue');
+            const budgetTotalExpensesElement = document.getElementById('budgetTotalExpenses');
+            const budgetNetProfitElement = document.getElementById('budgetNetProfit');
+            
+            if (budgetTotalRevenueElement) {
+                budgetTotalRevenueElement.textContent = formatCurrencyFull(totals.revenue.reduce((s, v) => s + v, 0), 'IDR');
+            }
+            if (budgetTotalExpensesElement) {
+                budgetTotalExpensesElement.textContent = formatCurrencyFull(
+                    totals.cogs.reduce((s, v) => s + v, 0) + totals.opex.reduce((s, v) => s + v, 0), 
+                    'IDR'
+                );
+            }
+            if (budgetNetProfitElement) {
+                budgetNetProfitElement.textContent = formatCurrencyFull(totalNetProfit, 'IDR');
+            }
         }
         
         function updateCategoryTotals(totals) {
@@ -31353,6 +31497,7 @@
                 const selectedYear = parseInt(document.getElementById('budgetYearSelect').value);
                 
                 clearBudgetTable();
+                addCategorySubtotals();
 
                 if (!selectedYear || isNaN(selectedYear)) {
                     updateBudgetStatus('draft');
@@ -31405,6 +31550,7 @@
                 // Use the correct function to RENDER the line, not the one for adding from UI
                 renderBudgetLine(itemGroup.category, itemGroup.line_item_name, itemGroup.months, itemGroup.account_code);
             });
+            addCategorySubtotals();
             updateBudgetCalculations();
         }
 
@@ -31523,14 +31669,54 @@
             console.log(`Switched to section: ${sectionName}`);
         }
 
-        function debugForecastIds() {
-            console.log('=== FORECAST ID DEBUG ===');
-            console.log('latest_forecast_id:', localStorage.getItem('latest_forecast_id'));
-            console.log('latest_forecast_table:', localStorage.getItem('latest_forecast_table'));
-            console.log('latest_2025_forecast_id:', localStorage.getItem('latest_2025_forecast_id'));
-            console.log('latest_2026_forecast_id:', localStorage.getItem('latest_2026_forecast_id'));
-            console.log('latest_multiyear_forecast_id:', localStorage.getItem('latest_multiyear_forecast_id'));
-            console.log('========================');
+        function addCategorySubtotals() {
+            const categories = ['revenue', 'cogs', 'opex'];
+            
+            categories.forEach(category => {
+                const categoryRow = document.querySelector(`tr[data-category="${category}"]`);
+                if (!categoryRow) return;
+                
+                // Find the last line item in this category
+                let lastLineItem = categoryRow.nextElementSibling;
+                while (lastLineItem && lastLineItem.dataset.parentCategory === category) {
+                    lastLineItem = lastLineItem.nextElementSibling;
+                }
+                
+                // Create subtotal row
+                const subtotalRow = document.createElement('tr');
+                subtotalRow.className = 'budget-category-subtotal';
+                subtotalRow.dataset.category = category;
+                subtotalRow.dataset.subtotal = 'true';
+                
+                let subtotalHTML = `<td class="budget-line-cell">Total ${getCategoryDisplayName(category)}</td>`;
+                
+                // Add monthly subtotals
+                for (let i = 1; i <= 12; i++) {
+                    subtotalHTML += `<td class="budget-line-cell" data-month="${i}">Rp 0</td>`;
+                }
+                
+                // Add yearly total
+                subtotalHTML += `<td class="budget-total-cell" data-category-total="${category}">Rp 0</td>`;
+                subtotalHTML += `<td class="budget-line-cell"></td>`; // Actions column
+                
+                subtotalRow.innerHTML = subtotalHTML;
+                
+                // Insert before the next category or summary rows
+                if (lastLineItem) {
+                    lastLineItem.parentNode.insertBefore(subtotalRow, lastLineItem);
+                } else {
+                    document.getElementById('budgetTableBody').appendChild(subtotalRow);
+                }
+            });
+        }
+        
+        function getCategoryDisplayName(category) {
+            const names = {
+                'revenue': 'Revenue',
+                'cogs': 'Cost of Goods Sold', 
+                'opex': 'Operating Expenses'
+            };
+            return names[category] || category;
         }
         
     </script>
