@@ -9083,6 +9083,219 @@
             background: #fef2f2;
             color: #dc2626;
         }
+
+        /* Enhanced Budget Controls */
+        .budget-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+        }
+        
+        .budget-controls-left {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+        
+        .budget-controls-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem; /* Add proper spacing between buttons */
+        }
+        
+        .budget-selector-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .budget-selector-label {
+            font-weight: 600;
+            color: #374151;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .budget-year-select {
+            padding: 0.75rem 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            background: white;
+            font-weight: 500;
+            color: #374151;
+            min-width: 180px;
+            transition: all 0.2s ease;
+        }
+        
+        .budget-year-select:focus {
+            outline: none;
+            border-color: #fbbf24;
+            box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1);
+        }
+        
+        .budget-status-group {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .budget-status-label {
+            font-weight: 600;
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+        
+        /* Enhanced buttons */
+        .btn-add-line {
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-save-budget {
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-add-line:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-save-budget:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
+        }
+        
+        /* Enhanced Budget Summary Cards */
+        .budget-summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .budget-summary-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .budget-summary-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #fbbf24, #f59e0b);
+        }
+        
+        .budget-summary-card h4 {
+            color: #6b7280;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+        
+        .budget-summary-card .amount {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+        
+        .budget-summary-card .vs-forecast {
+            color: #059669;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        /* Enhanced Table Headers */
+        .budget-detail-table thead {
+            background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+            position: sticky;
+            top: 0;
+            z-index: 20;
+        }
+        
+        .budget-detail-table thead th {
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 1rem 0.75rem;
+            border: none;
+            position: relative;
+        }
+        
+        .budget-detail-table thead th::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #fbbf24, #f59e0b);
+        }
+        
+        /* Enhanced Section Headers */
+        .budget-section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .budget-section-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: #1f2937;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        
+        .budget-section-title i {
+            color: #fbbf24;
+            font-size: 1.25rem;
+        }
+        
+        .budget-meta-info {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+        
+        .budget-meta-info span {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .budget-meta-info i {
+            color: #9ca3af;
+        }
         
     </style>
 </head>
@@ -10881,16 +11094,16 @@
             
                 <!-- Detailed Budget Breakdown -->
                 <div class="content-card">
-                    <div class="card-header">
-                        <div class="panel-title">
-                            <i class="fas fa-edit"></i>
-                            <h3>Detailed Budget Breakdown</h3>
-                        </div>
-                        <div class="scenario-actions">
-                            <button class="btn btn-secondary" onclick="addBudgetLine()">
+                    <div class="budget-section-header">
+                        <h2 class="budget-section-title">
+                            <i class="fas fa-calculator"></i>
+                            Detailed Budget Breakdown
+                        </h2>
+                        <div class="budget-controls-right">
+                            <button class="btn btn-outline btn-add-line" onclick="addBudgetLine()">
                                 <i class="fas fa-plus"></i> Add Line Item
                             </button>
-                            <button class="btn btn-primary" onclick="saveBudget()">
+                            <button class="btn btn-primary btn-save-budget" onclick="saveBudget()">
                                 <i class="fas fa-save"></i> Save Budget
                             </button>
                         </div>
@@ -31032,23 +31245,30 @@
                     selector.removeChild(selector.lastChild);
                 }
                 
+                // Track years already added to prevent duplicates
+                const addedYears = new Set();
+                
                 // Add years that have budgets
                 budgets.forEach(budget => {
-                    const option = document.createElement('option');
-                    option.value = budget.budget_year;
-                    option.textContent = `Budget ${budget.budget_year}`;
-                    selector.appendChild(option);
+                    if (!addedYears.has(budget.budget_year)) {
+                        const option = document.createElement('option');
+                        option.value = budget.budget_year;
+                        option.textContent = `Budget ${budget.budget_year}`;
+                        selector.appendChild(option);
+                        addedYears.add(budget.budget_year);
+                    }
                 });
                 
                 // Add future years that don't have budgets yet
                 const currentYear = new Date().getFullYear();
                 for (let year = currentYear; year <= 2030; year++) {
-                    if (!budgets.some(b => b.budget_year === year)) {
+                    if (!addedYears.has(year)) {
                         const option = document.createElement('option');
                         option.value = year;
                         option.textContent = `Budget ${year}`;
                         option.style.color = '#64748b'; // Lighter color for years without budgets
                         selector.appendChild(option);
+                        addedYears.add(year);
                     }
                 }
                 
