@@ -9139,36 +9139,6 @@
             border-color: #fbbf24;
             box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1);
         }
-
-        /* Add this to the existing CSS, around line where budget controls are styled */
-        .budget-controls-new .priority-badge {
-            padding: 0.6rem 1rem;
-            border: 2px solid transparent;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            min-width: 100px;
-            text-align: center;
-            transition: all 0.2s ease;
-        }
-        
-        .budget-controls-new .priority-badge.draft {
-            background: #fef3c7;
-            color: #92400e;
-            border-color: #fbbf24;
-        }
-        
-        .budget-controls-new .priority-badge.active {
-            background: #d1fae5;
-            color: #065f46;
-            border-color: #10b981;
-        }
-        
-        .budget-controls-new .priority-badge.completed {
-            background: #dbeafe;
-            color: #1e40af;
-            border-color: #3b82f6;
-        }
         
         /* Enhanced buttons */
         .btn-add-line {
@@ -17312,38 +17282,16 @@
         // Load GL Accounts from Supabase
         async function loadGLAccounts() {
             try {
-                const { data: { user } } = await supabase.auth.getUser();
-                if (!user) {
-                    console.log('No authenticated user for GL accounts');
-                    return [];
-                }
-        
-                console.log('🔄 Loading GL accounts for user:', user.id);
-        
-                const { data: accounts, error } = await supabase
+                const { data, error } = await supabase
                     .from('gl_accounts_meridash')
-                    .select('*')
-                    .eq('user_id', user.id)
+                    .select('account_code, account_name, category')
                     .eq('is_active', true)
                     .order('account_code');
-        
-                if (error) {
-                    console.error('Error loading GL accounts:', error);
-                    throw error;
-                }
-                
-                console.log('📊 Loaded GL accounts:', accounts?.length || 0, accounts);
-                
-                // IMPORTANT: Assign to ALL variable names used in different functions
-                window.glAccounts = accounts || [];
-                glAccounts = accounts || [];  // Global variable for populateBudgetTable
-                window.glAccountsData = accounts || [];  // Used in other functions
-                
-                return accounts || [];
-                
+                if (error) throw error;
+                glAccounts = data || [];
+                console.log(`✅ Loaded ${glAccounts.length} GL accounts.`);
             } catch (error) {
                 console.error('Error loading GL accounts:', error);
-                return [];
             }
         }
         
@@ -30910,134 +30858,6 @@
             return budgetData;
         }
 
-        async function saveBudget() {
-            try {
-                const { data: { user } } = await supabase.auth.getUser();
-                if (!user) {
-                    alert('Please log in to save budget');
-                    return;
-                }
-        
-                const selectedYear = parseInt(document.getElementById('budgetYearSelect').value);
-                if (!selectedYear) {
-                    alert('Please select a budget year first');
-                    return;
-                }
-        
-                console.log(`💾 Saving budget for year: ${selectedYear}`);
-        
-                // Show loading state
-                const saveButton = document.querySelector('.btn-save-budget');
-                const originalText = saveButton.innerHTML;
-                saveButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
-                saveButton.disabled = true;
-        
-                // Collect budget data from the table
-                const budgetData = [];
-                const lineRows = document.querySelectorAll('.budget-line-row');
-        
-                lineRows.forEach(row => {
-                    const accountCode = row.dataset.accountCode;
-                    const category = row.dataset.parentCategory;
-                    const lineName = row.dataset.lineName;
-        
-                    // Get monthly amounts from input fields
-                    for (let month = 1; month <= 12; month++) {
-                        const input = row.querySelector(`input[data-month="${month}"]`);
-                        const amount = parseFloat(input?.value || 0);
-        
-                        if (amount > 0) { // Only save non-zero amounts
-                            budgetData.push({
-                                budget_year: selectedYear,
-                                budget_month: month,
-                                category: category,
-                                account_code: parseInt(accountCode),
-                                line_item_name: lineName,
-                                amount: amount
-                            });
-                        }
-                    }
-                });
-        
-                if (budgetData.length === 0) {
-                    alert('No budget data to save. Please add some budget line items first.');
-                    return;
-                }
-        
-                // Use your existing saveBudgetToSupabase function
-                await saveBudgetToSupabase(budgetData);
-        
-                // Calculate totals for metadata
-                const totals = calculateBudgetTotals();
-                const totalRevenue = totals.revenue.reduce((sum, month) => sum + month, 0);
-                const totalExpenses = totals.cogs.reduce((sum, month) => sum + month, 0) + 
-                                     totals.opex.reduce((sum, month) => sum + month, 0);
-                const netProfit = totalRevenue - totalExpenses;
-        
-                // Save budget metadata
-                const { error: metaError } = await supabase
-                    .from('budget_metadata')
-                    .upsert({
-                        user_id: user.id,
-                        budget_year: selectedYear,
-                        budget_name: `Budget ${selectedYear}`,
-                        description: `Budget saved on ${new Date().toLocaleDateString()}`,
-                        status: 'active',
-                        source_type: 'manual',
-                        total_revenue: totalRevenue,
-                        total_expenses: totalExpenses,
-                        net_profit: netProfit,
-                        updated_at: new Date().toISOString()
-                    }, {
-                        onConflict: 'user_id,budget_year'
-                    });
-        
-                if (metaError) throw metaError;
-        
-                // Update status badge
-                updateBudgetStatus('active');
-        
-                console.log(`✅ Budget saved successfully: ${budgetData.length} entries`);
-                
-                // Use your existing showSuccessNotification function
-                showSuccessNotification(`Budget ${selectedYear} saved successfully!`);
-        
-            } catch (error) {
-                console.error('❌ Error saving budget:', error);
-                alert(`Failed to save budget: ${error.message}`);
-            } finally {
-                // Reset button state
-                const saveButton = document.querySelector('.btn-save-budget');
-                if (saveButton) {
-                    saveButton.innerHTML = '<i class="fas fa-save"></i> Save Budget';
-                    saveButton.disabled = false;
-                }
-            }
-        }
-
-        function calculateBudgetTotals() {
-            const totals = {
-                revenue: new Array(12).fill(0),
-                cogs: new Array(12).fill(0),
-                opex: new Array(12).fill(0)
-            };
-        
-            document.querySelectorAll('.budget-line-row').forEach(row => {
-                const category = row.dataset.parentCategory;
-                
-                for (let month = 1; month <= 12; month++) {
-                    const input = row.querySelector(`input[data-month="${month}"]`);
-                    const amount = parseFloat(input?.value || 0);
-                    
-                    if (totals[category]) {
-                        totals[category][month - 1] += amount;
-                    }
-                }
-            });
-        
-            return totals;
-        }
-
         // Save budget data to Supabase
         async function saveBudgetToSupabase(budgetData) {
             try {
@@ -31049,24 +30869,14 @@
                 // Add user_id to each budget entry
                 const budgetEntries = budgetData.map(entry => ({
                     ...entry,
-                    user_id: user.id,
-                    created_at: new Date().toISOString(),
-                    updated_at: new Date().toISOString()
+                    user_id: user.id
                 }));
         
-                // First, delete existing budget entries for this year
-                const { error: deleteError } = await supabase
-                    .from('budgets')
-                    .delete()
-                    .eq('user_id', user.id)
-                    .eq('budget_year', budgetEntries[0].budget_year);
-        
-                if (deleteError) throw deleteError;
-        
-                // Then insert the new entries
                 const { data, error } = await supabase
                     .from('budgets')
-                    .insert(budgetEntries);
+                    .upsert(budgetEntries, { 
+                        onConflict: 'user_id,budget_year,budget_month' 
+                    });
         
                 if (error) throw error;
                 
@@ -31121,160 +30931,74 @@
         }
         
         // Add new budget line item
-        async function addBudgetLine() {
-            console.log('🔄 Add Budget Line clicked');
-            
-            // Check if modal exists
+        function addBudgetLine() {
             const modal = document.getElementById('addBudgetLineModal');
-            if (!modal) {
-                console.error('❌ Modal not found!');
-                alert('Modal not found.');
-                return;
-            }
-            
-            console.log('✅ Modal found');
-            
-            // Make sure GL accounts are loaded
-            if (!window.glAccounts || window.glAccounts.length === 0) {
-                console.log('🔄 Loading GL accounts...');
-                await loadGLAccounts();
-            }
-            
-            console.log('📊 GL Accounts loaded:', window.glAccounts?.length || 0);
-            
-            if (!window.glAccounts || window.glAccounts.length === 0) {
-                alert('No GL accounts found. Please create some GL accounts first.');
-                return;
-            }
-            
             const container = document.getElementById('glAccountListContainer');
             container.innerHTML = ''; 
-        
-            // Add intro text
-            const intro = document.createElement('p');
-            intro.textContent = 'Select a GL account to add to your budget:';
-            intro.style.cssText = 'margin-bottom: 1rem; color: #6b7280; padding: 0 1rem;';
-            container.appendChild(intro);
-        
-            // Updated categories to match your actual GL account structure
-            const categories = [
-                {
-                    key: 'revenue',
-                    title: 'Revenue Accounts',
-                    filter: (acc) => acc.category === 'Revenue'
-                },
-                {
-                    key: 'cogs',
-                    title: 'Cost of Goods Sold',
-                    filter: (acc) => acc.category === 'Expense' && (
-                        acc.account_name.toLowerCase().includes('cost of goods') ||
-                        acc.account_code === '5010' ||
-                        acc.account_code === '5020' ||
-                        acc.account_code === '5030'
-                    )
-                },
-                {
-                    key: 'opex',
-                    title: 'Operating Expenses',
-                    filter: (acc) => acc.category === 'Expense' && !(
-                        acc.account_name.toLowerCase().includes('cost of goods') ||
-                        acc.account_code === '5010' ||
-                        acc.account_code === '5020' ||
-                        acc.account_code === '5030'
-                    )
-                }
-            ];
-        
-            categories.forEach(({ key, title, filter }) => {
+
+            const categories = { revenue: "Revenue", cogs: "Cost of Goods Sold", opex: "Operating Expenses" };
+
+            Object.entries(categories).forEach(([key, title]) => {
                 const header = document.createElement('h4');
                 header.textContent = title;
-                header.style.cssText = 'margin: 1rem 1rem 0.5rem 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid #e2e8f0; color: #374151; font-weight: 600;';
+                header.style.cssText = 'margin-top: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid #e2e8f0;';
                 container.appendChild(header);
-        
+
                 const accountGrid = document.createElement('div');
-                accountGrid.style.cssText = 'display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin: 0.5rem 1rem 1rem 1rem;';
+                accountGrid.style.cssText = 'display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.5rem;';
                 
-                const accounts = window.glAccounts.filter(filter);
-                
-                console.log(`${title} accounts found:`, accounts.length);
-                
+                const accounts = glAccounts.filter(acc => acc.category.toLowerCase().startsWith(key));
                 if (accounts.length > 0) {
                     accounts.forEach(account => {
                         const button = document.createElement('button');
                         button.className = 'btn btn-secondary';
-                        button.style.cssText = 'text-align: left; padding: 0.75rem; font-size: 0.875rem; border: 1px solid #e2e8f0; border-radius: 6px; background: white; cursor: pointer; transition: all 0.2s ease;';
+                        button.style.textAlign = 'left';
                         button.textContent = `${account.account_code} - ${account.account_name}`;
-                        
                         button.onclick = () => {
-                            // Check if line item already exists
                             if (document.querySelector(`tr[data-account-code="${account.account_code}"]`)) {
                                 alert('This line item already exists in the budget.');
                                 return;
                             }
-                            
-                            console.log(`Adding line item: ${account.account_code} - ${account.account_name}`);
-                            
-                            // Use renderBudgetLine to match the same function populateBudgetTable uses
                             renderBudgetLine(key, `${account.account_code} - ${account.account_name}`, {}, account.account_code);
-                            
-                            // Close modal and update calculations
                             closeAddBudgetLineModal();
-                            updateBudgetCalculations();
                         };
                         accountGrid.appendChild(button);
                     });
                 } else {
-                    const noAccounts = document.createElement('p');
-                    noAccounts.textContent = `No ${title.toLowerCase()} found.`;
-                    noAccounts.style.cssText = 'grid-column: 1 / -1; color: #64748b; font-style: italic; text-align: center; padding: 1rem;';
-                    accountGrid.appendChild(noAccounts);
+                    accountGrid.innerHTML = `<p style="grid-column: 1 / -1; color: #64748b;">No ${title} accounts found.</p>`;
                 }
                 container.appendChild(accountGrid);
             });
-            
-            console.log('🎯 Showing modal...');
             modal.style.display = 'flex';
         }
 
         function closeAddBudgetLineModal() {
-            const modal = document.getElementById('addBudgetLineModal');
-            if (modal) {
-                modal.style.display = 'none';
-            }
+            document.getElementById('addBudgetLineModal').style.display = 'none';
         }
         
         function addBudgetLineToTable(category, displayName, values = {}, accountCode) {
-            console.log(`🔨 Adding budget line: ${category} - ${displayName} - ${accountCode}`);
-            
             const tableBody = document.getElementById('budgetTableBody');
             const categoryRow = document.querySelector(`tr[data-category="${category}"]`);
             
-            if (!categoryRow) {
-                console.error(`❌ Category row not found for: ${category}`);
-                return;
+            let row = document.querySelector(`tr[data-account-code="${accountCode}"]`);
+            
+            // If the row doesn't exist, create it
+            if (!row) {
+                row = document.createElement('tr');
+                row.className = 'budget-line-row';
+                row.dataset.parentCategory = category;
+                row.dataset.lineName = displayName;
+                row.dataset.accountCode = accountCode;
+                categoryRow.parentNode.insertBefore(row, categoryRow.nextSibling);
             }
-            
-            // Check if row already exists
-            let existingRow = document.querySelector(`tr[data-account-code="${accountCode}"]`);
-            if (existingRow) {
-                console.log(`⚠️ Budget line already exists for account: ${accountCode}`);
-                return;
-            }
-            
-            const newRow = document.createElement('tr');
-            newRow.className = 'budget-line-row';
-            newRow.dataset.parentCategory = category;
-            newRow.dataset.lineName = displayName;
-            newRow.dataset.accountCode = accountCode;
-            
+        
             let inputsHTML = '';
             for(let i = 1; i <= 12; i++) {
                 const monthKey = getMonthKey(i);
-                const value = values[monthKey] || values[i] || 0; // Support both month key and number
-                inputsHTML += `<td class="budget-line-cell"><input type="number" class="budget-amount-input" data-month="${i}" value="${value}" oninput="updateBudgetCalculations()"></td>`;
+                inputsHTML += `<td class="budget-line-cell"><input type="number" class="budget-amount-input" data-month="${i}" value="${values[monthKey] || 0}" oninput="updateBudgetCalculations()"></td>`;
             }
         
-            newRow.innerHTML = `
+            row.innerHTML = `
                 <td class="budget-line-cell">
                     <div class="budget-line-name">${displayName}</div>
                 </td>
@@ -31286,23 +31010,12 @@
                     </div>
                 </td>
             `;
-            
-            // Insert after the category row
-            categoryRow.parentNode.insertBefore(newRow, categoryRow.nextSibling);
-            console.log(`✅ Added budget line: ${displayName} to category: ${category}`);
-            
-            // Update calculations
             updateBudgetCalculations();
         }
         
         function clearBudgetTable() {
-            console.log('🧹 Clearing budget table...');
-            document.querySelectorAll('.budget-line-row').forEach(row => {
-                console.log('🗑️ Removing row:', row.dataset.lineName);
-                row.remove();
-            });
+            document.querySelectorAll('.budget-line-row').forEach(row => row.remove());
             updateBudgetCalculations(); // Recalculate to zero out totals
-            console.log('✅ Budget table cleared');
         }
 
         function deleteBudgetLine(button) {
@@ -31469,18 +31182,6 @@
             const tableBody = document.getElementById('budgetTableBody');
             const categoryRow = document.querySelector(`tr[data-category="${category}"]`);
             
-            if (!categoryRow) {
-                console.error(`❌ Category row not found for: ${category}`);
-                return;
-            }
-            
-            // Check if row already exists
-            let existingRow = document.querySelector(`tr[data-account-code="${accountCode}"]`);
-            if (existingRow) {
-                console.log(`⚠️ Budget line already exists for account: ${accountCode}`);
-                return;
-            }
-            
             const newRow = document.createElement('tr');
             newRow.className = 'budget-line-row';
             newRow.dataset.parentCategory = category;
@@ -31489,8 +31190,7 @@
             
             let inputsHTML = '';
             for(let i = 1; i <= 12; i++) {
-                const value = values[i] || 0; // values is indexed by month number (1-12)
-                inputsHTML += `<td class="budget-line-cell"><input type="number" class="budget-amount-input" data-month="${i}" value="${value}" oninput="updateBudgetCalculations()"></td>`;
+                inputsHTML += `<td class="budget-line-cell"><input type="number" class="budget-amount-input" data-month="${i}" value="${values[i] || 0}" oninput="updateBudgetCalculations()"></td>`;
             }
         
             newRow.innerHTML = `
@@ -31504,9 +31204,7 @@
                 </td>
             `;
             
-            // Insert after the category row
             categoryRow.parentNode.insertBefore(newRow, categoryRow.nextSibling);
-            console.log(`✅ Added budget line: ${displayName} to category: ${category}`);
         }
 
         async function populateBudgetYearSelector() {
@@ -31589,10 +31287,7 @@
             
             // Initialize specific sections
             if (sectionName === 'budgets') {
-                // Load GL accounts FIRST, then initialize
-                loadGLAccounts().then(() => {
-                    initializeBudgetsSection();
-                });
+                initializeBudgetsSection();
             }
             
             console.log(`Switched to section: ${sectionName}`);
