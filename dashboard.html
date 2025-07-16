@@ -30079,15 +30079,16 @@
                 return;
             }
             
-            // Get current forecast details
             const industry = document.getElementById('forecastIndustrySelect')?.value || 'saas';
             const forecastStyle = document.getElementById('forecastStyleSelect')?.value || 'normal';
-            
-            // Determine the budget year based on current forecast
             const currentYear = new Date().getFullYear();
-            const budgetYear = currentYear; // For 2025 forecasts, create 2025 budget
+            const budgetYear = currentYear;
             
-            if (!confirm(`Convert current forecast to budget for ${budgetYear}? This will create a new budget plan.`)) {
+            // Check if budget already exists and show appropriate message
+            const existingBudget = await checkExistingBudget(budgetYear);
+            const actionText = existingBudget ? 'replace existing' : 'create new';
+            
+            if (!confirm(`Convert current forecast to ${actionText} budget for ${budgetYear}?`)) {
                 return;
             }
             
@@ -30097,15 +30098,12 @@
             button.disabled = true;
             
             try {
-                // Get current user
                 const { data: { user } } = await supabase.auth.getUser();
                 if (!user) throw new Error('User not authenticated');
                 
-                // Get the latest forecast ID 
                 const latestForecastId = localStorage.getItem('latest_2025_forecast_id') || localStorage.getItem('latest_forecast_id') || '1';
                 const forecastTableName = 'ai_forecasts_meridash';
                 
-                // Call Supabase function with proper parameters
                 const { data, error } = await supabase.rpc('convert_forecast_to_budget', {
                     p_user_id: user.id,
                     p_forecast_id: latestForecastId,
@@ -30115,28 +30113,21 @@
                     p_description: `Budget converted from AI forecast on ${new Date().toLocaleDateString()}`
                 });
                 
-                if (error) {
-                    throw error;
-                }
+                if (error) throw error;
                 
                 console.log('✅ Forecast converted to budget successfully');
                 
-                // Update budget year selector to show the new budget
+                // Update budget year selector and switch to budgets
                 document.getElementById('budgetYearSelect').value = budgetYear;
-                
-                // Switch to Budget tab and load
                 showSection('budgets');
                 await loadBudgetYear();
                 
-                showSuccessMessage(`Forecast converted to ${budgetYear} budget successfully!`);
+                const resultText = existingBudget ? 'replaced' : 'created';
+                showSuccessMessage(`${budgetYear} budget ${resultText} successfully from forecast!`);
                 
             } catch (error) {
                 console.error('Error converting forecast:', error);
-                if (error.message && error.message.includes('already exists')) {
-                    showErrorMessage(`Budget for ${budgetYear} already exists. Please delete it first.`);
-                } else {
-                    showErrorMessage('Failed to convert forecast: ' + error.message);
-                }
+                showErrorMessage('Failed to convert forecast: ' + error.message);
             } finally {
                 button.innerHTML = originalText;
                 button.disabled = false;
@@ -30153,7 +30144,10 @@
             const industry = document.getElementById('forecast2026IndustrySelect')?.value || 'saas';
             const forecastStyle = document.getElementById('forecast2026StyleSelect')?.value || 'normal';
             
-            if (!confirm('Convert 2026 forecast to budget? This will create a budget plan for 2026.')) {
+            const existingBudget = await checkExistingBudget(2026);
+            const actionText = existingBudget ? 'replace existing' : 'create new';
+            
+            if (!confirm(`Convert 2026 forecast to ${actionText} budget?`)) {
                 return;
             }
             
@@ -30182,7 +30176,9 @@
                 document.getElementById('budgetYearSelect').value = 2026;
                 showSection('budgets');
                 await loadBudgetYear();
-                showSuccessMessage('2026 forecast converted to budget successfully!');
+                
+                const resultText = existingBudget ? 'replaced' : 'created';
+                showSuccessMessage(`2026 budget ${resultText} successfully from forecast!`);
                 
             } catch (error) {
                 console.error('Error converting 2026 forecast:', error);
@@ -30193,11 +30189,8 @@
             }
         }
         
-        // Multi-year forecast conversion
+        // Updated multi-year conversion function
         async function convertMultiYearForecastToBudget() {
-            // Debug first
-            debugForecastIds();
-            
             const selectedYear = prompt('Which year do you want to convert to budget?\nEnter: 2027, 2028, 2029, or 2030');
             const year = parseInt(selectedYear);
             
@@ -30209,7 +30202,10 @@
             const industry = document.getElementById('forecastMultiYearIndustrySelect')?.value || 'saas';
             const forecastStyle = document.getElementById('forecastMultiYearStyleSelect')?.value || 'normal';
             
-            if (!confirm(`Convert ${year} forecast to budget?`)) {
+            const existingBudget = await checkExistingBudget(year);
+            const actionText = existingBudget ? 'replace existing' : 'create new';
+            
+            if (!confirm(`Convert ${year} forecast to ${actionText} budget?`)) {
                 return;
             }
             
@@ -30222,12 +30218,9 @@
                 const { data: { user } } = await supabase.auth.getUser();
                 if (!user) throw new Error('User not authenticated');
                 
-                // Try to get the multi-year forecast ID
                 let latestMultiYearForecastId = localStorage.getItem('latest_multiyear_forecast_id');
                 
-                // If not found, try to get the latest from Supabase
                 if (!latestMultiYearForecastId) {
-                    console.log('No stored multi-year forecast ID, checking Supabase...');
                     const { data: forecasts, error } = await supabase
                         .from('ai_forecasts_multiyear_meridash')
                         .select('id')
@@ -30240,7 +30233,6 @@
                     if (forecasts && forecasts.length > 0) {
                         latestMultiYearForecastId = forecasts[0].id;
                         localStorage.setItem('latest_multiyear_forecast_id', latestMultiYearForecastId);
-                        console.log('Found multi-year forecast ID from Supabase:', latestMultiYearForecastId);
                     } else {
                         throw new Error('No multi-year forecast found. Please generate a multi-year forecast first.');
                     }
@@ -30269,7 +30261,9 @@
                 budgetYearSelect.value = year;
                 showSection('budgets');
                 await loadBudgetYear();
-                showSuccessMessage(`${year} forecast converted to budget successfully!`);
+                
+                const resultText = existingBudget ? 'replaced' : 'created';
+                showSuccessMessage(`${year} budget ${resultText} successfully from multi-year forecast!`);
                 
             } catch (error) {
                 console.error(`Error converting ${year} forecast:`, error);
@@ -30277,6 +30271,24 @@
             } finally {
                 button.innerHTML = originalText;
                 button.disabled = false;
+            }
+        }
+
+        async function checkExistingBudget(year) {
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) return false;
+                
+                const { data, error } = await supabase
+                    .from('budget_metadata')
+                    .select('budget_year')
+                    .eq('user_id', user.id)
+                    .eq('budget_year', year)
+                    .single();
+                    
+                return data ? true : false;
+            } catch (error) {
+                return false;
             }
         }
         
@@ -30670,6 +30682,57 @@
             updateBudgetCalculations();
         }
 
+        async function populateBudgetYearSelector() {
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) return;
+                
+                const { data: budgets, error } = await supabase
+                    .from('budget_metadata')
+                    .select('budget_year, budget_name, source_type')
+                    .eq('user_id', user.id)
+                    .order('budget_year');
+                    
+                if (error) throw error;
+                
+                const selector = document.getElementById('budgetYearSelect');
+                
+                // Clear existing options except the first one
+                while (selector.children.length > 1) {
+                    selector.removeChild(selector.lastChild);
+                }
+                
+                // Add years that have budgets
+                budgets.forEach(budget => {
+                    const option = document.createElement('option');
+                    option.value = budget.budget_year;
+                    option.textContent = `Budget ${budget.budget_year}`;
+                    selector.appendChild(option);
+                });
+                
+                // Add future years that don't have budgets yet
+                const currentYear = new Date().getFullYear();
+                for (let year = currentYear; year <= 2030; year++) {
+                    if (!budgets.some(b => b.budget_year === year)) {
+                        const option = document.createElement('option');
+                        option.value = year;
+                        option.textContent = `Budget ${year}`;
+                        option.style.color = '#64748b'; // Lighter color for years without budgets
+                        selector.appendChild(option);
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Error populating budget selector:', error);
+            }
+        }
+        
+        // Call this when the budgets section is loaded
+        function initializeBudgetsSection() {
+            populateBudgetYearSelector();
+            loadBudgetYear();
+        }
+
         function getMonthKey(monthNumber) {
             const months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
             return months[monthNumber - 1];
@@ -30702,6 +30765,11 @@
             const targetLink = document.querySelector(`[data-section="${sectionName}"]`);
             if (targetLink) {
                 targetLink.classList.add('active');
+            }
+            
+            // Initialize specific sections
+            if (sectionName === 'budgets') {
+                initializeBudgetsSection();
             }
             
             console.log(`Switched to section: ${sectionName}`);
