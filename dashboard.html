@@ -31141,7 +31141,6 @@
             }
             
             console.log('📊 GL Accounts loaded:', window.glAccounts?.length || 0);
-            console.log('📊 Sample GL account:', window.glAccounts?.[0]);
             
             if (!window.glAccounts || window.glAccounts.length === 0) {
                 alert('No GL accounts found. Please create some GL accounts first.');
@@ -31206,16 +31205,6 @@
                         button.style.cssText = 'text-align: left; padding: 0.75rem; font-size: 0.875rem; border: 1px solid #e2e8f0; border-radius: 6px; background: white; cursor: pointer; transition: all 0.2s ease;';
                         button.textContent = `${account.account_code} - ${account.account_name}`;
                         
-                        // Add hover effect
-                        button.onmouseenter = () => {
-                            button.style.background = '#f8fafc';
-                            button.style.borderColor = '#fbbf24';
-                        };
-                        button.onmouseleave = () => {
-                            button.style.background = 'white';
-                            button.style.borderColor = '#e2e8f0';
-                        };
-                        
                         button.onclick = () => {
                             // Check if line item already exists
                             if (document.querySelector(`tr[data-account-code="${account.account_code}"]`)) {
@@ -31225,8 +31214,8 @@
                             
                             console.log(`Adding line item: ${account.account_code} - ${account.account_name}`);
                             
-                            // Add the line item to the budget table
-                            addBudgetLineToTable(key, `${account.account_code} - ${account.account_name}`, {}, account.account_code);
+                            // Use renderBudgetLine to match the same function populateBudgetTable uses
+                            renderBudgetLine(key, `${account.account_code} - ${account.account_name}`, {}, account.account_code);
                             
                             // Close modal and update calculations
                             closeAddBudgetLineModal();
@@ -31500,7 +31489,7 @@
             
             let inputsHTML = '';
             for(let i = 1; i <= 12; i++) {
-                const value = values[i] || 0;
+                const value = values[i] || 0; // values is indexed by month number (1-12)
                 inputsHTML += `<td class="budget-line-cell"><input type="number" class="budget-amount-input" data-month="${i}" value="${value}" oninput="updateBudgetCalculations()"></td>`;
             }
         
