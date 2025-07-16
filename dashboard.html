@@ -17287,7 +17287,6 @@
                     .select('account_code, account_name, category')
                     .eq('is_active', true)
                     .order('account_code');
-                
                 if (error) throw error;
                 glAccounts = data || [];
                 console.log(`✅ Loaded ${glAccounts.length} GL accounts.`);
@@ -30895,7 +30894,7 @@
         function addBudgetLine() {
             const modal = document.getElementById('addBudgetLineModal');
             const container = document.getElementById('glAccountListContainer');
-            container.innerHTML = ''; // Clear previous content
+            container.innerHTML = '';
 
             const categories = {
                 revenue: "Revenue",
@@ -30920,6 +30919,12 @@
                         button.style.textAlign = 'left';
                         button.textContent = `${account.account_code} - ${account.account_name}`;
                         button.onclick = () => {
+                            // **This is the new check for adding a line item manually**
+                            const existingRow = document.querySelector(`tr[data-account-code="${account.account_code}"]`);
+                            if (existingRow) {
+                                alert('This line item already exists in the budget.');
+                                return;
+                            }
                             const displayName = `${account.account_code} - ${account.account_name}`;
                             addBudgetLineToTable(key, displayName, {}, account.account_code);
                             closeAddBudgetLineModal();
@@ -30942,25 +30947,25 @@
             const tableBody = document.getElementById('budgetTableBody');
             const categoryRow = document.querySelector(`tr[data-category="${category}"]`);
             
-            const existingRow = document.querySelector(`tr[data-account-code="${accountCode}"]`);
-            if (existingRow) {
-                alert('This line item already exists in the budget.');
-                return;
+            let row = document.querySelector(`tr[data-account-code="${accountCode}"]`);
+            
+            // If the row doesn't exist, create it
+            if (!row) {
+                row = document.createElement('tr');
+                row.className = 'budget-line-row';
+                row.dataset.parentCategory = category;
+                row.dataset.lineName = displayName;
+                row.dataset.accountCode = accountCode;
+                categoryRow.parentNode.insertBefore(row, categoryRow.nextSibling);
             }
-            
-            const newRow = document.createElement('tr');
-            newRow.className = 'budget-line-row';
-            newRow.dataset.parentCategory = category;
-            newRow.dataset.lineName = displayName;
-            newRow.dataset.accountCode = accountCode;
-            
+        
             let inputsHTML = '';
             for(let i = 1; i <= 12; i++) {
                 const monthKey = getMonthKey(i);
                 inputsHTML += `<td class="budget-line-cell"><input type="number" class="budget-amount-input" data-month="${i}" value="${values[monthKey] || 0}" oninput="updateBudgetCalculations()"></td>`;
             }
         
-            newRow.innerHTML = `
+            row.innerHTML = `
                 <td class="budget-line-cell">
                     <div class="budget-line-name">${displayName}</div>
                 </td>
@@ -30972,18 +30977,14 @@
                     </div>
                 </td>
             `;
-            
-            categoryRow.parentNode.insertBefore(newRow, categoryRow.nextSibling);
             updateBudgetCalculations();
         }
         
         function clearBudgetTable() {
             const budgetLineRows = document.querySelectorAll('.budget-line-row');
             budgetLineRows.forEach(row => row.remove());
-            updateBudgetCalculations();
         }
-        
-        // Delete budget line
+
         function deleteBudgetLine(button) {
             if (confirm('Delete this budget line item?')) {
                 button.closest('tr').remove();
@@ -30994,41 +30995,46 @@
         // Update all budget calculations
         function updateBudgetCalculations() {
             const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-            
-            // Calculate totals for each category and month
-            const totals = {
-                revenue: Array(12).fill(0),
-                cogs: Array(12).fill(0),
-                opex: Array(12).fill(0)
-            };
-            
-            // Sum up all line items
+            const totals = { revenue: Array(12).fill(0), cogs: Array(12).fill(0), opex: Array(12).fill(0) };
+        
             document.querySelectorAll('.budget-line-row').forEach(row => {
-                const category = row.getAttribute('data-parent-category');
-                const inputs = row.querySelectorAll('.budget-amount-input');
+                const category = row.dataset.parentCategory;
                 let lineTotal = 0;
-                
-                inputs.forEach((input, index) => {
+                row.querySelectorAll('.budget-amount-input').forEach((input, index) => {
                     const value = parseFloat(input.value) || 0;
                     totals[category][index] += value;
                     lineTotal += value;
                 });
-                
-                // Update line total
                 const lineTotalCell = row.querySelector('.budget-line-total');
-                if (lineTotalCell) {
-                    lineTotalCell.textContent = formatCurrencyFull(lineTotal, 'IDR');
-                }
+                if (lineTotalCell) lineTotalCell.textContent = formatCurrencyFull(lineTotal, 'IDR');
             });
-            
-            // Update category totals
-            updateCategoryTotals(totals);
-            
-            // Update summary calculations
-            updateSummaryCalculations(totals, months);
-            
-            // Update dashboard cards
-            updateBudgetDashboardCards(totals);
+        
+            // Category totals
+            ['revenue', 'cogs', 'opex'].forEach(category => {
+                const total = totals[category].reduce((sum, val) => sum + val, 0);
+                document.getElementById(`${category}CategoryTotal`).textContent = formatCurrencyFull(total, 'IDR');
+            });
+        
+            // Summary rows
+            months.forEach((month, index) => {
+                const gp = totals.revenue[index] - totals.cogs[index];
+                const np = gp - totals.opex[index];
+                document.getElementById(`grossProfit${month}`).textContent = formatCurrencyFull(gp, 'IDR');
+                document.getElementById(`netProfit${month}`).textContent = formatCurrencyFull(np, 'IDR');
+            });
+        
+            const totalGrossProfit = totals.revenue.reduce((sum, val, i) => sum + (val - totals.cogs[i]), 0);
+            const totalNetProfit = totalGrossProfit - totals.opex.reduce((sum, val) => sum + val, 0);
+            document.getElementById('grossProfitTotal').textContent = formatCurrencyFull(totalGrossProfit, 'IDR');
+            document.getElementById('netProfitTotal').textContent = formatCurrencyFull(totalNetProfit, 'IDR');
+        
+            // Summary cards
+            document.getElementById('budgetTotalRevenue').textContent = formatCurrencyFull(totals.revenue.reduce((s, v) => s + v, 0), 'IDR');
+            document.getElementById('budgetTotalExpenses').textContent = formatCurrencyFull(
+                totals.cogs.reduce((s, v) => s + v, 0) + totals.opex.reduce((s, v) => s + v, 0), 
+                'IDR'
+            );
+            document.getElementById('budgetNetProfit').textContent = formatCurrencyFull(totalNetProfit, 'IDR');
         }
         
         function updateCategoryTotals(totals) {
@@ -31083,50 +31089,26 @@
         async function loadBudgetYear(overrideYear = null) {
             try {
                 const { data: { user } } = await supabase.auth.getUser();
-                if (!user) {
-                    throw new Error('User not authenticated');
-                }
-                
+                if (!user) { throw new Error('User not authenticated'); }
                 const selectedYear = overrideYear || parseInt(document.getElementById('budgetYearSelect').value);
-                
                 if (!selectedYear || isNaN(selectedYear)) {
-                    // No year selected, show empty state
                     updateBudgetStatus('draft');
                     document.getElementById('budgetSource').textContent = 'No budget selected';
-                    document.getElementById('budgetTotalRevenue').textContent = formatCurrencyFull(0, 'IDR');
-                    document.getElementById('budgetTotalExpenses').textContent = formatCurrencyFull(0, 'IDR');
-                    document.getElementById('budgetNetProfit').textContent = formatCurrencyFull(0, 'IDR');
-                    clearBudgetTable(); // Clear table for empty state
+                    clearBudgetTable();
                     return;
                 }
-        
                 console.log(`📊 Loading budget for year: ${selectedYear}`);
-                
                 clearBudgetTable();
-                
                 const { data: budgetMeta, error: metaError } = await supabase
-                    .from('budget_metadata')
-                    .select('*')
-                    .eq('user_id', user.id)
-                    .eq('budget_year', selectedYear)
-                    .single();
-                
+                    .from('budget_metadata').select('*').eq('user_id', user.id).eq('budget_year', selectedYear).single();
                 if (metaError && metaError.code !== 'PGRST116') throw metaError;
-                
                 if (budgetMeta) {
                     document.getElementById('budgetSource').textContent = `Source: ${budgetMeta.source_type || 'Manual'}`;
                     document.getElementById('budgetLastUpdated').textContent = `Last Updated: ${new Date(budgetMeta.updated_at).toLocaleDateString()}`;
                     updateBudgetStatus(budgetMeta.status);
-                    
                     const { data: budgetItems, error: itemsError } = await supabase
-                        .from('budgets')
-                        .select('*')
-                        .eq('user_id', user.id)
-                        .eq('budget_year', selectedYear)
-                        .order('category, account_code, budget_month');
-                    
+                        .from('budgets').select('*').eq('user_id', user.id).eq('budget_year', selectedYear).order('category, account_code, budget_month');
                     if (itemsError) throw itemsError;
-                    
                     if (budgetItems && budgetItems.length > 0) {
                         populateBudgetTable(budgetItems);
                     }
@@ -31135,14 +31117,12 @@
                     document.getElementById('budgetSource').textContent = 'No budget created yet';
                 }
                 updateBudgetCalculations();
-                
             } catch (error) {
                 console.error('Error loading budget year:', error);
             }
         }
         
         function populateBudgetTable(budgetItems) {
-            clearBudgetTable();
             const groupedItems = {};
             budgetItems.forEach(item => {
                 const key = `${item.category}_${item.account_code}`;
@@ -31165,14 +31145,13 @@
                 }
                 addBudgetLineToTable(itemGroup.category, itemGroup.line_item_name, monthlyValues, itemGroup.account_code);
             });
-            updateBudgetCalculations();
         }
 
         async function populateBudgetYearSelector() {
             try {
                 const { data: { user } } = await supabase.auth.getUser();
                 if (!user) return;
-        
+
                 const { data: budgets, error } = await supabase
                     .from('budget_metadata')
                     .select('budget_year')
@@ -31181,7 +31160,6 @@
                 if (error) throw error;
 
                 const selector = document.getElementById('budgetYearSelect');
-                
                 while (selector.children.length > 1) {
                     selector.removeChild(selector.lastChild);
                 }
@@ -31217,8 +31195,7 @@
         }
 
         function getMonthKey(monthNumber) {
-            const months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
-            return months[monthNumber - 1];
+            return ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'][monthNumber - 1];
         }
         
         function updateBudgetStatus(status) {
