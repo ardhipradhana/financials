@@ -8293,6 +8293,7 @@
         
         .aging-chart-canvas {
             position: relative;
+            width: 100%;
         }
 
         .aging-charts-container {
@@ -16202,24 +16203,33 @@
         
         function createAgingChart(canvasId, title, data, labels, color) {
             const canvas = document.getElementById(canvasId);
-            if (!canvas) return;
+            if (!canvas) {
+                console.error(`Canvas element with id "${canvasId}" not found.`);
+                return;
+            }
         
-            // --- THIS IS THE KEY FIX ---
-            // Force the canvas rendering area to be a perfect square.
-            // We get the available width from the container and apply it to both height and width.
-            const container = canvas.parentElement;
-            canvas.width = container.clientWidth;
-            canvas.height = container.clientWidth; // Setting height = width makes it a square
+            const container = canvas.parentElement; // Get the container <div>
+            if (!container) {
+                console.error(`Container for canvas "${canvasId}" not found.`);
+                return;
+            }
+            
+            // --- THIS IS THE BULLETPROOF FIX ---
+            // We set a fixed height on the canvas that is equal to its container's current width.
+            // This creates a perfect square rendering area *before* Chart.js initializes.
+            canvas.height = container.clientWidth;
             // --- END OF FIX ---
         
             const ctx = canvas.getContext('2d');
         
+            // Destroy any existing chart on this canvas to prevent conflicts
             if (window[canvasId + 'Instance']) {
                 window[canvasId + 'Instance'].destroy();
             }
         
             const totalAmount = data.reduce((sum, value) => sum + value, 0);
         
+            // Custom plugin to draw the total value in the middle
             const centerTextPlugin = {
                 id: 'centerText',
                 afterDraw: (chart) => {
@@ -16244,9 +16254,7 @@
                     labels: labels,
                     datasets: [{
                         data: data,
-                        backgroundColor: [
-                            '#10b981', '#f59e0b', '#ea580c', '#dc2626', '#991b1b'
-                        ],
+                        backgroundColor: ['#10b981', '#f59e0b', '#ea580c', '#dc2626', '#991b1b'],
                         borderColor: '#ffffff',
                         borderWidth: 4,
                         hoverOffset: 10,
@@ -16254,7 +16262,7 @@
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false, // This is still needed!
+                    maintainAspectRatio: false, // This is still required
                     cutout: '75%',
                     plugins: {
                         centerText: centerTextPlugin,
@@ -16269,10 +16277,9 @@
                                 font: { size: 12 },
                                 generateLabels: function(chart) {
                                     const data = chart.data;
-                                    const total = data.datasets[0].data.reduce((sum, val) => sum + val, 0);
                                     return data.labels.map((label, i) => {
                                         const value = data.datasets[0].data[i];
-                                        const percentage = total > 0 ? (value / total * 100).toFixed(1) : 0;
+                                        const percentage = totalAmount > 0 ? (value / totalAmount * 100).toFixed(1) : 0;
                                         return {
                                             text: `${label}: Rp ${(value / 1000000).toFixed(1)}M (${percentage}%)`,
                                             fillStyle: data.datasets[0].backgroundColor[i],
@@ -16284,7 +16291,18 @@
                             }
                         },
                         tooltip: {
-                            // ... (tooltip code is correct, no changes needed)
+                            backgroundColor: '#1e293b',
+                            titleColor: '#ffffff',
+                            bodyColor: '#cbd5e1',
+                            padding: 12,
+                            cornerRadius: 8,
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.parsed;
+                                    const percentage = totalAmount > 0 ? (value / totalAmount * 100).toFixed(1) : 0;
+                                    return ` ${context.label}: Rp ${(value / 1000000).toFixed(1)}M (${percentage}%)`;
+                                }
+                            }
                         }
                     }
                 },
