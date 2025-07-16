@@ -30175,7 +30175,7 @@
                 
                 document.getElementById('budgetYearSelect').value = 2026;
                 showSection('budgets');
-                await loadBudgetYear();
+                await loadBudgetYear(2026); // Pass 2026 explicitly
                 
                 const resultText = existingBudget ? 'replaced' : 'created';
                 showSuccessMessage(`2026 budget ${resultText} successfully from forecast!`);
@@ -30606,15 +30606,27 @@
         }
 
         // Load budget for selected year
-        async function loadBudgetYear() {
-            const selectedYear = document.getElementById('budgetYearSelect').value;
-            
+        async function loadBudgetYear(overrideYear = null) {
             try {
-                // Get current user
                 const { data: { user } } = await supabase.auth.getUser();
                 if (!user) {
                     throw new Error('User not authenticated');
                 }
+                
+                // Use override year if provided, otherwise get from selector
+                const selectedYear = overrideYear || parseInt(document.getElementById('budgetYearSelect').value);
+                
+                if (!selectedYear || selectedYear === 0) {
+                    // No year selected, show empty state
+                    updateBudgetStatus('draft');
+                    document.getElementById('budgetSource').textContent = 'No budget selected';
+                    document.getElementById('budgetTotalRevenue').textContent = formatCurrencyFull(0, 'IDR');
+                    document.getElementById('budgetTotalExpenses').textContent = formatCurrencyFull(0, 'IDR');
+                    document.getElementById('budgetNetProfit').textContent = formatCurrencyFull(0, 'IDR');
+                    return;
+                }
+                
+                console.log(`📊 Loading budget for year: ${selectedYear}`);
                 
                 // Clear existing line items
                 document.querySelectorAll('.budget-line-row').forEach(row => row.remove());
