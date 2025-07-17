@@ -12964,8 +12964,8 @@
                 </div>
             </div>
             
-            <!-- Industry Benchmarking Tab Content -->
-            <div id="industry-benchmarking-content" class="reports-tab-content" style="display: none;">
+            <!-- Industry Benchmarking Section (Main Navigation) -->
+            <div id="benchmarking-section" class="section-content" style="display: none;">
                 <!-- Header Section -->
                 <div class="modern-section-header">
                     <div class="header-content">
@@ -13022,7 +13022,7 @@
                             <div class="metric-header">
                                 <div class="metric-title">Benchmark Industries</div>
                                 <div class="metric-icon">
-                                    <i class="fas fa-industry"></i>
+                                    <i class="nav-icon fas fa-code-compare"></i>
                                 </div>
                             </div>
                             <div class="metric-content">
@@ -14390,6 +14390,13 @@
 
                 if (this.dataset.section === 'scenarios') {
                     initializeScenarios();
+                }
+
+                if (this.dataset.section === 'benchmarking') {
+                    // Initialize Industry Benchmarking
+                    setTimeout(() => {
+                        initializeIndustryBenchmarking();
+                    }, 100);
                 }
             });
         });
