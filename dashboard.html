@@ -22354,34 +22354,53 @@
                 const cellClass = item.type === 'prominent' ? 'prominent' : 
                                  item.type === 'margin' ? 'margin' : 'regular';
                 
+                // Format values using existing functions
+                const formatValueForType = (val) => {
+                    if (val === null || val === undefined) return 'N/A';
+                    if (item.type === 'margin') {
+                        return `${val.toFixed(1)}%`;
+                    } else {
+                        return formatCurrency(val);
+                    }
+                };
+                
+                const formatChangeForType = (change, isPercent = false) => {
+                    if (change === null || change === undefined) return 'N/A';
+                    if (item.type === 'margin') {
+                        return isPercent ? `${change >= 0 ? '+' : ''}${change.toFixed(1)}%` : `${change >= 0 ? '+' : ''}${change.toFixed(1)}pp`;
+                    } else {
+                        return isPercent ? `${change >= 0 ? '+' : ''}${change.toFixed(1)}%` : formatCurrency(change, true);
+                    }
+                };
+                
                 // Build row HTML
                 let rowHTML = `
                     <tr class="comparison-row">
                         <td class="line-item-cell ${cellClass}">${item.label}</td>
-                        <td class="value-cell ${cellClass}">${formatValue(currentValue, item.type === 'margin')}</td>
+                        <td class="value-cell ${cellClass}">${formatValueForType(currentValue)}</td>
                 `;
                 
                 if (includeBudget) {
                     rowHTML += `
-                        <td class="value-cell ${cellClass}">${budgetValue !== null ? formatValue(budgetValue, item.type === 'margin') : 'N/A'}</td>
-                        <td class="change-cell change-cell-${cellClass} ${budgetChange !== null ? getChangeClass(budgetChange) : ''}">${budgetChange !== null ? formatChange(budgetChange, item.type === 'margin') : 'N/A'}</td>
-                        <td class="change-cell change-cell-${cellClass} ${budgetPercent !== null ? getChangeClass(budgetPercent) : ''}">${budgetPercent !== null ? formatChange(budgetPercent, true) : 'N/A'}</td>
+                        <td class="value-cell ${cellClass}">${formatValueForType(budgetValue)}</td>
+                        <td class="change-cell change-cell-${cellClass} ${budgetChange !== null ? getChangeClass(budgetChange) : ''}">${formatChangeForType(budgetChange)}</td>
+                        <td class="change-cell change-cell-${cellClass} ${budgetPercent !== null ? getChangeClass(budgetPercent) : ''}">${formatChangeForType(budgetPercent, true)}</td>
                     `;
                 }
                 
                 if (includePreviousMonth) {
                     rowHTML += `
-                        <td class="value-cell ${cellClass}">${formatValue(previousValue, item.type === 'margin')}</td>
-                        <td class="change-cell change-cell-${cellClass} ${getChangeClass(momChange)}">${formatChange(momChange, item.type === 'margin')}</td>
-                        <td class="change-cell change-cell-${cellClass} ${getChangeClass(momPercent)}">${formatChange(momPercent, true)}</td>
+                        <td class="value-cell ${cellClass}">${formatValueForType(previousValue)}</td>
+                        <td class="change-cell change-cell-${cellClass} ${getChangeClass(momChange)}">${formatChangeForType(momChange)}</td>
+                        <td class="change-cell change-cell-${cellClass} ${getChangeClass(momPercent)}">${formatChangeForType(momPercent, true)}</td>
                     `;
                 }
                 
                 if (includeLastYear && lastYear) {
                     rowHTML += `
-                        <td class="value-cell ${cellClass}">${lastYearValue !== null ? formatValue(lastYearValue, item.type === 'margin') : 'N/A'}</td>
-                        <td class="change-cell change-cell-${cellClass} ${yoyChange !== null ? getChangeClass(yoyChange) : ''}">${yoyChange !== null ? formatChange(yoyChange, item.type === 'margin') : 'N/A'}</td>
-                        <td class="change-cell change-cell-${cellClass} ${yoyPercent !== null ? getChangeClass(yoyPercent) : ''}">${yoyPercent !== null ? formatChange(yoyPercent, true) : 'N/A'}</td>
+                        <td class="value-cell ${cellClass}">${formatValueForType(lastYearValue)}</td>
+                        <td class="change-cell change-cell-${cellClass} ${yoyChange !== null ? getChangeClass(yoyChange) : ''}">${formatChangeForType(yoyChange)}</td>
+                        <td class="change-cell change-cell-${cellClass} ${yoyPercent !== null ? getChangeClass(yoyPercent) : ''}">${formatChangeForType(yoyPercent, true)}</td>
                     `;
                 }
                 
