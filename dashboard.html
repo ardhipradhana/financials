@@ -8963,6 +8963,8 @@
             font-weight: 600;
             color: #1e293b;
             border: 1px solid #e2e8f0;
+            position: relative; 
+            overflow: visible;
         }
         
         .budget-category-toggle {
@@ -9396,6 +9398,8 @@
             align-items: center;
             gap: 0.5rem;
             flex-wrap: nowrap;
+            position: relative; /* Add this */
+            z-index: 5; /* Add this */
         }
 
         .category-target-input label {
@@ -9405,7 +9409,7 @@
         }
         
         .target-input {
-            width: 120px;
+            width: 130px;
             padding: 0.25rem;
             border: 1px solid #d1d5db;
             border-radius: 4px;
