@@ -31887,17 +31887,27 @@
             showAIAllocationProgress(category);
             
             try {
-                // Simplified API call - let backend handle GL account selection
+                // Get current user and budget context
+                const { data: { user } } = await supabase.auth.getUser();
+                const selectedYear = parseInt(document.getElementById('budgetYearSelect').value);
+                
+                // Simple API call with minimal but essential context
                 const response = await fetch('https://n8n.srv909550.hstgr.cloud/webhook/budget-reallocation', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
+                        // Essential budget context
+                        user_id: user?.id,
+                        budget_year: selectedYear,
                         category: category,
                         target_amount: targetAmount,
-                        business_context: await getCurrentBusinessContext(),
-                        user_id: (await supabase.auth.getUser()).data.user?.id
+                        
+                        // Simple business context (no complex calculations)
+                        industry: userIndustry || 'general', // if you have this variable
+                        business_stage: 'growth', // or get from user profile
+                        current_date: new Date().toISOString()
                     })
                 });
                 
@@ -31926,7 +31936,6 @@
                 hideAIAllocationProgress(category);
             }
         }
-
         function showAIRationale(category, aiResult) {
             const rationalePanel = document.getElementById('aiRationalePanel') || createRationalePanel();
             
