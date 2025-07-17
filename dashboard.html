@@ -9652,11 +9652,13 @@
             accent-color: #fbbf24;
         }
 
+        /* Update this CSS section */
         .suggestions-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 0.75rem;
+            padding: 0.5rem 0;
         }
         
         .suggestions-toggle {
@@ -9683,6 +9685,7 @@
             transition: transform 0.2s ease;
         }
         
+        /* When collapsed, rotate arrow 180 degrees (down arrow becomes up arrow) */
         .suggestions-container.collapsed .suggestions-toggle i {
             transform: rotate(180deg);
         }
@@ -9691,8 +9694,14 @@
             display: none;
         }
         
+        /* Minimize space when collapsed */
         .suggestions-container.collapsed {
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .suggestions-container.collapsed .suggestions-header {
+            margin-bottom: 0;
+            padding: 0.25rem 0;
         }
         
         /* Update existing suggestions-container to have transition */
@@ -12855,7 +12864,7 @@
                 <div class="suggestions-header">
                     <div class="suggestions-title">Quick Questions</div>
                     <button class="suggestions-toggle" id="suggestionsToggle" onclick="toggleSuggestions()">
-                        <i class="fas fa-chevron-up"></i>
+                        <i class="fas fa-chevron-down"></i>
                     </button>
                 </div>
                 <div class="suggestions-grid" id="suggestionsGrid">
