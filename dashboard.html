@@ -9417,7 +9417,7 @@
         }
         
         .btn-ai-allocate {
-            padding: 0.25rem 0.5rem;
+            padding: 0.4rem 0.8rem;
             background: #fbbf24;
             color: #1e293b;
             border: none;
@@ -9427,7 +9427,7 @@
             cursor: pointer;
             transition: all 0.2s ease;
             white-space: nowrap;
-            min-width: 80px;
+            min-width: 100px;
             position: relative; /* Add this */
             z-index: 10; /* Add this to bring it to front */
         }
@@ -9466,6 +9466,129 @@
             font-weight: 600;
             color: #059669;
             text-align: right;
+        }
+
+        .ai-rationale-explanation {
+            margin-top: 2rem;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+        
+        .rationale-container {
+            max-width: 100%;
+        }
+        
+        .rationale-header {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #fbbf24;
+        }
+        
+        .rationale-header h4 {
+            margin: 0 0 0.5rem 0;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .allocation-summary-info {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            font-size: 0.875rem;
+        }
+        
+        .summary-item {
+            color: #64748b;
+        }
+        
+        .rationale-content {
+            display: grid;
+            gap: 1.5rem;
+        }
+        
+        .rationale-section {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .rationale-section h5 {
+            margin: 0 0 0.75rem 0;
+            color: #374151;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .rationale-section p {
+            margin: 0;
+            line-height: 1.6;
+            color: #4b5563;
+        }
+        
+        .assumptions-list {
+            margin: 0;
+            padding-left: 1.5rem;
+            color: #4b5563;
+        }
+        
+        .assumptions-list li {
+            margin-bottom: 0.5rem;
+            line-height: 1.5;
+        }
+        
+        .allocation-breakdown-grid {
+            display: grid;
+            grid-template-columns: 2fr 80px 120px;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        
+        .breakdown-item {
+            display: contents;
+        }
+        
+        .account-info {
+            color: #374151;
+            font-weight: 500;
+        }
+        
+        .percentage {
+            color: #059669;
+            font-weight: 600;
+            text-align: center;
+        }
+        
+        .amount {
+            color: #059669;
+            font-weight: 600;
+            text-align: right;
+        }
+        
+        @media (max-width: 768px) {
+            .allocation-summary-info {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .allocation-breakdown-grid {
+                grid-template-columns: 1fr;
+                gap: 0.25rem;
+            }
+            
+            .breakdown-item {
+                display: block;
+                padding: 0.5rem;
+                background: #f9fafb;
+                border-radius: 4px;
+                margin-bottom: 0.5rem;
+            }
         }
         
     </style>
@@ -31934,9 +32057,7 @@
                 await createAIBudgetLines(category, aiResult);
                 
                 // Show AI rationale (only if we have the data)
-                if (aiResult.rationale || aiResult.selection_reasoning) {
-                    showAIRationale(category, aiResult);
-                }
+                showAIRationaleBelow(category, aiResult);
                 
                 // Update calculations
                 updateBudgetCalculations();
@@ -31948,6 +32069,88 @@
                 showAIError(category, error.message);
             } finally {
                 hideAIAllocationProgress(category);
+            }
+        }
+
+        function showAIRationaleBelow(category, aiResult) {
+            // Remove any existing rationale section
+            const existingRationale = document.getElementById('ai-rationale-explanation');
+            if (existingRationale) {
+                existingRationale.remove();
+            }
+            
+            // Create the rationale section
+            const rationaleSection = document.createElement('div');
+            rationaleSection.id = 'ai-rationale-explanation';
+            rationaleSection.className = 'ai-rationale-explanation';
+            
+            const targetAmount = parseFloat(document.getElementById(`${category}Target`).value);
+            const accountCount = aiResult.allocations ? Object.keys(aiResult.allocations).length : 0;
+            
+            rationaleSection.innerHTML = `
+                <div class="rationale-container">
+                    <div class="rationale-header">
+                        <h4><i class="fas fa-brain"></i> AI Allocation Explanation - ${category.toUpperCase()}</h4>
+                        <div class="allocation-summary-info">
+                            <span class="summary-item"><strong>Target:</strong> ${formatCurrency(targetAmount)}</span>
+                            <span class="summary-item"><strong>Accounts:</strong> ${accountCount}</span>
+                            <span class="summary-item"><strong>Strategy:</strong> AI Optimized</span>
+                        </div>
+                    </div>
+                    
+                    <div class="rationale-content">
+                        ${aiResult.rationale ? `
+                            <div class="rationale-section">
+                                <h5><i class="fas fa-lightbulb"></i> Strategic Rationale</h5>
+                                <p>${aiResult.rationale}</p>
+                            </div>
+                        ` : ''}
+                        
+                        ${aiResult.selection_reasoning ? `
+                            <div class="rationale-section">
+                                <h5><i class="fas fa-list"></i> Account Selection</h5>
+                                <p>${aiResult.selection_reasoning}</p>
+                            </div>
+                        ` : ''}
+                        
+                        ${aiResult.key_assumptions && aiResult.key_assumptions.length ? `
+                            <div class="rationale-section">
+                                <h5><i class="fas fa-info-circle"></i> Key Assumptions</h5>
+                                <ul class="assumptions-list">
+                                    ${aiResult.key_assumptions.map(assumption => `<li>${assumption}</li>`).join('')}
+                                </ul>
+                            </div>
+                        ` : ''}
+                        
+                        ${aiResult.allocation_percentages ? `
+                            <div class="rationale-section">
+                                <h5><i class="fas fa-chart-pie"></i> Allocation Breakdown</h5>
+                                <div class="allocation-breakdown-grid">
+                                    ${Object.entries(aiResult.allocation_percentages).map(([accountCode, percentage]) => {
+                                        const account = window.glAccounts.find(acc => acc.account_code === accountCode);
+                                        const accountName = account ? account.account_name : accountCode;
+                                        const annualTotal = aiResult.allocations[accountCode] ? 
+                                            aiResult.allocations[accountCode].reduce((sum, amount) => sum + amount, 0) : 0;
+                                        
+                                        return `
+                                            <div class="breakdown-item">
+                                                <span class="account-info">${accountCode} - ${accountName}</span>
+                                                <span class="percentage">${percentage}%</span>
+                                                <span class="amount">${formatCurrency(annualTotal)}</span>
+                                            </div>
+                                        `;
+                                    }).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+            
+            // Insert the rationale section after the budget table
+            const budgetTableWrapper = document.querySelector('.budget-table-wrapper');
+            if (budgetTableWrapper) {
+                budgetTableWrapper.parentNode.insertBefore(rationaleSection, budgetTableWrapper.nextSibling);
             }
         }
         
