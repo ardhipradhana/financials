@@ -32073,15 +32073,15 @@
         }
 
         function showAIRationaleBelow(category, aiResult) {
-            // Remove any existing rationale section
-            const existingRationale = document.getElementById('ai-rationale-explanation');
+            // Remove only the existing rationale for THIS category (if it exists)
+            const existingRationale = document.getElementById(`ai-rationale-${category}`);
             if (existingRationale) {
                 existingRationale.remove();
             }
             
-            // Create the rationale section
+            // Create the rationale section with unique ID per category
             const rationaleSection = document.createElement('div');
-            rationaleSection.id = 'ai-rationale-explanation';
+            rationaleSection.id = `ai-rationale-${category}`; // Unique ID per category
             rationaleSection.className = 'ai-rationale-explanation';
             
             const targetAmount = parseFloat(document.getElementById(`${category}Target`).value);
@@ -32150,7 +32150,17 @@
             // Insert the rationale section after the budget table
             const budgetTableWrapper = document.querySelector('.budget-table-wrapper');
             if (budgetTableWrapper) {
-                budgetTableWrapper.parentNode.insertBefore(rationaleSection, budgetTableWrapper.nextSibling);
+                // Find the best insertion point - after any existing rationale sections
+                const existingRationales = document.querySelectorAll('.ai-rationale-explanation');
+                const lastRationale = existingRationales[existingRationales.length - 1];
+                
+                if (lastRationale) {
+                    // Insert after the last existing rationale
+                    lastRationale.parentNode.insertBefore(rationaleSection, lastRationale.nextSibling);
+                } else {
+                    // Insert after the budget table (first rationale)
+                    budgetTableWrapper.parentNode.insertBefore(rationaleSection, budgetTableWrapper.nextSibling);
+                }
             }
         }
         
