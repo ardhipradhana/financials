@@ -4333,6 +4333,14 @@
         .value-cell.margin {
             font-style: italic;
             color: #6b7280;
+            font-size: 0.85rem;
+        }
+
+        .line-item-cell.margin {
+            font-style: italic;
+            color: #6b7280;
+            font-size: 0.85rem;
+            padding-left: 2rem !important;
         }
         
         .change-cell.change-cell-prominent {
@@ -4342,6 +4350,7 @@
         .change-cell.change-cell-margin {
             font-style: italic;
             font-size: 0.8rem;
+            color: #6b7280;
         }
         
         /* Value formatting - using your existing color scheme */
@@ -21543,7 +21552,6 @@
         // Generate P&L comparison report
         async function generateComparisonReport() {
             const periodType = document.querySelector('input[name="periodType"]:checked')?.value || 'custom';
-            const includeYoY = document.getElementById('includeYoY').checked;
             
             let currentPeriod, previousPeriod;
             
@@ -21592,7 +21600,7 @@
                 
                 // Get last year data if needed
                 let lastYearData = null;
-                if (includeYoY) {
+                if (includeLastYear && document.getElementById('includeLastYear')?.checked) {
                     const [year, month] = currentPeriod.split('-').map(Number);
                     const lastYear = year - 1;
                     const lastYearPeriod = `${lastYear}-${String(month).padStart(2, '0')}`;
@@ -21690,6 +21698,12 @@
         }
 
         function updateComparisonOptions() {
+            // Hide the auto YoY option since we have manual control now
+            const autoYoYOption = document.querySelector('.yoy-option');
+            if (autoYoYOption) {
+                autoYoYOption.style.display = 'none';
+            }
+            
             // Regenerate the table when options change
             if (comparisonData && comparisonData.current && comparisonData.previous) {
                 renderComparisonTable();
