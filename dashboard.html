@@ -33460,7 +33460,7 @@
             
             try {
                 const { data, error } = await supabase
-                    .from('latest_industry_benchmarks')
+                    .from('industry_benchmarks')
                     .select('*')
                     .in('industry', selectedIndustries)
                     .eq('is_active', true);
