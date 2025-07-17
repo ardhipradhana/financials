@@ -33646,6 +33646,18 @@
         
         // Generate detailed comparison table
         function generateBenchmarkTable() {
+            const metricNameMapping = {
+                'roe': 'return_on_equity',
+                'roa': 'return_on_assets',
+                'ebitda_margin': 'ebitda_margin',
+                'net_margin': 'net_margin',
+                'gross_margin': 'gross_margin',
+                'asset_turnover': 'asset_turnover',
+                'current_ratio': 'current_ratio',
+                'quick_ratio': 'quick_ratio',
+                'debt_to_equity': 'debt_to_equity'
+            };
+            
             const tableBody = document.getElementById('benchmarkTableBody');
             const tableHeader = document.querySelector('#benchmarkComparisonTable thead tr');
             
