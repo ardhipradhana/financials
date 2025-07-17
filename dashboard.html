@@ -9651,6 +9651,54 @@
             margin-right: 0.5rem;
             accent-color: #fbbf24;
         }
+
+        .suggestions-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+        
+        .suggestions-toggle {
+            background: none;
+            border: none;
+            color: #64748b;
+            font-size: 14px;
+            cursor: pointer;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        
+        .suggestions-toggle:hover {
+            background: #f1f5f9;
+            color: #334155;
+        }
+        
+        .suggestions-toggle i {
+            transition: transform 0.2s ease;
+        }
+        
+        .suggestions-container.collapsed .suggestions-toggle i {
+            transform: rotate(180deg);
+        }
+        
+        .suggestions-container.collapsed .suggestions-grid {
+            display: none;
+        }
+        
+        .suggestions-container.collapsed {
+            margin-bottom: 1rem;
+        }
+        
+        /* Update existing suggestions-container to have transition */
+        .suggestions-container {
+            transition: margin-bottom 0.3s ease;
+        }
         
     </style>
 </head>
@@ -12803,8 +12851,13 @@
             </div>
     
             <!-- Dynamic Suggestions -->
-            <div class="suggestions-container">
-                <div class="suggestions-title">Quick Questions</div>
+            <div class="suggestions-container" id="suggestionsContainer">
+                <div class="suggestions-header">
+                    <div class="suggestions-title">Quick Questions</div>
+                    <button class="suggestions-toggle" id="suggestionsToggle" onclick="toggleSuggestions()">
+                        <i class="fas fa-chevron-up"></i>
+                    </button>
+                </div>
                 <div class="suggestions-grid" id="suggestionsGrid">
                     <!-- Dynamic suggestions based on current tab -->
                 </div>
@@ -23987,24 +24040,31 @@
         // Call this function when the page loads
         document.addEventListener('DOMContentLoaded', ensureFreshReports);
 
+        // Update your existing toggleChatPanel function
         function toggleChatPanel() {
             const chatContainer = document.getElementById('chatContainerRight');
             
             if (chatContainer.classList.contains('active')) {
-                // Closing animation
                 chatContainer.classList.add('closing');
                 setTimeout(() => {
                     chatContainer.classList.remove('active', 'closing');
-                }, 400); // Match CSS transition duration
+                }, 400);
             } else {
-                // Opening
                 chatContainer.classList.add('active');
                 
-                // Initialize chat if first time opening
-                if (!window.aiChatInitialized) {
-                    aiChat = new AIFinancialChat();
-                    window.aiChatInitialized = true;
+                // Restore suggestions state when opening chat
+                restoreSuggestionsState();
+                
+                // Initialize AI chat if not already done
+                if (!window.aiChat) {
+                    window.aiChat = new AIFinancialChat();
                 }
+                
+                // Focus on chat input
+                setTimeout(() => {
+                    const chatInput = document.getElementById('chatInput');
+                    if (chatInput) chatInput.focus();
+                }, 100);
             }
         }
 
@@ -32735,6 +32795,33 @@
         function clearCategoryLines(category) {
             const existingLines = document.querySelectorAll(`tr[data-parent-category="${category}"]`);
             existingLines.forEach(line => line.remove());
+        }
+
+        function toggleSuggestions() {
+            const container = document.getElementById('suggestionsContainer');
+            const toggle = document.getElementById('suggestionsToggle');
+            
+            container.classList.toggle('collapsed');
+            
+            // Store the collapsed state in localStorage
+            const isCollapsed = container.classList.contains('collapsed');
+            localStorage.setItem('suggestions_collapsed', isCollapsed);
+            
+            // Optional: Add a subtle animation to the chat messages area
+            const chatMessages = document.getElementById('chatMessages');
+            if (chatMessages) {
+                chatMessages.style.transition = 'height 0.3s ease';
+            }
+        }
+        
+        // Add this to restore the collapsed state when chat is opened
+        function restoreSuggestionsState() {
+            const container = document.getElementById('suggestionsContainer');
+            const isCollapsed = localStorage.getItem('suggestions_collapsed') === 'true';
+            
+            if (isCollapsed) {
+                container.classList.add('collapsed');
+            }
         }
         
     </script>
