@@ -31887,28 +31887,43 @@
             showAIAllocationProgress(category);
             
             try {
-                // Step 1: AI dynamically selects appropriate GL accounts
-                const accountSelection = await aiSelectGLAccounts(category, targetAmount);
+                // Simplified API call - let backend handle GL account selection
+                const response = await fetch('https://n8n.srv909550.hstgr.cloud/webhook/budget-reallocation', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        category: category,
+                        target_amount: targetAmount,
+                        business_context: await getCurrentBusinessContext(),
+                        user_id: (await supabase.auth.getUser()).data.user?.id
+                    })
+                });
                 
-                // Step 2: AI dynamically allocates amounts
-                const allocationData = await aiAllocateAmounts(category, targetAmount, accountSelection);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
                 
-                // Step 3: Clear and rebuild
+                const aiResult = await response.json();
+                
+                // Clear existing lines and create new ones
                 clearCategoryLines(category);
-                await createAIBudgetLines(category, allocationData);
+                await createAIBudgetLines(category, aiResult);
                 
-                // Step 4: Generate dynamic rationale
-                const rationale = await generateAllocationRationale(category, allocationData, targetAmount);
+                // Show AI rationale
+                showAIRationale(category, aiResult);
                 
-                // Step 5: Show results
-                showAIRationale(category, rationale, allocationData);
+                // Update calculations
                 updateBudgetCalculations();
                 
-                console.log(`✅ AI dynamically allocated ${formatCurrency(targetAmount)} for ${category}`);
+                console.log(`✅ AI allocated ${formatCurrency(targetAmount)} for ${category}`);
                 
             } catch (error) {
                 console.error('AI allocation failed:', error);
                 showAIError(category, error.message);
+            } finally {
+                hideAIAllocationProgress(category);
             }
         }
 
