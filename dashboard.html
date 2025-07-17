@@ -31891,18 +31891,18 @@
                 const { data: { user } } = await supabase.auth.getUser();
                 const selectedYear = parseInt(document.getElementById('budgetYearSelect').value);
                 
-                // Simple API call with minimal but essential context
                 const response = await fetch('https://n8n.srv909550.hstgr.cloud/webhook/budget-reallocation', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        // Essential budget context
                         user_id: user?.id,
                         budget_year: selectedYear,
                         category: category,
                         target_amount: targetAmount,
+                        industry: 'general',
+                        business_stage: 'growth',
                         current_date: new Date().toISOString()
                     })
                 });
@@ -31911,14 +31911,28 @@
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 
-                const aiResult = await response.json();
+                const responseData = await response.json();
+                console.log('Backend response:', responseData);
+                
+                // Handle the response safely
+                let aiResult = responseData;
+                if (Array.isArray(responseData)) {
+                    aiResult = responseData[0];
+                }
+                
+                // Validate the response structure
+                if (!aiResult || !aiResult.allocations) {
+                    throw new Error('Invalid response from backend - missing allocations');
+                }
                 
                 // Clear existing lines and create new ones
                 clearCategoryLines(category);
                 await createAIBudgetLines(category, aiResult);
                 
-                // Show AI rationale
-                showAIRationale(category, aiResult);
+                // Show AI rationale (only if we have the data)
+                if (aiResult.rationale || aiResult.selection_reasoning) {
+                    showAIRationale(category, aiResult);
+                }
                 
                 // Update calculations
                 updateBudgetCalculations();
@@ -31932,77 +31946,112 @@
                 hideAIAllocationProgress(category);
             }
         }
+        
         function showAIRationale(category, aiResult) {
-            const rationalePanel = document.getElementById('aiRationalePanel') || createRationalePanel();
+            // Create or get rationale panel
+            let rationalePanel = document.getElementById('aiRationalePanel');
+            if (!rationalePanel) {
+                rationalePanel = document.createElement('div');
+                rationalePanel.id = 'aiRationalePanel';
+                rationalePanel.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0,0,0,0.5);
+                    z-index: 1000;
+                    display: none;
+                    align-items: center;
+                    justify-content: center;
+                `;
+                document.body.appendChild(rationalePanel);
+            }
+            
+            const targetAmount = parseFloat(document.getElementById(`${category}Target`).value);
+            const accountCount = aiResult.allocations ? Object.keys(aiResult.allocations).length : 0;
             
             rationalePanel.innerHTML = `
-                <div class="ai-rationale-container">
+                <div class="ai-rationale-container" style="background: white; border-radius: 12px; padding: 2rem; max-width: 800px; max-height: 80vh; overflow-y: auto;">
                     <div class="rationale-header">
                         <h4><i class="fas fa-brain"></i> AI Allocation Analysis - ${category.toUpperCase()}</h4>
                         <div class="allocation-summary">
-                            Target: ${formatCurrency(parseFloat(document.getElementById(`${category}Target`).value))} | 
-                            Accounts: ${aiResult.selected_accounts.length} | 
+                            Target: ${formatCurrency(targetAmount)} | 
+                            Accounts: ${accountCount} | 
                             Strategy: AI Optimized
                         </div>
-                        <button class="btn-close" onclick="closeRationale()">&times;</button>
+                        <button class="btn-close" onclick="closeRationale()" style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
                     </div>
                     
                     <div class="rationale-content">
-                        <div class="ai-analysis">
-                            <h5><i class="fas fa-lightbulb"></i> Strategic Rationale</h5>
-                            <p>${formatAIRationale(aiResult.rationale)}</p>
-                        </div>
+                        ${aiResult.rationale ? `
+                            <div class="ai-analysis">
+                                <h5><i class="fas fa-lightbulb"></i> Strategic Rationale</h5>
+                                <p>${aiResult.rationale}</p>
+                            </div>
+                        ` : ''}
                         
-                        <div class="account-selection">
-                            <h5><i class="fas fa-list"></i> Account Selection</h5>
-                            <p>${aiResult.selection_reasoning}</p>
-                        </div>
+                        ${aiResult.selection_reasoning ? `
+                            <div class="account-selection">
+                                <h5><i class="fas fa-list"></i> Account Selection</h5>
+                                <p>${aiResult.selection_reasoning}</p>
+                            </div>
+                        ` : ''}
                         
-                        <div class="key-assumptions">
-                            <h5><i class="fas fa-info-circle"></i> Key Assumptions</h5>
-                            <ul>
-                                ${aiResult.key_assumptions.map(assumption => `<li>${assumption}</li>`).join('')}
-                            </ul>
-                        </div>
+                        ${aiResult.key_assumptions ? `
+                            <div class="key-assumptions">
+                                <h5><i class="fas fa-info-circle"></i> Key Assumptions</h5>
+                                <ul>
+                                    ${aiResult.key_assumptions.map(assumption => `<li>${assumption}</li>`).join('')}
+                                </ul>
+                            </div>
+                        ` : ''}
                         
-                        <div class="allocation-breakdown">
-                            <h5><i class="fas fa-chart-pie"></i> Allocation Breakdown</h5>
-                            ${generateAllocationTable(aiResult)}
-                        </div>
+                        ${aiResult.allocation_percentages ? `
+                            <div class="allocation-breakdown">
+                                <h5><i class="fas fa-chart-pie"></i> Allocation Breakdown</h5>
+                                ${generateAllocationTable(aiResult)}
+                            </div>
+                        ` : ''}
                     </div>
                     
-                    <div class="rationale-actions">
-                        <button class="btn btn-secondary" onclick="regenerateAllocation('${category}')">
-                            <i class="fas fa-refresh"></i> Regenerate
-                        </button>
-                        <button class="btn btn-secondary" onclick="exportRationale('${category}')">
-                            <i class="fas fa-download"></i> Export Analysis
-                        </button>
-                        <button class="btn btn-primary" onclick="approveAllocation('${category}')">
-                            <i class="fas fa-check"></i> Approve & Apply
+                    <div class="rationale-actions" style="margin-top: 2rem; text-align: center;">
+                        <button class="btn btn-primary" onclick="closeRationale()" style="padding: 0.5rem 1rem; background: #fbbf24; color: #1e293b; border: none; border-radius: 4px; cursor: pointer;">
+                            <i class="fas fa-check"></i> Close
                         </button>
                     </div>
                 </div>
             `;
             
-            rationalePanel.style.display = 'block';
+            rationalePanel.style.display = 'flex';
+        }
+
+        function closeRationale() {
+            const panel = document.getElementById('aiRationalePanel');
+            if (panel) {
+                panel.style.display = 'none';
+            }
         }
 
         function generateAllocationTable(aiResult) {
+            if (!aiResult.allocations || !aiResult.allocation_percentages) {
+                return '<p>No allocation details available</p>';
+            }
+            
             const { allocations, allocation_percentages } = aiResult;
             
-            let tableHTML = '<table class="allocation-table"><thead><tr><th>Account</th><th>Percentage</th><th>Annual Total</th></tr></thead><tbody>';
+            let tableHTML = '<table style="width: 100%; border-collapse: collapse; margin-top: 1rem;"><thead><tr><th style="border: 1px solid #ddd; padding: 0.5rem;">Account</th><th style="border: 1px solid #ddd; padding: 0.5rem;">Percentage</th><th style="border: 1px solid #ddd; padding: 0.5rem;">Annual Total</th></tr></thead><tbody>';
             
             for (const [accountCode, monthlyAmounts] of Object.entries(allocations)) {
                 const account = window.glAccounts.find(acc => acc.account_code === accountCode);
-                const annualTotal = monthlyAmounts.reduce((sum, amount) => sum + amount, 0);
-                const percentage = allocation_percentages[accountCode];
+                const annualTotal = Array.isArray(monthlyAmounts) ? monthlyAmounts.reduce((sum, amount) => sum + (amount || 0), 0) : 0;
+                const percentage = allocation_percentages[accountCode] || 0;
                 
                 tableHTML += `
                     <tr>
-                        <td>${account?.account_name || accountCode}</td>
-                        <td>${percentage}%</td>
-                        <td>${formatCurrency(annualTotal)}</td>
+                        <td style="border: 1px solid #ddd; padding: 0.5rem;">${account?.account_name || accountCode}</td>
+                        <td style="border: 1px solid #ddd; padding: 0.5rem;">${percentage}%</td>
+                        <td style="border: 1px solid #ddd; padding: 0.5rem;">${formatCurrency(annualTotal)}</td>
                     </tr>
                 `;
             }
@@ -32021,18 +32070,39 @@
         }
 
         async function createAIBudgetLines(category, aiResult) {
+            // Safety check
+            if (!aiResult || !aiResult.allocations) {
+                console.error('No allocations in AI result');
+                return;
+            }
+            
             const { allocations } = aiResult;
             
+            // Safety check for allocations
+            if (!allocations || typeof allocations !== 'object') {
+                console.error('Invalid allocations structure');
+                return;
+            }
+            
             for (const [accountCode, monthlyAmounts] of Object.entries(allocations)) {
+                // Safety check for monthly amounts
+                if (!Array.isArray(monthlyAmounts) || monthlyAmounts.length !== 12) {
+                    console.warn(`Invalid monthly amounts for account ${accountCode}`);
+                    continue;
+                }
+                
                 const account = window.glAccounts.find(acc => acc.account_code === accountCode);
-                if (!account) continue;
+                if (!account) {
+                    console.warn(`Account ${accountCode} not found in GL accounts`);
+                    continue;
+                }
                 
                 const displayName = `${account.account_code} - ${account.account_name}`;
                 const monthlyValues = {};
                 
                 // Convert monthly amounts to the expected format
                 monthlyAmounts.forEach((amount, index) => {
-                    monthlyValues[getMonthKey(index + 1)] = amount;
+                    monthlyValues[getMonthKey(index + 1)] = amount || 0;
                 });
                 
                 // Create the budget line
