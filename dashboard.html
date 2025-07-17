@@ -31915,10 +31915,17 @@
                 console.log('Backend response:', responseData);
                 
                 // Handle the response safely
-                let aiResult = responseData;
-                if (Array.isArray(responseData)) {
+                let aiResult;
+                if (Array.isArray(responseData) && responseData[0]?.output) {
+                    // Parse the stringified JSON in the output field
+                    aiResult = JSON.parse(responseData[0].output);
+                } else if (Array.isArray(responseData)) {
                     aiResult = responseData[0];
+                } else {
+                    aiResult = responseData;
                 }
+                
+                console.log('Parsed AI result:', aiResult);
                 
                 // Validate the response structure
                 if (!aiResult || !aiResult.allocations) {
