@@ -33646,6 +33646,7 @@
         
         // Generate detailed comparison table
         function generateBenchmarkTable() {
+            // Add the metric name mapping at the beginning of the function
             const metricNameMapping = {
                 'roe': 'return_on_equity',
                 'roa': 'return_on_assets',
@@ -33657,7 +33658,7 @@
                 'quick_ratio': 'quick_ratio',
                 'debt_to_equity': 'debt_to_equity'
             };
-            
+        
             const tableBody = document.getElementById('benchmarkTableBody');
             const tableHeader = document.querySelector('#benchmarkComparisonTable thead tr');
             
@@ -33669,16 +33670,8 @@
             `;
             
             selectedIndustries.forEach(industry => {
-                const industryData = industryBenchmarkData[industry];
-                const dbMetricName = metricNameMapping[metric.key] || metric.key;
-                const metricData = industryData?.find(d => d.metric_name === dbMetricName);
-                const medianValue = metricData?.median_value || 0;
-                
-                rowHTML += `
-                    <td style="text-align: center; color: #6b7280;">
-                        ${metric.isPercent ? `${parseFloat(medianValue).toFixed(1)}%` : parseFloat(medianValue).toFixed(2)}
-                    </td>
-                `;
+                const industryName = industry.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+                headerHTML += `<th>${industryName}<br>Median</th>`;
             });
             
             tableHeader.innerHTML = headerHTML;
@@ -33717,17 +33710,18 @@
                 // Add industry benchmark values
                 selectedIndustries.forEach(industry => {
                     const industryData = industryBenchmarkData[industry];
-                    const metricData = industryData?.find(d => d.metric_name === metric.key);
+                    const dbMetricName = metricNameMapping[metric.key] || metric.key;
+                    const metricData = industryData?.find(d => d.metric_name === dbMetricName);
                     const medianValue = metricData?.median_value || 0;
                     
                     rowHTML += `
                         <td style="text-align: center; color: #6b7280;">
-                            ${metric.isPercent ? `${medianValue.toFixed(1)}%` : medianValue.toFixed(2)}
+                            ${metric.isPercent ? `${parseFloat(medianValue).toFixed(1)}%` : parseFloat(medianValue).toFixed(2)}
                         </td>
                     `;
                 });
                 
-                rowHTML += '</tr>';
+                rowHTML += `</tr>`;
                 tableHTML += rowHTML;
             });
             
