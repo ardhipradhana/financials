@@ -21468,6 +21468,7 @@
         
         // Initialize Reports & Analytics when page loads
         function initializeReportsAnalytics() {
+            hideOldYoYCheckbox();
             populateAvailablePeriods();
             setDefaultPeriods();
             updatePeriodSelection();
@@ -21699,10 +21700,7 @@
 
         function updateComparisonOptions() {
             // Hide the auto YoY option since we have manual control now
-            const autoYoYOption = document.querySelector('.yoy-option');
-            if (autoYoYOption) {
-                autoYoYOption.style.display = 'none';
-            }
+            hideOldYoYCheckbox();
             
             // Regenerate the table when options change
             if (comparisonData && comparisonData.current && comparisonData.previous) {
@@ -22242,6 +22240,13 @@
                 `;
             }).join('');
         }
+
+        function hideOldYoYCheckbox() {
+            const autoYoYOption = document.querySelector('.yoy-option');
+            if (autoYoYOption) {
+                autoYoYOption.style.display = 'none';
+            }
+        }
         
         // Update table rendering to remove Margins column
         function renderComparisonTable() {
@@ -22277,7 +22282,8 @@
                 headerHTML += `<th>MoM %<br>Change</th>`;
             }
             
-            if (includeLastYear && lastYear) {
+            // ALWAYS show last year columns when checkbox is checked, regardless of data availability
+            if (includeLastYear) {
                 headerHTML += `<th>${lastYearPeriodName || 'Last Year'}<br>(Last Year)</th>`;
                 headerHTML += `<th>YoY Value<br>Change</th>`;
                 headerHTML += `<th>YoY %<br>Change</th>`;
@@ -22410,7 +22416,7 @@
                     `;
                 }
                 
-                if (includeLastYear && lastYear) {
+                if (includeLastYear) {
                     rowHTML += `
                         <td class="value-cell ${cellClass}">${formatValueForType(lastYearValue)}</td>
                         <td class="change-cell change-cell-${cellClass} ${yoyChange !== null ? getChangeClass(yoyChange) : ''}">${formatChangeForType(yoyChange)}</td>
