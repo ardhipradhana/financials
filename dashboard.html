@@ -32078,6 +32078,11 @@
             alert(`AI allocation failed for ${category}: ${errorMessage}`);
             hideAIAllocationProgress(category);
         }
+
+        function clearCategoryLines(category) {
+            const existingLines = document.querySelectorAll(`tr[data-parent-category="${category}"]`);
+            existingLines.forEach(line => line.remove());
+        }
         
     </script>
 
