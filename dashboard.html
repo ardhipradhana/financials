@@ -32098,12 +32098,14 @@
                     continue;
                 }
                 
+                // Find account in GL accounts and create description
                 const account = window.glAccounts.find(acc => acc.account_code === accountCode);
                 if (!account) {
                     console.warn(`Account ${accountCode} not found in GL accounts`);
                     continue;
                 }
                 
+                // Create display name using GL account data
                 const displayName = `${account.account_code} - ${account.account_name}`;
                 const monthlyValues = {};
                 
@@ -32114,6 +32116,8 @@
                 
                 // Create the budget line
                 addBudgetLineToTable(category, displayName, monthlyValues, accountCode);
+                
+                console.log(`✅ Created budget line: ${displayName}`);
             }
         }
 
