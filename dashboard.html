@@ -33590,11 +33590,26 @@
         function calculateMetricPercentile(metricName, companyValue) {
             if (!selectedIndustries.length || companyValue === undefined) return 0;
             
+            // Map company metric names to database metric names
+            const metricNameMapping = {
+                'roe': 'return_on_equity',
+                'roa': 'return_on_assets',
+                'ebitda_margin': 'ebitda_margin',
+                'net_margin': 'net_margin',
+                'gross_margin': 'gross_margin',
+                'asset_turnover': 'asset_turnover',
+                'current_ratio': 'current_ratio',
+                'quick_ratio': 'quick_ratio',
+                'debt_to_equity': 'debt_to_equity'
+            };
+            
+            const dbMetricName = metricNameMapping[metricName] || metricName;
+            
             // Get benchmark data for this metric across all selected industries
             const allBenchmarks = [];
             selectedIndustries.forEach(industry => {
                 const industryData = industryBenchmarkData[industry];
-                const metricData = industryData?.find(d => d.metric_name === metricName);
+                const metricData = industryData?.find(d => d.metric_name === dbMetricName);
                 if (metricData) {
                     allBenchmarks.push(metricData);
                 }
@@ -33604,11 +33619,11 @@
             
             // Use the average benchmark for calculation
             const avgBenchmark = {
-                min_value: allBenchmarks.reduce((sum, b) => sum + b.min_value, 0) / allBenchmarks.length,
-                q1_value: allBenchmarks.reduce((sum, b) => sum + b.q1_value, 0) / allBenchmarks.length,
-                median_value: allBenchmarks.reduce((sum, b) => sum + b.median_value, 0) / allBenchmarks.length,
-                q3_value: allBenchmarks.reduce((sum, b) => sum + b.q3_value, 0) / allBenchmarks.length,
-                max_value: allBenchmarks.reduce((sum, b) => sum + b.max_value, 0) / allBenchmarks.length
+                min_value: allBenchmarks.reduce((sum, b) => sum + parseFloat(b.min_value), 0) / allBenchmarks.length,
+                q1_value: allBenchmarks.reduce((sum, b) => sum + parseFloat(b.q1_value), 0) / allBenchmarks.length,
+                median_value: allBenchmarks.reduce((sum, b) => sum + parseFloat(b.median_value), 0) / allBenchmarks.length,
+                q3_value: allBenchmarks.reduce((sum, b) => sum + parseFloat(b.q3_value), 0) / allBenchmarks.length,
+                max_value: allBenchmarks.reduce((sum, b) => sum + parseFloat(b.max_value), 0) / allBenchmarks.length
             };
             
             // Calculate percentile position
@@ -33642,8 +33657,16 @@
             `;
             
             selectedIndustries.forEach(industry => {
-                const industryName = industry.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
-                headerHTML += `<th>${industryName}<br>Median</th>`;
+                const industryData = industryBenchmarkData[industry];
+                const dbMetricName = metricNameMapping[metric.key] || metric.key;
+                const metricData = industryData?.find(d => d.metric_name === dbMetricName);
+                const medianValue = metricData?.median_value || 0;
+                
+                rowHTML += `
+                    <td style="text-align: center; color: #6b7280;">
+                        ${metric.isPercent ? `${parseFloat(medianValue).toFixed(1)}%` : parseFloat(medianValue).toFixed(2)}
+                    </td>
+                `;
             });
             
             tableHeader.innerHTML = headerHTML;
