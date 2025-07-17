@@ -9409,7 +9409,7 @@
         }
         
         .target-input {
-            width: 130px;
+            width: 135px;
             padding: 0.25rem;
             border: 1px solid #d1d5db;
             border-radius: 4px;
@@ -32082,6 +32082,45 @@
                 // Create the budget line
                 addBudgetLineToTable(category, displayName, monthlyValues, accountCode);
             }
+        }
+
+        function enableAIReallocation() {
+            // Enable AI Allocate buttons when target values are entered
+            const revenueTarget = document.getElementById('revenueTarget').value;
+            const cogsTarget = document.getElementById('cogsTarget').value;
+            const opexTarget = document.getElementById('opexTarget').value;
+            
+            // Enable/disable buttons based on input values
+            const revenueBtn = document.querySelector('button[onclick="aiAllocateCategory(\'revenue\')"]');
+            const cogsBtn = document.querySelector('button[onclick="aiAllocateCategory(\'cogs\')"]');
+            const opexBtn = document.querySelector('button[onclick="aiAllocateCategory(\'opex\')"]');
+            
+            if (revenueBtn) revenueBtn.disabled = !revenueTarget;
+            if (cogsBtn) cogsBtn.disabled = !cogsTarget;
+            if (opexBtn) opexBtn.disabled = !opexTarget;
+        }
+
+        function showAIAllocationProgress(category) {
+            // Show loading state
+            const button = document.querySelector(`button[onclick="aiAllocateCategory('${category}')"]`);
+            if (button) {
+                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> AI Working...';
+                button.disabled = true;
+            }
+        }
+
+        function hideAIAllocationProgress(category) {
+            // Reset button to normal state
+            const button = document.querySelector(`button[onclick="aiAllocateCategory('${category}')"]`);
+            if (button) {
+                button.innerHTML = '<i class="fas fa-magic"></i> AI Allocate';
+                button.disabled = false;
+            }
+        }
+
+        function showAIError(category, errorMessage) {
+            alert(`AI allocation failed for ${category}: ${errorMessage}`);
+            hideAIAllocationProgress(category);
         }
         
     </script>
