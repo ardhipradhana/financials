@@ -21258,16 +21258,15 @@
         
         // Helper function to calculate current assets (typically 1000-1499)
         function calculateCurrentAssets(balances) {
-            let currentAssets = 0;
+            if (!balances || !balances.accountBalances) return 0;
             
-            financialTransactions.forEach(transaction => {
-                const accountCode = parseInt(transaction.account_code) || 0;
-                const debit = parseFloat(transaction.debit_amount || transaction.debit || 0);
-                const credit = parseFloat(transaction.credit_amount || transaction.credit || 0);
-                
-                // Current assets are typically 1000-1499 (Cash, AR, Inventory, Prepaid)
-                if (accountCode >= 1000 && accountCode < 1500 && transaction.category === 'Asset') {
-                    currentAssets += (debit - credit);
+            // Current assets typically include accounts 1000-1999
+            let currentAssets = 0;
+            balances.accountBalances.forEach(account => {
+                const code = parseInt(account.account_code);
+                if (code >= 1000 && code < 2000) {
+                    // For asset accounts, debit increases balance
+                    currentAssets += account.debit_total - account.credit_total;
                 }
             });
             
@@ -21276,16 +21275,15 @@
         
         // Helper function to calculate current liabilities (typically 2000-2499)
         function calculateCurrentLiabilities(balances) {
-            let currentLiabilities = 0;
+            if (!balances || !balances.accountBalances) return 0;
             
-            financialTransactions.forEach(transaction => {
-                const accountCode = parseInt(transaction.account_code) || 0;
-                const debit = parseFloat(transaction.debit_amount || transaction.debit || 0);
-                const credit = parseFloat(transaction.credit_amount || transaction.credit || 0);
-                
-                // Current liabilities are typically 2000-2499 (AP, Accrued, Short-term debt)
-                if (accountCode >= 2000 && accountCode < 2500 && transaction.category === 'Liability') {
-                    currentLiabilities += Math.abs(credit - debit); // Liabilities have credit balances
+            // Current liabilities typically include accounts 2000-2499
+            let currentLiabilities = 0;
+            balances.accountBalances.forEach(account => {
+                const code = parseInt(account.account_code);
+                if (code >= 2000 && code < 2500) {
+                    // For liability accounts, credit increases balance
+                    currentLiabilities += account.credit_total - account.debit_total;
                 }
             });
             
@@ -33259,7 +33257,29 @@
             
             // Get period-specific transactions
             const periodTransactions = getTransactionsForPeriod(period);
-            const periodFinancials = calculateFinancialDataFromTransactions(periodTransactions, getCurrentPeriodKey(), period);
+            
+            // Generate a period key for the current selection
+            const today = new Date();
+            let periodKey;
+            switch(period) {
+                case 'MTD':
+                    periodKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+                    break;
+                case 'QTD':
+                    const currentQuarter = Math.floor(today.getMonth() / 3) + 1;
+                    periodKey = `${today.getFullYear()}-Q${currentQuarter}`;
+                    break;
+                case 'YTD':
+                    periodKey = `${today.getFullYear()}-YTD`;
+                    break;
+                case 'YEARLY':
+                    periodKey = `${today.getFullYear() - 1}-YEARLY`;
+                    break;
+                default:
+                    periodKey = `${today.getFullYear()}-YTD`;
+            }
+            
+            const periodFinancials = calculateFinancialDataFromTransactions(periodTransactions, periodKey, period);
             
             // Calculate all 9 key ratios
             companyFinancialMetrics = {
@@ -33288,6 +33308,14 @@
             if (selectedIndustries.length > 0) {
                 loadIndustryBenchmarks();
             }
+        }
+
+        // Helper function to get account balance by code
+        function getAccountBalance(accountCode, balances) {
+            if (!balances || !balances.accountBalances) return 0;
+            
+            const account = balances.accountBalances.find(acc => acc.account_code === accountCode);
+            return account ? account.net_balance : 0;
         }
         
         // Financial ratio calculation functions
