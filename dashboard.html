@@ -21809,8 +21809,14 @@
                 cogs: 0,
                 grossProfit: 0,
                 opex: 0,
-                ebitda: 0
+                ebitda: 0,
+                ebit: 0,
+                netIncome: 0
             };
+            
+            let depreciation = 0;
+            let interestExpense = 0;
+            let taxExpense = 0;
             
             transactions.forEach(transaction => {
                 const accountCode = parseInt(transaction.account_code) || 0;
@@ -21832,12 +21838,44 @@
                 } else if (accountCode >= 5200) {
                     // OPEX accounts
                     data.opex += debit;
+                    
+                    // Track specific expense types for EBIT calculation
+                    if (accountCode === 5600 || accountCode === 5610) {
+                        // Depreciation and Amortization
+                        depreciation += debit;
+                    } else if (accountCode === 5700) {
+                        // Interest Expense
+                        interestExpense += debit;
+                    } else if (accountCode === 6010) {
+                        // Tax Expense
+                        taxExpense += debit;
+                    }
                 }
             });
             
             data.netRevenue = data.grossRevenue - data.discounts;
             data.grossProfit = data.netRevenue - data.cogs;
             data.ebitda = data.grossProfit - data.opex;
+            
+            // Calculate EBIT (EBITDA - Depreciation & Amortization)
+            data.ebit = data.ebitda - depreciation;
+            
+            // Calculate Net Income (EBIT - Interest Expense - Tax Expense)
+            data.netIncome = data.ebit - interestExpense - taxExpense;
+            
+            console.log('Financial Data Calculated:', {
+                period,
+                grossRevenue: data.grossRevenue,
+                netRevenue: data.netRevenue,
+                grossProfit: data.grossProfit,
+                opex: data.opex,
+                ebitda: data.ebitda,
+                ebit: data.ebit,
+                netIncome: data.netIncome,
+                depreciation,
+                interestExpense,
+                taxExpense
+            });
             
             return data;
         }
