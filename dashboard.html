@@ -20574,7 +20574,7 @@
             return lines || '<div class="report-line"><span class="account-item">No cash flows recorded</span><span>Rp  0</span></div>';
         }
         
-        function getAccountBalance(accountCodes) {
+        function getAccountBalanceForCashFlow(accountCodes) {
             let total = 0;
             const filteredTransactions = getFilteredFinancialTransactions(); // Add this line
             
@@ -33370,7 +33370,7 @@
         }
 
         // Helper function to get account balance by code
-        function getAccountBalance(accountCode, balances) {
+        function getAccountBalanceForBenchmarking(accountCode, balances) {
             if (!balances || !balances.accountBalances) return 0;
             
             const account = balances.accountBalances.find(acc => acc.account_code === accountCode);
@@ -33422,7 +33422,7 @@
         
         function calculateQuickRatio(balances) {
             const currentAssets = calculateCurrentAssets(balances);
-            const inventory = getAccountBalance('1300', balances) || 0; // Inventory account
+            const inventory = getAccountBalanceForBenchmarking('1300', balances) || 0; // Inventory account
             const currentLiabilities = calculateCurrentLiabilities(balances);
             const quickAssets = currentAssets - inventory;
             return currentLiabilities > 0 ? quickAssets / currentLiabilities : 0;
