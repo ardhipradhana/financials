@@ -22270,8 +22270,12 @@
                 startDate = new Date(year, 0, 1);
                 endDate = new Date(year, month, 0);
                 
-            } else {
+            } else if (periodType === 'custom') {
                 // Custom: Just the specific month
+                startDate = new Date(year, month - 1, 1);
+                endDate = new Date(year, month, 0);
+            } else {
+                console.warn('Unknown period type:', periodType);
                 startDate = new Date(year, month - 1, 1);
                 endDate = new Date(year, month, 0);
             }
@@ -23557,6 +23561,10 @@
             generateOpexBreakdownTable();
             generateRevenueOpexInsights();
         }
+
+        function generateRevenueOpexBreakdown() {
+            renderRevenueOpexBreakdown();
+        }
         
         function generateRevenueAnalysisTable() {
             generateRevenueBreakdownTable(); // Call the corrected function name
@@ -23967,7 +23975,7 @@
                 const monthName = new Date(year, month - 1).toLocaleDateString('en-US', { month: 'short' });
                 
                 // Get transactions for this period
-                const transactions = getTransactionsForPeriod(periodKey, 'custom');
+                const transactions = getTransactionsForPeriodFixed(periodKey, 'custom');
                 const financialData = calculateFinancialDataFromTransactions(transactions, periodKey, 'custom');
                 
                 trendingData.periods.push(monthName);
@@ -24849,7 +24857,9 @@
                     renderRevenueOpexBreakdown();
                 } else if (tabName === 'trending-analysis') {
                     // Auto-initialize trending analysis
-                    generateTrendingAnalysis();
+                    if (comparisonData && comparisonData.current) {
+                        generateTrendingAnalysis();
+                    }
                 }
             }
         }
