@@ -24830,39 +24830,6 @@
             renderParkedFinancingList();
             calculateScenarioImpact();
         }
-
-        function switchReportsTab(tabName) {
-            // Remove active class from all tab buttons
-            document.querySelectorAll('.reports-tab-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            // Add active class to clicked button
-            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
-            
-            // Hide all tab contents
-            document.querySelectorAll('.reports-tab-content').forEach(content => {
-                content.classList.remove('active');
-                content.style.display = 'none';
-            });
-            
-            // Show selected tab content
-            const targetTab = document.getElementById(`${tabName}-tab`);
-            if (targetTab) {
-                targetTab.classList.add('active');
-                targetTab.style.display = 'block';
-                
-                // Load content for specific tabs
-                if (tabName === 'revenue-opex-breakdown') {
-                    renderRevenueOpexBreakdown();
-                } else if (tabName === 'trending-analysis') {
-                    // Auto-initialize trending analysis
-                    if (comparisonData && comparisonData.current) {
-                        generateTrendingAnalysis();
-                    }
-                }
-            }
-        }
         
         // Close panel when clicking outside
         document.addEventListener('click', function(e) {
@@ -34069,35 +34036,59 @@
         
         // Update the main switchReportsTab function to handle benchmarking
         function switchReportsTab(tabName) {
-            // Hide all tab contents
-            document.querySelectorAll('.reports-tab-content').forEach(content => {
-                content.style.display = 'none';
-            });
+            // Store current comparisonData state before switching
+            const savedComparisonData = comparisonData;
             
             // Remove active class from all tab buttons
             document.querySelectorAll('.reports-tab-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
             
-            // Show selected tab content
-            const selectedContent = document.getElementById(`${tabName}-content`);
-            if (selectedContent) {
-                selectedContent.style.display = 'block';
-            }
-            
-            // Add active class to selected tab button
+            // Add active class to clicked button
             const selectedBtn = document.querySelector(`[data-tab="${tabName}"]`);
             if (selectedBtn) {
                 selectedBtn.classList.add('active');
             }
             
-            // Initialize specific tab functionality
-            if (tabName === 'industry-benchmarking') {
-                initializeIndustryBenchmarking();
-            } else if (tabName === 'pnl-comparison') {
-                // Your existing P&L comparison initialization
-            } else if (tabName === 'trending-analysis') {
-                // Your existing trending analysis initialization
+            // Hide all tab contents
+            document.querySelectorAll('.reports-tab-content').forEach(content => {
+                content.classList.remove('active');
+                content.style.display = 'none';
+            });
+            
+            // Show selected tab content (try both naming conventions)
+            let targetTab = document.getElementById(`${tabName}-tab`);
+            if (!targetTab) {
+                targetTab = document.getElementById(`${tabName}-content`);
+            }
+            
+            if (targetTab) {
+                targetTab.classList.add('active');
+                targetTab.style.display = 'block';
+                
+                // Restore comparisonData
+                if (savedComparisonData) {
+                    comparisonData = savedComparisonData;
+                }
+                
+                // Initialize specific tab functionality
+                if (tabName === 'revenue-opex-breakdown') {
+                    if (comparisonData && comparisonData.current) {
+                        renderRevenueOpexBreakdown();
+                    } else {
+                        targetTab.innerHTML = '<div class="no-data-message">Please generate a comparison report first from the P&L Comparison tab.</div>';
+                    }
+                } else if (tabName === 'trending-analysis') {
+                    generateTrendingAnalysis();
+                } else if (tabName === 'industry-benchmarking') {
+                    initializeIndustryBenchmarking();
+                } else if (tabName === 'pnl-comparison') {
+                    // P&L comparison tab - ensure waterfall charts are displayed if comparisonData exists
+                    if (comparisonData && comparisonData.current) {
+                        renderWaterfallCharts();
+                        renderExecutiveSummary();
+                    }
+                }
             }
         }
 
