@@ -33823,44 +33823,172 @@
             }
         }
         
-        // Format AI insights for display
+        // Format AI insights for display - handles multiple response formats
         function formatAIInsights(insights) {
-            // This will depend on the structure returned by your AI endpoint
-            // For now, let's assume it returns formatted HTML or markdown
+            console.log('Raw insights received:', insights);
             
-            if (typeof insights === 'string') {
-                return `<div style="line-height: 1.6;">${insights}</div>`;
+            // Handle different response formats
+            let data;
+            
+            // If it's an array, take the first element
+            if (Array.isArray(insights)) {
+                data = insights[0] || {};
+            } 
+            // If it's a string, try to parse it
+            else if (typeof insights === 'string') {
+                try {
+                    const parsed = JSON.parse(insights);
+                    data = Array.isArray(parsed) ? parsed[0] : parsed;
+                } catch (e) {
+                    // If parsing fails, treat as plain text
+                    return `<div style="line-height: 1.6; padding: 1rem;">${insights}</div>`;
+                }
+            }
+            // If it's already an object, use it directly
+            else if (typeof insights === 'object' && insights !== null) {
+                data = insights;
+            }
+            // Fallback for any other type
+            else {
+                return `<div style="line-height: 1.6; padding: 1rem;">Strategic analysis completed.</div>`;
             }
             
-            if (insights.recommendations) {
-                let html = '<div class="ai-insights">';
+            console.log('Processed data:', data);
+            
+            let html = '<div class="ai-insights">';
+            
+            // Overall Score Section
+            if (data.overall_score || data.overall_score === 0) {
+                const score = data.overall_score;
+                const confidence = data.confidence_level || '';
                 
-                if (insights.overall_score) {
+                html += `
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; padding: 2rem; margin-bottom: 2rem; color: white; text-align: center;">
+                        <h3 style="margin: 0 0 0.5rem 0; font-size: 1.2rem;">Overall Financial Health Score</h3>
+                        <div style="font-size: 3rem; font-weight: 700; margin: 1rem 0;">${score}/100</div>
+                        ${confidence ? `<p style="margin: 0; opacity: 0.9;">Confidence Level: ${confidence}%</p>` : ''}
+                    </div>
+                `;
+            }
+            
+            // Executive Summary
+            if (data.executive_summary) {
+                html += `
+                    <div style="background: #f8fafc; border-left: 4px solid #3b82f6; padding: 1.5rem; margin-bottom: 2rem; border-radius: 8px;">
+                        <h4 style="margin: 0 0 1rem 0; color: #1e293b; display: flex; align-items: center;">
+                            <i class="fas fa-chart-line" style="margin-right: 0.5rem; color: #3b82f6;"></i>
+                            Executive Summary
+                        </h4>
+                        <p style="margin: 0; line-height: 1.6; color: #374151; font-size: 1rem;">${data.executive_summary}</p>
+                    </div>
+                `;
+            }
+            
+            // Recommendations Section
+            if (data.recommendations && Array.isArray(data.recommendations) && data.recommendations.length > 0) {
+                html += `
+                    <div style="margin-bottom: 2rem;">
+                        <h4 style="margin: 0 0 1rem 0; color: #1e293b; display: flex; align-items: center;">
+                            <i class="fas fa-lightbulb" style="margin-right: 0.5rem; color: #f59e0b;"></i>
+                            Strategic Recommendations
+                        </h4>
+                `;
+                
+                data.recommendations.forEach((rec, index) => {
+                    const priorityColor = {
+                        'high': '#ef4444',
+                        'medium': '#f59e0b',
+                        'low': '#10b981'
+                    }[rec.priority] || '#6b7280';
+                    
+                    const priorityBg = {
+                        'high': '#fef2f2',
+                        'medium': '#fffbeb',
+                        'low': '#f0fdf4'
+                    }[rec.priority] || '#f9fafb';
+                    
                     html += `
-                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem;">
-                            <h5 style="margin: 0 0 0.5rem 0; color: #1e293b;">Overall Performance Score</h5>
-                            <div style="font-size: 2rem; font-weight: 700; color: #3b82f6;">${insights.overall_score}/100</div>
+                        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.75rem;">
+                                <h5 style="margin: 0; color: #1e293b; font-size: 1.1rem;">${rec.title}</h5>
+                                <span style="background: ${priorityBg}; color: ${priorityColor}; padding: 0.25rem 0.75rem; border-radius: 16px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">
+                                    ${rec.priority} Priority
+                                </span>
+                            </div>
+                            <p style="margin: 0; line-height: 1.6; color: #6b7280;">${rec.description}</p>
+                            ${rec.category ? `<div style="margin-top: 0.75rem;"><span style="background: #f3f4f6; color: #374151; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem;">${rec.category}</span></div>` : ''}
                         </div>
                     `;
+                });
+                
+                html += '</div>';
+            }
+            
+            // Key Insights
+            if (data.key_insights && Array.isArray(data.key_insights) && data.key_insights.length > 0) {
+                html += `
+                    <div style="margin-bottom: 2rem;">
+                        <h4 style="margin: 0 0 1rem 0; color: #1e293b; display: flex; align-items: center;">
+                            <i class="fas fa-key" style="margin-right: 0.5rem; color: #8b5cf6;"></i>
+                            Key Insights
+                        </h4>
+                        <ul style="margin: 0; padding-left: 1.5rem; line-height: 1.8;">
+                `;
+                
+                data.key_insights.forEach(insight => {
+                    html += `<li style="margin-bottom: 0.5rem; color: #374151;">${insight}</li>`;
+                });
+                
+                html += '</ul></div>';
+            }
+            
+            // Strengths and Areas for Improvement in a grid
+            if ((data.strengths && data.strengths.length > 0) || (data.areas_for_improvement && data.areas_for_improvement.length > 0)) {
+                html += `
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+                `;
+                
+                // Strengths
+                if (data.strengths && data.strengths.length > 0) {
+                    html += `
+                        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 1.5rem;">
+                            <h5 style="margin: 0 0 1rem 0; color: #166534; display: flex; align-items: center;">
+                                <i class="fas fa-check-circle" style="margin-right: 0.5rem;"></i>
+                                Strengths
+                            </h5>
+                            <ul style="margin: 0; padding-left: 1.5rem; line-height: 1.6;">
+                    `;
+                    
+                    data.strengths.forEach(strength => {
+                        html += `<li style="margin-bottom: 0.5rem; color: #166534;">${strength}</li>`;
+                    });
+                    
+                    html += '</ul></div>';
                 }
                 
-                if (insights.recommendations && insights.recommendations.length > 0) {
-                    html += '<h5 style="margin: 1.5rem 0 1rem 0; color: #1e293b;">Strategic Recommendations</h5>';
-                    insights.recommendations.forEach(rec => {
-                        html += `
-                            <div style="background: #f9fafb; border-left: 4px solid #3b82f6; padding: 1rem; margin-bottom: 1rem;">
-                                <h6 style="margin: 0 0 0.5rem 0; color: #1e293b;">${rec.title}</h6>
-                                <p style="margin: 0; color: #6b7280; line-height: 1.5;">${rec.description}</p>
-                            </div>
-                        `;
+                // Areas for Improvement
+                if (data.areas_for_improvement && data.areas_for_improvement.length > 0) {
+                    html += `
+                        <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 1.5rem;">
+                            <h5 style="margin: 0 0 1rem 0; color: #dc2626; display: flex; align-items: center;">
+                                <i class="fas fa-exclamation-triangle" style="margin-right: 0.5rem;"></i>
+                                Areas for Improvement
+                            </h5>
+                            <ul style="margin: 0; padding-left: 1.5rem; line-height: 1.6;">
+                    `;
+                    
+                    data.areas_for_improvement.forEach(area => {
+                        html += `<li style="margin-bottom: 0.5rem; color: #dc2626;">${area}</li>`;
                     });
+                    
+                    html += '</ul></div>';
                 }
                 
                 html += '</div>';
-                return html;
             }
             
-            return '<div>Strategic analysis completed. Please review your performance metrics above.</div>';
+            html += '</div>';
+            return html;
         }
         
         // Refresh benchmark data
