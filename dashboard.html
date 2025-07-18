@@ -9875,6 +9875,31 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        .loading-spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid #e2e8f0;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .section-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
         
     </style>
 </head>
@@ -13194,6 +13219,12 @@
                 <div class="dashboard-section" id="strategicAdvisorSection" style="display: none;">
                     <div class="section-header">
                         <h4><i class="fas fa-lightbulb"></i> AI Strategic Advisor</h4>
+                        <div class="section-actions">
+                            <button class="btn btn-primary" onclick="generateStrategicInsights()" id="generateInsightsBtn">
+                                <i class="fas fa-brain"></i>
+                                Generate AI Insights
+                            </button>
+                        </div>
                     </div>
                     <div class="ai-advisor-container">
                         <div class="loading-state" id="advisorLoading" style="display: none;">
@@ -13201,7 +13232,10 @@
                             <p>Analyzing your performance and generating strategic recommendations...</p>
                         </div>
                         <div class="ai-advisor-content" id="advisorContent">
-                            <!-- AI recommendations will be populated here -->
+                            <div style="text-align: center; color: #6b7280; padding: 2rem;">
+                                <i class="fas fa-brain" style="font-size: 2rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                                <p>Click "Generate AI Insights" to analyze your financial performance and get strategic recommendations.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -33493,7 +33527,6 @@
                 // Update UI components
                 generateBenchmarkGauges();
                 generateBenchmarkTable();
-                generateStrategicInsights();
                 
                 // Show comparison sections
                 document.getElementById('benchmarkGaugesSection').style.display = 'block';
@@ -33728,9 +33761,14 @@
         async function generateStrategicInsights() {
             const advisorContent = document.getElementById('advisorContent');
             const advisorLoading = document.getElementById('advisorLoading');
+            const generateBtn = document.getElementById('generateInsightsBtn');
+            
+            // Update button state
+            generateBtn.disabled = true;
+            generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
             
             advisorLoading.style.display = 'block';
-            advisorContent.innerHTML = '';
+            advisorContent.style.display = 'none';
             
             try {
                 // Prepare payload for AI endpoint
@@ -33741,8 +33779,8 @@
                     time_period: currentBenchmarkPeriod,
                     company_context: {
                         total_assets: calculateAccountBalances().totalAssets,
-                        total_revenue: companyFinancialMetrics.net_margin * companyFinancialMetrics.asset_turnover, // Approximate
-                        business_type: "general" // Could be enhanced later
+                        total_revenue: companyFinancialMetrics.net_margin * companyFinancialMetrics.asset_turnover,
+                        business_type: "general"
                     }
                 };
                 
@@ -33759,8 +33797,11 @@
                 
                 const insights = await response.json();
                 
-                // Display insights
+                // Display insights (persistent until next generation)
                 advisorContent.innerHTML = formatAIInsights(insights);
+                
+                // Update button to "Regenerate"
+                generateBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Regenerate Insights';
                 
             } catch (error) {
                 console.error('Error generating strategic insights:', error);
@@ -33771,8 +33812,14 @@
                         <p style="font-size: 0.875rem; color: #6b7280;">Please try again later or contact support.</p>
                     </div>
                 `;
+                
+                // Reset button on error
+                generateBtn.innerHTML = '<i class="fas fa-brain"></i> Generate AI Insights';
+                
             } finally {
                 advisorLoading.style.display = 'none';
+                advisorContent.style.display = 'block';
+                generateBtn.disabled = false;
             }
         }
         
