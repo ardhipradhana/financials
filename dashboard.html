@@ -23967,7 +23967,7 @@
                 const monthName = new Date(year, month - 1).toLocaleDateString('en-US', { month: 'short' });
                 
                 // Get transactions for this period
-                const transactions = getTransactionsForPeriodFixed(periodKey, 'custom');
+                const transactions = getTransactionsForPeriod(periodKey, 'custom');
                 const financialData = calculateFinancialDataFromTransactions(transactions, periodKey, 'custom');
                 
                 trendingData.periods.push(monthName);
