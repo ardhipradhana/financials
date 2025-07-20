@@ -13369,56 +13369,31 @@
                 const { data: { user } } = await supabase.auth.getUser();
                 if (!user) return null;
         
-                // Check if user has profile in user_profiles_meridash
+                console.log('Loading profile for user:', user.id);
+        
+                // Try to get existing profile first
                 let { data, error } = await supabase
                     .from('user_profiles_meridash')
                     .select('*')
                     .eq('user_id', user.id)
                     .single();
         
-                if (error && error.code === 'PGRST116') {
-                    // User doesn't have profile yet, create one
-                    console.log('Creating new user profile for:', user.email);
-                    
-                    try {
-                        const { data: newProfile, error: createError } = await supabase
-                            .from('user_profiles_meridash')
-                            .insert([{
-                                user_id: user.id,
-                                email: user.email,
-                                access_level: 'basic'
-                            }])
-                            .select()
-                            .single();
-        
-                        if (createError) {
-                            console.error('Failed to create user profile:', createError);
-                            // Fallback: create a basic profile locally
-                            data = {
-                                user_id: user.id,
-                                email: user.email,
-                                access_level: 'basic'
-                            };
-                        } else {
-                            data = newProfile;
-                        }
-                    } catch (createError) {
-                        console.error('Error creating user profile:', createError);
-                        // Fallback: create a basic profile locally
-                        data = {
-                            user_id: user.id,
-                            email: user.email,
-                            access_level: 'basic'
-                        };
-                    }
-                } else if (error) {
+                if (error) {
                     console.error('Error loading user profile:', error);
-                    // Fallback: create a basic profile locally
+                    
+                    // If we get any error, just use a fallback profile
+                    // The trigger should have created the profile already
                     data = {
                         user_id: user.id,
                         email: user.email,
-                        access_level: 'basic'
+                        access_level: 'basic',
+                        is_active: true,
+                        subscription_status: 'trial'
                     };
+                    
+                    console.log('Using fallback profile');
+                } else {
+                    console.log('Successfully loaded profile:', data);
                 }
         
                 userProfile = data;
@@ -13426,12 +13401,15 @@
                 return data;
                 
             } catch (error) {
-                console.error('Error loading user profile:', error);
-                // Fallback: create a basic profile locally
+                console.error('Error in loadUserProfile:', error);
+                
+                // Fallback profile for any errors
                 const fallbackProfile = {
                     user_id: 'unknown',
                     email: 'unknown@email.com',
-                    access_level: 'basic'
+                    access_level: 'basic',
+                    is_active: true,
+                    subscription_status: 'trial'
                 };
                 userProfile = fallbackProfile;
                 updateNavigationAccess();
