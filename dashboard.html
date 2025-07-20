@@ -13378,20 +13378,47 @@
         
                 if (error && error.code === 'PGRST116') {
                     // User doesn't have profile yet, create one
-                    const { data: newProfile, error: createError } = await supabase
-                        .from('user_profiles_meridash')
-                        .insert([{
+                    console.log('Creating new user profile for:', user.email);
+                    
+                    try {
+                        const { data: newProfile, error: createError } = await supabase
+                            .from('user_profiles_meridash')
+                            .insert([{
+                                user_id: user.id,
+                                email: user.email,
+                                access_level: 'basic'
+                            }])
+                            .select()
+                            .single();
+        
+                        if (createError) {
+                            console.error('Failed to create user profile:', createError);
+                            // Fallback: create a basic profile locally
+                            data = {
+                                user_id: user.id,
+                                email: user.email,
+                                access_level: 'basic'
+                            };
+                        } else {
+                            data = newProfile;
+                        }
+                    } catch (createError) {
+                        console.error('Error creating user profile:', createError);
+                        // Fallback: create a basic profile locally
+                        data = {
                             user_id: user.id,
                             email: user.email,
                             access_level: 'basic'
-                        }])
-                        .select()
-                        .single();
-        
-                    if (createError) throw createError;
-                    data = newProfile;
+                        };
+                    }
                 } else if (error) {
-                    throw error;
+                    console.error('Error loading user profile:', error);
+                    // Fallback: create a basic profile locally
+                    data = {
+                        user_id: user.id,
+                        email: user.email,
+                        access_level: 'basic'
+                    };
                 }
         
                 userProfile = data;
@@ -13400,7 +13427,15 @@
                 
             } catch (error) {
                 console.error('Error loading user profile:', error);
-                return null;
+                // Fallback: create a basic profile locally
+                const fallbackProfile = {
+                    user_id: 'unknown',
+                    email: 'unknown@email.com',
+                    access_level: 'basic'
+                };
+                userProfile = fallbackProfile;
+                updateNavigationAccess();
+                return fallbackProfile;
             }
         }
         
