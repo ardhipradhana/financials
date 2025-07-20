@@ -13661,8 +13661,9 @@
                 const existingModal = document.getElementById('loginModal');
                 if (existingModal) {
                     existingModal.remove();
-                    // Restore body scrolling
+                    // Restore both body and html scrolling
                     document.body.style.overflow = '';
+                    document.documentElement.style.overflow = '';
                 }
                 
                 const { data: { user }, error } = await supabase.auth.getUser();
@@ -13688,11 +13689,12 @@
         }
         
         async function showLoginForm() {
-            // Disable body scrolling
+            // Store original body overflow and hide scrolling completely
+            document.documentElement.style.overflow = 'hidden';
             document.body.style.overflow = 'hidden';
             
             const landingHTML = `
-                <div id="loginModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); z-index: 9999; overflow-y: auto;">
+                <div id="loginModal" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); z-index: 9999; overflow-y: auto; overflow-x: hidden;">
                     
                     <!-- Header -->
                     <header style="position: sticky; top: 0; left: 0; right: 0; z-index: 10; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-bottom: 1px solid #334155;">
@@ -13750,7 +13752,7 @@
                                     </button>
                                 </div>
                                 
-                                <!-- Trust Indicators - Updated -->
+                                <!-- Trust Indicators -->
                                 <div style="display: flex; align-items: center; justify-content: center; gap: 3rem; color: #64748b; font-size: 0.875rem;">
                                     <div style="display: flex; align-items: center; gap: 0.5rem;">
                                         <i class="fas fa-clock" style="color: #10b981;"></i>
