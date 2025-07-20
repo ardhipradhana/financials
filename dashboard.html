@@ -13644,6 +13644,12 @@
         // Updated initialization with profile loading
         async function initializeApp() {
             try {
+                // First remove any existing login modal
+                const existingModal = document.getElementById('loginModal');
+                if (existingModal) {
+                    existingModal.remove();
+                }
+                
                 const { data: { user }, error } = await supabase.auth.getUser();
                 
                 if (error || !user) {
@@ -13711,6 +13717,22 @@
         }
         
         initializeApp();
+
+        // Listen for auth state changes
+        supabase.auth.onAuthStateChange((event, session) => {
+            console.log('Auth state changed:', event, session);
+            
+            if (event === 'SIGNED_IN') {
+                // Remove login modal and initialize app
+                const existingModal = document.getElementById('loginModal');
+                if (existingModal) {
+                    existingModal.remove();
+                }
+                initializeApp();
+            } else if (event === 'SIGNED_OUT') {
+                showLoginForm();
+            }
+        });
         
         // AP/AR Data Management
         let aparTransactions = [];
