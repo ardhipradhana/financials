@@ -13686,30 +13686,198 @@
         }
         
         async function showLoginForm() {
-            const loginHTML = `
-                <div id="loginModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; display: flex; align-items: center; justify-content: center;">
-                    <div style="background: white; padding: 2rem; border-radius: 12px; max-width: 400px; width: 90%;">
-                        <h2 style="color: #1e293b; margin-bottom: 1.5rem; text-align: center;">Access MontPro</h2>
-                        <p style="color: #6b7280; text-align: center; margin-bottom: 2rem;">Sign in with your Google account to continue</p>
+            const landingHTML = `
+                <div id="loginModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); z-index: 9999; overflow-y: auto;">
+                    
+                    <!-- Header -->
+                    <header style="position: fixed; top: 0; left: 0; right: 0; z-index: 10; background: rgba(248, 250, 252, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid #e2e8f0;">
+                        <div style="max-width: 1200px; margin: 0 auto; padding: 1rem 2rem; display: flex; justify-content: between; align-items: center;">
+                            <div style="display: flex; align-items: center;">
+                                <div class="logo" style="font-size: 1.5rem; color: #fbbf24; margin: 0;">MontPro</div>
+                                <div style="margin-left: 0.75rem; font-size: 0.875rem; color: #64748b; font-weight: 500;">Financier</div>
+                            </div>
+                            <button onclick="signInWithGoogle()" style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: #1e293b; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(251, 191, 36, 0.3);" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(251, 191, 36, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(251, 191, 36, 0.3)'">
+                                Sign In with Google
+                            </button>
+                        </div>
+                    </header>
+        
+                    <!-- Main Content -->
+                    <main style="padding-top: 5rem; min-height: 100vh; display: flex; flex-direction: column;">
                         
-                        <button onclick="signInWithGoogle()" style="width: 100%; background: #4285f4; color: white; padding: 0.75rem; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                            </svg>
-                            Continue with Google
-                        </button>
-                        
-                        <p style="text-align: center; margin-top: 1.5rem; color: #6b7280; font-size: 0.875rem;">
-                            Same login as your other tools
-                        </p>
-                    </div>
+                        <!-- Hero Section -->
+                        <section style="flex: 1; display: flex; align-items: center; padding: 4rem 2rem 2rem;">
+                            <div style="max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center;">
+                                
+                                <!-- Left Content -->
+                                <div>
+                                    <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: white; padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.875rem; font-weight: 600; display: inline-block; margin-bottom: 1.5rem;">
+                                        Executive-Grade Financial Intelligence
+                                    </div>
+                                    
+                                    <h1 style="font-size: 3rem; font-weight: 800; color: #1e293b; line-height: 1.1; margin-bottom: 1.5rem;">
+                                        Financial Control.<br>
+                                        <span style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Simplified.</span>
+                                    </h1>
+                                    
+                                    <p style="font-size: 1.25rem; color: #64748b; margin-bottom: 2rem; line-height: 1.6;">
+                                        Transform your financial operations with AI-powered insights, real-time dashboards, and enterprise-grade reporting. Built for ambitious businesses.
+                                    </p>
+                                    
+                                    <div style="display: flex; gap: 1rem; margin-bottom: 3rem;">
+                                        <button onclick="signInWithGoogle()" style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: #1e293b; border: none; padding: 1rem 2rem; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(251, 191, 36, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(251, 191, 36, 0.3)'">
+                                            <i class="fas fa-rocket" style="margin-right: 0.5rem;"></i>
+                                            Start Free Trial
+                                        </button>
+                                        <button onclick="document.getElementById('features').scrollIntoView({behavior: 'smooth'})" style="background: white; color: #64748b; border: 2px solid #e2e8f0; padding: 1rem 2rem; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.borderColor='#fbbf24'; this.style.color='#1e293b'" onmouseout="this.style.borderColor='#e2e8f0'; this.style.color='#64748b'">
+                                            View Features
+                                        </button>
+                                    </div>
+                                    
+                                    <!-- Trust Indicators -->
+                                    <div style="display: flex; align-items: center; gap: 2rem; color: #64748b; font-size: 0.875rem;">
+                                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                            <i class="fas fa-shield-alt" style="color: #10b981;"></i>
+                                            Bank-grade security
+                                        </div>
+                                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                            <i class="fas fa-clock" style="color: #10b981;"></i>
+                                            5-minute setup
+                                        </div>
+                                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                            <i class="fas fa-users" style="color: #10b981;"></i>
+                                            Trusted by CFOs
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Right Content - Dashboard Preview -->
+                                <div style="position: relative;">
+                                    <div style="background: white; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); overflow: hidden; border: 1px solid #e2e8f0;">
+                                        <!-- Mock Dashboard Header -->
+                                        <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding: 1rem 1.5rem; color: white;">
+                                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                                <h3 style="font-size: 1.125rem; font-weight: 600; margin: 0;">Dashboard Overview</h3>
+                                                <div style="width: 8px; height: 8px; background: #10b981; border-radius: 50%;"></div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Mock Cards -->
+                                        <div style="padding: 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                            <div style="background: #f8fafc; padding: 1rem; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                                <div style="font-size: 0.875rem; color: #64748b; margin-bottom: 0.5rem;">Revenue (MTD)</div>
+                                                <div style="font-size: 1.5rem; font-weight: 700; color: #10b981;">Rp 2.4M</div>
+                                                <div style="font-size: 0.75rem; color: #10b981;">↗ +12.5%</div>
+                                            </div>
+                                            <div style="background: #f8fafc; padding: 1rem; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                                <div style="font-size: 0.875rem; color: #64748b; margin-bottom: 0.5rem;">Cash Flow</div>
+                                                <div style="font-size: 1.5rem; font-weight: 700; color: #1e293b;">Rp 1.8M</div>
+                                                <div style="font-size: 0.75rem; color: #64748b;">↗ +8.2%</div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Mock Chart -->
+                                        <div style="padding: 0 1.5rem 1.5rem;">
+                                            <div style="height: 120px; background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); border-radius: 8px; position: relative; overflow: hidden;">
+                                                <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 60%; background: linear-gradient(135deg, rgba(251, 191, 36, 0.8) 0%, rgba(245, 158, 11, 0.8) 100%); clip-path: polygon(0% 100%, 20% 80%, 40% 60%, 60% 40%, 80% 20%, 100% 0%, 100% 100%);"></div>
+                                                <div style="position: absolute; top: 1rem; left: 1rem; color: #1e293b; font-size: 0.875rem; font-weight: 600;">Revenue Trend</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Floating Elements -->
+                                    <div style="position: absolute; -top: 2rem; -right: 2rem; background: white; padding: 0.75rem; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); border: 1px solid #e2e8f0; font-size: 0.875rem; color: #64748b;">
+                                        <i class="fas fa-robot" style="color: #fbbf24; margin-right: 0.5rem;"></i>
+                                        AI Insights
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+        
+                        <!-- Features Section -->
+                        <section id="features" style="background: white; padding: 4rem 2rem; border-top: 1px solid #e2e8f0;">
+                            <div style="max-width: 1200px; margin: 0 auto;">
+                                <div style="text-align: center; margin-bottom: 3rem;">
+                                    <h2 style="font-size: 2.5rem; font-weight: 700; color: #1e293b; margin-bottom: 1rem;">Everything you need to run finance</h2>
+                                    <p style="font-size: 1.125rem; color: #64748b; max-width: 600px; margin: 0 auto;">From real-time dashboards to AI-powered forecasting, get enterprise-grade financial intelligence without the complexity.</p>
+                                </div>
+                                
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+                                    
+                                    <!-- Feature 1 -->
+                                    <div style="background: #f8fafc; padding: 2rem; border-radius: 12px; border: 1px solid #e2e8f0; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 10px 25px rgba(0, 0, 0, 0.1)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                                        <div style="width: 3rem; height: 3rem; background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem;">
+                                            <i class="fas fa-chart-line" style="color: #1e293b; font-size: 1.25rem;"></i>
+                                        </div>
+                                        <h3 style="font-size: 1.25rem; font-weight: 600; color: #1e293b; margin-bottom: 1rem;">Real-time Dashboards</h3>
+                                        <p style="color: #64748b; line-height: 1.6;">Get instant visibility into your financial performance with customizable dashboards and automated reporting.</p>
+                                    </div>
+                                    
+                                    <!-- Feature 2 -->
+                                    <div style="background: #f8fafc; padding: 2rem; border-radius: 12px; border: 1px solid #e2e8f0; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 10px 25px rgba(0, 0, 0, 0.1)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                                        <div style="width: 3rem; height: 3rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem;">
+                                            <i class="fas fa-brain" style="color: white; font-size: 1.25rem;"></i>
+                                        </div>
+                                        <h3 style="font-size: 1.25rem; font-weight: 600; color: #1e293b; margin-bottom: 1rem;">AI-Powered Insights</h3>
+                                        <p style="color: #64748b; line-height: 1.6;">Leverage artificial intelligence for forecasting, anomaly detection, and strategic financial recommendations.</p>
+                                    </div>
+                                    
+                                    <!-- Feature 3 -->
+                                    <div style="background: #f8fafc; padding: 2rem; border-radius: 12px; border: 1px solid #e2e8f0; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 10px 25px rgba(0, 0, 0, 0.1)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                                        <div style="width: 3rem; height: 3rem; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem;">
+                                            <i class="fas fa-file-invoice-dollar" style="color: white; font-size: 1.25rem;"></i>
+                                        </div>
+                                        <h3 style="font-size: 1.25rem; font-weight: 600; color: #1e293b; margin-bottom: 1rem;">Complete Financial Suite</h3>
+                                        <p style="color: #64748b; line-height: 1.6;">Manage AP/AR, generate financial statements, track budgets, and analyze performance all in one platform.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+        
+                        <!-- Social Proof Section -->
+                        <section style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding: 3rem 2rem; color: white;">
+                            <div style="max-width: 800px; margin: 0 auto; text-align: center;">
+                                <div style="display: flex; justify-content: center; align-items: center; gap: 3rem; margin-bottom: 2rem;">
+                                    <div>
+                                        <div style="font-size: 2rem; font-weight: 700; color: #fbbf24;">15+</div>
+                                        <div style="font-size: 0.875rem; color: #94a3b8;">Years Finance Leadership</div>
+                                    </div>
+                                    <div>
+                                        <div style="font-size: 2rem; font-weight: 700; color: #fbbf24;">5min</div>
+                                        <div style="font-size: 0.875rem; color: #94a3b8;">Average Setup Time</div>
+                                    </div>
+                                    <div>
+                                        <div style="font-size: 2rem; font-weight: 700; color: #fbbf24;">24/7</div>
+                                        <div style="font-size: 0.875rem; color: #94a3b8;">Real-time Updates</div>
+                                    </div>
+                                </div>
+                                
+                                <blockquote style="font-size: 1.125rem; font-style: italic; margin-bottom: 1rem; color: #e2e8f0;">
+                                    "Built by finance experts who understand the real challenges of managing business finances in emerging markets."
+                                </blockquote>
+                                <div style="font-size: 0.875rem; color: #94a3b8;">— Finance Leadership Team</div>
+                            </div>
+                        </section>
+        
+                        <!-- CTA Section -->
+                        <section style="background: #f8fafc; padding: 4rem 2rem; text-align: center;">
+                            <div style="max-width: 600px; margin: 0 auto;">
+                                <h2 style="font-size: 2.5rem; font-weight: 700; color: #1e293b; margin-bottom: 1rem;">Ready to transform your finance operations?</h2>
+                                <p style="font-size: 1.125rem; color: #64748b; margin-bottom: 2rem;">Join forward-thinking businesses using MontPro to gain financial clarity and control.</p>
+                                
+                                <button onclick="signInWithGoogle()" style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: #1e293b; border: none; padding: 1rem 2rem; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3); font-size: 1.125rem;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(251, 191, 36, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(251, 191, 36, 0.3)'">
+                                    <i class="fas fa-google" style="margin-right: 0.5rem;"></i>
+                                    Start Your Free Trial
+                                </button>
+                                
+                                <p style="font-size: 0.875rem; color: #94a3b8; margin-top: 1rem;">No credit card required • 14-day free trial • Full access</p>
+                            </div>
+                        </section>
+                    </main>
                 </div>
             `;
             
-            document.body.insertAdjacentHTML('beforeend', loginHTML);
+            document.body.insertAdjacentHTML('beforeend', landingHTML);
         }
         
         async function signInWithGoogle() {
