@@ -22419,34 +22419,59 @@
             }
             
             // Card 2: Revenue Performance (using GL accounts)
-            const revenuePerformance = calculateRevenuePerformanceFromGL('YTD');
             const revenueElement = document.getElementById('revenuePerformanceValue');
             const revenueChangeElement = document.getElementById('revenuePerformanceChange');
             
             if (revenueElement) {
-                revenueElement.textContent = formatCurrencyFull(revenuePerformance.currentRevenue, 'IDR');
+                // Use the same calculation as financial statements
+                const currentYearData = calculateFinancialDataFromTransactions(
+                    getTransactionsForPeriodFixed('YTD', 'custom'), 'YTD', 'custom'
+                );
+                
+                revenueElement.textContent = formatCurrencyFull(currentYearData.netRevenue, 'IDR');
+                console.log('Revenue Performance - using netRevenue:', currentYearData.netRevenue);
             }
             if (revenueChangeElement) {
-                const growthPercent = revenuePerformance.growthPercent;
+                // Calculate YoY growth using the same logic
+                const currentYearTransactions = getTransactionsForPeriodFixed('YTD', 'custom');
+                const lastYearTransactions = financialTransactions.filter(transaction => {
+                    const transactionDate = new Date(transaction.transaction_date);
+                    const lastYear = new Date().getFullYear() - 1;
+                    const startDate = new Date(lastYear, 0, 1);
+                    const endDate = new Date(lastYear, new Date().getMonth(), new Date().getDate());
+                    return transactionDate >= startDate && transactionDate <= endDate;
+                });
+                
+                const currentYearRevenue = calculateFinancialDataFromTransactions(currentYearTransactions, 'YTD', 'custom').netRevenue;
+                const lastYearRevenue = calculateFinancialDataFromTransactions(lastYearTransactions, 'YTD', 'custom').netRevenue;
+                
+                const growthPercent = lastYearRevenue > 0 ? ((currentYearRevenue - lastYearRevenue) / lastYearRevenue) * 100 : 0;
                 revenueChangeElement.textContent = `${growthPercent >= 0 ? '+' : ''}${growthPercent.toFixed(1)}% vs last year`;
                 revenueChangeElement.className = `metric-change ${growthPercent >= 0 ? 'positive' : 'negative'}`;
             }
             
-            // Card 3: Profitability (calculate from current data)
+            // Card 3: Profitability (calculate Net Income Margin)
             const profitabilityElement = document.getElementById('profitabilityValue');
             const profitabilityChangeElement = document.getElementById('profitabilityChange');
             
             if (profitabilityElement && profitabilityChangeElement) {
-                // Calculate current year's profitability
                 const currentYearData = calculateFinancialDataFromTransactions(
-                    getTransactionsForPeriodFixed(getCurrentYTDPeriod(), 'custom')
+                    getTransactionsForPeriodFixed('YTD', 'custom'), 'YTD', 'custom'
                 );
-                const profitMargin = currentYearData.netRevenue > 0 ? 
-                    ((currentYearData.netRevenue - currentYearData.opex) / currentYearData.netRevenue) * 100 : 0;
+                
+                // Net Income Margin = Net Income / Net Revenue * 100
+                const netIncomeMargin = currentYearData.netRevenue > 0 ? 
+                    (currentYearData.netIncome / currentYearData.netRevenue) * 100 : 0;
                     
-                profitabilityElement.textContent = `${profitMargin.toFixed(1)}%`;
-                profitabilityChangeElement.textContent = profitMargin >= 15 ? 'Strong margin' : 'Monitor margin';
-                profitabilityChangeElement.className = `metric-change ${profitMargin >= 15 ? 'positive' : 'neutral'}`;
+                profitabilityElement.textContent = `${netIncomeMargin.toFixed(1)}%`;
+                profitabilityChangeElement.textContent = netIncomeMargin >= 10 ? 'Strong margin' : netIncomeMargin >= 5 ? 'Good margin' : 'Monitor margin';
+                profitabilityChangeElement.className = `metric-change ${netIncomeMargin >= 10 ? 'positive' : netIncomeMargin >= 5 ? 'neutral' : 'negative'}`;
+                
+                console.log('Profitability calculation:', {
+                    netIncome: currentYearData.netIncome,
+                    netRevenue: currentYearData.netRevenue,
+                    netIncomeMargin: netIncomeMargin
+                });
             }
             
             // Card 4: Working Capital (calculate from current balance sheet data)
@@ -22464,14 +22489,35 @@
                 workingCapitalChangeElement.className = `metric-change ${currentRatio >= 1.2 ? 'positive' : 'neutral'}`;
             }
             
-            // Card 5: Budget Variance (NEW: using budget data)
+            // Card 5: Budget Variance (show Revenue Variance specifically)
             const budgetVarianceElement = document.getElementById('budgetVarianceValue');
             const budgetVarianceChangeElement = document.getElementById('budgetVarianceChange');
             
             if (budgetVarianceElement && budgetVarianceChangeElement) {
                 try {
                     const budgetVariance = await calculateDashboardBudgetVariance();
-                    // ... rest of the budget variance code
+                    
+                    if (budgetVariance.details && budgetVariance.details.revenueVariance !== undefined) {
+                        const revenueVariance = budgetVariance.details.revenueVariance;
+                        
+                        budgetVarianceElement.textContent = `${revenueVariance >= 0 ? '+' : ''}${revenueVariance.toFixed(1)}%`;
+                        budgetVarianceChangeElement.textContent = `Revenue vs Budget`;
+                        
+                        // Color coding based on variance
+                        if (Math.abs(revenueVariance) <= 5) {
+                            budgetVarianceChangeElement.className = 'metric-change positive';
+                        } else if (revenueVariance > 5) {
+                            budgetVarianceChangeElement.className = 'metric-change positive';
+                        } else {
+                            budgetVarianceChangeElement.className = 'metric-change negative';
+                        }
+                        
+                        console.log('Budget Variance (Revenue):', revenueVariance);
+                    } else {
+                        budgetVarianceElement.textContent = 'N/A';
+                        budgetVarianceChangeElement.textContent = budgetVariance.status;
+                        budgetVarianceChangeElement.className = 'metric-change neutral';
+                    }
                 } catch (error) {
                     console.error('Error calculating budget variance for card:', error);
                     budgetVarianceElement.textContent = 'N/A';
