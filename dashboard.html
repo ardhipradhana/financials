@@ -10322,7 +10322,7 @@
                     <div class="metric-card">
                         <div class="metric-header">
                             <div class="metric-top-section">
-                                <div class="metric-title">Revenue Performance</div>
+                                <div class="metric-title">Revenue Performance (YTD)</div>
                                 <div class="metric-icon icon-ar">
                                     <i class="fas fa-chart-line"></i>
                                 </div>
@@ -10339,7 +10339,7 @@
                     <div class="metric-card">
                         <div class="metric-header">
                             <div class="metric-top-section">
-                                <div class="metric-title">Profitability</div>
+                                <div class="metric-title">Net Income Margin (YTD)</div>
                                 <div class="metric-icon icon-opex">
                                     <i class="fas fa-percentage"></i>
                                 </div>
@@ -20669,11 +20669,15 @@
         function generateIncomeStatement() {
             // GET FILTERED TRANSACTIONS BASED ON PERIOD SELECTOR
             const filteredTransactions = getFilteredFinancialTransactions();
+            const cleanTransactions = filteredTransactions.filter(tx => 
+                tx.source !== 'Smart-Balance' && 
+                !tx.description?.includes('Smart balance correction')
+            );
             console.log('Generating Income Statement with filtered transactions:', filteredTransactions.length);
             
             // Use FILTERED transactions for period-specific income statement
-            const revenueTransactions = filteredTransactions.filter(t => t.category === 'Revenue');
-            const expenseTransactions = filteredTransactions.filter(t => t.category === 'Expense');
+            const revenueTransactions = cleanTransactions.filter(t => t.category === 'Revenue');
+            const expenseTransactions = cleanTransactions.filter(t => t.category === 'Expense');
             
             const revenueAccounts = groupTransactionsByAccount(revenueTransactions);
             const expenseAccounts = groupTransactionsByAccount(expenseTransactions);
@@ -22226,16 +22230,22 @@
                     break;
             }
             
-            // Filter transactions for current period
+            // Filter transactions for current period AND exclude smart balance
             const currentPeriodTransactions = financialTransactions.filter(transaction => {
                 const transactionDate = new Date(transaction.transaction_date);
-                return transactionDate >= currentStartDate && transactionDate <= currentEndDate;
+                const isInDateRange = transactionDate >= currentStartDate && transactionDate <= currentEndDate;
+                const isNotSmartBalance = transaction.source !== 'Smart-Balance' && 
+                                        !transaction.description?.includes('Smart balance correction');
+                return isInDateRange && isNotSmartBalance;
             });
             
-            // Filter transactions for previous period
+            // Filter transactions for previous period AND exclude smart balance
             const previousPeriodTransactions = financialTransactions.filter(transaction => {
                 const transactionDate = new Date(transaction.transaction_date);
-                return transactionDate >= previousStartDate && transactionDate <= previousEndDate;
+                const isInDateRange = transactionDate >= previousStartDate && transactionDate <= previousEndDate;
+                const isNotSmartBalance = transaction.source !== 'Smart-Balance' && 
+                                        !transaction.description?.includes('Smart balance correction');
+                return isInDateRange && isNotSmartBalance;
             });
             
             // Calculate revenue for both periods using GL revenue accounts (4000-4999)
