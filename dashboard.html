@@ -14141,11 +14141,15 @@
                 
                 // User is logged in, load their profile and data
                 console.log('User logged in:', user.email);
-                
+
                 await loadUserProfile();
                 await loadFinancialTransactions();
                 await loadAPARData();
                 await loadGLAccounts();
+                
+                // Initialize enhanced dashboard with risk alerts and all components
+                console.log('Initializing enhanced dashboard...');
+                await initializeDashboardData();
                 
             } catch (error) {
                 console.error('Auth check failed:', error);
@@ -14621,7 +14625,7 @@
                     if (customRange) {
                         customRange.style.display = this.value === 'custom' ? 'block' : 'none';
                     }
-                    updateDashboardWithRealData();
+                    initializeDashboardData();
                 });
             }
             
@@ -14668,7 +14672,7 @@
                 
                 // Update dashboard with loaded data
                 console.log('Updating dashboard with real data...');
-                updateDashboardWithRealData();
+                initializeDashboardData();
                 
                 // Initialize AP/AR summary
                 updateAPARSummary();
@@ -14757,7 +14761,7 @@
                     console.log('All categories:', [...new Set(financialTransactions.map(t => t.category))]);
                     console.log('All account names:', [...new Set(financialTransactions.map(t => t.account_name))]);
                 }
-                updateDashboardWithRealData();
+                initializeDashboardData();
             }, 2000);
         });
 
@@ -15005,7 +15009,7 @@
                 
                 if (this.dataset.section === 'dashboard') {
                     setTimeout(() => {
-                        updateDashboardWithRealData();
+                        initializeDashboardData();
                     }, 100);
                 }
         
@@ -15491,7 +15495,7 @@
                 console.error('Error loading data:', error);
                 alert('Error loading transactions: ' + error.message);
             }
-            updateDashboardWithRealData();
+            initializeDashboardData();
         }
         
         async function saveTransaction(transaction) {
@@ -16177,7 +16181,7 @@
                 startConnectionMonitoring();
                 initializeCashFlowForecast();
                 updateAgingAnalysis();
-                updateDashboardWithRealData();
+                initializeDashboardData();
             });
 
             loadFinancialDataGlobally().then(() => {
@@ -20659,7 +20663,7 @@
             generateBalanceSheet();
             generateIncomeStatement();
             generateCashFlowStatement();
-            updateDashboardWithRealData();
+            initializeDashboardData();
         }
         
         function generateIncomeStatement() {
@@ -35767,24 +35771,41 @@
         // NEW: Risk & Alert Management Functions
         function generateRiskAlerts() {
             console.log('=== GENERATING RISK ALERTS ===');
+            console.log('aparTransactions length:', aparTransactions?.length || 'undefined');
+            console.log('financialTransactions length:', financialTransactions?.length || 'undefined');
             
             try {
+                // Cash Flow Alerts
+                console.log('Generating cash flow alerts...');
                 const cashFlowAlerts = generateCashFlowAlerts();
-                const aparAlerts = generateAPARAlerts();
-                const healthAlerts = generateFinancialHealthAlerts();
-                
-                // Don't call generateBudgetAlerts() directly since it's async
-                // Handle budget alerts separately
+                console.log('Cash flow alerts generated:', cashFlowAlerts.length);
                 updateAlertUI('cashFlowAlerts', 'cashFlowAlertCount', cashFlowAlerts);
+                
+                // AP/AR Alerts
+                console.log('Generating AP/AR alerts...');
+                const aparAlerts = generateAPARAlerts();
+                console.log('AP/AR alerts generated:', aparAlerts.length);
                 updateAlertUI('aparAlerts', 'aparAlertCount', aparAlerts);
+                
+                // Financial Health Alerts
+                console.log('Generating financial health alerts...');
+                const healthAlerts = generateFinancialHealthAlerts();
+                console.log('Health alerts generated:', healthAlerts.length);
                 updateAlertUI('healthAlerts', 'healthAlertCount', healthAlerts);
                 
-                // Handle budget alerts asynchronously
+                // Budget alerts (async)
+                console.log('Generating budget alerts...');
                 generateBudgetAlertsAsync();
                 
                 console.log('Risk alerts generated successfully');
             } catch (error) {
                 console.error('Error generating risk alerts:', error);
+                
+                // Set all to "No alerts" if there's an error
+                updateAlertUI('cashFlowAlerts', 'cashFlowAlertCount', []);
+                updateAlertUI('aparAlerts', 'aparAlertCount', []);
+                updateAlertUI('healthAlerts', 'healthAlertCount', []);
+                updateAlertUI('budgetAlerts', 'budgetAlertCount', []);
             }
         }
 
@@ -35836,9 +35857,19 @@
             const alerts = [];
             
             try {
-                // Get cash flow forecast data
-                const forecastData = generateForecastData();
-                if (!forecastData || forecastData.length === 0) {
+                // Check if we have the required data
+                if (!aparTransactions || aparTransactions.length === 0) {
+                    console.log('No AP/AR data available for cash flow alerts');
+                    return alerts;
+                }
+                
+                // Get cash flow forecast data - use existing cash flow chart data
+                let forecastData = [];
+                if (window.forecastData && window.forecastData.length > 0) {
+                    forecastData = window.forecastData;
+                } else {
+                    // Generate simple forecast if not available
+                    console.log('No forecast data available, skipping cash flow alerts');
                     return alerts;
                 }
                 
@@ -35848,32 +35879,29 @@
                     if (week.cashPosition < 0) {
                         alerts.push({
                             severity: 'high',
-                            title: `Cash Shortfall in ${week.week}`,
+                            title: `Cash Shortfall in Week ${index + 1}`,
                             description: `Projected negative cash position`,
                             value: formatCurrencyFull(week.cashPosition, 'IDR')
                         });
                     } else if (week.cashPosition < 50000000) { // Less than 50M IDR
                         alerts.push({
                             severity: 'medium',
-                            title: `Low Cash Warning - ${week.week}`,
+                            title: `Low Cash Warning - Week ${index + 1}`,
                             description: `Cash position below minimum threshold`,
                             value: formatCurrencyFull(week.cashPosition, 'IDR')
                         });
                     }
                 });
                 
-                // Check for significant cash drops week-over-week
-                for (let i = 1; i < Math.min(forecastData.length, 8); i++) {
-                    const currentWeek = forecastData[i];
-                    const previousWeek = forecastData[i - 1];
-                    const dropPercentage = ((currentWeek.cashPosition - previousWeek.cashPosition) / previousWeek.cashPosition) * 100;
-                    
-                    if (dropPercentage < -25) {
+                // If no specific alerts, add a general cash flow status
+                if (alerts.length === 0) {
+                    const currentCash = forecastData[0]?.cashPosition || 0;
+                    if (currentCash > 100000000) {
                         alerts.push({
-                            severity: 'medium',
-                            title: `Significant Cash Drop`,
-                            description: `${dropPercentage.toFixed(1)}% decrease in ${currentWeek.week}`,
-                            value: `From ${formatCurrencyFull(previousWeek.cashPosition, 'IDR')} to ${formatCurrencyFull(currentWeek.cashPosition, 'IDR')}`
+                            severity: 'low',
+                            title: 'Cash Flow Healthy',
+                            description: 'Sufficient cash reserves projected',
+                            value: formatCurrencyFull(currentCash, 'IDR')
                         });
                     }
                 }
@@ -35891,16 +35919,27 @@
             
             try {
                 if (!aparTransactions || aparTransactions.length === 0) {
+                    console.log('No AP/AR transactions available for alerts');
                     return alerts;
                 }
                 
-                // Find severely overdue AR (over 90 days)
-                const severelyOverdueAR = aparTransactions.filter(t => 
-                    t.type === 'AR' && t.status === 'Overdue' && 
-                    calculateDaysOverdue(t) > 90
+                // Find overdue AR
+                const overdueAR = aparTransactions.filter(t => 
+                    t.type === 'AR' && t.status === 'Overdue'
                 );
                 
-                severelyOverdueAR.slice(0, 3).forEach(transaction => {
+                // Find overdue AP
+                const overdueAP = aparTransactions.filter(t => 
+                    t.type === 'AP' && t.status === 'Overdue'
+                );
+                
+                // Add alerts for severely overdue AR (over 60 days)
+                const severelyOverdueAR = overdueAR.filter(t => {
+                    const daysOverdue = calculateDaysOverdue(t);
+                    return daysOverdue > 60;
+                }).slice(0, 2);
+                
+                severelyOverdueAR.forEach(transaction => {
                     alerts.push({
                         severity: 'high',
                         title: `Severely Overdue Invoice`,
@@ -35909,13 +35948,10 @@
                     });
                 });
                 
-                // Find large overdue AP (over 30 days and > 100M IDR)
-                const criticalAP = aparTransactions.filter(t => 
-                    t.type === 'AP' && t.status === 'Overdue' && 
-                    calculateDaysOverdue(t) > 30 && Math.abs(t.amount) > 100000000
-                );
+                // Add alerts for large overdue AP
+                const largeOverdueAP = overdueAP.filter(t => Math.abs(t.amount) > 50000000).slice(0, 2);
                 
-                criticalAP.slice(0, 3).forEach(transaction => {
+                largeOverdueAP.forEach(transaction => {
                     alerts.push({
                         severity: 'medium',
                         title: `Large Overdue Payment`,
@@ -35925,16 +35961,34 @@
                 });
                 
                 // Summary alert for total overdue amounts
-                const totalOverdueAR = aparTransactions
-                    .filter(t => t.type === 'AR' && t.status === 'Overdue')
-                    .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+                const totalOverdueAR = overdueAR.reduce((sum, t) => sum + Math.abs(t.amount), 0);
+                const totalOverdueAP = overdueAP.reduce((sum, t) => sum + Math.abs(t.amount), 0);
                 
-                if (totalOverdueAR > 500000000) { // Over 500M IDR
+                if (totalOverdueAR > 200000000) {
                     alerts.push({
                         severity: 'medium',
                         title: `High Total AR Overdue`,
-                        description: `Total overdue receivables exceed threshold`,
+                        description: `${overdueAR.length} overdue invoices`,
                         value: formatCurrencyFull(totalOverdueAR, 'IDR')
+                    });
+                }
+                
+                if (totalOverdueAP > 100000000) {
+                    alerts.push({
+                        severity: 'medium',
+                        title: `High Total AP Overdue`,
+                        description: `${overdueAP.length} overdue payments`,
+                        value: formatCurrencyFull(totalOverdueAP, 'IDR')
+                    });
+                }
+                
+                // If no alerts, add positive message
+                if (alerts.length === 0) {
+                    alerts.push({
+                        severity: 'low',
+                        title: 'AP/AR Status Good',
+                        description: 'No critical overdue items',
+                        value: 'All accounts current'
                     });
                 }
                 
