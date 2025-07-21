@@ -22427,23 +22427,35 @@
             const revenueChangeElement = document.getElementById('revenuePerformanceChange');
             
             if (revenueElement) {
-                // Use the same calculation as financial statements
-                const currentYearData = calculateFinancialDataFromTransactions(
-                    getTransactionsForPeriodFixed('YTD', 'custom'), 'YTD', 'custom'
+                // Get YTD transactions but exclude smart balance corrections
+                const allYTDTransactions = getTransactionsForPeriodFixed('YTD', 'custom');
+                const filteredTransactions = allYTDTransactions.filter(tx => 
+                    tx.source !== 'Smart-Balance' && 
+                    !tx.description?.includes('Smart balance correction')
                 );
                 
+                const currentYearData = calculateFinancialDataFromTransactions(filteredTransactions, 'YTD', 'custom');
+                
                 revenueElement.textContent = formatCurrencyFull(currentYearData.netRevenue, 'IDR');
-                console.log('Revenue Performance - using netRevenue:', currentYearData.netRevenue);
+                console.log('Revenue Performance - using netRevenue (excluding smart balance):', currentYearData.netRevenue);
             }
+            
             if (revenueChangeElement) {
-                // Calculate YoY growth using the same logic
-                const currentYearTransactions = getTransactionsForPeriodFixed('YTD', 'custom');
+                // Calculate YoY growth using the same logic (also exclude smart balance)
+                const currentYearTransactions = getTransactionsForPeriodFixed('YTD', 'custom').filter(tx => 
+                    tx.source !== 'Smart-Balance' && 
+                    !tx.description?.includes('Smart balance correction')
+                );
+                
                 const lastYearTransactions = financialTransactions.filter(transaction => {
                     const transactionDate = new Date(transaction.transaction_date);
                     const lastYear = new Date().getFullYear() - 1;
                     const startDate = new Date(lastYear, 0, 1);
                     const endDate = new Date(lastYear, new Date().getMonth(), new Date().getDate());
-                    return transactionDate >= startDate && transactionDate <= endDate;
+                    const isInRange = transactionDate >= startDate && transactionDate <= endDate;
+                    const isNotSmartBalance = transaction.source !== 'Smart-Balance' && 
+                                            !transaction.description?.includes('Smart balance correction');
+                    return isInRange && isNotSmartBalance;
                 });
                 
                 const currentYearRevenue = calculateFinancialDataFromTransactions(currentYearTransactions, 'YTD', 'custom').netRevenue;
