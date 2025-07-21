@@ -36338,133 +36338,56 @@
         // NEW: Dashboard Trending Chart Functions
         function generateDashboardTrendingChart() {
             try {
-                // Get trending data (reuse existing function but limit to 6 months)
-                const trendingData = generateTrendingAnalysis();
-                if (!trendingData || trendingData.periods.length === 0) {
+                // Reuse existing trending logic but adapt for dashboard
+                const monthsToInclude = 6; // Fixed to 6 months for dashboard
+                
+                // Calculate trending data using existing function
+                const trendingData = calculateTrendingData(monthsToInclude);
+                
+                if (!trendingData || !trendingData.periods || trendingData.periods.length === 0) {
+                    console.log('No trending data available for dashboard chart');
                     return;
                 }
                 
-                // Limit to last 6 periods for dashboard view
-                const maxPeriods = 6;
-                const startIndex = Math.max(0, trendingData.periods.length - maxPeriods);
+                // Find if there's an existing chart element in the dashboard
+                // Look for common chart element IDs that might exist
+                const possibleChartIds = [
+                    'dashboardTrendingChart', 
+                    'dashboardChart', 
+                    'mainDashboardChart',
+                    'overviewChart'
+                ];
                 
-                const dashboardData = {
-                    periods: trendingData.periods.slice(startIndex),
-                    revenue: trendingData.revenue.slice(startIndex),
-                    opex: trendingData.opex.slice(startIndex)
-                };
-                
-                const ctx = document.getElementById('dashboardTrendingChart');
-                if (!ctx) return;
-                
-                // Destroy existing chart if it exists
-                if (window.dashboardTrendingChartInstance) {
-                    window.dashboardTrendingChartInstance.destroy();
+                let chartElement = null;
+                for (const id of possibleChartIds) {
+                    chartElement = document.getElementById(id);
+                    if (chartElement) {
+                        console.log(`Found chart element: ${id}`);
+                        break;
+                    }
                 }
                 
-                // Create new chart
-                window.dashboardTrendingChartInstance = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: dashboardData.periods,
-                        datasets: [
-                            {
-                                label: 'Revenue',
-                                data: dashboardData.revenue,
-                                borderColor: '#10b981',
-                                backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                                borderWidth: 3,
-                                fill: true,
-                                tension: 0.4,
-                                pointBackgroundColor: '#10b981',
-                                pointBorderColor: '#ffffff',
-                                pointBorderWidth: 2,
-                                pointRadius: 5
-                            },
-                            {
-                                label: 'OPEX',
-                                data: dashboardData.opex,
-                                borderColor: '#ef4444',
-                                backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                                borderWidth: 3,
-                                fill: true,
-                                tension: 0.4,
-                                pointBackgroundColor: '#ef4444',
-                                pointBorderColor: '#ffffff',
-                                pointBorderWidth: 2,
-                                pointRadius: 5
-                            }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'top',
-                                labels: {
-                                    usePointStyle: true,
-                                    padding: 20,
-                                    font: {
-                                        size: 12,
-                                        weight: '500'
-                                    }
-                                }
-                            },
-                            tooltip: {
-                                mode: 'index',
-                                intersect: false,
-                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                                titleColor: '#ffffff',
-                                bodyColor: '#ffffff',
-                                borderColor: '#e2e8f0',
-                                borderWidth: 1,
-                                callbacks: {
-                                    label: function(context) {
-                                        return `${context.dataset.label}: Rp ${context.parsed.y.toFixed(1)}M`;
-                                    }
-                                }
-                            }
-                        },
-                        scales: {
-                            x: {
-                                grid: {
-                                    display: false
-                                },
-                                ticks: {
-                                    font: {
-                                        size: 11
-                                    },
-                                    color: '#6b7280'
-                                }
-                            },
-                            y: {
-                                beginAtZero: true,
-                                grid: {
-                                    color: '#f3f4f6',
-                                    lineWidth: 1
-                                },
-                                ticks: {
-                                    callback: function(value) {
-                                        return 'Rp ' + value + 'M';
-                                    },
-                                    font: {
-                                        size: 11
-                                    },
-                                    color: '#6b7280'
-                                }
-                            }
-                        },
-                        interaction: {
-                            mode: 'nearest',
-                            axis: 'x',
-                            intersect: false
-                        }
-                    }
-                });
+                if (!chartElement) {
+                    console.log('No chart element found in dashboard - skipping trending chart');
+                    return;
+                }
                 
-                // Generate insights for the dashboard
-                generateDashboardTrendingInsights(dashboardData);
+                // Use existing renderTrendingChart function but with dashboard element
+                const originalChart = document.getElementById('trendingChart');
+                if (originalChart) {
+                    // Temporarily point to dashboard element
+                    originalChart.id = 'tempTrendingChart';
+                    chartElement.id = 'trendingChart';
+                    
+                    // Render using existing function
+                    renderTrendingChart(trendingData);
+                    
+                    // Restore original IDs
+                    chartElement.id = possibleChartIds[0];
+                    originalChart.id = 'trendingChart';
+                }
+                
+                console.log('Dashboard trending chart generated successfully');
                 
             } catch (error) {
                 console.error('Error generating dashboard trending chart:', error);
