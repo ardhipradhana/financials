@@ -22459,9 +22459,8 @@
             const profitabilityChangeElement = document.getElementById('profitabilityChange');
             
             if (profitabilityElement && profitabilityChangeElement) {
-                const currentYearData = calculateFinancialDataFromTransactions(
-                    const currentYearTransactions = getTransactionsForPeriodFixed('YTD', 'custom');
-                );
+                const currentYearTransactions = getTransactionsForPeriodFixed('YTD', 'custom');
+                const currentYearData = calculateFinancialDataFromTransactions(currentYearTransactions);
                 
                 // Net Income Margin = Net Income / Net Revenue * 100
                 const netIncomeMargin = currentYearData.netRevenue > 0 ? 
