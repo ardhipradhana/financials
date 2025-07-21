@@ -22305,7 +22305,7 @@
                 const currentYear = today.getFullYear();
                 const currentMonth = today.getMonth() + 1;
                 
-                // Define monthsToInclude for YTD (this was missing!)
+                // Define monthsToInclude for YTD
                 const monthsToInclude = [];
                 for (let i = 1; i <= currentMonth; i++) {
                     monthsToInclude.push(i);
@@ -22316,14 +22316,10 @@
                     getTransactionsForPeriodFixed('YTD', 'custom'), 'YTD', 'custom'
                 );
                 
-                // Get YTD budget data (sum of Jan to current month)
+                // Get YTD budget data from the correct table (budgets, not budget_entries)
                 const { data: budgetData, error } = await supabase
-                    .from('budget_entries')
-                    .select(`
-                        amount,
-                        budget_month,
-                        budget_account_mapping(account_code, category)
-                    `)
+                    .from('budgets')
+                    .select('*')
                     .eq('user_id', user.id)
                     .eq('budget_year', currentYear)
                     .in('budget_month', monthsToInclude);
@@ -22337,8 +22333,8 @@
                     return { variance: 0, status: 'No budget set' };
                 }
                 
-                // Calculate YTD budget totals
-                const ytdBudgetData = calculateBudgetTotals(budgetData);
+                // Calculate YTD budget totals using the correct structure
+                const ytdBudgetData = calculateBudgetTotalsFromBudgetsTable(budgetData);
                 
                 // Calculate key variances
                 const revenueVariance = ytdBudgetData.revenue !== 0 ? 
@@ -22356,23 +22352,47 @@
                 else if (overallVariance > 5) status = 'Above budget';
                 else status = 'Below budget';
                 
-        return {
-            variance: overallVariance,
-            status,
-            details: {
-                revenueVariance,
-                opexVariance,
-                ebitdaVariance,
-                actual: ytdActualData,
-                budget: ytdBudgetData
+                return {
+                    variance: overallVariance,
+                    status,
+                    details: {
+                        revenueVariance,
+                        opexVariance,
+                        ebitdaVariance,
+                        actual: ytdActualData,
+                        budget: ytdBudgetData
+                    }
+                };
+                
+            } catch (error) {
+                console.error('Error calculating budget variance:', error);
+                return { variance: 0, status: 'Calculation error' };
             }
-        };
-        
-    } catch (error) {
-        console.error('Error calculating budget variance:', error);
-        return { variance: 0, status: 'Calculation error' };
-    }
-}
+        }
+
+        function calculateBudgetTotalsFromBudgetsTable(budgetData) {
+            const totals = { revenue: 0, cogs: 0, opex: 0, ebitda: 0 };
+            
+            budgetData.forEach(entry => {
+                const amount = parseFloat(entry.amount) || 0;
+                const category = entry.category; // category is directly in the budgets table
+                
+                switch(category) {
+                    case 'revenue':
+                        totals.revenue += amount;
+                        break;
+                    case 'cogs':
+                        totals.cogs += amount;
+                        break;
+                    case 'opex':
+                        totals.opex += amount;
+                        break;
+                }
+            });
+            
+            totals.ebitda = totals.revenue - totals.cogs - totals.opex;
+            return totals;
+        }
         
         async function updateDashboardCardsWithGL(metrics) {
             console.log('=== UPDATING DASHBOARD CARDS WITH COMPLETE DATA ===');
@@ -36110,13 +36130,10 @@
                         break;
                 }
                 
-                // Get budget data for the relevant months
+                // Get budget data from the correct table (budgets)
                 const { data: budgetData, error } = await supabase
-                    .from('budget_entries')
-                    .select(`
-                        *,
-                        budget_account_mapping!inner(account_code, category)
-                    `)
+                    .from('budgets')
+                    .select('*')
                     .eq('user_id', user.id)
                     .eq('budget_year', currentYear)
                     .in('budget_month', monthsToInclude);
@@ -36126,7 +36143,7 @@
                     return null;
                 }
                 
-                return calculateBudgetTotals(budgetData || []);
+                return calculateBudgetTotalsFromBudgetsTable(budgetData || []);
                 
             } catch (error) {
                 console.error('Error in getDashboardBudgetData:', error);
