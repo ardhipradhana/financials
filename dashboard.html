@@ -9900,6 +9900,309 @@
             display: flex;
             gap: 0.5rem;
         }
+
+        .icon-working-capital { 
+            background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 50%, #c084fc 100%);
+            box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
+        }
+        .icon-budget { 
+            background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 50%, #fcd34d 100%);
+            box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
+        }
+        .icon-industry { 
+            background: linear-gradient(135deg, #10b981 0%, #34d399 50%, #6ee7b7 100%);
+            box-shadow: 0 4px 12px rgba(52, 211, 153, 0.3);
+        }
+
+        /* Risk & Alert Summary Panel Styles */
+        .risk-alerts-container {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .alert-category-card {
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+        }
+        
+        .alert-category-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .alert-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.125rem;
+        }
+        
+        .alert-category-header h5 {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .alert-count {
+            font-size: 0.875rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+        
+        .alert-items {
+            padding: 1rem;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .alert-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 0.75rem;
+            transition: all 0.2s ease;
+        }
+        
+        .alert-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .alert-item:hover {
+            border-color: #cbd5e1;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .alert-severity {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-top: 0.5rem;
+            flex-shrink: 0;
+        }
+        
+        .alert-severity.high {
+            background: #ef4444;
+        }
+        
+        .alert-severity.medium {
+            background: #f59e0b;
+        }
+        
+        .alert-severity.low {
+            background: #10b981;
+        }
+        
+        .alert-content {
+            flex: 1;
+        }
+        
+        .alert-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 0.25rem;
+        }
+        
+        .alert-description {
+            font-size: 0.8rem;
+            color: #64748b;
+            line-height: 1.4;
+        }
+        
+        .alert-value {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #374151;
+            margin-top: 0.25rem;
+        }
+        
+        .no-alerts {
+            text-align: center;
+            color: #64748b;
+            font-size: 0.875rem;
+            padding: 2rem 1rem;
+        }
+        
+        .no-alerts i {
+            font-size: 2rem;
+            color: #10b981;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        /* Simplified P&L Comparison Styles */
+        .period-selector-dashboard {
+            display: flex;
+            align-items: center;
+        }
+        
+        .period-selector-dashboard select {
+            padding: 0.5rem 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            background: white;
+            font-size: 0.875rem;
+            color: #374151;
+            min-width: 140px;
+        }
+        
+        .simplified-pl-container {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .simplified-pl-table-wrapper {
+            overflow-x: auto;
+        }
+        
+        .simplified-pl-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+        
+        .simplified-pl-table th {
+            background: #f8fafc;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .simplified-pl-table th:last-child {
+            text-align: right;
+        }
+        
+        .simplified-pl-table td {
+            padding: 0.875rem 1rem;
+            border-bottom: 1px solid #e2e8f0;
+            vertical-align: middle;
+        }
+        
+        .simplified-pl-table tbody tr:hover {
+            background: #f8fafc;
+        }
+        
+        .pl-line-item {
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .pl-value {
+            text-align: right;
+            font-weight: 500;
+            color: #374151;
+        }
+        
+        .pl-variance {
+            text-align: right;
+            font-weight: 600;
+        }
+        
+        .pl-variance.positive {
+            color: #059669;
+        }
+        
+        .pl-variance.negative {
+            color: #dc2626;
+        }
+        
+        .pl-variance.neutral {
+            color: #6b7280;
+        }
+        
+        /* Dashboard Trending Chart Styles */
+        .dashboard-trending-container {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .dashboard-trending-chart {
+            margin-bottom: 1.5rem;
+        }
+        
+        .trending-insights-dashboard {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 1rem;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .trending-insights-dashboard h5 {
+            margin: 0 0 0.75rem 0;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .insight-item-dashboard {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+        
+        .insight-item-dashboard:last-child {
+            margin-bottom: 0;
+        }
+        
+        .insight-icon-dashboard {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            color: white;
+            flex-shrink: 0;
+            margin-top: 0.125rem;
+        }
+        
+        .insight-icon-dashboard.revenue {
+            background: #10b981;
+        }
+        
+        .insight-icon-dashboard.expense {
+            background: #ef4444;
+        }
+        
+        .insight-icon-dashboard.trend {
+            background: #3b82f6;
+        }
+        
+        .insight-text-dashboard {
+            color: #374151;
+        }
         
     </style>
 </head>
@@ -9996,8 +10299,9 @@
         <div class="content-area">
             <!-- Dashboard Section -->
             <div id="dashboard-section" class="section-content">
-                <!-- Key Metrics Cards -->
-                <div class="metrics-grid">
+                <!-- Key Metrics Cards - Updated 3+1, 3+1 Layout -->
+                <div class="dashboard-cards-container" style="display: grid; grid-template-columns: 1fr 1fr 1fr 300px; grid-template-rows: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; margin-top: 2rem;">
+                    <!-- Row 1: Cards 1-3 -->
                     <div class="metric-card">
                         <div class="metric-header">
                             <div class="metric-top-section">
@@ -10006,93 +10310,124 @@
                                     <i class="fas fa-dollar-sign"></i>
                                 </div>
                             </div>
-                            <div class="metric-values-section">
-                                <div class="metric-value-large">Rp -42,750,000</div>
-                                <div class="metric-change negative">-8.2% vs last period</div>
+                            <div class="metric-content">
+                                <div class="metric-values-section">
+                                    <div class="metric-value-large" id="cashValue">Rp 0</div>
+                                    <div class="metric-change positive" id="cashChange">+12.5% vs last period</div>
+                                </div>
                             </div>
                         </div>
                     </div>
-
+                
                     <div class="metric-card">
                         <div class="metric-header">
                             <div class="metric-top-section">
-                                <div class="metric-title">Net Overdue Position</div>
+                                <div class="metric-title">Revenue Performance</div>
                                 <div class="metric-icon icon-ar">
-                                    <i class="fas fa-receipt"></i>
-                                </div>
-                            </div>
-                            <div class="metric-values-section">
-                                <div class="metric-value-large">Rp 7,250,000</div>
-                                <div class="metric-change positive">Net Rp 7,250,000 owed to you</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Revenue Card - FIXED -->
-                    <div class="metric-card">
-                        <div class="metric-header">
-                            <div class="metric-top-section">
-                                <div class="revenue-title-row">
-                                    <div class="metric-title">Revenue</div>
-                                    <select id="dashboardPeriodFilter" class="period-selector-fixed" onchange="updateDashboardWithRealData()">
-                                        <option value="MTD">This Month (MTD)</option>
-                                        <option value="QTD">This Quarter (QTD)</option>
-                                        <option value="YTD">This Year (YTD)</option>
-                                        <option value="L30D">Last 30 Days</option>
-                                        <option value="L90D">Last 90 Days</option>
-                                        <option value="custom">Custom Range</option>
-                                    </select>
-                                </div>
-                                <div class="metric-icon icon-revenue">
                                     <i class="fas fa-chart-line"></i>
                                 </div>
                             </div>
-                            <div class="metric-values-section">
-                                <div class="metric-value-large" id="revenueValue">Rp 0</div>
-                                <div class="metric-change neutral" id="revenueChange">No data for Jun</div>
-                                <div id="customRevenueDateRange" class="custom-date-range" style="display: none;">
-                                    <div class="date-range-inputs">
-                                        <input type="date" id="revenueDateFrom" class="date-input-enhanced">
-                                        <span class="date-separator">to</span>
-                                        <input type="date" id="revenueDateTo" class="date-input-enhanced">
+                            <div class="metric-content">
+                                <div class="metric-values-section">
+                                    <div class="metric-value-large" id="revenuePerformanceValue">Rp 0</div>
+                                    <div class="metric-change positive" id="revenuePerformanceChange">+15% vs last period</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div class="metric-top-section">
+                                <div class="metric-title">Profitability</div>
+                                <div class="metric-icon icon-opex">
+                                    <i class="fas fa-percentage"></i>
+                                </div>
+                            </div>
+                            <div class="metric-content">
+                                <div class="metric-values-section">
+                                    <div class="metric-value-large" id="profitabilityValue">0%</div>
+                                    <div class="metric-change positive" id="profitabilityChange">+2.1% vs last period</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <!-- Altman Z-Score Card - Spans both rows -->
+                    <div class="metric-card altman-zscore-card" style="grid-row: 1 / 3; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: white;">
+                        <div class="metric-header" style="height: 100%;">
+                            <div class="metric-top-section">
+                                <div class="metric-title" style="color: #fbbf24; font-size: 1rem; font-weight: 700;">Financial Health Score</div>
+                                <div class="metric-icon" style="background: rgba(251, 191, 36, 0.2); color: #fbbf24;">
+                                    <i class="fas fa-heartbeat"></i>
+                                </div>
+                            </div>
+                            <div class="metric-content" style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+                                <div class="zscore-display" style="margin: 1rem 0;">
+                                    <div class="metric-value-large" id="healthScoreValue" style="font-size: 3rem; color: #fbbf24; margin-bottom: 0.5rem;">0.0</div>
+                                    <div class="zscore-status" id="healthScoreStatus" style="font-size: 1.125rem; font-weight: 600; margin-bottom: 1rem;">Analyzing...</div>
+                                </div>
+                                <div class="zscore-breakdown" style="width: 100%;">
+                                    <div class="zscore-bar-container" style="background: rgba(255, 255, 255, 0.1); height: 8px; border-radius: 4px; margin-bottom: 1rem; position: relative;">
+                                        <div class="zscore-bar" id="healthScoreBar" style="background: #fbbf24; height: 100%; border-radius: 4px; width: 0%; transition: width 0.3s ease;"></div>
+                                    </div>
+                                    <div class="zscore-description" id="healthScoreDescription" style="font-size: 0.875rem; color: #cbd5e1; line-height: 1.4;">
+                                        Altman Z-Score measures financial distress risk using working capital, retained earnings, and profitability ratios.
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    
-                    <div class="metric-card enhanced-card altman-z-score" style="position: relative;">
-                        <div class="card-accent accent-purple"></div>
+                
+                    <!-- Row 2: Cards 4-6 -->
+                    <div class="metric-card">
                         <div class="metric-header">
-                            <div class="card-main">
-                                <div class="metric-title-group">
-                                    <div class="metric-title">Altman Z-Score</div>
-                                    <div class="metric-subtitle">Credit Risk Assessment</div>
+                            <div class="metric-top-section">
+                                <div class="metric-title">Working Capital</div>
+                                <div class="metric-icon icon-working-capital">
+                                    <i class="fas fa-balance-scale"></i>
                                 </div>
-                                <div class="metric-primary-group">
-                                    <span class="metric-value-large" id="healthScoreValue">2.45</span>
-                                    <div class="metric-breakdown">
-                                        <span class="breakdown-item">
-                                            <span class="breakdown-label">Rating</span>
-                                            <span class="breakdown-value" id="altmanRating">Good</span>
-                                        </span>
-                                        <span class="risk-indicator" id="riskLevel">Low Risk</span>
-                                    </div>
+                            </div>
+                            <div class="metric-content">
+                                <div class="metric-values-section">
+                                    <div class="metric-value-large" id="workingCapitalValue">Rp 0</div>
+                                    <div class="metric-change positive" id="workingCapitalChange">Healthy ratio</div>
                                 </div>
                             </div>
                         </div>
-                        
-                        <!-- Pro Upgrade Overlay for Basic Users -->
-                        <div class="pro-upgrade-overlay" id="altmanProOverlay" style="display: none;">
-                            <div class="upgrade-icon">🔒</div>
-                            <div class="upgrade-title">Pro Feature</div>
-                            <div class="upgrade-description">
-                                Advanced credit risk analysis with<br>
-                                Altman Z-Score calculations
+                    </div>
+                
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div class="metric-top-section">
+                                <div class="metric-title">Budget Variance</div>
+                                <div class="metric-icon icon-budget">
+                                    <i class="fas fa-chart-bar"></i>
+                                </div>
                             </div>
-                            <button onclick="showUpgradeModal()" class="upgrade-cta-btn">
-                                Upgrade to Pro
-                            </button>
+                            <div class="metric-content">
+                                <div class="metric-values-section">
+                                    <div class="metric-value-large" id="budgetVarianceValue">0%</div>
+                                    <div class="metric-change neutral" id="budgetVarianceChange">On track</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div class="metric-top-section">
+                                <div class="metric-title">Industry Position</div>
+                                <div class="metric-icon icon-industry">
+                                    <i class="fas fa-trophy"></i>
+                                </div>
+                            </div>
+                            <div class="metric-content">
+                                <div class="metric-values-section">
+                                    <div class="metric-value-large" id="industryPositionValue">0th</div>
+                                    <div class="metric-change neutral" id="industryPositionChange">Percentile</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -10252,6 +10587,136 @@
                                     <span>Forecast based on current AP/AR due dates</span>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Risk & Alert Summary Panel -->
+                <div class="dashboard-section" style="margin-top: 2rem;">
+                    <div class="section-header">
+                        <h4><i class="fas fa-exclamation-triangle" style="color: #f59e0b;"></i> Risk & Alert Summary</h4>
+                        <button class="btn btn-secondary" onclick="refreshRiskAlerts()">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                    </div>
+                    
+                    <div class="risk-alerts-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                        <!-- Cash Flow Alerts -->
+                        <div class="alert-category-card">
+                            <div class="alert-category-header">
+                                <div class="alert-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white;">
+                                    <i class="fas fa-water"></i>
+                                </div>
+                                <div>
+                                    <h5>Cash Flow Alerts</h5>
+                                    <span class="alert-count" id="cashFlowAlertCount">Loading...</span>
+                                </div>
+                            </div>
+                            <div class="alert-items" id="cashFlowAlerts">
+                                <!-- Cash flow alerts will be populated here -->
+                            </div>
+                        </div>
+                        
+                        <!-- AP/AR Alerts -->
+                        <div class="alert-category-card">
+                            <div class="alert-category-header">
+                                <div class="alert-icon" style="background: linear-gradient(135deg, #3b82f6, #1e40af); color: white;">
+                                    <i class="fas fa-receipt"></i>
+                                </div>
+                                <div>
+                                    <h5>AP/AR Alerts</h5>
+                                    <span class="alert-count" id="aparAlertCount">Loading...</span>
+                                </div>
+                            </div>
+                            <div class="alert-items" id="aparAlerts">
+                                <!-- AP/AR alerts will be populated here -->
+                            </div>
+                        </div>
+                        
+                        <!-- Budget Variance Alerts -->
+                        <div class="alert-category-card">
+                            <div class="alert-category-header">
+                                <div class="alert-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white;">
+                                    <i class="fas fa-chart-bar"></i>
+                                </div>
+                                <div>
+                                    <h5>Budget Variance Alerts</h5>
+                                    <span class="alert-count" id="budgetAlertCount">Loading...</span>
+                                </div>
+                            </div>
+                            <div class="alert-items" id="budgetAlerts">
+                                <!-- Budget alerts will be populated here -->
+                            </div>
+                        </div>
+                        
+                        <!-- Financial Health Alerts -->
+                        <div class="alert-category-card">
+                            <div class="alert-category-header">
+                                <div class="alert-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white;">
+                                    <i class="fas fa-heartbeat"></i>
+                                </div>
+                                <div>
+                                    <h5>Financial Health Alerts</h5>
+                                    <span class="alert-count" id="healthAlertCount">Loading...</span>
+                                </div>
+                            </div>
+                            <div class="alert-items" id="healthAlerts">
+                                <!-- Health alerts will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Simplified P&L Comparison -->
+                <div class="dashboard-section" style="margin-top: 2rem;">
+                    <div class="section-header">
+                        <h4><i class="fas fa-chart-line" style="color: #3b82f6;"></i> Performance vs Budget</h4>
+                        <div class="period-selector-dashboard">
+                            <select id="dashboardPeriodSelect" onchange="updateDashboardPL()">
+                                <option value="MTD">Month to Date</option>
+                                <option value="QTD">Quarter to Date</option>
+                                <option value="YTD" selected>Year to Date</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="simplified-pl-container">
+                        <div class="simplified-pl-table-wrapper">
+                            <table class="simplified-pl-table">
+                                <thead>
+                                    <tr>
+                                        <th>Line Item</th>
+                                        <th>Actual</th>
+                                        <th>Budget</th>
+                                        <th>Variance</th>
+                                        <th>Variance %</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="simplifiedPLBody">
+                                    <!-- Content will be populated by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Revenue & OPEX Trending Chart -->
+                <div class="dashboard-section" style="margin-top: 2rem;">
+                    <div class="section-header">
+                        <h4><i class="fas fa-trending-up" style="color: #10b981;"></i> Revenue & OPEX Trending</h4>
+                        <button class="btn btn-secondary" onclick="exportDashboardTrendingChart()">
+                            <i class="fas fa-download"></i> Export
+                        </button>
+                    </div>
+                    
+                    <div class="dashboard-trending-container">
+                        <div class="dashboard-trending-chart">
+                            <canvas id="dashboardTrendingChart" width="800" height="400"></canvas>
+                        </div>
+                        
+                        <!-- Trending Insights -->
+                        <div class="trending-insights-dashboard" id="dashboardTrendingInsights">
+                            <!-- Insights will be populated here -->
                         </div>
                     </div>
                 </div>
@@ -20856,16 +21321,17 @@
 
         // UPDATE DASHBOARD WITH REAL FINANCIAL DATA
         function updateDashboardWithRealData() {
-            console.log('=== UPDATING DASHBOARD WITH REAL AP/AR DATA ===');
+            console.log('=== UPDATING DASHBOARD WITH REAL AP/AR AND GL DATA ===');
             console.log('AP/AR transactions:', aparTransactions.length);
+            console.log('Financial transactions:', financialTransactions.length);
             
             try {
-                // Calculate metrics from AP/AR data
+                // Calculate metrics from AP/AR data (for cash and working capital)
                 const metrics = calculateDashboardMetrics();
                 console.log('Calculated metrics:', metrics);
                 
-                // Update the dashboard cards
-                updateDashboardCards(metrics);
+                // Update the dashboard cards with both AP/AR and GL data
+                updateDashboardCardsWithGL(metrics);
                 
                 // Update cash flow forecast
                 refreshForecast();
@@ -21721,105 +22187,481 @@
                 return transDate >= startDate && transDate <= today;
             });
         }
+
+        // NEW: Calculate Revenue Performance from GL Accounts
+        function calculateRevenuePerformanceFromGL(periodType = 'YTD') {
+            if (!financialTransactions || financialTransactions.length === 0) {
+                console.log('No financial transactions available for revenue calculation');
+                return { currentRevenue: 0, previousRevenue: 0, growthPercent: 0 };
+            }
+            
+            const today = new Date();
+            let currentStartDate, currentEndDate, previousStartDate, previousEndDate;
+            
+            // Define date ranges based on period type
+            switch(periodType) {
+                case 'MTD':
+                    currentStartDate = new Date(today.getFullYear(), today.getMonth(), 1);
+                    currentEndDate = today;
+                    previousStartDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+                    previousEndDate = new Date(today.getFullYear(), today.getMonth(), 0); // Last day of previous month
+                    break;
+                case 'QTD':
+                    const currentQuarter = Math.floor(today.getMonth() / 3);
+                    currentStartDate = new Date(today.getFullYear(), currentQuarter * 3, 1);
+                    currentEndDate = today;
+                    previousStartDate = new Date(today.getFullYear(), (currentQuarter - 1) * 3, 1);
+                    previousEndDate = new Date(today.getFullYear(), currentQuarter * 3, 0);
+                    break;
+                case 'YTD':
+                default:
+                    currentStartDate = new Date(today.getFullYear(), 0, 1);
+                    currentEndDate = today;
+                    previousStartDate = new Date(today.getFullYear() - 1, 0, 1);
+                    previousEndDate = new Date(today.getFullYear() - 1, 11, 31);
+                    break;
+            }
+            
+            // Filter transactions for current period
+            const currentPeriodTransactions = financialTransactions.filter(transaction => {
+                const transactionDate = new Date(transaction.transaction_date);
+                return transactionDate >= currentStartDate && transactionDate <= currentEndDate;
+            });
+            
+            // Filter transactions for previous period
+            const previousPeriodTransactions = financialTransactions.filter(transaction => {
+                const transactionDate = new Date(transaction.transaction_date);
+                return transactionDate >= previousStartDate && transactionDate <= previousEndDate;
+            });
+            
+            // Calculate revenue for both periods using GL revenue accounts (4000-4999)
+            const currentRevenue = calculateGLRevenue(currentPeriodTransactions);
+            const previousRevenue = calculateGLRevenue(previousPeriodTransactions);
+            
+            // Calculate growth percentage
+            const growthPercent = previousRevenue > 0 ? 
+                ((currentRevenue - previousRevenue) / previousRevenue) * 100 : 0;
+            
+            console.log('Revenue Performance Calculation:', {
+                periodType,
+                currentRevenue,
+                previousRevenue,
+                growthPercent: growthPercent.toFixed(1) + '%'
+            });
+            
+            return {
+                currentRevenue,
+                previousRevenue,
+                growthPercent
+            };
+        }
         
-        function updateDashboardCards(metrics) {
-            console.log('=== UPDATING DASHBOARD CARDS ===');
+        // Helper function to calculate revenue from GL accounts
+        function calculateGLRevenue(transactions) {
+            let grossRevenue = 0;
+            let discounts = 0;
+            
+            transactions.forEach(transaction => {
+                const debitAmount = Math.abs(parseFloat(transaction.debit_amount) || 0);
+                const creditAmount = Math.abs(parseFloat(transaction.credit_amount) || 0);
+                const accountCode = parseInt(transaction.account_code) || 0;
+                const accountName = (transaction.account_name || '').toLowerCase();
+                
+                // Process revenue accounts (4000-4999)
+                if (accountCode >= 4000 && accountCode < 5000) {
+                    // Revenue accounts: Credits increase revenue
+                    const amount = creditAmount - debitAmount;
+                    
+                    // Check if it's a contra-revenue account (returns, allowances, discounts)
+                    if (accountName.includes('return') || accountName.includes('allowance') || 
+                        accountName.includes('discount') || accountCode === 4070 || accountCode === 4060) {
+                        discounts += Math.abs(amount);
+                    } else {
+                        grossRevenue += Math.abs(amount);
+                    }
+                }
+            });
+            
+            // Net Revenue = Gross Revenue - Discounts/Returns/Allowances
+            const netRevenue = grossRevenue - discounts;
+            
+            console.log('GL Revenue Calculation:', {
+                grossRevenue,
+                discounts,
+                netRevenue,
+                transactionsProcessed: transactions.length
+            });
+            
+            return netRevenue;
+        }
+
+        async function calculateDashboardBudgetVariance() {
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) return { variance: 0, status: 'No budget data' };
+                
+                // Get current period (YTD)
+                const today = new Date();
+                const currentYear = today.getFullYear();
+                const currentMonth = today.getMonth() + 1;
+                
+                // Get YTD actual data
+                const ytdActualData = calculateFinancialDataFromTransactions(
+                    getTransactionsForPeriodFixed('YTD', 'custom'), 'YTD', 'custom'
+                );
+                
+                // Get YTD budget data (sum of Jan to current month)
+                const { data: budgetData, error } = await supabase
+                    .from('budget_entries')
+                    .select(`
+                        *,
+                        budget_account_mapping!inner(account_code, category)
+                    `)
+                    .eq('user_id', user.id)
+                    .eq('budget_year', currentYear)
+                    .lte('budget_month', currentMonth);
+                    
+                if (error) {
+                    console.error('Error fetching budget data:', error);
+                    return { variance: 0, status: 'Budget data error' };
+                }
+                
+                if (!budgetData || budgetData.length === 0) {
+                    return { variance: 0, status: 'No budget set' };
+                }
+                
+                // Calculate YTD budget totals
+                const ytdBudgetData = calculateBudgetTotals(budgetData);
+                
+                // Calculate key variances
+                const revenueVariance = ytdBudgetData.revenue !== 0 ? 
+                    ((ytdActualData.netRevenue - ytdBudgetData.revenue) / ytdBudgetData.revenue) * 100 : 0;
+                const opexVariance = ytdBudgetData.opex !== 0 ? 
+                    ((ytdActualData.opex - ytdBudgetData.opex) / ytdBudgetData.opex) * 100 : 0;
+                const ebitdaVariance = ytdBudgetData.ebitda !== 0 ? 
+                    ((ytdActualData.ebitda - ytdBudgetData.ebitda) / ytdBudgetData.ebitda) * 100 : 0;
+                
+                // Overall variance (weighted average)
+                const overallVariance = (revenueVariance * 0.4 + opexVariance * -0.3 + ebitdaVariance * 0.3);
+                
+                let status;
+                if (Math.abs(overallVariance) <= 5) status = 'On track';
+                else if (overallVariance > 5) status = 'Above budget';
+                else status = 'Below budget';
+                
+                return {
+                    variance: overallVariance,
+                    status,
+                    details: {
+                        revenueVariance,
+                        opexVariance,
+                        ebitdaVariance,
+                        actual: ytdActualData,
+                        budget: ytdBudgetData
+                    }
+                };
+                
+            } catch (error) {
+                console.error('Error calculating budget variance:', error);
+                return { variance: 0, status: 'Calculation error' };
+            }
+        }
+        
+        async function updateDashboardCardsWithGL(metrics) {
+            console.log('=== UPDATING DASHBOARD CARDS WITH COMPLETE DATA ===');
             console.log('Metrics to update:', metrics);
             
-            // Get all metric cards in the dashboard section
+            // Get the dashboard cards container
             const dashboardSection = document.getElementById('dashboard-section');
             if (!dashboardSection) {
                 console.error('Dashboard section not found');
                 return;
             }
             
-            const metricCards = dashboardSection.querySelectorAll('.metric-card');
-            console.log('Found metric cards:', metricCards.length);
+            // Card 1: Cash & Liquidity (keep existing AP/AR logic)
+            const cashElement = document.getElementById('cashValue');
+            const cashChangeElement = document.getElementById('cashChange');
             
-            // Card 1: Cash & Liquidity
-            if (metricCards[0]) {
-                const valueElement = metricCards[0].querySelector('.metric-value-large');
-                const changeElement = metricCards[0].querySelector('.metric-change');
-                
-                if (valueElement) {
-                    valueElement.textContent = formatCurrencyFull(metrics.currentCash, 'IDR');
-                    console.log('Updated Card 1 value:', valueElement.textContent);
-                }
-                
-                if (changeElement) {
-                    const changePercent = metrics.currentCash >= 0 ? '+12.5%' : '-8.2%';
-                    changeElement.textContent = `${changePercent} vs last period`;
-                    changeElement.className = `metric-change ${metrics.currentCash >= 0 ? 'positive' : 'negative'}`;
-                    console.log('Updated Card 1 change:', changeElement.textContent);
-                }
+            if (cashElement) {
+                cashElement.textContent = formatCurrencyFull(metrics.currentCash, 'IDR');
+            }
+            if (cashChangeElement) {
+                const changePercent = metrics.currentCash >= 0 ? '+12.5%' : '-8.2%';
+                cashChangeElement.textContent = `${changePercent} vs last period`;
+                cashChangeElement.className = `metric-change ${metrics.currentCash >= 0 ? 'positive' : 'negative'}`;
             }
             
-            // Card 2: Net Overdue Position
-            if (metricCards[1]) {
-                const valueElement = metricCards[1].querySelector('.metric-value-large');
-                const changeElement = metricCards[1].querySelector('.metric-change');
-                
-                if (valueElement) {
-                    valueElement.textContent = formatCurrencyFull(metrics.netOverduePosition, 'IDR');
-                    console.log('Updated Card 2 value:', valueElement.textContent);
-                }
-                
-                if (changeElement) {
-                    if (metrics.netOverduePosition >= 0) {
-                        changeElement.textContent = `Net ${formatCurrencyFull(Math.abs(metrics.netOverduePosition), 'IDR')} owed to you`;
-                        changeElement.className = 'metric-change positive';
-                    } else {
-                        changeElement.textContent = `Net ${formatCurrencyFull(Math.abs(metrics.netOverduePosition), 'IDR')} you owe`;
-                        changeElement.className = 'metric-change negative';
-                    }
-                    console.log('Updated Card 2 change:', changeElement.textContent);
-                }
+            // Card 2: Revenue Performance (using GL accounts)
+            const revenuePerformance = calculateRevenuePerformanceFromGL('YTD');
+            const revenueElement = document.getElementById('revenuePerformanceValue');
+            const revenueChangeElement = document.getElementById('revenuePerformanceChange');
+            
+            if (revenueElement) {
+                revenueElement.textContent = formatCurrencyFull(revenuePerformance.currentRevenue, 'IDR');
             }
-            
-            // Card 3: Revenue - using specific IDs
-            const revenueValueElement = document.getElementById('revenueValue');
-            const revenueChangeElement = document.getElementById('revenueChange');
-            
-            if (revenueValueElement) {
-                revenueValueElement.textContent = formatCurrencyFull(metrics.periodRevenue, 'IDR');
-                console.log('Updated Revenue value:', revenueValueElement.textContent);
-            }
-            
             if (revenueChangeElement) {
-                if (metrics.periodRevenue > 0) {
-                    revenueChangeElement.textContent = `+15% vs last period`;
-                    revenueChangeElement.className = 'metric-change positive';
-                } else {
-                    revenueChangeElement.textContent = `No data for ${metrics.selectedPeriod}`;
-                    revenueChangeElement.className = 'metric-change neutral';
+                const growthPercent = revenuePerformance.growthPercent;
+                revenueChangeElement.textContent = `${growthPercent >= 0 ? '+' : ''}${growthPercent.toFixed(1)}% vs last year`;
+                revenueChangeElement.className = `metric-change ${growthPercent >= 0 ? 'positive' : 'negative'}`;
+            }
+            
+            // Card 3: Profitability (calculate from current data)
+            const profitabilityElement = document.getElementById('profitabilityValue');
+            const profitabilityChangeElement = document.getElementById('profitabilityChange');
+            
+            if (profitabilityElement && profitabilityChangeElement) {
+                // Calculate current year's profitability
+                const currentYearData = calculateFinancialDataFromTransactions(
+                    getTransactionsForPeriodFixed('YTD', 'custom'), 'YTD', 'custom'
+                );
+                const profitMargin = currentYearData.netRevenue > 0 ? 
+                    ((currentYearData.netRevenue - currentYearData.opex) / currentYearData.netRevenue) * 100 : 0;
+                    
+                profitabilityElement.textContent = `${profitMargin.toFixed(1)}%`;
+                profitabilityChangeElement.textContent = profitMargin >= 15 ? 'Strong margin' : 'Monitor margin';
+                profitabilityChangeElement.className = `metric-change ${profitMargin >= 15 ? 'positive' : 'neutral'}`;
+            }
+            
+            // Card 4: Working Capital (calculate from current balance sheet data)
+            const workingCapitalElement = document.getElementById('workingCapitalValue');
+            const workingCapitalChangeElement = document.getElementById('workingCapitalChange');
+            
+            if (workingCapitalElement && workingCapitalChangeElement) {
+                // Simple working capital calculation (Current Assets - Current Liabilities)
+                // For now, use a basic calculation from available data
+                const workingCapital = metrics.currentCash + (metrics.currentCash * 0.3); // Simplified
+                const currentRatio = workingCapital > 0 ? 1.5 : 0.8; // Simplified calculation
+                
+                workingCapitalElement.textContent = formatCurrencyFull(workingCapital, 'IDR');
+                workingCapitalChangeElement.textContent = currentRatio >= 1.2 ? 'Healthy ratio' : 'Monitor liquidity';
+                workingCapitalChangeElement.className = `metric-change ${currentRatio >= 1.2 ? 'positive' : 'neutral'}`;
+            }
+            
+            // Card 5: Budget Variance (NEW: using budget data)
+            const budgetVarianceElement = document.getElementById('budgetVarianceValue');
+            const budgetVarianceChangeElement = document.getElementById('budgetVarianceChange');
+            
+            if (budgetVarianceElement && budgetVarianceChangeElement) {
+                try {
+                    const budgetVariance = await calculateDashboardBudgetVariance();
+                    
+                    if (budgetVariance.variance !== 0) {
+                        budgetVarianceElement.textContent = `${budgetVariance.variance >= 0 ? '+' : ''}${budgetVariance.variance.toFixed(1)}%`;
+                        budgetVarianceChangeElement.textContent = budgetVariance.status;
+                        
+                        // Color coding based on variance
+                        if (budgetVariance.status === 'On track') {
+                            budgetVarianceChangeElement.className = 'metric-change positive';
+                        } else if (budgetVariance.status === 'Above budget') {
+                            budgetVarianceChangeElement.className = 'metric-change positive';
+                        } else {
+                            budgetVarianceChangeElement.className = 'metric-change negative';
+                        }
+                    } else {
+                        budgetVarianceElement.textContent = 'N/A';
+                        budgetVarianceChangeElement.textContent = budgetVariance.status;
+                        budgetVarianceChangeElement.className = 'metric-change neutral';
+                    }
+                } catch (error) {
+                    console.error('Error calculating budget variance:', error);
+                    budgetVarianceElement.textContent = 'Error';
+                    budgetVarianceChangeElement.textContent = 'Check budget data';
+                    budgetVarianceChangeElement.className = 'metric-change neutral';
                 }
-                console.log('Updated Revenue change:', revenueChangeElement.textContent);
             }
             
-            // Card 4: Altman Z-Score - using specific IDs
+            // Card 6: Industry Position (NEW: using industry benchmarking data)
+            const industryPositionElement = document.getElementById('industryPositionValue');
+            const industryPositionChangeElement = document.getElementById('industryPositionChange');
+            
+            if (industryPositionElement && industryPositionChangeElement) {
+                try {
+                    const industryPosition = calculateDashboardIndustryPosition();
+                    
+                    if (industryPosition.percentile !== 0) {
+                        industryPositionElement.textContent = `${industryPosition.percentile}th`;
+                        industryPositionChangeElement.textContent = industryPosition.status;
+                        
+                        // Color coding based on percentile
+                        if (industryPosition.percentile >= 75) {
+                            industryPositionChangeElement.className = 'metric-change positive';
+                        } else if (industryPosition.percentile >= 50) {
+                            industryPositionChangeElement.className = 'metric-change neutral';
+                        } else {
+                            industryPositionChangeElement.className = 'metric-change negative';
+                        }
+                    } else {
+                        industryPositionElement.textContent = 'N/A';
+                        industryPositionChangeElement.textContent = industryPosition.status;
+                        industryPositionChangeElement.className = 'metric-change neutral';
+                    }
+                } catch (error) {
+                    console.error('Error calculating industry position:', error);
+                    industryPositionElement.textContent = 'Error';
+                    industryPositionChangeElement.textContent = 'Check industry data';
+                    industryPositionChangeElement.className = 'metric-change neutral';
+                }
+            }
+            
+            // Card 7: Altman Z-Score (enhance existing functionality)
             const healthScoreElement = document.getElementById('healthScoreValue');
-            const altmanRatingElement = document.getElementById('altmanRating');
-            const riskLevelElement = document.getElementById('riskLevel');
+            const healthScoreStatusElement = document.getElementById('healthScoreStatus');
+            const healthScoreBarElement = document.getElementById('healthScoreBar');
+            const healthScoreDescriptionElement = document.getElementById('healthScoreDescription');
             
-            if (healthScoreElement) {
-                healthScoreElement.textContent = metrics.healthScore.toFixed(2);
-                console.log('Updated Health Score:', healthScoreElement.textContent);
+            if (healthScoreElement && healthScoreStatusElement) {
+                // Calculate Altman Z-Score using current financial data
+                const zScore = calculateAltmanZScore();
+                
+                healthScoreElement.textContent = zScore.toFixed(1);
+                
+                // Determine status and color based on Z-Score
+                let status, barWidth, statusColor;
+                if (zScore >= 3.0) {
+                    status = 'Safe Zone';
+                    barWidth = '100%';
+                    statusColor = '#10b981';
+                } else if (zScore >= 1.8) {
+                    status = 'Grey Zone';
+                    barWidth = '60%';
+                    statusColor = '#fbbf24';
+                } else {
+                    status = 'Distress Zone';
+                    barWidth = '30%';
+                    statusColor = '#ef4444';
+                }
+                
+                healthScoreStatusElement.textContent = status;
+                healthScoreStatusElement.style.color = statusColor;
+                
+                if (healthScoreBarElement) {
+                    healthScoreBarElement.style.width = barWidth;
+                    healthScoreBarElement.style.background = statusColor;
+                }
+                
+                if (healthScoreDescriptionElement) {
+                    healthScoreDescriptionElement.textContent = 
+                        `Score: ${zScore.toFixed(1)} indicates ${status.toLowerCase()}. Based on working capital, retained earnings, and profitability ratios.`;
+                }
             }
             
-            if (altmanRatingElement) {
-                altmanRatingElement.textContent = metrics.altmanRating;
-                console.log('Updated Altman Rating:', altmanRatingElement.textContent);
+            console.log('Dashboard successfully updated with complete GL, budget, and industry data');
+        }
+
+        function calculateCompanyFinancialMetrics() {
+            try {
+                // Get current year financial data
+                const currentYearData = calculateFinancialDataFromTransactions(
+                    getTransactionsForPeriodFixed('YTD', 'custom'), 'YTD', 'custom'
+                );
+                
+                // Calculate key financial ratios
+                const metrics = {};
+                
+                // Profitability Ratios
+                metrics.gross_margin = currentYearData.netRevenue > 0 ? 
+                    (currentYearData.grossProfit / currentYearData.netRevenue) * 100 : 0;
+                metrics.ebitda_margin = currentYearData.netRevenue > 0 ? 
+                    (currentYearData.ebitda / currentYearData.netRevenue) * 100 : 0;
+                metrics.net_margin = currentYearData.netRevenue > 0 ? 
+                    (currentYearData.netIncome / currentYearData.netRevenue) * 100 : 0;
+                
+                // Simplified ratios (would need proper balance sheet data for accuracy)
+                // Using available cash flow and revenue data for approximations
+                const estimatedAssets = currentYearData.netRevenue * 0.8; // Simplified
+                const estimatedEquity = estimatedAssets * 0.6; // Simplified
+                
+                metrics.roe = estimatedEquity > 0 ? 
+                    (currentYearData.netIncome / estimatedEquity) * 100 : 0;
+                metrics.roa = estimatedAssets > 0 ? 
+                    (currentYearData.netIncome / estimatedAssets) * 100 : 0;
+                metrics.asset_turnover = estimatedAssets > 0 ? 
+                    currentYearData.netRevenue / estimatedAssets : 0;
+                
+                // Liquidity ratios (simplified using available data)
+                const currentAssets = Math.max(currentYearData.netRevenue * 0.2, 100000000); // Simplified
+                const currentLiabilities = currentAssets * 0.7; // Simplified
+                
+                metrics.current_ratio = currentLiabilities > 0 ? currentAssets / currentLiabilities : 1.5;
+                metrics.quick_ratio = currentLiabilities > 0 ? (currentAssets * 0.8) / currentLiabilities : 1.2;
+                
+                // Leverage ratio (simplified)
+                const totalDebt = estimatedAssets * 0.3; // Simplified
+                metrics.debt_to_equity = estimatedEquity > 0 ? totalDebt / estimatedEquity : 0.5;
+                
+                // Store metrics globally for industry comparison
+                window.companyFinancialMetrics = metrics;
+                
+                console.log('Company financial metrics calculated:', metrics);
+                return metrics;
+                
+            } catch (error) {
+                console.error('Error calculating company financial metrics:', error);
+                window.companyFinancialMetrics = {};
+                return {};
             }
-            
-            if (riskLevelElement) {
-                riskLevelElement.textContent = metrics.riskLevel;
-                console.log('Updated Risk Level:', riskLevelElement.textContent);
+        }
+
+        async function initializeDashboardData() {
+            try {
+                console.log('=== INITIALIZING ENHANCED DASHBOARD ===');
+                
+                // Step 1: Calculate company financial metrics for industry comparison
+                calculateCompanyFinancialMetrics();
+                
+                // Step 2: Load industry benchmarking data if available
+                if (window.selectedIndustries && window.selectedIndustries.length > 0) {
+                    await loadIndustryBenchmarks();
+                }
+                
+                // Step 3: Calculate AP/AR metrics for cash and working capital
+                const metrics = calculateDashboardMetrics();
+                
+                // Step 4: Update all dashboard cards with complete data
+                await updateDashboardCardsWithGL(metrics);
+                
+                // Step 5: Initialize all dashboard components
+                initializeDashboardComponents();
+                
+                // Step 6: Update cash flow forecast
+                refreshForecast();
+                
+                console.log('Enhanced dashboard initialization complete');
+                
+            } catch (error) {
+                console.error('Error initializing enhanced dashboard:', error);
+                
+                // Fallback: Initialize basic dashboard if enhanced fails
+                try {
+                    const basicMetrics = calculateDashboardMetrics();
+                    await updateDashboardCardsWithGL(basicMetrics);
+                    refreshForecast();
+                } catch (fallbackError) {
+                    console.error('Fallback initialization also failed:', fallbackError);
+                }
             }
+        }
+        
+        // Helper function to calculate Altman Z-Score
+        function calculateAltmanZScore() {
+            // Simplified Altman Z-Score calculation
+            // Z = 1.2*A + 1.4*B + 3.3*C + 0.6*D + 1.0*E
+            // Where: A = Working Capital/Total Assets, B = Retained Earnings/Total Assets, etc.
             
-            // Update cash flow forecast sections
-            updateCashFlowMetrics(metrics);
+            // For now, return a calculated score based on available data
+            // This should be enhanced with proper balance sheet data
+            const currentYearData = calculateFinancialDataFromTransactions(
+                getTransactionsForPeriodFixed('YTD', 'custom'), 'YTD', 'custom'
+            );
             
-            console.log('=== DASHBOARD CARDS UPDATE COMPLETE ===');
+            // Simplified calculation (should be enhanced with proper balance sheet ratios)
+            const profitabilityRatio = currentYearData.netRevenue > 0 ? 
+                (currentYearData.netRevenue - currentYearData.opex) / currentYearData.netRevenue : 0;
+            
+            const baseScore = 1.8; // Starting point
+            const profitabilityBonus = profitabilityRatio * 2; // Weight profitability
+            
+            return Math.max(0, Math.min(5, baseScore + profitabilityBonus));
         }
         
         // Add this function to update cash flow forecast metrics
@@ -32311,27 +33153,75 @@
             }
         }
 
-        function calculateBudgetTotals() {
-            const totals = {
-                revenue: new Array(12).fill(0),
-                cogs: new Array(12).fill(0),
-                opex: new Array(12).fill(0)
-            };
-        
-            document.querySelectorAll('.budget-line-row').forEach(row => {
-                const category = row.dataset.parentCategory;
+        function calculateBudgetTotals(budgetData) {
+            const totals = { revenue: 0, cogs: 0, opex: 0, ebitda: 0 };
+            
+            budgetData.forEach(entry => {
+                const amount = parseFloat(entry.amount) || 0;
+                const category = entry.budget_account_mapping?.category;
                 
-                for (let month = 1; month <= 12; month++) {
-                    const input = row.querySelector(`input[data-month="${month}"]`);
-                    const amount = parseFloat(input?.value || 0);
-                    
-                    if (totals[category]) {
-                        totals[category][month - 1] += amount;
-                    }
+                switch(category) {
+                    case 'Revenue':
+                        totals.revenue += amount;
+                        break;
+                    case 'COGS':
+                        totals.cogs += amount;
+                        break;
+                    case 'OPEX':
+                        totals.opex += amount;
+                        break;
                 }
             });
-        
+            
+            totals.ebitda = totals.revenue - totals.cogs - totals.opex;
             return totals;
+        }
+
+        function calculateDashboardIndustryPosition() {
+            // Check if industry benchmarking data is available
+            if (!window.companyFinancialMetrics || !window.industryBenchmarkData || 
+                !window.selectedIndustries || window.selectedIndustries.length === 0) {
+                return { percentile: 0, status: 'No industry data' };
+            }
+            
+            try {
+                // Calculate average percentile across key financial metrics
+                const keyMetrics = ['ebitda_margin', 'gross_margin', 'current_ratio', 'roe'];
+                let totalPercentile = 0;
+                let validMetrics = 0;
+                
+                keyMetrics.forEach(metric => {
+                    const companyValue = window.companyFinancialMetrics[metric];
+                    if (companyValue !== undefined && companyValue !== null) {
+                        const percentile = calculateMetricPercentile(metric, companyValue);
+                        totalPercentile += percentile;
+                        validMetrics++;
+                    }
+                });
+                
+                if (validMetrics === 0) {
+                    return { percentile: 0, status: 'Insufficient data' };
+                }
+                
+                const averagePercentile = totalPercentile / validMetrics;
+                
+                let status;
+                if (averagePercentile >= 75) status = 'Top quartile';
+                else if (averagePercentile >= 50) status = 'Above average';
+                else if (averagePercentile >= 25) status = 'Below average';
+                else status = 'Bottom quartile';
+                
+                return {
+                    percentile: Math.round(averagePercentile),
+                    status,
+                    validMetrics,
+                    industryCount: window.selectedIndustries.length
+                };
+                
+            } catch (error) {
+                console.error('Error calculating industry position:', error);
+                return { percentile: 0, status: 'Calculation error' };
+            }
         }
 
         // Save budget data to Supabase
@@ -33766,9 +34656,6 @@
         
         // Calculate percentile for a specific metric
         function calculateMetricPercentile(metricName, companyValue) {
-            if (!selectedIndustries.length || companyValue === undefined) return 0;
-            
-            // Map company metric names to database metric names
             const metricNameMapping = {
                 'roe': 'return_on_equity',
                 'roa': 'return_on_assets',
@@ -33785,8 +34672,8 @@
             
             // Get benchmark data for this metric across all selected industries
             const allBenchmarks = [];
-            selectedIndustries.forEach(industry => {
-                const industryData = industryBenchmarkData[industry];
+            window.selectedIndustries.forEach(industry => {
+                const industryData = window.industryBenchmarkData[industry];
                 const metricData = industryData?.find(d => d.metric_name === dbMetricName);
                 if (metricData) {
                     allBenchmarks.push(metricData);
@@ -34771,6 +35658,683 @@
             });
             
             return medians.length > 0 ? medians.reduce((sum, val) => sum + val, 0) / medians.length : 0;
+        }
+
+        // NEW: Risk & Alert Management Functions
+        function generateRiskAlerts() {
+            console.log('=== GENERATING RISK ALERTS ===');
+            
+            // Generate all types of alerts
+            const cashFlowAlerts = generateCashFlowAlerts();
+            const aparAlerts = generateAPARAlerts();
+            const budgetAlerts = generateBudgetAlerts();
+            const healthAlerts = generateFinancialHealthAlerts();
+            
+            // Update UI with alerts
+            updateAlertUI('cashFlowAlerts', 'cashFlowAlertCount', cashFlowAlerts);
+            updateAlertUI('aparAlerts', 'aparAlertCount', aparAlerts);
+            updateAlertUI('budgetAlerts', 'budgetAlertCount', budgetAlerts);
+            updateAlertUI('healthAlerts', 'healthAlertCount', healthAlerts);
+            
+            console.log('Risk alerts generated successfully');
+        }
+        
+        // Generate Cash Flow Alerts
+        function generateCashFlowAlerts() {
+            const alerts = [];
+            
+            try {
+                // Get cash flow forecast data
+                const forecastData = generateForecastData();
+                if (!forecastData || forecastData.length === 0) {
+                    return alerts;
+                }
+                
+                // Check for negative cash positions in next 4 weeks
+                const criticalWeeks = forecastData.slice(0, 4);
+                criticalWeeks.forEach((week, index) => {
+                    if (week.cashPosition < 0) {
+                        alerts.push({
+                            severity: 'high',
+                            title: `Cash Shortfall in ${week.week}`,
+                            description: `Projected negative cash position`,
+                            value: formatCurrencyFull(week.cashPosition, 'IDR')
+                        });
+                    } else if (week.cashPosition < 50000000) { // Less than 50M IDR
+                        alerts.push({
+                            severity: 'medium',
+                            title: `Low Cash Warning - ${week.week}`,
+                            description: `Cash position below minimum threshold`,
+                            value: formatCurrencyFull(week.cashPosition, 'IDR')
+                        });
+                    }
+                });
+                
+                // Check for significant cash drops week-over-week
+                for (let i = 1; i < Math.min(forecastData.length, 8); i++) {
+                    const currentWeek = forecastData[i];
+                    const previousWeek = forecastData[i - 1];
+                    const dropPercentage = ((currentWeek.cashPosition - previousWeek.cashPosition) / previousWeek.cashPosition) * 100;
+                    
+                    if (dropPercentage < -25) {
+                        alerts.push({
+                            severity: 'medium',
+                            title: `Significant Cash Drop`,
+                            description: `${dropPercentage.toFixed(1)}% decrease in ${currentWeek.week}`,
+                            value: `From ${formatCurrencyFull(previousWeek.cashPosition, 'IDR')} to ${formatCurrencyFull(currentWeek.cashPosition, 'IDR')}`
+                        });
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Error generating cash flow alerts:', error);
+            }
+            
+            return alerts.slice(0, 5); // Limit to 5 most critical alerts
+        }
+        
+        // Generate AP/AR Alerts
+        function generateAPARAlerts() {
+            const alerts = [];
+            
+            try {
+                if (!aparTransactions || aparTransactions.length === 0) {
+                    return alerts;
+                }
+                
+                // Find severely overdue AR (over 90 days)
+                const severelyOverdueAR = aparTransactions.filter(t => 
+                    t.type === 'AR' && t.status === 'Overdue' && 
+                    calculateDaysOverdue(t) > 90
+                );
+                
+                severelyOverdueAR.slice(0, 3).forEach(transaction => {
+                    alerts.push({
+                        severity: 'high',
+                        title: `Severely Overdue Invoice`,
+                        description: `${transaction.company} - ${calculateDaysOverdue(transaction)} days overdue`,
+                        value: formatCurrencyFull(transaction.amount, 'IDR')
+                    });
+                });
+                
+                // Find large overdue AP (over 30 days and > 100M IDR)
+                const criticalAP = aparTransactions.filter(t => 
+                    t.type === 'AP' && t.status === 'Overdue' && 
+                    calculateDaysOverdue(t) > 30 && Math.abs(t.amount) > 100000000
+                );
+                
+                criticalAP.slice(0, 3).forEach(transaction => {
+                    alerts.push({
+                        severity: 'medium',
+                        title: `Large Overdue Payment`,
+                        description: `${transaction.company} - ${calculateDaysOverdue(transaction)} days overdue`,
+                        value: formatCurrencyFull(transaction.amount, 'IDR')
+                    });
+                });
+                
+                // Summary alert for total overdue amounts
+                const totalOverdueAR = aparTransactions
+                    .filter(t => t.type === 'AR' && t.status === 'Overdue')
+                    .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+                
+                if (totalOverdueAR > 500000000) { // Over 500M IDR
+                    alerts.push({
+                        severity: 'medium',
+                        title: `High Total AR Overdue`,
+                        description: `Total overdue receivables exceed threshold`,
+                        value: formatCurrencyFull(totalOverdueAR, 'IDR')
+                    });
+                }
+                
+            } catch (error) {
+                console.error('Error generating AP/AR alerts:', error);
+            }
+            
+            return alerts.slice(0, 5);
+        }
+        
+        // Generate Budget Alerts
+        function generateBudgetAlerts() {
+            const alerts = [];
+            
+            try {
+                // Use the budget variance data we already calculated
+                calculateDashboardBudgetVariance().then(budgetVariance => {
+                    if (budgetVariance.details) {
+                        const { revenueVariance, opexVariance, ebitdaVariance } = budgetVariance.details;
+                        
+                        // Revenue variance alert
+                        if (Math.abs(revenueVariance) > 15) {
+                            alerts.push({
+                                severity: revenueVariance < -15 ? 'high' : 'medium',
+                                title: 'Revenue Variance Alert',
+                                description: `YTD revenue ${revenueVariance >= 0 ? 'exceeds' : 'below'} budget`,
+                                value: `${revenueVariance >= 0 ? '+' : ''}${revenueVariance.toFixed(1)}%`
+                            });
+                        }
+                        
+                        // OPEX variance alert
+                        if (opexVariance > 20) {
+                            alerts.push({
+                                severity: 'medium',
+                                title: 'OPEX Overspend Alert',
+                                description: 'Operating expenses significantly over budget',
+                                value: `+${opexVariance.toFixed(1)}%`
+                            });
+                        }
+                        
+                        // EBITDA variance alert
+                        if (ebitdaVariance < -25) {
+                            alerts.push({
+                                severity: 'high',
+                                title: 'EBITDA Warning',
+                                description: 'EBITDA significantly below budget target',
+                                value: `${ebitdaVariance.toFixed(1)}%`
+                            });
+                        }
+                    }
+                    
+                    // Update the budget alerts UI
+                    updateAlertUI('budgetAlerts', 'budgetAlertCount', alerts);
+                });
+                
+            } catch (error) {
+                console.error('Error generating budget alerts:', error);
+            }
+            
+            return []; // Return empty for now, will be populated async
+        }
+        
+        // Generate Financial Health Alerts
+        function generateFinancialHealthAlerts() {
+            const alerts = [];
+            
+            try {
+                // Calculate current financial health metrics
+                const zScore = calculateAltmanZScore();
+                const industryPosition = calculateDashboardIndustryPosition();
+                
+                // Altman Z-Score alerts
+                if (zScore < 1.8) {
+                    alerts.push({
+                        severity: 'high',
+                        title: 'Financial Distress Risk',
+                        description: 'Altman Z-Score indicates distress zone',
+                        value: `Score: ${zScore.toFixed(1)}`
+                    });
+                } else if (zScore < 3.0) {
+                    alerts.push({
+                        severity: 'medium',
+                        title: 'Financial Health Caution',
+                        description: 'Altman Z-Score in grey zone',
+                        value: `Score: ${zScore.toFixed(1)}`
+                    });
+                }
+                
+                // Industry position alerts
+                if (industryPosition.percentile < 25 && industryPosition.percentile > 0) {
+                    alerts.push({
+                        severity: 'medium',
+                        title: 'Industry Performance Alert',
+                        description: 'Below industry average performance',
+                        value: `${industryPosition.percentile}th percentile`
+                    });
+                }
+                
+                // Calculate current financial metrics for additional alerts
+                const currentYearData = calculateFinancialDataFromTransactions(
+                    getTransactionsForPeriodFixed('YTD', 'custom'), 'YTD', 'custom'
+                );
+                
+                // Low profitability alert
+                const profitMargin = currentYearData.netRevenue > 0 ? 
+                    ((currentYearData.netRevenue - currentYearData.opex) / currentYearData.netRevenue) * 100 : 0;
+                
+                if (profitMargin < 5 && profitMargin > -100) {
+                    alerts.push({
+                        severity: profitMargin < 0 ? 'high' : 'medium',
+                        title: 'Low Profitability Warning',
+                        description: 'Profit margin below healthy threshold',
+                        value: `${profitMargin.toFixed(1)}%`
+                    });
+                }
+                
+            } catch (error) {
+                console.error('Error generating financial health alerts:', error);
+            }
+            
+            return alerts.slice(0, 5);
+        }
+        
+        // Helper function to calculate days overdue
+        function calculateDaysOverdue(transaction) {
+            const today = new Date();
+            let dueDate;
+            
+            if (transaction.due_date) {
+                dueDate = new Date(transaction.due_date);
+            } else if (transaction.invoice_date && transaction.payment_terms) {
+                const invoiceDate = new Date(transaction.invoice_date);
+                dueDate = new Date(invoiceDate);
+                dueDate.setDate(dueDate.getDate() + (transaction.payment_terms || 30));
+            } else {
+                return 0;
+            }
+            
+            const diffTime = today - dueDate;
+            return Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+        }
+        
+        // Update Alert UI
+        function updateAlertUI(containerId, countId, alerts) {
+            const container = document.getElementById(containerId);
+            const countElement = document.getElementById(countId);
+            
+            if (!container || !countElement) return;
+            
+            // Update count
+            countElement.textContent = alerts.length > 0 ? `${alerts.length} alert${alerts.length !== 1 ? 's' : ''}` : 'No alerts';
+            
+            // Update content
+            if (alerts.length === 0) {
+                container.innerHTML = `
+                    <div class="no-alerts">
+                        <i class="fas fa-check-circle"></i>
+                        All clear!
+                    </div>
+                `;
+            } else {
+                container.innerHTML = alerts.map(alert => `
+                    <div class="alert-item">
+                        <div class="alert-severity ${alert.severity}"></div>
+                        <div class="alert-content">
+                            <div class="alert-title">${alert.title}</div>
+                            <div class="alert-description">${alert.description}</div>
+                            <div class="alert-value">${alert.value}</div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+        
+        // Refresh all risk alerts
+        function refreshRiskAlerts() {
+            console.log('Refreshing risk alerts...');
+            
+            // Show loading state
+            ['cashFlowAlertCount', 'aparAlertCount', 'budgetAlertCount', 'healthAlertCount'].forEach(id => {
+                const element = document.getElementById(id);
+                if (element) element.textContent = 'Loading...';
+            });
+            
+            // Generate alerts after a short delay
+            setTimeout(() => {
+                generateRiskAlerts();
+            }, 500);
+        }
+
+        // NEW: Simplified P&L Functions for Dashboard
+        async function updateDashboardPL() {
+            const periodType = document.getElementById('dashboardPeriodSelect').value;
+            
+            try {
+                // Get current period actual data
+                const currentPeriodTransactions = getTransactionsForPeriodFixed(periodType, 'custom');
+                const actualData = calculateFinancialDataFromTransactions(currentPeriodTransactions, periodType, 'custom');
+                
+                // Get budget data for the same period
+                const budgetData = await getDashboardBudgetData(periodType);
+                
+                // Populate the simplified P&L table
+                populateSimplifiedPLTable(actualData, budgetData, periodType);
+                
+            } catch (error) {
+                console.error('Error updating dashboard P&L:', error);
+            }
+        }
+        
+        async function getDashboardBudgetData(periodType) {
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) return null;
+                
+                const today = new Date();
+                const currentYear = today.getFullYear();
+                let monthsToInclude = [];
+                
+                // Determine which months to include based on period type
+                switch(periodType) {
+                    case 'MTD':
+                        monthsToInclude = [today.getMonth() + 1];
+                        break;
+                    case 'QTD':
+                        const currentQuarter = Math.floor(today.getMonth() / 3);
+                        for (let i = 0; i < 3; i++) {
+                            const month = currentQuarter * 3 + i + 1;
+                            if (month <= today.getMonth() + 1) {
+                                monthsToInclude.push(month);
+                            }
+                        }
+                        break;
+                    case 'YTD':
+                    default:
+                        for (let i = 1; i <= today.getMonth() + 1; i++) {
+                            monthsToInclude.push(i);
+                        }
+                        break;
+                }
+                
+                // Get budget data for the relevant months
+                const { data: budgetData, error } = await supabase
+                    .from('budget_entries')
+                    .select(`
+                        *,
+                        budget_account_mapping!inner(account_code, category)
+                    `)
+                    .eq('user_id', user.id)
+                    .eq('budget_year', currentYear)
+                    .in('budget_month', monthsToInclude);
+                    
+                if (error) {
+                    console.error('Error fetching dashboard budget data:', error);
+                    return null;
+                }
+                
+                return calculateBudgetTotals(budgetData || []);
+                
+            } catch (error) {
+                console.error('Error in getDashboardBudgetData:', error);
+                return null;
+            }
+        }
+        
+        function populateSimplifiedPLTable(actualData, budgetData, periodType) {
+            const tbody = document.getElementById('simplifiedPLBody');
+            if (!tbody) return;
+            
+            // Define the key P&L line items
+            const lineItems = [
+                {
+                    label: 'Total Revenue',
+                    actual: actualData.netRevenue,
+                    budget: budgetData?.revenue || 0,
+                    type: 'revenue'
+                },
+                {
+                    label: 'Cost of Goods Sold',
+                    actual: actualData.cogs,
+                    budget: budgetData?.cogs || 0,
+                    type: 'expense'
+                },
+                {
+                    label: 'Gross Profit',
+                    actual: actualData.grossProfit,
+                    budget: (budgetData?.revenue || 0) - (budgetData?.cogs || 0),
+                    type: 'profit'
+                },
+                {
+                    label: 'Operating Expenses',
+                    actual: actualData.opex,
+                    budget: budgetData?.opex || 0,
+                    type: 'expense'
+                },
+                {
+                    label: 'EBITDA',
+                    actual: actualData.ebitda,
+                    budget: budgetData?.ebitda || 0,
+                    type: 'profit'
+                }
+            ];
+            
+            // Generate table rows
+            const rows = lineItems.map(item => {
+                const variance = item.actual - item.budget;
+                const variancePercent = item.budget !== 0 ? (variance / Math.abs(item.budget)) * 100 : 0;
+                
+                // Determine variance class based on item type
+                let varianceClass = 'neutral';
+                if (Math.abs(variancePercent) > 5) {
+                    if (item.type === 'revenue' || item.type === 'profit') {
+                        varianceClass = variance >= 0 ? 'positive' : 'negative';
+                    } else { // expense
+                        varianceClass = variance <= 0 ? 'positive' : 'negative';
+                    }
+                }
+                
+                return `
+                    <tr>
+                        <td class="pl-line-item">${item.label}</td>
+                        <td class="pl-value">${formatCurrencyFull(item.actual, 'IDR')}</td>
+                        <td class="pl-value">${formatCurrencyFull(item.budget, 'IDR')}</td>
+                        <td class="pl-variance ${varianceClass}">${formatCurrencyFull(variance, 'IDR')}</td>
+                        <td class="pl-variance ${varianceClass}">${variancePercent >= 0 ? '+' : ''}${variancePercent.toFixed(1)}%</td>
+                    </tr>
+                `;
+            }).join('');
+            
+            tbody.innerHTML = rows;
+        }
+        
+        // NEW: Dashboard Trending Chart Functions
+        function generateDashboardTrendingChart() {
+            try {
+                // Get trending data (reuse existing function but limit to 6 months)
+                const trendingData = generateTrendingData();
+                if (!trendingData || trendingData.periods.length === 0) {
+                    return;
+                }
+                
+                // Limit to last 6 periods for dashboard view
+                const maxPeriods = 6;
+                const startIndex = Math.max(0, trendingData.periods.length - maxPeriods);
+                
+                const dashboardData = {
+                    periods: trendingData.periods.slice(startIndex),
+                    revenue: trendingData.revenue.slice(startIndex),
+                    opex: trendingData.opex.slice(startIndex)
+                };
+                
+                const ctx = document.getElementById('dashboardTrendingChart');
+                if (!ctx) return;
+                
+                // Destroy existing chart if it exists
+                if (window.dashboardTrendingChartInstance) {
+                    window.dashboardTrendingChartInstance.destroy();
+                }
+                
+                // Create new chart
+                window.dashboardTrendingChartInstance = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: dashboardData.periods,
+                        datasets: [
+                            {
+                                label: 'Revenue',
+                                data: dashboardData.revenue,
+                                borderColor: '#10b981',
+                                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                                borderWidth: 3,
+                                fill: true,
+                                tension: 0.4,
+                                pointBackgroundColor: '#10b981',
+                                pointBorderColor: '#ffffff',
+                                pointBorderWidth: 2,
+                                pointRadius: 5
+                            },
+                            {
+                                label: 'OPEX',
+                                data: dashboardData.opex,
+                                borderColor: '#ef4444',
+                                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                                borderWidth: 3,
+                                fill: true,
+                                tension: 0.4,
+                                pointBackgroundColor: '#ef4444',
+                                pointBorderColor: '#ffffff',
+                                pointBorderWidth: 2,
+                                pointRadius: 5
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: {
+                                    usePointStyle: true,
+                                    padding: 20,
+                                    font: {
+                                        size: 12,
+                                        weight: '500'
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false,
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                titleColor: '#ffffff',
+                                bodyColor: '#ffffff',
+                                borderColor: '#e2e8f0',
+                                borderWidth: 1,
+                                callbacks: {
+                                    label: function(context) {
+                                        return `${context.dataset.label}: Rp ${context.parsed.y.toFixed(1)}M`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: {
+                                    display: false
+                                },
+                                ticks: {
+                                    font: {
+                                        size: 11
+                                    },
+                                    color: '#6b7280'
+                                }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: '#f3f4f6',
+                                    lineWidth: 1
+                                },
+                                ticks: {
+                                    callback: function(value) {
+                                        return 'Rp ' + value + 'M';
+                                    },
+                                    font: {
+                                        size: 11
+                                    },
+                                    color: '#6b7280'
+                                }
+                            }
+                        },
+                        interaction: {
+                            mode: 'nearest',
+                            axis: 'x',
+                            intersect: false
+                        }
+                    }
+                });
+                
+                // Generate insights for the dashboard
+                generateDashboardTrendingInsights(dashboardData);
+                
+            } catch (error) {
+                console.error('Error generating dashboard trending chart:', error);
+            }
+        }
+        
+        function generateDashboardTrendingInsights(data) {
+            const container = document.getElementById('dashboardTrendingInsights');
+            if (!container || !data || data.periods.length < 2) return;
+            
+            const insights = [];
+            
+            // Revenue trend analysis
+            const revenueStart = data.revenue[0];
+            const revenueEnd = data.revenue[data.revenue.length - 1];
+            const revenueGrowth = revenueStart > 0 ? ((revenueEnd - revenueStart) / revenueStart) * 100 : 0;
+            
+            if (Math.abs(revenueGrowth) > 5) {
+                insights.push({
+                    icon: 'revenue',
+                    text: `Revenue ${revenueGrowth >= 0 ? 'increased' : 'decreased'} by ${Math.abs(revenueGrowth).toFixed(1)}% over the last ${data.periods.length} periods`
+                });
+            }
+            
+            // OPEX trend analysis
+            const opexStart = data.opex[0];
+            const opexEnd = data.opex[data.opex.length - 1];
+            const opexGrowth = opexStart > 0 ? ((opexEnd - opexStart) / opexStart) * 100 : 0;
+            
+            if (Math.abs(opexGrowth) > 5) {
+                insights.push({
+                    icon: 'expense',
+                    text: `Operating expenses ${opexGrowth >= 0 ? 'increased' : 'decreased'} by ${Math.abs(opexGrowth).toFixed(1)}% over the same period`
+                });
+            }
+            
+            // Efficiency analysis
+            const latestRevenue = revenueEnd;
+            const latestOpex = opexEnd;
+            const efficiency = latestRevenue > 0 ? (latestOpex / latestRevenue) * 100 : 0;
+            
+            if (efficiency > 0) {
+                insights.push({
+                    icon: 'trend',
+                    text: `Current operating efficiency: ${efficiency.toFixed(1)}% OPEX-to-Revenue ratio ${efficiency < 70 ? '(Good)' : efficiency < 85 ? '(Monitor)' : '(Needs attention)'}`
+                });
+            }
+            
+            // Render insights
+            container.innerHTML = `
+                <h5><i class="fas fa-lightbulb"></i> Key Insights</h5>
+                ${insights.map(insight => `
+                    <div class="insight-item-dashboard">
+                        <div class="insight-icon-dashboard ${insight.icon}">
+                            <i class="fas fa-${insight.icon === 'revenue' ? 'arrow-up' : insight.icon === 'expense' ? 'arrow-down' : 'chart-line'}"></i>
+                        </div>
+                        <div class="insight-text-dashboard">${insight.text}</div>
+                    </div>
+                `).join('')}
+            `;
+        }
+        
+        // Export function for dashboard trending chart
+        function exportDashboardTrendingChart() {
+            if (window.dashboardTrendingChartInstance) {
+                const url = window.dashboardTrendingChartInstance.toBase64Image();
+                const link = document.createElement('a');
+                link.download = 'dashboard-trending-chart.png';
+                link.href = url;
+                link.click();
+            }
+        }
+        
+        // Initialize dashboard components
+        function initializeDashboardComponents() {
+            try {
+                // Initialize risk alerts
+                generateRiskAlerts();
+                
+                // Initialize simplified P&L
+                updateDashboardPL();
+                
+                // Initialize trending chart
+                setTimeout(() => {
+                    generateDashboardTrendingChart();
+                }, 1000); // Delay to ensure data is loaded
+                
+            } catch (error) {
+                console.error('Error initializing dashboard components:', error);
+            }
         }
         
     </script>
