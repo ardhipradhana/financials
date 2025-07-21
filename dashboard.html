@@ -22412,6 +22412,8 @@
                     break;
             }
             
+            console.log(`Budget calculation for ${periodType}: Including months ${monthsToSum.join(', ')}`);
+            
             // Only sum budget entries for the relevant months
             budgetData.forEach(entry => {
                 const amount = parseFloat(entry.amount) || 0;
@@ -22420,6 +22422,7 @@
                 
                 // Only include this entry if its month is in our target period
                 if (monthsToSum.includes(budgetMonth)) {
+                    console.log(`Including budget: Month ${budgetMonth}, Category ${category}, Amount ${amount}`);
                     switch(category) {
                         case 'revenue':
                             totals.revenue += amount;
@@ -22431,10 +22434,14 @@
                             totals.opex += amount;
                             break;
                     }
+                } else {
+                    console.log(`Excluding budget: Month ${budgetMonth} not in period ${periodType}`);
                 }
             });
             
             totals.ebitda = totals.revenue - totals.cogs - totals.opex;
+            
+            console.log(`Final budget totals for ${periodType}:`, totals);
             return totals;
         }
         
