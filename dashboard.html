@@ -22670,6 +22670,20 @@
         async function initializeDashboardData() {
             try {
                 console.log('=== INITIALIZING ENHANCED DASHBOARD ===');
+
+                if (!financialTransactions || financialTransactions.length === 0) {
+                    console.log('⚠️ Financial transactions not loaded yet');
+                    setTimeout(initializeDashboardData, 1000);
+                    return;
+                }
+                
+                if (!aparTransactions || aparTransactions.length === 0) {
+                    console.log('⚠️ AP/AR transactions not loaded yet');
+                    setTimeout(initializeDashboardData, 1000);
+                    return;
+                }
+                
+                console.log('✅ All data loaded, proceeding with initialization...');
                 
                 // Step 1: Calculate company financial metrics for industry comparison
                 calculateCompanyFinancialMetrics();
