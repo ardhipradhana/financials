@@ -10834,10 +10834,6 @@
                                         <i class="fas fa-file-upload"></i>
                                         Upload CSV/Excel
                                     </button>
-                                    <button class="btn btn-secondary" onclick="openImageUploadModal()">
-                                        <i class="fas fa-camera"></i>
-                                        Upload PDF/JPG
-                                    </button>
                                     <button class="btn btn-primary" onclick="openAddModal()">
                                         <i class="fas fa-plus"></i>
                                         Add Transaction
@@ -16064,11 +16060,6 @@
                     maximumFractionDigits: 2
                 }).format(amount);
             }
-        }
-        
-        // Image upload modal
-        function openImageUploadModal() {
-            alert('Image upload feature coming soon! This will use OCR to extract invoice data from images.');
         }
 
         function calculateCCC() {
@@ -23410,7 +23401,7 @@
                 }
                 
                 // Get budget data for current period
-                const budgetData = await getBudgetDataForPeriod(currentPeriod, periodType);
+                const budgetData = await getDashboardBudgetData(periodType);
                 
                 // Store global comparison data
                 comparisonData = {
