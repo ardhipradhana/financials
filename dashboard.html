@@ -22722,24 +22722,134 @@
         
         // Helper function to calculate Altman Z-Score
         function calculateAltmanZScore() {
-            // Simplified Altman Z-Score calculation
-            // Z = 1.2*A + 1.4*B + 3.3*C + 0.6*D + 1.0*E
-            // Where: A = Working Capital/Total Assets, B = Retained Earnings/Total Assets, etc.
+            try {
+                // Get YTD financial data
+                const ytdTransactions = getTransactionsForPeriodFixed('YTD', 'custom');
+                if (!ytdTransactions || ytdTransactions.length === 0) {
+                    console.log('No YTD transactions available for Z-Score calculation');
+                    return 1.8; // Default safe value
+                }
+        
+                // Calculate balance sheet components from transactions
+                const balanceSheet = calculateBalanceSheetFromTransactions(ytdTransactions);
+                const incomeStatement = calculateIncomeStatementFromTransactions(ytdTransactions);
+                
+                console.log('Z-Score Balance Sheet:', balanceSheet);
+                console.log('Z-Score Income Statement:', incomeStatement);
+        
+                // Altman Z-Score Formula: Z = 1.2A + 1.4B + 3.3C + 0.6D + 1.0E
+                
+                // A = Working Capital / Total Assets
+                const workingCapital = balanceSheet.currentAssets - balanceSheet.currentLiabilities;
+                const ratioA = balanceSheet.totalAssets > 0 ? workingCapital / balanceSheet.totalAssets : 0;
+                
+                // B = Retained Earnings / Total Assets  
+                const ratioB = balanceSheet.totalAssets > 0 ? balanceSheet.retainedEarnings / balanceSheet.totalAssets : 0;
+                
+                // C = EBIT / Total Assets
+                const ebit = incomeStatement.netRevenue - incomeStatement.totalExpenses + incomeStatement.interestExpense; // Add back interest to get EBIT
+                const ratioC = balanceSheet.totalAssets > 0 ? ebit / balanceSheet.totalAssets : 0;
+                
+                // D = Market Value of Equity / Total Liabilities (simplified as Book Value for private companies)
+                const bookValueEquity = balanceSheet.totalAssets - balanceSheet.totalLiabilities;
+                const ratioD = balanceSheet.totalLiabilities > 0 ? bookValueEquity / balanceSheet.totalLiabilities : 1;
+                
+                // E = Sales / Total Assets
+                const ratioE = balanceSheet.totalAssets > 0 ? incomeStatement.netRevenue / balanceSheet.totalAssets : 0;
+                
+                // Calculate Z-Score
+                const zScore = (1.2 * ratioA) + (1.4 * ratioB) + (3.3 * ratioC) + (0.6 * ratioD) + (1.0 * ratioE);
+                
+                console.log('Z-Score Components:', {
+                    ratioA: ratioA.toFixed(3),
+                    ratioB: ratioB.toFixed(3), 
+                    ratioC: ratioC.toFixed(3),
+                    ratioD: ratioD.toFixed(3),
+                    ratioE: ratioE.toFixed(3),
+                    workingCapital: workingCapital,
+                    totalAssets: balanceSheet.totalAssets,
+                    zScore: zScore.toFixed(2)
+                });
+                
+                return Math.max(0, zScore);
+                
+            } catch (error) {
+                console.error('Error calculating Altman Z-Score:', error);
+                return 1.8; // Return safe default
+            }
+        }
+
+        function calculateBalanceSheetFromTransactions(transactions) {
+            let currentAssets = 0;
+            let totalAssets = 0;
+            let currentLiabilities = 0; 
+            let totalLiabilities = 0;
+            let retainedEarnings = 0;
             
-            // For now, return a calculated score based on available data
-            // This should be enhanced with proper balance sheet data
-            const currentYearData = calculateFinancialDataFromTransactions(
-                getTransactionsForPeriodFixed('YTD', 'custom'), 'YTD', 'custom'
-            );
+            transactions.forEach(tx => {
+                const debit = parseFloat(tx.debit_amount || 0);
+                const credit = parseFloat(tx.credit_amount || 0);
+                const netAmount = debit - credit;
+                
+                // Assets (normally debit balance)
+                if (tx.account_code.startsWith('1')) {
+                    totalAssets += netAmount;
+                    // Current assets (1000-1999)
+                    if (tx.account_code.startsWith('10') || tx.account_code.startsWith('11') || tx.account_code.startsWith('12')) {
+                        currentAssets += netAmount;
+                    }
+                }
+                // Liabilities (normally credit balance, so we reverse)
+                else if (tx.account_code.startsWith('2')) {
+                    totalLiabilities -= netAmount; // Reverse for credit balance
+                    // Current liabilities (2000-2999) 
+                    if (tx.account_code.startsWith('20') || tx.account_code.startsWith('21') || tx.account_code.startsWith('22')) {
+                        currentLiabilities -= netAmount; // Reverse for credit balance
+                    }
+                }
+                // Equity - Retained Earnings (3040)
+                else if (tx.account_code === '3040') {
+                    retainedEarnings -= netAmount; // Reverse for credit balance
+                }
+            });
             
-            // Simplified calculation (should be enhanced with proper balance sheet ratios)
-            const profitabilityRatio = currentYearData.netRevenue > 0 ? 
-                (currentYearData.netRevenue - currentYearData.opex) / currentYearData.netRevenue : 0;
+            return {
+                currentAssets,
+                totalAssets,
+                currentLiabilities, 
+                totalLiabilities,
+                retainedEarnings
+            };
+        }
+
+        function calculateIncomeStatementFromTransactions(transactions) {
+            let netRevenue = 0;
+            let totalExpenses = 0;
+            let interestExpense = 0;
             
-            const baseScore = 1.8; // Starting point
-            const profitabilityBonus = profitabilityRatio * 2; // Weight profitability
+            transactions.forEach(tx => {
+                const debit = parseFloat(tx.debit_amount || 0);
+                const credit = parseFloat(tx.credit_amount || 0);
+                
+                // Revenue accounts (4000s) - normally credit balance
+                if (tx.account_code.startsWith('4')) {
+                    netRevenue += credit - debit;
+                }
+                // Expense accounts (5000s) - normally debit balance  
+                else if (tx.account_code.startsWith('5')) {
+                    totalExpenses += debit - credit;
+                    // Interest expense (5900s)
+                    if (tx.account_code.startsWith('59')) {
+                        interestExpense += debit - credit;
+                    }
+                }
+            });
             
-            return Math.max(0, Math.min(5, baseScore + profitabilityBonus));
+            return {
+                netRevenue,
+                totalExpenses,
+                interestExpense
+            };
         }
         
         // Add this function to update cash flow forecast metrics
