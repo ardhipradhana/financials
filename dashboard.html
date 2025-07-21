@@ -22305,6 +22305,12 @@
                 const currentYear = today.getFullYear();
                 const currentMonth = today.getMonth() + 1;
                 
+                // Define monthsToInclude for YTD (this was missing!)
+                const monthsToInclude = [];
+                for (let i = 1; i <= currentMonth; i++) {
+                    monthsToInclude.push(i);
+                }
+                
                 // Get YTD actual data
                 const ytdActualData = calculateFinancialDataFromTransactions(
                     getTransactionsForPeriodFixed('YTD', 'custom'), 'YTD', 'custom'
@@ -22350,23 +22356,23 @@
                 else if (overallVariance > 5) status = 'Above budget';
                 else status = 'Below budget';
                 
-                return {
-                    variance: overallVariance,
-                    status,
-                    details: {
-                        revenueVariance,
-                        opexVariance,
-                        ebitdaVariance,
-                        actual: ytdActualData,
-                        budget: ytdBudgetData
-                    }
-                };
-                
-            } catch (error) {
-                console.error('Error calculating budget variance:', error);
-                return { variance: 0, status: 'Calculation error' };
+        return {
+            variance: overallVariance,
+            status,
+            details: {
+                revenueVariance,
+                opexVariance,
+                ebitdaVariance,
+                actual: ytdActualData,
+                budget: ytdBudgetData
             }
-        }
+        };
+        
+    } catch (error) {
+        console.error('Error calculating budget variance:', error);
+        return { variance: 0, status: 'Calculation error' };
+    }
+}
         
         async function updateDashboardCardsWithGL(metrics) {
             console.log('=== UPDATING DASHBOARD CARDS WITH COMPLETE DATA ===');
