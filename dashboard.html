@@ -23438,6 +23438,10 @@
                     // Month-over-Month: Just the specific month
                     startDate = new Date(year, month - 1, 1);
                     endDate = new Date(year, month, 0);
+                } else {
+                    // DEFAULT CASE - Add this to handle 'custom' and other period types
+                    startDate = new Date(year, month - 1, 1);
+                    endDate = new Date(year, month, 0);
                 }
             }
             
@@ -36335,7 +36339,7 @@
         function generateDashboardTrendingChart() {
             try {
                 // Get trending data (reuse existing function but limit to 6 months)
-                const trendingData = generateTrendingData();
+                const trendingData = generateTrendingAnalysis();
                 if (!trendingData || trendingData.periods.length === 0) {
                     return;
                 }
