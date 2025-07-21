@@ -23401,7 +23401,7 @@
                 }
                 
                 // Get budget data for current period
-                const budgetData = await getDashboardBudgetData(periodType);
+                const budgetData = await getBudgetDataForPeriod(currentPeriod, periodType);
                 
                 // Store global comparison data
                 comparisonData = {
@@ -23442,43 +23442,105 @@
             }
         }
         // Add this new function
-        async function getBudgetDataForPeriod(period, periodType) {
+        async function getBudgetDataForPeriod(currentPeriod, periodType) {
             try {
                 const { data: { user } } = await supabase.auth.getUser();
                 if (!user) return null;
                 
-                const [year, month] = period.split('-').map(Number);
+                const today = new Date();
+                const currentYear = today.getFullYear();
+                let monthsToInclude = [];
                 
-                // Get budget data for the specific year and month
+                console.log('=== GET BUDGET DATA FOR PERIOD ===');
+                console.log('Current Period:', currentPeriod);
+                console.log('Period Type:', periodType);
+                
+                // Determine which months to include based on period type
+                switch(periodType) {
+                    case 'MTD':
+                    case 'mom':
+                        monthsToInclude = [today.getMonth() + 1];
+                        break;
+                    case 'QTD':
+                    case 'qoq':
+                        const currentQuarter = Math.floor(today.getMonth() / 3);
+                        for (let i = 0; i < 3; i++) {
+                            const month = currentQuarter * 3 + i + 1;
+                            if (month <= today.getMonth() + 1) {
+                                monthsToInclude.push(month);
+                            }
+                        }
+                        break;
+                    case 'YTD':
+                    case 'yoy':
+                    default:
+                        for (let i = 1; i <= today.getMonth() + 1; i++) {
+                            monthsToInclude.push(i);
+                        }
+                        break;
+                }
+                
+                console.log('Months to include:', monthsToInclude);
+                
+                // Get budget data from the correct table (budgets)
                 const { data: budgetData, error } = await supabase
                     .from('budgets')
                     .select('*')
                     .eq('user_id', user.id)
-                    .eq('budget_year', year)
-                    .eq('budget_month', month);
+                    .eq('budget_year', currentYear)
+                    .in('budget_month', monthsToInclude);
                     
                 if (error) {
                     console.error('Error fetching budget data:', error);
                     return null;
                 }
                 
-                if (!budgetData || budgetData.length === 0) {
-                    return null;
-                }
+                console.log('Raw budget data fetched:', budgetData);
                 
-                // Get account mapping for proper categorization
-                const { data: accountMapping, error: mappingError } = await supabase
-                    .from('budget_account_mapping')
-                    .select('*')
-                    .eq('user_id', user.id);
+                // Calculate budget totals using the same logic as dashboard
+                const totals = { 
+                    revenue: 0, 
+                    grossRevenue: 0,
+                    netRevenue: 0,
+                    cogs: 0, 
+                    opex: 0, 
+                    ebitda: 0,
+                    grossProfit: 0,
+                    ebit: 0,
+                    netIncome: 0
+                };
+                
+                if (budgetData && budgetData.length > 0) {
+                    budgetData.forEach(entry => {
+                        const amount = parseFloat(entry.amount) || 0;
+                        const category = entry.category;
+                        
+                        console.log(`Processing budget entry: Month ${entry.budget_month}, Category ${category}, Amount ${amount}`);
+                        
+                        switch(category) {
+                            case 'revenue':
+                                totals.revenue += amount;
+                                totals.grossRevenue += amount;
+                                totals.netRevenue += amount; // Assuming no discounts in budget
+                                break;
+                            case 'cogs':
+                                totals.cogs += amount;
+                                break;
+                            case 'opex':
+                                totals.opex += amount;
+                                break;
+                        }
+                    });
                     
-                if (mappingError) {
-                    console.error('Error fetching account mapping:', mappingError);
-                    return null;
+                    // Calculate derived budget values
+                    totals.grossProfit = totals.netRevenue - totals.cogs;
+                    totals.ebitda = totals.grossProfit - totals.opex;
+                    totals.ebit = totals.ebitda; // Assuming no depreciation in budget
+                    totals.netIncome = totals.ebit; // Assuming no interest/tax in budget
                 }
                 
-                // Process budget data similar to transaction data
-                return calculateFinancialDataFromBudget(budgetData, accountMapping);
+                console.log('Final calculated budget totals:', totals);
+                return totals;
                 
             } catch (error) {
                 console.error('Error in getBudgetDataForPeriod:', error);
