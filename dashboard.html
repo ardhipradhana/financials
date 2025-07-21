@@ -22384,23 +22384,53 @@
             }
         }
 
-        function calculateBudgetTotalsFromBudgetsTable(budgetData) {
+        function calculateBudgetTotalsFromBudgetsTable(budgetData, periodType = 'YTD') {
             const totals = { revenue: 0, cogs: 0, opex: 0, ebitda: 0 };
             
+            // Get current date info for period calculations
+            const today = new Date();
+            const currentMonth = today.getMonth() + 1; // 1-based month
+            let monthsToSum = [];
+            
+            // Determine which months to include based on period type
+            switch(periodType) {
+                case 'MTD':
+                    monthsToSum = [currentMonth];
+                    break;
+                case 'QTD':
+                    const currentQuarter = Math.floor((currentMonth - 1) / 3);
+                    const quarterStartMonth = currentQuarter * 3 + 1;
+                    for (let i = quarterStartMonth; i <= currentMonth; i++) {
+                        monthsToSum.push(i);
+                    }
+                    break;
+                case 'YTD':
+                default:
+                    for (let i = 1; i <= currentMonth; i++) {
+                        monthsToSum.push(i);
+                    }
+                    break;
+            }
+            
+            // Only sum budget entries for the relevant months
             budgetData.forEach(entry => {
                 const amount = parseFloat(entry.amount) || 0;
-                const category = entry.category; // category is directly in the budgets table
+                const budgetMonth = parseInt(entry.budget_month);
+                const category = entry.category;
                 
-                switch(category) {
-                    case 'revenue':
-                        totals.revenue += amount;
-                        break;
-                    case 'cogs':
-                        totals.cogs += amount;
-                        break;
-                    case 'opex':
-                        totals.opex += amount;
-                        break;
+                // Only include this entry if its month is in our target period
+                if (monthsToSum.includes(budgetMonth)) {
+                    switch(category) {
+                        case 'revenue':
+                            totals.revenue += amount;
+                            break;
+                        case 'cogs':
+                            totals.cogs += amount;
+                            break;
+                        case 'opex':
+                            totals.opex += amount;
+                            break;
+                    }
                 }
             });
             
@@ -36403,7 +36433,7 @@
                     return null;
                 }
                 
-                return calculateBudgetTotalsFromBudgetsTable(budgetData || []);
+                return calculateBudgetTotalsFromBudgetsTable(budgetData || [], periodType);
                 
             } catch (error) {
                 console.error('Error in getDashboardBudgetData:', error);
