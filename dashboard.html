@@ -34781,6 +34781,17 @@
         
         // Calculate percentile for a specific metric
         function calculateMetricPercentile(metricName, companyValue) {
+            // ADD THESE SAFETY CHECKS:
+            if (!window.selectedIndustries || !Array.isArray(window.selectedIndustries) || window.selectedIndustries.length === 0) {
+                console.log('No selected industries available for benchmarking');
+                return 50; // Default to median
+            }
+            
+            if (!window.industryBenchmarkData) {
+                console.log('No industry benchmark data available');
+                return 50; // Default to median
+            }
+            
             const metricNameMapping = {
                 'roe': 'return_on_equity',
                 'roa': 'return_on_assets',
