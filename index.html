@@ -326,7 +326,7 @@
         
         .card-header {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             justify-content: space-between;
             margin-bottom: 24px;
         }
@@ -347,6 +347,12 @@
             font-size: 0.75rem;
             font-weight: 600;
             text-transform: uppercase;
+        }
+
+        .card-badges {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
         }
         
         .card-badge.coming-soon {
@@ -652,8 +658,10 @@
                                 <polyline points="10,9 9,9 8,9"/>
                             </svg>
                         </div>
-                        <div class="card-badge">Available Now</div>
-                        <div class="card-badge">Free</div>
+                        <div class="card-badges">
+                            <div class="card-badge">Available Now</div>
+                            <div class="card-badge">Free</div>
+                        </div>
                     </div>
                     <h3 class="card-title">Statements Generator</h3>
                     <p class="card-description">
