@@ -203,8 +203,15 @@
             margin-bottom: 24px;
             letter-spacing: -2px;
         }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #3B82F6, #10B981);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
 
-        .hero-title::after {
+        .gradient-text::after {
             content: '';
             position: absolute;
             bottom: -2px;
@@ -213,13 +220,6 @@
             height: 2px;
             background: linear-gradient(90deg, #fbbf24 0%, transparent 100%);
             border-radius: 1px;
-        }
-        
-        .gradient-text {
-            background: linear-gradient(135deg, #3B82F6, #10B981);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
         }
         
         .hero-subtitle {
