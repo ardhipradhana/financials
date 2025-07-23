@@ -140,19 +140,38 @@
         }
         
         .btn-nav-cta {
-            background: linear-gradient(135deg, #1E40AF, #60A5FA);
+            background: linear-gradient(135deg, #1E40AF, #3B82F6);
             color: white;
             border: none;
-            padding: 10px 20px;
+            padding: 12px 24px;
             border-radius: 8px;
             font-weight: 600;
-            cursor: pointer;
+            font-size: 0.9rem;
+            text-decoration: none !important;
+            display: inline-block;
             transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            letter-spacing: 0.5px;
+        }
+
+        .btn-nav-cta:hover,
+        .btn-nav-cta:focus,
+        .btn-nav-cta:active {
+            text-decoration: none !important;
         }
         
         .btn-nav-cta:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+            background: linear-gradient(135deg, #3B82F6, #60A5FA);
+            color: white;
+            text-decoration: none !important;
+        }
+
+        .btn-nav-cta:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+            text-decoration: none !important;
         }
         
         /* Hero Section */
@@ -986,7 +1005,7 @@
             <div class="nav-links">
                 <a href="#platform" class="nav-link">Platform</a>
                 <a href="about.html" class="nav-link">About</a>
-                <a href="https://calendly.com/ardhipradhana/montpro_discovery" class="btn-nav-cta">Request Demo</a>
+                <a href="https://calendly.com/ardhipradhana/montpro_discovery" class="btn-nav-cta">Book Demo</a>
             </div>
         </div>
     </nav>
