@@ -369,7 +369,31 @@
         }
         
         .card-badge.coming-soon {
-            background: linear-gradient(135deg, #F59E0B, #D97706);
+            background: linear-gradient(135deg, #6B7280, #4B5563);
+            color: #F3F4F6;
+            animation: pulse-subtle 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-subtle {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .platform-card:nth-child(3) {
+            filter: grayscale(0.3);
+            opacity: 0.85;
+        }
+        
+        .platform-card:nth-child(3):hover {
+            filter: grayscale(0.1);
+            opacity: 0.95;
+        }
+
+        .platform-card:nth-child(3) .btn-card-primary {
+            background: linear-gradient(135deg, rgba(75, 85, 99, 0.6), rgba(55, 65, 81, 0.8));
+            color: #9CA3AF;
+            cursor: not-allowed;
+            pointer-events: none;
         }
         
         .card-title {
@@ -916,6 +940,39 @@
                 margin: 0 20px;
             }
         }
+
+        .platform-card:nth-child(2) {
+            transform: scale(1.05);
+            z-index: 2;
+            position: relative;
+        }
+        
+        .platform-card:nth-child(2):hover {
+            transform: scale(1.05) translateY(-12px);
+        }
+
+        /* Generator Card (Left) - Subtle glow */
+        .platform-card:nth-child(1):hover {
+            transform: translateY(-8px);
+            border-color: rgba(16, 185, 129, 0.6);
+            box-shadow: 0 25px 80px rgba(16, 185, 129, 0.2);
+            background: linear-gradient(145deg, rgba(16, 185, 129, 0.08), rgba(30, 41, 59, 0.9));
+        }
+        
+        /* Dashboard Card (Middle) - Stronger effect */
+        .platform-card:nth-child(2):hover {
+            transform: scale(1.05) translateY(-12px);
+            border-color: rgba(59, 130, 246, 0.6);
+            box-shadow: 0 35px 100px rgba(59, 130, 246, 0.3);
+            background: linear-gradient(145deg, rgba(59, 130, 246, 0.1), rgba(30, 41, 59, 0.9));
+        }
+        
+        /* Credit Intel Card (Right) - Muted effect */
+        .platform-card:nth-child(3):hover {
+            transform: translateY(-4px);
+            border-color: rgba(139, 92, 246, 0.4);
+            box-shadow: 0 20px 60px rgba(139, 92, 246, 0.15);
+        }
     </style>
 </head>
 <body>
@@ -1106,7 +1163,7 @@
                         <div class="feature-item">✓ Key ratio analysis included</div>
                         <div class="feature-item">✓ Download PDF reports</div>
                     </div>
-                    <a href="generator.html" class="btn-card-primary">Launch Generator →</a>
+                    <a href="generator.html" class="btn-card-primary">Start Generating</a>
                 </div>
                 
                 <div class="platform-card active" data-aos="fade-up" data-aos-delay="100">
@@ -1128,7 +1185,7 @@
                         <div class="feature-item">✓ Real-time risk & opportunity alerts</div>
                         <div class="feature-item">✓ AI-powered forecasting</div>
                     </div>
-                    <a href="dashboard.html" class="btn-card-primary">Launch Dashboard →</a>
+                    <a href="dashboard.html" class="btn-card-primary">Launch Intelligence Hub</a>
                 </div>
 
                 <div class="platform-card" data-aos="fade-up" data-aos-delay="300">
@@ -1150,7 +1207,7 @@
                         <div class="feature-item">✓ Risk assessment</div>
                         <div class="feature-item">✓ Lender matching</div>
                     </div>
-                    <a href="credit.html" class="btn-card-primary">See Progress →</a>
+                    <a href="credit.html" class="btn-card-primary">In Development</a>
                 </div>
             </div>
         </div>
