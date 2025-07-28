@@ -33790,45 +33790,64 @@
         }
 
         function calculateDashboardIndustryPosition() {
+            console.log('=== DEBUG: calculateDashboardIndustryPosition ===');
+            console.log('companyFinancialMetrics:', window.companyFinancialMetrics);
+            console.log('industryBenchmarkData:', window.industryBenchmarkData);
+            console.log('selectedIndustries:', window.selectedIndustries);
+            
             // Check if industry benchmarking data is available
             if (!window.companyFinancialMetrics || !window.industryBenchmarkData || 
                 !window.selectedIndustries || window.selectedIndustries.length === 0) {
+                console.log('Missing required data for industry position calculation');
                 return { percentile: 0, status: 'No industry data' };
             }
             
             try {
                 // Calculate average percentile across key financial metrics
-                const keyMetrics = ['ebitda_margin', 'gross_margin', 'current_ratio', 'roe'];
+                const keyMetrics = ['ebitda_margin', 'gross_margin', 'net_margin', 'roe', 'current_ratio'];
                 let totalPercentile = 0;
                 let validMetrics = 0;
                 
                 keyMetrics.forEach(metric => {
                     const companyValue = window.companyFinancialMetrics[metric];
-                    if (companyValue !== undefined && companyValue !== null) {
+                    console.log(`Checking metric ${metric}:`, companyValue);
+                    
+                    if (companyValue !== undefined && companyValue !== null && !isNaN(companyValue)) {
                         const percentile = calculateMetricPercentile(metric, companyValue);
-                        totalPercentile += percentile;
-                        validMetrics++;
+                        console.log(`${metric} percentile:`, percentile);
+                        
+                        if (percentile > 0) { // Only count valid percentiles
+                            totalPercentile += percentile;
+                            validMetrics++;
+                        }
                     }
                 });
+                
+                console.log(`Total percentile: ${totalPercentile}, Valid metrics: ${validMetrics}`);
                 
                 if (validMetrics === 0) {
                     return { percentile: 0, status: 'Insufficient data' };
                 }
                 
-                const averagePercentile = totalPercentile / validMetrics;
+                // Calculate average percentile
+                const avgPercentile = Math.round(totalPercentile / validMetrics);
+                console.log('Average percentile:', avgPercentile);
                 
+                // Determine status based on average percentile
                 let status;
-                if (averagePercentile >= 75) status = 'Top quartile';
-                else if (averagePercentile >= 50) status = 'Above average';
-                else if (averagePercentile >= 25) status = 'Below average';
-                else status = 'Bottom quartile';
+                if (avgPercentile >= 75) {
+                    status = 'Top Performer';
+                } else if (avgPercentile >= 60) {
+                    status = 'Above Average';
+                } else if (avgPercentile >= 40) {
+                    status = 'Average';
+                } else if (avgPercentile >= 25) {
+                    status = 'Below Average';
+                } else {
+                    status = 'Needs Improvement';
+                }
                 
-                return {
-                    percentile: Math.round(averagePercentile),
-                    status,
-                    validMetrics,
-                    industryCount: window.selectedIndustries.length
-                };
+                return { percentile: avgPercentile, status };
                 
             } catch (error) {
                 console.error('Error calculating industry position:', error);
@@ -35185,6 +35204,10 @@
                 // Update UI components
                 generateBenchmarkGauges();
                 generateBenchmarkTable();
+
+                if (typeof updateDashboardMetrics === 'function') {
+                    updateDashboardMetrics();
+                }
                 
                 // Show comparison sections
                 document.getElementById('benchmarkGaugesSection').style.display = 'block';
