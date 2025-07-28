@@ -22773,7 +22773,7 @@
                 try {
                     const industryPosition = calculateDashboardIndustryPosition();
                     
-                    if (industryPosition.percentile !== 0) {
+                    if (industryPosition.percentile !== 0 && industryPosition.status !== 'Set up benchmarking') {
                         industryPositionElement.textContent = `${industryPosition.percentile}th`;
                         industryPositionChangeElement.textContent = industryPosition.status;
                         
@@ -22785,6 +22785,10 @@
                         } else {
                             industryPositionChangeElement.className = 'metric-change negative';
                         }
+                    } else if (industryPosition.status === 'Set up benchmarking') {
+                        industryPositionElement.textContent = '--';
+                        industryPositionChangeElement.innerHTML = '<a href="#" onclick="switchToIndustryBenchmarking()" style="color: inherit; text-decoration: underline;">Set up benchmarking</a>';
+                        industryPositionChangeElement.className = 'metric-change neutral';
                     } else {
                         industryPositionElement.textContent = 'N/A';
                         industryPositionChangeElement.textContent = industryPosition.status;
@@ -22846,6 +22850,14 @@
         function getCurrentYTDPeriod() {
             const today = new Date();
             return `${today.getFullYear()}-01-01_to_${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+        }
+
+        function switchToIndustryBenchmarking() {
+            // Find the Industry Benchmarking tab and click it
+            const benchmarkingTab = document.querySelector('[data-section="benchmarking"]');
+            if (benchmarkingTab) {
+                benchmarkingTab.click();
+            }
         }
 
         function calculateCompanyFinancialMetrics() {
@@ -33795,11 +33807,15 @@
             console.log('industryBenchmarkData:', window.industryBenchmarkData);
             console.log('selectedIndustries:', window.selectedIndustries);
             
+            // Check if we have company metrics first
+            if (!window.companyFinancialMetrics) {
+                return { percentile: 0, status: 'No financial data' };
+            }
+            
             // Check if industry benchmarking data is available
-            if (!window.companyFinancialMetrics || !window.industryBenchmarkData || 
-                !window.selectedIndustries || window.selectedIndustries.length === 0) {
-                console.log('Missing required data for industry position calculation');
-                return { percentile: 0, status: 'No industry data' };
+            if (!window.industryBenchmarkData || !window.selectedIndustries || window.selectedIndustries.length === 0) {
+                console.log('No industry benchmark data - user needs to set up benchmarking');
+                return { percentile: 0, status: 'Set up benchmarking' };
             }
             
             try {
@@ -35194,10 +35210,12 @@
                 if (error) throw error;
                 
                 // Organize data by industry
-                industryBenchmarkData = {};
+                window.industryBenchmarkData = {};
                 selectedIndustries.forEach(industry => {
-                    industryBenchmarkData[industry] = data.filter(d => d.industry === industry);
+                    window.industryBenchmarkData[industry] = data.filter(d => d.industry === industry);
                 });
+
+                window.selectedIndustries = [...selectedIndustries];
                 
                 console.log('Industry benchmark data loaded:', industryBenchmarkData);
                 
