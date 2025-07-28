@@ -36907,24 +36907,41 @@
             }
             
             try {
+                const { current, previous } = comparisonData;
+                
                 // Create CSV content
                 let csvContent = "Revenue Source,Current Period,Previous Period,Change,Percentage Contribution\n";
                 
-                // Add revenue data rows
-                const revenueData = comparisonData.current.revenueBreakdown || {};
-                const previousRevenueData = comparisonData.previous.revenueBreakdown || {};
+                // Revenue categories based on your data structure
+                const revenueCategories = [
+                    { name: 'Sales Revenue', accounts: [4010, 4020, 4030] },
+                    { name: 'Service Revenue', accounts: [4110, 4120, 4130] },
+                    { name: 'Interest Income', accounts: [4210] },
+                    { name: 'Sales Discounts', accounts: [4510] }
+                ];
                 
-                Object.keys(revenueData).forEach(source => {
-                    const current = revenueData[source] || 0;
-                    const previous = previousRevenueData[source] || 0;
-                    const change = current - previous;
-                    const percentage = comparisonData.current.netRevenue > 0 ? 
-                        ((current / comparisonData.current.netRevenue) * 100).toFixed(1) : '0.0';
+                revenueCategories.forEach(category => {
+                    let currentTotal = 0;
+                    let previousTotal = 0;
                     
-                    csvContent += `${source},${formatCurrencyForExport(current)},${formatCurrencyForExport(previous)},${formatCurrencyForExport(change)},${percentage}%\n`;
+                    category.accounts.forEach(accountCode => {
+                        currentTotal += getAccountBalance(current, accountCode);
+                        previousTotal += getAccountBalance(previous, accountCode);
+                    });
+                    
+                    if (currentTotal > 0 || previousTotal > 0) {
+                        const change = currentTotal - previousTotal;
+                        const percentage = current.netRevenue > 0 ? 
+                            ((currentTotal / current.netRevenue) * 100).toFixed(1) : '0.0';
+                        
+                        csvContent += `${category.name},${formatCurrencyForExport(currentTotal)},${formatCurrencyForExport(previousTotal)},${formatCurrencyForExport(change)},${percentage}%\n`;
+                    }
                 });
                 
-                // Use your existing download function
+                // Add total row
+                const totalChange = current.netRevenue - previous.netRevenue;
+                csvContent += `Total Revenue,${formatCurrencyForExport(current.netRevenue)},${formatCurrencyForExport(previous.netRevenue)},${formatCurrencyForExport(totalChange)},100.0%\n`;
+                
                 downloadCSVFile(csvContent, 'Revenue_Breakdown_Analysis.csv');
                 
             } catch (error) {
@@ -36941,24 +36958,41 @@
             }
             
             try {
+                const { current, previous } = comparisonData;
+                
                 // Create CSV content
                 let csvContent = "OPEX Category,Current Period,Previous Period,Change,Percentage Contribution\n";
                 
-                // Add OPEX data rows
-                const opexData = comparisonData.current.opexBreakdown || {};
-                const previousOpexData = comparisonData.previous.opexBreakdown || {};
+                // OPEX categories based on your data structure
+                const opexCategories = [
+                    { name: 'Facilities', codes: [5200, 5210, 5220, 5230, 5240, 5250] },
+                    { name: 'Marketing', codes: [5300, 5310, 5320, 5330] },
+                    { name: 'Professional Services', codes: [5400, 5410, 5420, 5430] },
+                    { name: 'Operations', codes: [5500, 5600, 5700, 5800] }
+                ];
                 
-                Object.keys(opexData).forEach(category => {
-                    const current = opexData[category] || 0;
-                    const previous = previousOpexData[category] || 0;
-                    const change = current - previous;
-                    const percentage = comparisonData.current.opex > 0 ? 
-                        ((current / comparisonData.current.opex) * 100).toFixed(1) : '0.0';
+                opexCategories.forEach(category => {
+                    let currentTotal = 0;
+                    let previousTotal = 0;
                     
-                    csvContent += `${category},${formatCurrencyForExport(current)},${formatCurrencyForExport(previous)},${formatCurrencyForExport(change)},${percentage}%\n`;
+                    category.codes.forEach(code => {
+                        currentTotal += getAccountBalance(current, code);
+                        previousTotal += getAccountBalance(previous, code);
+                    });
+                    
+                    if (currentTotal > 0 || previousTotal > 0) {
+                        const change = currentTotal - previousTotal;
+                        const percentage = current.opex > 0 ? 
+                            ((currentTotal / current.opex) * 100).toFixed(1) : '0.0';
+                        
+                        csvContent += `${category.name},${formatCurrencyForExport(currentTotal)},${formatCurrencyForExport(previousTotal)},${formatCurrencyForExport(change)},${percentage}%\n`;
+                    }
                 });
                 
-                // Use your existing download function
+                // Add total row
+                const totalChange = current.opex - previous.opex;
+                csvContent += `Total OPEX,${formatCurrencyForExport(current.opex)},${formatCurrencyForExport(previous.opex)},${formatCurrencyForExport(totalChange)},100.0%\n`;
+                
                 downloadCSVFile(csvContent, 'OPEX_Breakdown_Analysis.csv');
                 
             } catch (error) {
