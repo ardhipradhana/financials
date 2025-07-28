@@ -36912,29 +36912,30 @@
                 // Create CSV content
                 let csvContent = "Revenue Source,Current Period,Previous Period,Change,Percentage Contribution\n";
                 
-                // Revenue categories based on your data structure
-                const revenueCategories = [
-                    { name: 'Sales Revenue', accounts: [4010, 4020, 4030] },
-                    { name: 'Service Revenue', accounts: [4110, 4120, 4130] },
-                    { name: 'Interest Income', accounts: [4210] },
-                    { name: 'Sales Discounts', accounts: [4510] }
+                // All revenue accounts from your GL (4000 series)
+                const revenueAccounts = [
+                    { name: 'Sales Revenue', code: '4010' },
+                    { name: 'Service Revenue', code: '4020' },
+                    { name: 'Interest Income', code: '4030' },
+                    { name: 'Rental Income', code: '4040' },
+                    { name: 'Other Income', code: '4050' },
+                    { name: 'Sales Discounts', code: '4060' },
+                    { name: 'Sales Returns and Allowances', code: '4070' },
+                    { name: 'Gain on Sale of Assets', code: '4110' },
+                    { name: 'Dividend Income', code: '4120' },
+                    { name: 'Foreign Exchange Gain', code: '4130' }
                 ];
                 
-                revenueCategories.forEach(category => {
-                    let currentTotal = 0;
-                    let previousTotal = 0;
+                revenueAccounts.forEach(account => {
+                    const currentAmount = getAccountBalance(current, account.code);
+                    const previousAmount = getAccountBalance(previous, account.code);
                     
-                    category.accounts.forEach(accountCode => {
-                        currentTotal += getAccountBalance(current, accountCode);
-                        previousTotal += getAccountBalance(previous, accountCode);
-                    });
-                    
-                    if (currentTotal > 0 || previousTotal > 0) {
-                        const change = currentTotal - previousTotal;
+                    if (currentAmount !== 0 || previousAmount !== 0) {
+                        const change = currentAmount - previousAmount;
                         const percentage = current.netRevenue > 0 ? 
-                            ((currentTotal / current.netRevenue) * 100).toFixed(1) : '0.0';
+                            ((Math.abs(currentAmount) / current.netRevenue) * 100).toFixed(1) : '0.0';
                         
-                        csvContent += `${category.name},${formatCurrencyForExport(currentTotal)},${formatCurrencyForExport(previousTotal)},${formatCurrencyForExport(change)},${percentage}%\n`;
+                        csvContent += `${account.name},${formatCurrencyForExport(currentAmount)},${formatCurrencyForExport(previousAmount)},${formatCurrencyForExport(change)},${percentage}%\n`;
                     }
                 });
                 
@@ -36963,24 +36964,68 @@
                 // Create CSV content
                 let csvContent = "OPEX Category,Current Period,Previous Period,Change,Percentage Contribution\n";
                 
-                // OPEX categories based on your data structure
-                const opexCategories = [
-                    { name: 'Facilities', codes: [5200, 5210, 5220, 5230, 5240, 5250] },
-                    { name: 'Marketing', codes: [5300, 5310, 5320, 5330] },
-                    { name: 'Professional Services', codes: [5400, 5410, 5420, 5430] },
-                    { name: 'Operations', codes: [5500, 5600, 5700, 5800] }
+                // All expense accounts from your GL (5000-6000 series) organized by category
+                const expenseCategories = [
+                    {
+                        name: 'Cost of Goods Sold',
+                        accounts: ['5010', '5020', '5030'] // COGS, Purchase Discounts, Freight In
+                    },
+                    {
+                        name: 'Payroll & Benefits',
+                        accounts: ['5100', '5110', '5120', '5130'] // Salaries, Benefits, Payroll Tax, Workers Comp
+                    },
+                    {
+                        name: 'Facilities & Operations',
+                        accounts: ['5200', '5210', '5220', '5230', '5240', '5250'] // Rent, Utilities, Insurance, Maintenance, Cleaning, Security
+                    },
+                    {
+                        name: 'Marketing & Sales',
+                        accounts: ['5300', '5310', '5320', '5330'] // Marketing, Digital Marketing, Trade Shows, Sales Commissions
+                    },
+                    {
+                        name: 'Professional Services',
+                        accounts: ['5400', '5410', '5420', '5430', '5440'] // Professional Services, Legal, Accounting, Consulting, Bank Charges
+                    },
+                    {
+                        name: 'Office & Administration',
+                        accounts: ['5500', '5510', '5520', '5530', '5540', '5550'] // Office Supplies, Software, Telecom, Internet, Postage, Equipment Rental
+                    },
+                    {
+                        name: 'Depreciation & Amortization',
+                        accounts: ['5600', '5610'] // Depreciation, Amortization
+                    },
+                    {
+                        name: 'Financial Expenses',
+                        accounts: ['5700', '5710', '5720'] // Interest Expense, FX Loss, Bad Debt
+                    },
+                    {
+                        name: 'Travel & Transportation',
+                        accounts: ['5800', '5810', '5820', '5830'] // Travel & Entertainment, Vehicle Expenses, Fuel, Parking
+                    },
+                    {
+                        name: 'Training & Development',
+                        accounts: ['5900', '5910', '5920'] // Training, Books, Conferences
+                    },
+                    {
+                        name: 'Other Expenses',
+                        accounts: ['5950', '5960', '5970'] // Licenses, Donations, Miscellaneous
+                    },
+                    {
+                        name: 'Tax & Extraordinary',
+                        accounts: ['6010', '6020', '6030'] // Income Tax, Extraordinary Loss, Loss on Sale
+                    }
                 ];
                 
-                opexCategories.forEach(category => {
+                expenseCategories.forEach(category => {
                     let currentTotal = 0;
                     let previousTotal = 0;
                     
-                    category.codes.forEach(code => {
-                        currentTotal += getAccountBalance(current, code);
-                        previousTotal += getAccountBalance(previous, code);
+                    category.accounts.forEach(accountCode => {
+                        currentTotal += getAccountBalance(current, accountCode);
+                        previousTotal += getAccountBalance(previous, accountCode);
                     });
                     
-                    if (currentTotal > 0 || previousTotal > 0) {
+                    if (currentTotal !== 0 || previousTotal !== 0) {
                         const change = currentTotal - previousTotal;
                         const percentage = current.opex > 0 ? 
                             ((currentTotal / current.opex) * 100).toFixed(1) : '0.0';
