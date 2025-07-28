@@ -25526,6 +25526,8 @@
             
             // Calculate the trending data
             const trendingData = calculateTrendingData(monthsToInclude);
+
+            window.trendingData = trendingData;
             
             // Update summary cards
             updateTrendingSummaryCards(trendingData);
@@ -25961,7 +25963,84 @@
         }
         
         function exportTrendingChart() {
-            alert('Trending chart export feature - to be implemented');
+            try {
+                // Check if trending data exists
+                if (!window.trendingData || !window.trendingData.periods || window.trendingData.periods.length === 0) {
+                    alert('Please generate trending analysis first.');
+                    return;
+                }
+                
+                const data = window.trendingData;
+                
+                // Create CSV content
+                let csvContent = "Period,Revenue (Millions),OPEX (Millions),Gross Margin (%)\n";
+                
+                // Add data rows
+                for (let i = 0; i < data.periods.length; i++) {
+                    const period = data.periods[i];
+                    const revenue = data.revenue[i] || 0;
+                    const opex = data.opex[i] || 0;
+                    const margin = data.margins[i] || 0;
+                    
+                    csvContent += `${period},${revenue.toFixed(2)},${opex.toFixed(2)},${margin.toFixed(1)}\n`;
+                }
+                
+                // Add summary statistics
+                csvContent += "\n--- Summary Statistics ---\n";
+                
+                // Calculate growth rates
+                if (data.revenue.length >= 2) {
+                    const revenueGrowth = ((data.revenue[data.revenue.length - 1] - data.revenue[0]) / data.revenue[0]) * 100;
+                    csvContent += `Revenue Growth (First to Last Period),${revenueGrowth.toFixed(1)}%\n`;
+                }
+                
+                if (data.opex.length >= 2) {
+                    const opexGrowth = ((data.opex[data.opex.length - 1] - data.opex[0]) / data.opex[0]) * 100;
+                    csvContent += `OPEX Growth (First to Last Period),${opexGrowth.toFixed(1)}%\n`;
+                }
+                
+                // Average margin
+                const avgMargin = data.margins.reduce((sum, margin) => sum + margin, 0) / data.margins.length;
+                csvContent += `Average Gross Margin,${avgMargin.toFixed(1)}%\n`;
+                
+                // Current month projections if available
+                if (data.currentMonthMTD && data.currentMonthProjected) {
+                    csvContent += `Current Month MTD (Millions),${(data.currentMonthMTD / 1000000).toFixed(2)}\n`;
+                    csvContent += `Current Month Projected (Millions),${(data.currentMonthProjected / 1000000).toFixed(2)}\n`;
+                }
+                
+                // Download the CSV
+                downloadCSVFile(csvContent, 'Trending_Analysis_Export.csv');
+                
+                console.log('Trending chart data exported successfully');
+                
+            } catch (error) {
+                console.error('Error exporting trending chart:', error);
+                
+                // Fallback: Try to get data directly from the chart if it exists
+                try {
+                    const chartCanvas = document.getElementById('trendingChart');
+                    if (chartCanvas && window.trendingChartInstance) {
+                        const chart = window.trendingChartInstance;
+                        const chartData = chart.data;
+                        
+                        let csvContent = "Period,Revenue (Millions),OPEX (Millions)\n";
+                        
+                        chartData.labels.forEach((label, index) => {
+                            const revenue = chartData.datasets[0]?.data[index] || 0;
+                            const opex = chartData.datasets[1]?.data[index] || 0;
+                            csvContent += `${label},${revenue},${opex}\n`;
+                        });
+                        
+                        downloadCSVFile(csvContent, 'Trending_Analysis_Export.csv');
+                        return;
+                    }
+                } catch (fallbackError) {
+                    console.error('Fallback export also failed:', fallbackError);
+                }
+                
+                alert('Error exporting trending chart: ' + error.message);
+            }
         }
 
         // Initialize when reports section is accessed
