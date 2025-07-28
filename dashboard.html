@@ -35218,6 +35218,8 @@
                 window.selectedIndustries = [...selectedIndustries];
                 
                 console.log('Industry benchmark data loaded:', industryBenchmarkData);
+
+                debugIndustryData();
                 
                 // Update UI components
                 generateBenchmarkGauges();
@@ -35235,6 +35237,21 @@
             } catch (error) {
                 console.error('Error loading industry benchmarks:', error);
                 alert('Error loading industry benchmarks. Please try again.');
+            }
+        }
+
+        // Add this debug function and call it after loading industry benchmarks
+        function debugIndustryData() {
+            console.log('=== INDUSTRY BENCHMARK DEBUG ===');
+            console.log('selectedIndustries:', window.selectedIndustries);
+            console.log('industryBenchmarkData:', window.industryBenchmarkData);
+            
+            if (window.industryBenchmarkData) {
+                Object.keys(window.industryBenchmarkData).forEach(industry => {
+                    console.log(`Industry: ${industry}`);
+                    console.log('Metrics available:', window.industryBenchmarkData[industry].map(d => d.metric_name));
+                    console.log('Sample data:', window.industryBenchmarkData[industry][0]);
+                });
             }
         }
         
@@ -35382,53 +35399,59 @@
         
         // Generate detailed comparison table
         function generateBenchmarkTable() {
-            // Add the metric name mapping at the beginning of the function
-            const metricNameMapping = {
-                'roe': 'return_on_equity',
-                'roa': 'return_on_assets',
-                'ebitda_margin': 'ebitda_margin',
-                'net_margin': 'net_margin',
-                'gross_margin': 'gross_margin',
-                'asset_turnover': 'asset_turnover',
-                'current_ratio': 'current_ratio',
-                'quick_ratio': 'quick_ratio',
-                'debt_to_equity': 'debt_to_equity'
-            };
-        
-            const tableBody = document.getElementById('benchmarkTableBody');
             const tableHeader = document.querySelector('#benchmarkComparisonTable thead tr');
+            const tableBody = document.getElementById('benchmarkTableBody');
             
-            // Update table header with selected industries
+            if (!tableHeader || !tableBody || !window.selectedIndustries || window.selectedIndustries.length === 0) {
+                console.log('Missing table elements or no selected industries');
+                return;
+            }
+            
+            // Debug the available data
+            console.log('Generating benchmark table with:', window.selectedIndustries);
+            console.log('Available industry data:', window.industryBenchmarkData);
+            
+            // Clear existing content
+            tableBody.innerHTML = '';
+            
+            // Build header dynamically for selected industries
             let headerHTML = `
                 <th>Financial Metric</th>
                 <th>Your Company</th>
                 <th>Percentile</th>
             `;
             
-            selectedIndustries.forEach(industry => {
+            window.selectedIndustries.forEach(industry => {
                 const industryName = industry.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
                 headerHTML += `<th>${industryName}<br>Median</th>`;
             });
             
             tableHeader.innerHTML = headerHTML;
             
-            // Generate table rows
+            // Define metrics with correct database mapping
             const metrics = [
-                { key: 'roe', label: 'Return on Equity (%)', isPercent: true },
-                { key: 'roa', label: 'Return on Assets (%)', isPercent: true },
-                { key: 'ebitda_margin', label: 'EBITDA Margin (%)', isPercent: true },
-                { key: 'net_margin', label: 'Net Profit Margin (%)', isPercent: true },
-                { key: 'gross_margin', label: 'Gross Profit Margin (%)', isPercent: true },
-                { key: 'asset_turnover', label: 'Asset Turnover', isPercent: false },
-                { key: 'current_ratio', label: 'Current Ratio', isPercent: false },
-                { key: 'quick_ratio', label: 'Quick Ratio', isPercent: false },
-                { key: 'debt_to_equity', label: 'Debt-to-Equity', isPercent: false }
+                { key: 'roe', label: 'Return on Equity (%)', isPercent: true, dbName: 'return_on_equity' },
+                { key: 'roa', label: 'Return on Assets (%)', isPercent: true, dbName: 'return_on_assets' },
+                { key: 'ebitda_margin', label: 'EBITDA Margin (%)', isPercent: true, dbName: 'ebitda_margin' },
+                { key: 'net_margin', label: 'Net Profit Margin (%)', isPercent: true, dbName: 'net_margin' },
+                { key: 'gross_margin', label: 'Gross Profit Margin (%)', isPercent: true, dbName: 'gross_margin' },
+                { key: 'asset_turnover', label: 'Asset Turnover', isPercent: false, dbName: 'asset_turnover' },
+                { key: 'current_ratio', label: 'Current Ratio', isPercent: false, dbName: 'current_ratio' },
+                { key: 'quick_ratio', label: 'Quick Ratio', isPercent: false, dbName: 'quick_ratio' },
+                { key: 'debt_to_equity', label: 'Debt-to-Equity', isPercent: false, dbName: 'debt_to_equity' }
             ];
             
             let tableHTML = '';
             
             metrics.forEach(metric => {
-                const companyValue = companyFinancialMetrics[metric.key];
+                const companyValue = window.companyFinancialMetrics[metric.key];
+                console.log(`Processing ${metric.key}:`, companyValue);
+                
+                if (companyValue === undefined || companyValue === null) {
+                    console.log(`Skipping ${metric.key} - no company data`);
+                    return; // Skip metrics without company data
+                }
+                
                 const percentile = calculateMetricPercentile(metric.key, companyValue);
                 const performanceClass = getPerformanceClass(percentile);
                 
@@ -35444,10 +35467,14 @@
                 `;
                 
                 // Add industry benchmark values
-                selectedIndustries.forEach(industry => {
-                    const industryData = industryBenchmarkData[industry];
-                    const dbMetricName = metricNameMapping[metric.key] || metric.key;
-                    const metricData = industryData?.find(d => d.metric_name === dbMetricName);
+                window.selectedIndustries.forEach(industry => {
+                    const industryData = window.industryBenchmarkData[industry];
+                    console.log(`Looking for ${metric.dbName} in ${industry}:`, industryData);
+                    
+                    // Find the metric in industry data using the database name
+                    const metricData = industryData?.find(d => d.metric_name === metric.dbName);
+                    console.log(`Found metric data for ${metric.dbName}:`, metricData);
+                    
                     const medianValue = metricData?.median_value || 0;
                     
                     rowHTML += `
@@ -35462,6 +35489,7 @@
             });
             
             tableBody.innerHTML = tableHTML;
+            console.log('Benchmark table generated successfully');
         }
         
         // Generate strategic insights using AI
