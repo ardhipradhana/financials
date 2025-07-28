@@ -11468,47 +11468,53 @@
                         </div>
                         
                         <div class="form-group">
-                            <label class="form-label">Account</label>
-                            <div class="account-input-group">
-                                <select class="form-select" id="financialAccount" required onchange="updateAccountDetails()">
-                                    <option value="">Select Account</option>
-                                    <!-- Populated by JavaScript -->
-                                </select>
-                                <button type="button" class="btn btn-secondary" onclick="openNewAccountModal()">
-                                    <i class="fas fa-plus"></i>
-                                </button>
-                            </div>
+                            <label class="form-label">Reference</label>
+                            <input type="text" class="form-input" id="financialReference" placeholder="REF-001">
                         </div>
-            
+                        
                         <div class="form-group">
                             <label class="form-label">Description</label>
-                            <input type="text" class="form-input" id="financialDescription" required>
+                            <input type="text" class="form-input" id="financialDescription" required placeholder="Transaction description">
                         </div>
-            
-                        <div class="form-row">
+                    
+                        <!-- Balance Indicator -->
+                        <div class="balance-indicator" id="journalBalance" style="margin: 1rem 0; padding: 0.75rem; background: #f8fafc; border-radius: 6px; text-align: center;">
+                            <span id="balanceStatus">Debits: Rp 0 | Credits: Rp 0 | <span style="color: #ef4444;">Out of Balance</span></span>
+                        </div>
+                    
+                        <!-- Debit Line -->
+                        <div class="journal-line" style="border: 1px solid #e2e8f0; border-radius: 6px; padding: 1rem; margin-bottom: 1rem;">
+                            <h4 style="margin-bottom: 0.75rem; color: #059669;">Debit Entry</h4>
                             <div class="form-group">
-                                <label class="form-label">Debit Amount</label>
-                                <input type="number" class="form-input" id="financialDebit" step="0.01" min="0" oninput="handleAmountInput('debit')">
+                                <label class="form-label">Account</label>
+                                <select class="form-select" id="debitAccount" required onchange="updateBalance()">
+                                    <option value="">Select Account</option>
+                                </select>
                             </div>
                             <div class="form-group">
-                                <label class="form-label">Credit Amount</label>
-                                <input type="number" class="form-input" id="financialCredit" step="0.01" min="0" oninput="handleAmountInput('credit')">
+                                <label class="form-label">Amount</label>
+                                <input type="number" class="form-input" id="debitAmount" step="0.01" min="0" oninput="updateBalance()" required>
                             </div>
                         </div>
-            
-                        <div class="form-group">
-                            <label class="form-label">Reference</label>
-                            <input type="text" class="form-input" id="financialReference">
+                    
+                        <!-- Credit Line -->
+                        <div class="journal-line" style="border: 1px solid #e2e8f0; border-radius: 6px; padding: 1rem; margin-bottom: 1rem;">
+                            <h4 style="margin-bottom: 0.75rem; color: #dc2626;">Credit Entry</h4>
+                            <div class="form-group">
+                                <label class="form-label">Account</label>
+                                <select class="form-select" id="creditAccount" required onchange="updateBalance()">
+                                    <option value="">Select Account</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Amount</label>
+                                <input type="number" class="form-input" id="creditAmount" step="0.01" min="0" oninput="updateBalance()" required>
+                            </div>
                         </div>
-            
-                        <div class="form-group">
-                            <label class="form-label">Notes</label>
-                            <textarea class="form-input" id="financialNotes"></textarea>
-                        </div>
-            
+                    
                         <div class="form-actions">
                             <button type="button" class="btn btn-secondary" onclick="closeAddFinancialModal()">Cancel</button>
-                            <button type="submit" class="btn btn-primary">Add Transaction</button>
+                            <button type="submit" class="btn btn-primary" id="saveJournalButton" disabled>Add Journal Entry</button>
                         </div>
                     </form>
                 </div>
@@ -19120,22 +19126,18 @@
                 modal.style.visibility = 'visible';
                 modal.style.opacity = '1';
                 
-                // Set default date to today
+                // Set default date
                 document.getElementById('financialDate').value = new Date().toISOString().split('T')[0];
                 
-                // Clear form
-                clearFinancialForm();
+                // Populate both account dropdowns
+                populateJournalAccountDropdowns();
                 
-                // Reset modal title for new transaction
-                document.querySelector('#addFinancialModal .modal-title').textContent = 'Add Financial Transaction';
+                // Reset form
+                document.getElementById('addFinancialForm').reset();
+                document.getElementById('financialDate').value = new Date().toISOString().split('T')[0];
                 
-                // Populate GL accounts dropdown if not already done
-                if (glAccounts && glAccounts.length > 0) {
-                    populateAccountDropdowns();
-                }
-            } else {
-                console.error('Add Financial Modal not found');
-                alert('Modal not found. Please check the page structure.');
+                // Reset balance indicator
+                updateBalance();
             }
         }
         
@@ -19150,6 +19152,26 @@
             clearFinancialForm();
             isEditingFinancial = false;
             editingFinancialId = null;
+        }
+
+        function populateJournalAccountDropdowns() {
+            const debitSelect = document.getElementById('debitAccount');
+            const creditSelect = document.getElementById('creditAccount');
+            
+            if (!debitSelect || !creditSelect) return;
+            
+            // Clear existing options (except first)
+            debitSelect.innerHTML = '<option value="">Select Account</option>';
+            creditSelect.innerHTML = '<option value="">Select Account</option>';
+            
+            // Add accounts to both dropdowns
+            glAccounts.forEach(account => {
+                const option1 = new Option(`${account.account_code} - ${account.account_name}`, account.account_code);
+                const option2 = new Option(`${account.account_code} - ${account.account_name}`, account.account_code);
+                
+                debitSelect.add(option1);
+                creditSelect.add(option2);
+            });
         }
         
         function clearFinancialForm() {
@@ -19198,85 +19220,95 @@
         async function addFinancialTransaction(event) {
             event.preventDefault();
             
-            const formData = {
-                transaction_date: document.getElementById('financialDate').value,
-                account_code: document.getElementById('financialAccount').value,
-                description: document.getElementById('financialDescription').value,
-                debit_amount: parseFloat(document.getElementById('financialDebit').value) || 0,
-                credit_amount: parseFloat(document.getElementById('financialCredit').value) || 0,
-                reference: document.getElementById('financialReference').value || '',
-                notes: document.getElementById('financialNotes').value || ''
-            };
+            // Get form data
+            const transactionDate = document.getElementById('financialDate').value;
+            const reference = document.getElementById('financialReference').value || '';
+            const description = document.getElementById('financialDescription').value;
+            const debitAccountCode = document.getElementById('debitAccount').value;
+            const creditAccountCode = document.getElementById('creditAccount').value;
+            const amount = parseFloat(document.getElementById('debitAmount').value);
             
-            // Enhanced validation - check required fields first
-            if (!formData.transaction_date || !formData.account_code || !formData.description) {
-                alert('Please fill in all required fields (Date, Account, Description).');
+            // Validation
+            if (!transactionDate || !description || !debitAccountCode || !creditAccountCode || !amount) {
+                alert('Please fill in all required fields.');
                 return;
             }
             
-            // Amount validation
-            if (formData.debit_amount === 0 && formData.credit_amount === 0) {
-                alert('Please enter either a debit or credit amount.');
-                return;
-            }
-            
-            if (formData.debit_amount > 0 && formData.credit_amount > 0) {
-                alert('Please enter either debit OR credit amount, not both.');
+            if (amount <= 0) {
+                alert('Amount must be greater than zero.');
                 return;
             }
             
             // Get account details
-            const account = glAccounts.find(acc => acc.account_code === formData.account_code);
-            if (!account) {
-                alert('Please select a valid account.');
+            const debitAccount = glAccounts.find(acc => acc.account_code === debitAccountCode);
+            const creditAccount = glAccounts.find(acc => acc.account_code === creditAccountCode);
+            
+            if (!debitAccount || !creditAccount) {
+                alert('Please select valid accounts.');
                 return;
             }
             
-            formData.account_name = account.account_name;
-            formData.category = account.category;
-            formData.source = 'Manual';
-            
             try {
-                let savedTransaction;
+                // Create debit transaction
+                const debitTransaction = {
+                    transaction_date: transactionDate,
+                    account_code: debitAccountCode,
+                    account_name: debitAccount.account_name,
+                    description: description,
+                    debit_amount: amount,
+                    credit_amount: 0,
+                    reference: reference,
+                    notes: `Journal Entry - Debit`,
+                    category: debitAccount.category,
+                    source: 'Manual Journal'
+                };
                 
-                if (isEditingFinancial) {
-                    await updateFinancialTransaction(editingFinancialId, formData);
-                    alert('Transaction updated successfully!');
-                } else {
-                    savedTransaction = await saveFinancialTransaction(formData);
-                    alert('Transaction added successfully!');
-                }
+                // Create credit transaction
+                const creditTransaction = {
+                    transaction_date: transactionDate,
+                    account_code: creditAccountCode,
+                    account_name: creditAccount.account_name,
+                    description: description,
+                    debit_amount: 0,
+                    credit_amount: amount,
+                    reference: reference,
+                    notes: `Journal Entry - Credit`,
+                    category: creditAccount.category,
+                    source: 'Manual Journal'
+                };
                 
+                // Save both transactions
+                await saveFinancialTransaction(debitTransaction);
+                await saveFinancialTransaction(creditTransaction);
+                
+                alert('Journal entry added successfully!');
                 closeAddFinancialModal();
                 await loadFinancialTransactions();
-                
-                // Update displays
                 updateTrialBalance();
                 
-                // Auto-link if created from AP/AR (FIXED)
-                if (window.pendingAPARLinkId && savedTransaction) {
-                    try {
-                        await updateTransaction(window.pendingAPARLinkId, {
-                            linked_financial_id: savedTransaction.id
-                        });
-                        
-                        await updateFinancialTransaction(savedTransaction.id, {
-                            ap_ar_transaction_id: window.pendingAPARLinkId,
-                            is_linked: true
-                        });
-                        
-                        window.pendingAPARLinkId = null;
-                        renderAPARTable(); // Refresh AP/AR table
-                        alert('GL transaction created and linked successfully!');
-                    } catch (error) {
-                        console.error('Error auto-linking:', error);
-                        alert('GL transaction created but linking failed. You can link manually.');
-                    }
-                }
-                
             } catch (error) {
-                console.error('Error saving transaction:', error);
-                alert('Error saving transaction: ' + error.message);
+                console.error('Error saving journal entry:', error);
+                alert('Error saving journal entry: ' + error.message);
+            }
+        }
+
+        function updateBalance() {
+            const debitAmount = parseFloat(document.getElementById('debitAmount').value) || 0;
+            const creditAmount = parseFloat(document.getElementById('creditAmount').value) || 0;
+            
+            const balanceStatus = document.getElementById('balanceStatus');
+            const saveButton = document.getElementById('saveJournalButton');
+            
+            const isBalanced = debitAmount > 0 && creditAmount > 0 && debitAmount === creditAmount;
+            
+            if (isBalanced) {
+                balanceStatus.innerHTML = `Debits: ${formatCurrency(debitAmount, 'IDR')} | Credits: ${formatCurrency(creditAmount, 'IDR')} | <span style="color: #059669;">✓ Balanced</span>`;
+                saveButton.disabled = false;
+                saveButton.textContent = 'Add Journal Entry';
+            } else {
+                balanceStatus.innerHTML = `Debits: ${formatCurrency(debitAmount, 'IDR')} | Credits: ${formatCurrency(creditAmount, 'IDR')} | <span style="color: #ef4444;">Out of Balance</span>`;
+                saveButton.disabled = true;
+                saveButton.textContent = 'Balance Required';
             }
         }
         
