@@ -35333,18 +35333,16 @@
         
         // Calculate percentile for a specific metric
         function calculateMetricPercentile(metricName, companyValue) {
-            console.log(`=== PERCENTILE DEBUG for ${metricName} ===`);
+            console.log(`=== ADAPTIVE PERCENTILE for ${metricName} ===`);
             console.log('Company value:', companyValue);
             
             // Safety checks
             if (!window.selectedIndustries || !Array.isArray(window.selectedIndustries) || window.selectedIndustries.length === 0) {
-                console.log('No selected industries available for benchmarking');
-                return 50; // Default to median
+                return 50;
             }
             
             if (!window.industryBenchmarkData) {
-                console.log('No industry benchmark data available');
-                return 50; // Default to median
+                return 50;
             }
             
             const metricNameMapping = {
@@ -35361,45 +35359,69 @@
             
             const dbMetricName = metricNameMapping[metricName] || metricName;
             
-            // Get ALL benchmark data points for this metric across all selected industries
-            const allBenchmarkValues = [];
+            // Collect only AVAILABLE benchmark data (filter out zeros)
+            const validBenchmarks = [];
             window.selectedIndustries.forEach(industry => {
                 const industryData = window.industryBenchmarkData[industry];
                 const metricData = industryData?.find(d => d.metric_name === dbMetricName);
                 if (metricData) {
-                    // Add all the benchmark points for this industry
-                    allBenchmarkValues.push(parseFloat(metricData.min_value));
-                    allBenchmarkValues.push(parseFloat(metricData.q1_value));
-                    allBenchmarkValues.push(parseFloat(metricData.median_value));
-                    allBenchmarkValues.push(parseFloat(metricData.q3_value));
-                    allBenchmarkValues.push(parseFloat(metricData.max_value));
+                    // Only add non-zero values to create realistic distribution
+                    const values = [
+                        parseFloat(metricData.min_value),
+                        parseFloat(metricData.q1_value),
+                        parseFloat(metricData.median_value),
+                        parseFloat(metricData.q3_value),
+                        parseFloat(metricData.max_value)
+                    ].filter(v => v > 0); // Filter out zeros
+                    
+                    validBenchmarks.push(...values);
                 }
             });
             
-            console.log('All benchmark values:', allBenchmarkValues);
+            console.log('Valid benchmark values (zeros filtered):', validBenchmarks);
             
-            if (allBenchmarkValues.length === 0) {
-                console.log('No benchmark data found for', dbMetricName);
-                return 50; // Default to median if no data
+            if (validBenchmarks.length === 0) {
+                console.log('No valid benchmark data found');
+                return 50;
             }
             
-            // Sort the values to calculate percentile
-            allBenchmarkValues.sort((a, b) => a - b);
+            // Sort the values
+            validBenchmarks.sort((a, b) => a - b);
             
-            // Calculate percentile: how many values are below the company value
-            const belowCount = allBenchmarkValues.filter(value => value < companyValue).length;
-            const equalCount = allBenchmarkValues.filter(value => value === companyValue).length;
+            // ADAPTIVE PERCENTILE CALCULATION
+            let percentile;
             
-            // Use the standard percentile formula
-            const percentile = ((belowCount + 0.5 * equalCount) / allBenchmarkValues.length) * 100;
+            if (validBenchmarks.length <= 3) {
+                // Very limited data - use simple comparison
+                console.log('Limited data - using simple comparison');
+                const median = validBenchmarks[Math.floor(validBenchmarks.length / 2)];
+                const min = Math.min(...validBenchmarks);
+                const max = Math.max(...validBenchmarks);
+                
+                if (companyValue <= min) percentile = 10;
+                else if (companyValue >= max) percentile = 90;
+                else if (companyValue < median) percentile = 25;
+                else if (companyValue > median) percentile = 75;
+                else percentile = 50;
+                
+            } else {
+                // Standard percentile calculation for adequate data
+                const belowCount = validBenchmarks.filter(value => value < companyValue).length;
+                const equalCount = validBenchmarks.filter(value => value === companyValue).length;
+                const rawPercentile = ((belowCount + 0.5 * equalCount) / validBenchmarks.length) * 100;
+                
+                // Smooth extreme values for small datasets
+                if (validBenchmarks.length < 10) {
+                    if (rawPercentile <= 5) percentile = 10;
+                    else if (rawPercentile >= 95) percentile = 90;
+                    else percentile = rawPercentile;
+                } else {
+                    percentile = rawPercentile;
+                }
+            }
             
-            console.log(`Percentile calculation:`);
-            console.log(`- Values below company: ${belowCount}`);
-            console.log(`- Values equal to company: ${equalCount}`);
-            console.log(`- Total benchmark values: ${allBenchmarkValues.length}`);
-            console.log(`- Calculated percentile: ${percentile.toFixed(1)}`);
-            
-            return Math.max(0, Math.min(100, Math.round(percentile)));
+            console.log(`Final percentile: ${Math.round(percentile)}`);
+            return Math.max(5, Math.min(95, Math.round(percentile))); // Cap between 5th-95th percentile
         }
         
         // Get performance class based on percentile
