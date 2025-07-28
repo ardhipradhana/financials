@@ -11245,22 +11245,7 @@
                             </button>
                         </div>
 
-                        <div class="table-pagination-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding: 0.75rem 1rem; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
-                            <div class="pagination-info" style="color: #64748b; font-size: 0.875rem;">
-                                <span id="transactionCount">Showing 0-0 of 0 transactions</span>
-                            </div>
-                            <div class="pagination-controls" style="display: flex; align-items: center; gap: 0.5rem;">
-                                <span style="color: #64748b; font-size: 0.875rem;">Show:</span>
-                                <select id="transactionPageSize" onchange="changePageSize()" 
-                                        style="padding: 0.375rem 0.75rem; border: 1px solid #d1d5db; border-radius: 6px; background: white; font-size: 0.875rem; min-width: 80px;">
-                                    <option value="25">25</option>
-                                    <option value="50" selected>50</option>
-                                    <option value="100">100</option>
-                                    <option value="200">200</option>
-                                </select>
-                                <span style="color: #64748b; font-size: 0.875rem;">per page</span>
-                            </div>
-                        </div>
+                        
             
                         <!-- Transactions Tab -->
                         <div class="tab-content active" id="financial-transactions-tab">
@@ -11284,6 +11269,22 @@
                                 </div>
                         
                                 <!-- UPDATED: Horizontal Filters Section -->
+                                <div class="table-pagination-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding: 0.75rem 1rem; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                    <div class="pagination-info" style="color: #64748b; font-size: 0.875rem;">
+                                        <span id="transactionCount">Showing 0-0 of 0 transactions</span>
+                                    </div>
+                                    <div class="pagination-controls" style="display: flex; align-items: center; gap: 0.5rem;">
+                                        <span style="color: #64748b; font-size: 0.875rem;">Show:</span>
+                                        <select id="transactionPageSize" onchange="changePageSize()" 
+                                                style="padding: 0.375rem 0.75rem; border: 1px solid #d1d5db; border-radius: 6px; background: white; font-size: 0.875rem; min-width: 80px;">
+                                            <option value="25">25</option>
+                                            <option value="50" selected>50</option>
+                                            <option value="100">100</option>
+                                            <option value="200">200</option>
+                                        </select>
+                                        <span style="color: #64748b; font-size: 0.875rem;">per page</span>
+                                    </div>
+                                </div>
                                 <div class="filters-section-horizontal">
                                     <div class="filter-row">
                                         <div class="filter-group">
