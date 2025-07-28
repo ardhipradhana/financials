@@ -19114,13 +19114,39 @@
         
         // Modal Functions
         function openAddFinancialModal() {
-            document.getElementById('addFinancialModal').classList.add('active');
-            document.getElementById('financialDate').value = new Date().toISOString().split('T')[0];
-            clearFinancialForm();
+            const modal = document.getElementById('addFinancialModal');
+            if (modal) {
+                modal.classList.add('active');
+                modal.style.visibility = 'visible';
+                modal.style.opacity = '1';
+                
+                // Set default date to today
+                document.getElementById('financialDate').value = new Date().toISOString().split('T')[0];
+                
+                // Clear form
+                clearFinancialForm();
+                
+                // Reset modal title for new transaction
+                document.querySelector('#addFinancialModal .modal-title').textContent = 'Add Financial Transaction';
+                
+                // Populate GL accounts dropdown if not already done
+                if (glAccounts && glAccounts.length > 0) {
+                    populateAccountDropdowns();
+                }
+            } else {
+                console.error('Add Financial Modal not found');
+                alert('Modal not found. Please check the page structure.');
+            }
         }
         
         function closeAddFinancialModal() {
-            document.getElementById('addFinancialModal').classList.remove('active');
+            const modal = document.getElementById('addFinancialModal');
+            if (modal) {
+                modal.classList.remove('active');
+                modal.style.visibility = 'hidden';
+                modal.style.opacity = '0';
+            }
+            
             clearFinancialForm();
             isEditingFinancial = false;
             editingFinancialId = null;
@@ -19178,11 +19204,17 @@
                 description: document.getElementById('financialDescription').value,
                 debit_amount: parseFloat(document.getElementById('financialDebit').value) || 0,
                 credit_amount: parseFloat(document.getElementById('financialCredit').value) || 0,
-                reference: document.getElementById('financialReference').value,
-                notes: document.getElementById('financialNotes').value
+                reference: document.getElementById('financialReference').value || '',
+                notes: document.getElementById('financialNotes').value || ''
             };
             
-            // Validation
+            // Enhanced validation - check required fields first
+            if (!formData.transaction_date || !formData.account_code || !formData.description) {
+                alert('Please fill in all required fields (Date, Account, Description).');
+                return;
+            }
+            
+            // Amount validation
             if (formData.debit_amount === 0 && formData.credit_amount === 0) {
                 alert('Please enter either a debit or credit amount.');
                 return;
@@ -19205,37 +19237,46 @@
             formData.source = 'Manual';
             
             try {
+                let savedTransaction;
+                
                 if (isEditingFinancial) {
                     await updateFinancialTransaction(editingFinancialId, formData);
+                    alert('Transaction updated successfully!');
                 } else {
-                    await saveFinancialTransaction(formData);
+                    savedTransaction = await saveFinancialTransaction(formData);
+                    alert('Transaction added successfully!');
                 }
                 
                 closeAddFinancialModal();
                 await loadFinancialTransactions();
+                
+                // Update displays
+                updateTrialBalance();
+                
+                // Auto-link if created from AP/AR (FIXED)
+                if (window.pendingAPARLinkId && savedTransaction) {
+                    try {
+                        await updateTransaction(window.pendingAPARLinkId, {
+                            linked_financial_id: savedTransaction.id
+                        });
+                        
+                        await updateFinancialTransaction(savedTransaction.id, {
+                            ap_ar_transaction_id: window.pendingAPARLinkId,
+                            is_linked: true
+                        });
+                        
+                        window.pendingAPARLinkId = null;
+                        renderAPARTable(); // Refresh AP/AR table
+                        alert('GL transaction created and linked successfully!');
+                    } catch (error) {
+                        console.error('Error auto-linking:', error);
+                        alert('GL transaction created but linking failed. You can link manually.');
+                    }
+                }
+                
             } catch (error) {
                 console.error('Error saving transaction:', error);
                 alert('Error saving transaction: ' + error.message);
-            }
-            // Auto-link if created from AP/AR
-            if (window.pendingAPARLinkId && data[0]) {
-                try {
-                    await updateTransaction(window.pendingAPARLinkId, {
-                        linked_financial_id: data[0].id
-                    });
-                    
-                    await updateFinancialTransaction(data[0].id, {
-                        ap_ar_transaction_id: window.pendingAPARLinkId,
-                        is_linked: true
-                    });
-                    
-                    window.pendingAPARLinkId = null;
-                    renderAPARTable(); // Refresh AP/AR table
-                    alert('GL transaction created and linked successfully!');
-                } catch (error) {
-                    console.error('Error auto-linking:', error);
-                    alert('GL transaction created but linking failed. You can link manually.');
-                }
             }
         }
         
