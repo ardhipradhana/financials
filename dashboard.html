@@ -36912,7 +36912,16 @@
                 // Create CSV content
                 let csvContent = "Revenue Source,Current Period,Previous Period,Change,Percentage Contribution\n";
                 
-                // All revenue accounts from your GL (4000 series)
+                // Helper function to get account balance from transactions
+                function getAccountBalanceFromTransactions(periodData, accountCode) {
+                    if (!periodData.transactions) return 0;
+                    
+                    return periodData.transactions
+                        .filter(t => t.account_code === accountCode)
+                        .reduce((sum, t) => sum + (t.credit_amount || 0) - (t.debit_amount || 0), 0);
+                }
+                
+                // All revenue accounts
                 const revenueAccounts = [
                     { name: 'Sales Revenue', code: '4010' },
                     { name: 'Service Revenue', code: '4020' },
@@ -36927,8 +36936,8 @@
                 ];
                 
                 revenueAccounts.forEach(account => {
-                    const currentAmount = getAccountBalance(current, account.code);
-                    const previousAmount = getAccountBalance(previous, account.code);
+                    const currentAmount = getAccountBalanceFromTransactions(current, account.code);
+                    const previousAmount = getAccountBalanceFromTransactions(previous, account.code);
                     
                     if (currentAmount !== 0 || previousAmount !== 0) {
                         const change = currentAmount - previousAmount;
@@ -36964,66 +36973,70 @@
                 // Create CSV content
                 let csvContent = "OPEX Category,Current Period,Previous Period,Change,Percentage Contribution\n";
                 
-                // All expense accounts from your GL (5000-6000 series) organized by category
+                // Helper function to get account balance from transactions
+                function getAccountBalanceFromTransactions(periodData, accountCodes) {
+                    if (!periodData.transactions) return 0;
+                    
+                    return periodData.transactions
+                        .filter(t => accountCodes.includes(t.account_code))
+                        .reduce((sum, t) => sum + (t.debit_amount || 0) - (t.credit_amount || 0), 0);
+                }
+                
+                // Expense categories with account codes
                 const expenseCategories = [
                     {
                         name: 'Cost of Goods Sold',
-                        accounts: ['5010', '5020', '5030'] // COGS, Purchase Discounts, Freight In
+                        accounts: ['5010', '5020', '5030']
                     },
                     {
                         name: 'Payroll & Benefits',
-                        accounts: ['5100', '5110', '5120', '5130'] // Salaries, Benefits, Payroll Tax, Workers Comp
+                        accounts: ['5100', '5110', '5120', '5130']
                     },
                     {
                         name: 'Facilities & Operations',
-                        accounts: ['5200', '5210', '5220', '5230', '5240', '5250'] // Rent, Utilities, Insurance, Maintenance, Cleaning, Security
+                        accounts: ['5200', '5210', '5220', '5230', '5240', '5250']
                     },
                     {
                         name: 'Marketing & Sales',
-                        accounts: ['5300', '5310', '5320', '5330'] // Marketing, Digital Marketing, Trade Shows, Sales Commissions
+                        accounts: ['5300', '5310', '5320', '5330']
                     },
                     {
                         name: 'Professional Services',
-                        accounts: ['5400', '5410', '5420', '5430', '5440'] // Professional Services, Legal, Accounting, Consulting, Bank Charges
+                        accounts: ['5400', '5410', '5420', '5430', '5440']
                     },
                     {
                         name: 'Office & Administration',
-                        accounts: ['5500', '5510', '5520', '5530', '5540', '5550'] // Office Supplies, Software, Telecom, Internet, Postage, Equipment Rental
+                        accounts: ['5500', '5510', '5520', '5530', '5540', '5550']
                     },
                     {
                         name: 'Depreciation & Amortization',
-                        accounts: ['5600', '5610'] // Depreciation, Amortization
+                        accounts: ['5600', '5610']
                     },
                     {
                         name: 'Financial Expenses',
-                        accounts: ['5700', '5710', '5720'] // Interest Expense, FX Loss, Bad Debt
+                        accounts: ['5700', '5710', '5720']
                     },
                     {
                         name: 'Travel & Transportation',
-                        accounts: ['5800', '5810', '5820', '5830'] // Travel & Entertainment, Vehicle Expenses, Fuel, Parking
+                        accounts: ['5800', '5810', '5820', '5830']
                     },
                     {
                         name: 'Training & Development',
-                        accounts: ['5900', '5910', '5920'] // Training, Books, Conferences
+                        accounts: ['5900', '5910', '5920']
                     },
                     {
                         name: 'Other Expenses',
-                        accounts: ['5950', '5960', '5970'] // Licenses, Donations, Miscellaneous
+                        accounts: ['5950', '5960', '5970']
                     },
                     {
                         name: 'Tax & Extraordinary',
-                        accounts: ['6010', '6020', '6030'] // Income Tax, Extraordinary Loss, Loss on Sale
+                        accounts: ['6010', '6020', '6030']
                     }
                 ];
                 
                 expenseCategories.forEach(category => {
-                    let currentTotal = 0;
-                    let previousTotal = 0;
-                    
-                    category.accounts.forEach(accountCode => {
-                        currentTotal += getAccountBalance(current, accountCode);
-                        previousTotal += getAccountBalance(previous, accountCode);
-                    });
+                    const currentTotal = getAccountBalanceFromTransactions(current, category.accounts);
+                    const previousTotal = getAccountBalanceFromTransactions(previous, category.accounts);
                     
                     if (currentTotal !== 0 || previousTotal !== 0) {
                         const change = currentTotal - previousTotal;
