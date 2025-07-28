@@ -10203,6 +10203,24 @@
         .insight-text-dashboard {
             color: #374151;
         }
+
+        .page-btn {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #e2e8f0;
+            background: white;
+            cursor: pointer;
+            margin: 0 2px;
+        }
+        
+        .page-btn.active {
+            background: #fbbf24;
+            color: white;
+            border-color: #fbbf24;
+        }
+        
+        .page-btn:hover:not(.active) {
+            background: #f8fafc;
+        }
         
     </style>
 </head>
@@ -11226,6 +11244,20 @@
                                 Financial Statements
                             </button>
                         </div>
+
+                        <div class="table-pagination-header" style="display: flex; justify-content: between; align-items: center; margin-bottom: 1rem;">
+                            <div class="pagination-info">
+                                <span id="transactionCount">Showing 0-0 of 0 transactions</span>
+                            </div>
+                            <div class="pagination-controls">
+                                <select id="transactionPageSize" onchange="changePageSize()" style="margin-right: 1rem;">
+                                    <option value="25">25 per page</option>
+                                    <option value="50" selected>50 per page</option>
+                                    <option value="100">100 per page</option>
+                                    <option value="200">200 per page</option>
+                                </select>
+                            </div>
+                        </div>
             
                         <!-- Transactions Tab -->
                         <div class="tab-content active" id="financial-transactions-tab">
@@ -11339,6 +11371,12 @@
                                     </table>
                                 </div>
                             </div>
+                        </div>
+                        <!-- Add this after the GL transactions table -->
+                        <div class="table-pagination-footer" style="display: flex; justify-content: center; align-items: center; margin-top: 1rem; gap: 1rem;">
+                            <button id="prevPageBtn" onclick="previousPage()" class="btn btn-secondary" disabled>Previous</button>
+                            <div class="page-numbers" id="pageNumbers"></div>
+                            <button id="nextPageBtn" onclick="nextPage()" class="btn btn-secondary">Next</button>
                         </div>
             
                         <!-- Trial Balance Tab -->
@@ -18815,6 +18853,9 @@
         let selectedFinancialTransactions = [];
         let isEditingFinancial = false;
         let editingFinancialId = null;
+        let currentFinancialPage = 1;
+        let financialPageSize = 50;
+        let totalFinancialTransactions = 0;
           
         // Load GL Accounts from Supabase
         async function loadGLAccounts() {
@@ -18914,8 +18955,14 @@
             if (!tbody) return;
             
             const filteredData = getFilteredFinancialTransactions();
+            totalFinancialTransactions = filteredData.length;
             
-            tbody.innerHTML = filteredData.map(transaction => {
+            // Calculate pagination
+            const startIndex = (currentFinancialPage - 1) * financialPageSize;
+            const endIndex = startIndex + financialPageSize;
+            const paginatedData = filteredData.slice(startIndex, endIndex);
+            
+            tbody.innerHTML = paginatedData.map(transaction => {
                 const isLinked = transaction.is_linked || transaction.ap_ar_transaction_id;
                 
                 return `
@@ -18953,6 +19000,72 @@
                     </tr>
                 `;
             }).join('');
+            
+            // Update pagination controls
+            updateFinancialPagination();
+        }
+
+        function updateFinancialPagination() {
+            const totalPages = Math.ceil(totalFinancialTransactions / financialPageSize);
+            const startItem = totalFinancialTransactions === 0 ? 0 : (currentFinancialPage - 1) * financialPageSize + 1;
+            const endItem = Math.min(currentFinancialPage * financialPageSize, totalFinancialTransactions);
+            
+            // Update count display
+            document.getElementById('transactionCount').textContent = 
+                `Showing ${startItem}-${endItem} of ${totalFinancialTransactions} transactions`;
+            
+            // Update page buttons
+            document.getElementById('prevPageBtn').disabled = currentFinancialPage === 1;
+            document.getElementById('nextPageBtn').disabled = currentFinancialPage === totalPages || totalPages === 0;
+            
+            // Update page numbers
+            renderPageNumbers(totalPages);
+        }
+        
+        function renderPageNumbers(totalPages) {
+            const pageNumbers = document.getElementById('pageNumbers');
+            if (!pageNumbers) return;
+            
+            let html = '';
+            const maxVisible = 5;
+            let startPage = Math.max(1, currentFinancialPage - Math.floor(maxVisible / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+            
+            if (endPage - startPage + 1 < maxVisible) {
+                startPage = Math.max(1, endPage - maxVisible + 1);
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                html += `<button class="page-btn ${i === currentFinancialPage ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
+            }
+            
+            pageNumbers.innerHTML = html;
+        }
+        
+        function changePageSize() {
+            financialPageSize = parseInt(document.getElementById('transactionPageSize').value);
+            currentFinancialPage = 1; // Reset to first page
+            renderFinancialTable();
+        }
+        
+        function previousPage() {
+            if (currentFinancialPage > 1) {
+                currentFinancialPage--;
+                renderFinancialTable();
+            }
+        }
+        
+        function nextPage() {
+            const totalPages = Math.ceil(totalFinancialTransactions / financialPageSize);
+            if (currentFinancialPage < totalPages) {
+                currentFinancialPage++;
+                renderFinancialTable();
+            }
+        }
+        
+        function goToPage(page) {
+            currentFinancialPage = page;
+            renderFinancialTable();
         }
         
         function getFilteredFinancialTransactions() {
