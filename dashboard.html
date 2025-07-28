@@ -11245,8 +11245,6 @@
                             </button>
                         </div>
 
-                        
-            
                         <!-- Transactions Tab -->
                         <div class="tab-content active" id="financial-transactions-tab">
                             <div class="dashboard-section">
@@ -11374,13 +11372,13 @@
                                         </tbody>
                                     </table>
                                 </div>
+                                <!-- Add this after the GL transactions table -->
+                                <div class="table-pagination-footer" style="display: flex; justify-content: center; align-items: center; margin-top: 1rem; gap: 1rem;">
+                                    <button id="prevPageBtn" onclick="previousPage()" class="btn btn-secondary" disabled>Previous</button>
+                                    <div class="page-numbers" id="pageNumbers"></div>
+                                    <button id="nextPageBtn" onclick="nextPage()" class="btn btn-secondary">Next</button>
+                                </div>
                             </div>
-                        </div>
-                        <!-- Add this after the GL transactions table -->
-                        <div class="table-pagination-footer" style="display: flex; justify-content: center; align-items: center; margin-top: 1rem; gap: 1rem;">
-                            <button id="prevPageBtn" onclick="previousPage()" class="btn btn-secondary" disabled>Previous</button>
-                            <div class="page-numbers" id="pageNumbers"></div>
-                            <button id="nextPageBtn" onclick="nextPage()" class="btn btn-secondary">Next</button>
                         </div>
             
                         <!-- Trial Balance Tab -->
