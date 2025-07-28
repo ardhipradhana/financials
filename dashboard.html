@@ -17719,7 +17719,7 @@
         
                 if (change.type === 'AP') { // Accounts Payable (Money Out)
                     text = isDelayed ? 
-                        `Payment to <strong>${change.vendor}</strong> delayed, improving short-term cash.` :
+                        `Payment to <strong>${change.vendor}</strong> delayed, improving short-term cash. Check any potential penalties` :
                         `Payment to <strong>${change.vendor}</strong> accelerated, check for early payment discounts.`;
                 } else { // Accounts Receivable (Money In)
                      text = isDelayed ? 
