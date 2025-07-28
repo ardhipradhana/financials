@@ -35333,7 +35333,10 @@
         
         // Calculate percentile for a specific metric
         function calculateMetricPercentile(metricName, companyValue) {
-            // ADD THESE SAFETY CHECKS:
+            console.log(`=== PERCENTILE DEBUG for ${metricName} ===`);
+            console.log('Company value:', companyValue);
+            
+            // Safety checks
             if (!window.selectedIndustries || !Array.isArray(window.selectedIndustries) || window.selectedIndustries.length === 0) {
                 console.log('No selected industries available for benchmarking');
                 return 50; // Default to median
@@ -35358,36 +35361,45 @@
             
             const dbMetricName = metricNameMapping[metricName] || metricName;
             
-            // Get benchmark data for this metric across all selected industries
-            const allBenchmarks = [];
+            // Get ALL benchmark data points for this metric across all selected industries
+            const allBenchmarkValues = [];
             window.selectedIndustries.forEach(industry => {
                 const industryData = window.industryBenchmarkData[industry];
                 const metricData = industryData?.find(d => d.metric_name === dbMetricName);
                 if (metricData) {
-                    allBenchmarks.push(metricData);
+                    // Add all the benchmark points for this industry
+                    allBenchmarkValues.push(parseFloat(metricData.min_value));
+                    allBenchmarkValues.push(parseFloat(metricData.q1_value));
+                    allBenchmarkValues.push(parseFloat(metricData.median_value));
+                    allBenchmarkValues.push(parseFloat(metricData.q3_value));
+                    allBenchmarkValues.push(parseFloat(metricData.max_value));
                 }
             });
             
-            if (allBenchmarks.length === 0) return 50; // Default to median if no data
+            console.log('All benchmark values:', allBenchmarkValues);
             
-            // Use the average benchmark for calculation
-            const avgBenchmark = {
-                min_value: allBenchmarks.reduce((sum, b) => sum + parseFloat(b.min_value), 0) / allBenchmarks.length,
-                q1_value: allBenchmarks.reduce((sum, b) => sum + parseFloat(b.q1_value), 0) / allBenchmarks.length,
-                median_value: allBenchmarks.reduce((sum, b) => sum + parseFloat(b.median_value), 0) / allBenchmarks.length,
-                q3_value: allBenchmarks.reduce((sum, b) => sum + parseFloat(b.q3_value), 0) / allBenchmarks.length,
-                max_value: allBenchmarks.reduce((sum, b) => sum + parseFloat(b.max_value), 0) / allBenchmarks.length
-            };
+            if (allBenchmarkValues.length === 0) {
+                console.log('No benchmark data found for', dbMetricName);
+                return 50; // Default to median if no data
+            }
             
-            // Calculate percentile position
-            const { min_value, q1_value, median_value, q3_value, max_value } = avgBenchmark;
+            // Sort the values to calculate percentile
+            allBenchmarkValues.sort((a, b) => a - b);
             
-            if (companyValue <= min_value) return 0;
-            if (companyValue >= max_value) return 100;
-            if (companyValue <= q1_value) return 25 * (companyValue - min_value) / (q1_value - min_value);
-            if (companyValue <= median_value) return 25 + 25 * (companyValue - q1_value) / (median_value - q1_value);
-            if (companyValue <= q3_value) return 50 + 25 * (companyValue - median_value) / (q3_value - median_value);
-            return 75 + 25 * (companyValue - q3_value) / (max_value - q3_value);
+            // Calculate percentile: how many values are below the company value
+            const belowCount = allBenchmarkValues.filter(value => value < companyValue).length;
+            const equalCount = allBenchmarkValues.filter(value => value === companyValue).length;
+            
+            // Use the standard percentile formula
+            const percentile = ((belowCount + 0.5 * equalCount) / allBenchmarkValues.length) * 100;
+            
+            console.log(`Percentile calculation:`);
+            console.log(`- Values below company: ${belowCount}`);
+            console.log(`- Values equal to company: ${equalCount}`);
+            console.log(`- Total benchmark values: ${allBenchmarkValues.length}`);
+            console.log(`- Calculated percentile: ${percentile.toFixed(1)}`);
+            
+            return Math.max(0, Math.min(100, Math.round(percentile)));
         }
         
         // Get performance class based on percentile
