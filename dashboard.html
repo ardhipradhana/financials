@@ -36898,6 +36898,79 @@
                 console.error('Error initializing dashboard components:', error);
             }
         }
+
+        // Export Revenue Breakdown function
+        function exportRevenueBreakdown() {
+            if (!comparisonData || !comparisonData.current) {
+                alert('Please generate a comparison report first.');
+                return;
+            }
+            
+            try {
+                // Create CSV content
+                let csvContent = "Revenue Source,Current Period,Previous Period,Change,Percentage Contribution\n";
+                
+                // Add revenue data rows
+                const revenueData = comparisonData.current.revenueBreakdown || {};
+                const previousRevenueData = comparisonData.previous.revenueBreakdown || {};
+                
+                Object.keys(revenueData).forEach(source => {
+                    const current = revenueData[source] || 0;
+                    const previous = previousRevenueData[source] || 0;
+                    const change = current - previous;
+                    const percentage = comparisonData.current.netRevenue > 0 ? 
+                        ((current / comparisonData.current.netRevenue) * 100).toFixed(1) : '0.0';
+                    
+                    csvContent += `${source},${formatCurrencyForExport(current)},${formatCurrencyForExport(previous)},${formatCurrencyForExport(change)},${percentage}%\n`;
+                });
+                
+                // Use your existing download function
+                downloadCSVFile(csvContent, 'Revenue_Breakdown_Analysis.csv');
+                
+            } catch (error) {
+                console.error('Error exporting revenue breakdown:', error);
+                alert('Error exporting revenue breakdown: ' + error.message);
+            }
+        }
+        
+        // Export OPEX Breakdown function
+        function exportOpexBreakdown() {
+            if (!comparisonData || !comparisonData.current) {
+                alert('Please generate a comparison report first.');
+                return;
+            }
+            
+            try {
+                // Create CSV content
+                let csvContent = "OPEX Category,Current Period,Previous Period,Change,Percentage Contribution\n";
+                
+                // Add OPEX data rows
+                const opexData = comparisonData.current.opexBreakdown || {};
+                const previousOpexData = comparisonData.previous.opexBreakdown || {};
+                
+                Object.keys(opexData).forEach(category => {
+                    const current = opexData[category] || 0;
+                    const previous = previousOpexData[category] || 0;
+                    const change = current - previous;
+                    const percentage = comparisonData.current.opex > 0 ? 
+                        ((current / comparisonData.current.opex) * 100).toFixed(1) : '0.0';
+                    
+                    csvContent += `${category},${formatCurrencyForExport(current)},${formatCurrencyForExport(previous)},${formatCurrencyForExport(change)},${percentage}%\n`;
+                });
+                
+                // Use your existing download function
+                downloadCSVFile(csvContent, 'OPEX_Breakdown_Analysis.csv');
+                
+            } catch (error) {
+                console.error('Error exporting OPEX breakdown:', error);
+                alert('Error exporting OPEX breakdown: ' + error.message);
+            }
+        }
+        
+        // Helper function to format currency for CSV export
+        function formatCurrencyForExport(amount) {
+            return amount.toFixed(2);
+        }
         
     </script>
 
