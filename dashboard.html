@@ -29384,7 +29384,7 @@
                         alert(`${years.next} AI forecast generated successfully!`);
                         
                         // Save to Supabase
-                        await saveNextYearForecastToSupabase(aiResult, industry, additionalContext, forecastStyle, years.next);
+                        await save2026ForecastToSupabase(aiResult);
                         
                     } else {
                         throw new Error(aiResult?.message || `Failed to generate ${years.next} forecast - invalid response format`);
@@ -29926,65 +29926,67 @@
                     throw new Error('Invalid AI result format');
                 }
                 
+                // Get form data
+                const industry = document.getElementById('forecast2026IndustrySelect')?.value || '';
+                const additionalContext = document.getElementById('forecast2026Context')?.value || '';
+                const forecastStyle = document.getElementById('forecast2026StyleSelect')?.value || 'normal';
+                
                 const monthlyForecasts = aiResult.forecast_data.monthly_forecasts;
                 
-                // Prepare the forecast data for Supabase
-                const forecastData = {
-                    user_id: user.id, // Add user_id for RLS
-                    forecast_year: 2026,
-                    forecast_type: 'full_year_ai_forecast',
-                    industry_context: document.getElementById('forecast2026IndustrySelect').value,
-                    additional_context: document.getElementById('forecast2026Context').value,
-                    forecast_style: document.getElementById('forecast2026StyleSelect').value,
-                    confidence_level: aiResult.confidence,
-                    generated_at: new Date().toISOString(),
-                    model_version: aiResult.model_version || 'ai-agent-v1',
+                // Calculate totals
+                let totalRevenue = 0, totalCogs = 0, totalOpex = 0;
+                
+                const monthlyData = monthlyForecasts.map(month => {
+                    const revenue = (month.revenue_accounts?.['4010'] || 0) + (month.revenue_accounts?.['4020'] || 0);
+                    const cogs = (month.cogs_accounts?.['5010'] || 0) + (month.cogs_accounts?.['5020'] || 0);
+                    const opex = (month.opex_accounts?.['5100'] || 0) + (month.opex_accounts?.['5110'] || 0);
                     
-                    // Monthly data (rest remains the same...)
-                    monthly_data: monthlyForecasts.map(month => ({
+                    totalRevenue += revenue;
+                    totalCogs += cogs;
+                    totalOpex += opex;
+                    
+                    return {
                         month_number: month.month,
                         month_name: month.month_name,
-                        sales_revenue: month.revenue_accounts['4010'] || 0,
-                        service_revenue: month.revenue_accounts['4020'] || 0,
-                        total_revenue: (month.revenue_accounts['4010'] || 0) + (month.revenue_accounts['4020'] || 0),
-                        direct_costs: month.cogs_accounts['5010'] || 0,
-                        total_cogs: (month.cogs_accounts['5010'] || 0) + (month.cogs_accounts['5020'] || 0),
-                        operating_expenses: month.opex_accounts['5100'] || 0,
-                        total_opex: (month.opex_accounts['5100'] || 0) + (month.opex_accounts['5110'] || 0),
-                        gross_profit: ((month.revenue_accounts['4010'] || 0) + (month.revenue_accounts['4020'] || 0)) - ((month.cogs_accounts['5010'] || 0) + (month.cogs_accounts['5020'] || 0)),
-                        ebitda: ((month.revenue_accounts['4010'] || 0) + (month.revenue_accounts['4020'] || 0)) - ((month.cogs_accounts['5010'] || 0) + (month.cogs_accounts['5020'] || 0)) - ((month.opex_accounts['5100'] || 0) + (month.opex_accounts['5110'] || 0))
-                    })),
-                    
-                    // Year totals
+                        sales_revenue: month.revenue_accounts?.['4010'] || 0,
+                        service_revenue: month.revenue_accounts?.['4020'] || 0,
+                        direct_costs: month.cogs_accounts?.['5010'] || 0,
+                        operating_expenses: month.opex_accounts?.['5100'] || 0,
+                        total_revenue: revenue,
+                        total_cogs: cogs,
+                        total_opex: opex,
+                        gross_profit: revenue - cogs,
+                        ebitda: revenue - cogs - opex
+                    };
+                });
+                
+                // Prepare forecast data for Supabase
+                const forecastData = {
+                    user_id: user.id,
+                    forecast_year: 2026,
+                    industry_context: industry,
+                    additional_context: additionalContext,
+                    forecast_style: forecastStyle,
+                    confidence_level: aiResult.confidence || 85,
+                    monthly_data: monthlyData,
                     year_totals: {
-                        total_revenue: monthlyForecasts.reduce((sum, m) => sum + (m.revenue_accounts['4010'] || 0) + (m.revenue_accounts['4020'] || 0), 0),
-                        total_cogs: monthlyForecasts.reduce((sum, m) => sum + (m.cogs_accounts['5010'] || 0) + (m.cogs_accounts['5020'] || 0), 0),
-                        total_opex: monthlyForecasts.reduce((sum, m) => sum + (m.opex_accounts['5100'] || 0) + (m.opex_accounts['5110'] || 0), 0),
-                        gross_profit: monthlyForecasts.reduce((sum, m) => {
-                            const revenue = (m.revenue_accounts['4010'] || 0) + (m.revenue_accounts['4020'] || 0);
-                            const cogs = (m.cogs_accounts['5010'] || 0) + (m.cogs_accounts['5020'] || 0);
-                            return sum + (revenue - cogs);
-                        }, 0),
-                        ebitda: monthlyForecasts.reduce((sum, m) => {
-                            const revenue = (m.revenue_accounts['4010'] || 0) + (m.revenue_accounts['4020'] || 0);
-                            const cogs = (m.cogs_accounts['5010'] || 0) + (m.cogs_accounts['5020'] || 0);
-                            const opex = (m.opex_accounts['5100'] || 0) + (m.opex_accounts['5110'] || 0);
-                            return sum + (revenue - cogs - opex);
-                        }, 0)
+                        total_revenue: totalRevenue,
+                        total_cogs: totalCogs,
+                        total_opex: totalOpex,
+                        total_gross_profit: totalRevenue - totalCogs,
+                        total_ebitda: totalRevenue - totalCogs - totalOpex,
+                        gross_margin: totalRevenue > 0 ? ((totalRevenue - totalCogs) / totalRevenue) * 100 : 0,
+                        ebitda_margin: totalRevenue > 0 ? ((totalRevenue - totalCogs - totalOpex) / totalRevenue) * 100 : 0
                     },
-                    
-                    // AI insights
                     ai_insights: {
                         key_trends: aiResult.insights?.key_trends || '',
                         risk_factors: aiResult.insights?.risk_factors || '',
                         opportunities: aiResult.insights?.opportunities || '',
                         methodology: aiResult.insights?.methodology || ''
-                    }
+                    },
+                    generated_at: new Date().toISOString(),
+                    model_version: aiResult.model_version || 'ai-agent-v1'
                 };
-                
-                // Calculate margins
-                forecastData.year_totals.gross_margin = (forecastData.year_totals.gross_profit / forecastData.year_totals.total_revenue) * 100;
-                forecastData.year_totals.ebitda_margin = (forecastData.year_totals.ebitda / forecastData.year_totals.total_revenue) * 100;
                 
                 // Save to Supabase
                 const { data, error } = await supabase
@@ -29995,7 +29997,7 @@
                 if (error) {
                     throw error;
                 }
-
+        
                 trackLatestForecastId(data[0].id, 'ai_forecasts_2026_meridash');
                 
                 console.log('✅ 2026 forecast saved to Supabase:', data);
