@@ -14389,10 +14389,10 @@
             const currentMonth = now.getMonth() + 1; // 1-12
             const currentDay = now.getDate();
             
-            // Rule: Include current month in actuals if day <= 25
-            const includeCurrentMonth = currentDay <= 25;
-            const actualEndMonth = includeCurrentMonth ? currentMonth : currentMonth - 1;
-            const forecastStartMonth = actualEndMonth + 1;
+            // Rule: Only COMPLETED months are actuals
+            // Since we're in August, only Jan-July are completed (actuals)
+            const actualEndMonth = currentMonth - 1; // Previous month is the last completed month
+            const forecastStartMonth = currentMonth; // Current month starts forecast
             
             // Generate dynamic years (current + 5 years ahead)
             const years = {
@@ -27713,6 +27713,10 @@
             const tbody = document.getElementById('plForecastBody');
             if (!tbody) return;
             
+            // Get dynamic date context
+            const dateContext = getDateContext();
+            const { actualEndMonth, monthNames, currentYear } = dateContext;
+            
             let htmlContent = '';
             
             // REVENUE SECTION
@@ -27727,19 +27731,19 @@
             accountCategories.revenue.forEach(account => {
                 htmlContent += `
                     <tr class="pl-data-row pl-revenue-row" data-account-code="${account.account_code}">
-                        <td class="pl-line-item">${account.account_name}</td>
-                        <td class="pl-actual-cell" data-month="jan">0</td>
-                        <td class="pl-actual-cell" data-month="feb">0</td>
-                        <td class="pl-actual-cell" data-month="mar">0</td>
-                        <td class="pl-actual-cell" data-month="apr">0</td>
-                        <td class="pl-actual-cell" data-month="may">0</td>
-                        <td class="pl-actual-cell" data-month="jun">0</td>
-                        <td class="pl-forecast-cell" contenteditable="true" data-month="jul">0</td>
-                        <td class="pl-forecast-cell" contenteditable="true" data-month="aug">0</td>
-                        <td class="pl-forecast-cell" contenteditable="true" data-month="sep">0</td>
-                        <td class="pl-forecast-cell" contenteditable="true" data-month="oct">0</td>
-                        <td class="pl-forecast-cell" contenteditable="true" data-month="nov">0</td>
-                        <td class="pl-forecast-cell" contenteditable="true" data-month="dec">0</td>
+                        <td class="pl-line-item">${account.account_name}</td>`;
+                
+                // Generate dynamic month cells
+                for (let month = 1; month <= 12; month++) {
+                    const monthKey = monthNames[month - 1].toLowerCase();
+                    const isActual = month <= actualEndMonth;
+                    const cellClass = isActual ? 'pl-actual-cell' : 'pl-forecast-cell';
+                    const editableAttr = isActual ? '' : 'contenteditable="true"';
+                    
+                    htmlContent += `<td class="${cellClass}" ${editableAttr} data-month="${monthKey}">0</td>`;
+                }
+                
+                htmlContent += `
                         <td class="pl-total-cell" id="${account.account_code}-total">0</td>
                         <td class="pl-percentage-cell" id="${account.account_code}-pct">0.0%</td>
                     </tr>
@@ -27749,19 +27753,14 @@
             // Revenue Total Row
             htmlContent += `
                 <tr class="pl-total-row pl-revenue-total">
-                    <td class="pl-line-item pl-total-line">Total Revenue</td>
-                    <td class="pl-calculated-cell">0</td>
-                    <td class="pl-calculated-cell">0</td>
-                    <td class="pl-calculated-cell">0</td>
-                    <td class="pl-calculated-cell">0</td>
-                    <td class="pl-calculated-cell">0</td>
-                    <td class="pl-calculated-cell">0</td>
-                    <td class="pl-calculated-cell">0</td>
-                    <td class="pl-calculated-cell">0</td>
-                    <td class="pl-calculated-cell">0</td>
-                    <td class="pl-calculated-cell">0</td>
-                    <td class="pl-calculated-cell">0</td>
-                    <td class="pl-calculated-cell">0</td>
+                    <td class="pl-line-item pl-total-line">Total Revenue</td>`;
+            
+            // Generate dynamic total cells
+            for (let month = 1; month <= 12; month++) {
+                htmlContent += `<td class="pl-calculated-cell">0</td>`;
+            }
+            
+            htmlContent += `
                     <td class="pl-total-cell pl-total-prominent" id="totalRevenue-total">0</td>
                     <td class="pl-percentage-cell">100.0%</td>
                 </tr>
@@ -27780,19 +27779,19 @@
                 accountCategories.cogs.forEach(account => {
                     htmlContent += `
                         <tr class="pl-data-row pl-cogs-row" data-account-code="${account.account_code}">
-                            <td class="pl-line-item">${account.account_name}</td>
-                            <td class="pl-actual-cell" data-month="jan">0</td>
-                            <td class="pl-actual-cell" data-month="feb">0</td>
-                            <td class="pl-actual-cell" data-month="mar">0</td>
-                            <td class="pl-actual-cell" data-month="apr">0</td>
-                            <td class="pl-actual-cell" data-month="may">0</td>
-                            <td class="pl-actual-cell" data-month="jun">0</td>
-                            <td class="pl-forecast-cell" contenteditable="true" data-month="jul">0</td>
-                            <td class="pl-forecast-cell" contenteditable="true" data-month="aug">0</td>
-                            <td class="pl-forecast-cell" contenteditable="true" data-month="sep">0</td>
-                            <td class="pl-forecast-cell" contenteditable="true" data-month="oct">0</td>
-                            <td class="pl-forecast-cell" contenteditable="true" data-month="nov">0</td>
-                            <td class="pl-forecast-cell" contenteditable="true" data-month="dec">0</td>
+                            <td class="pl-line-item">${account.account_name}</td>`;
+                    
+                    // Generate dynamic month cells
+                    for (let month = 1; month <= 12; month++) {
+                        const monthKey = monthNames[month - 1].toLowerCase();
+                        const isActual = month <= actualEndMonth;
+                        const cellClass = isActual ? 'pl-actual-cell' : 'pl-forecast-cell';
+                        const editableAttr = isActual ? '' : 'contenteditable="true"';
+                        
+                        htmlContent += `<td class="${cellClass}" ${editableAttr} data-month="${monthKey}">0</td>`;
+                    }
+                    
+                    htmlContent += `
                             <td class="pl-total-cell" id="${account.account_code}-total">0</td>
                             <td class="pl-percentage-cell" id="${account.account_code}-pct">0.0%</td>
                         </tr>
@@ -27802,19 +27801,14 @@
                 // COGS Total Row
                 htmlContent += `
                     <tr class="pl-total-row pl-cogs-total">
-                        <td class="pl-line-item pl-total-line">Total COGS</td>
-                        <td class="pl-calculated-cell">0</td>
-                        <td class="pl-calculated-cell">0</td>
-                        <td class="pl-calculated-cell">0</td>
-                        <td class="pl-calculated-cell">0</td>
-                        <td class="pl-calculated-cell">0</td>
-                        <td class="pl-calculated-cell">0</td>
-                        <td class="pl-calculated-cell">0</td>
-                        <td class="pl-calculated-cell">0</td>
-                        <td class="pl-calculated-cell">0</td>
-                        <td class="pl-calculated-cell">0</td>
-                        <td class="pl-calculated-cell">0</td>
-                        <td class="pl-calculated-cell">0</td>
+                        <td class="pl-line-item pl-total-line">Total COGS</td>`;
+                
+                // Generate dynamic total cells
+                for (let month = 1; month <= 12; month++) {
+                    htmlContent += `<td class="pl-calculated-cell">0</td>`;
+                }
+                
+                htmlContent += `
                         <td class="pl-total-cell pl-total-prominent" id="totalCOGS-total">0</td>
                         <td class="pl-percentage-cell" id="totalCOGS-pct">0.0%</td>
                     </tr>
@@ -27823,19 +27817,14 @@
                 // Gross Profit Row
                 htmlContent += `
                     <tr class="pl-calculated-row pl-gross-profit">
-                        <td class="pl-line-item pl-calculated-line">Gross Profit</td>
-                        <td class="pl-gross-cell">0</td>
-                        <td class="pl-gross-cell">0</td>
-                        <td class="pl-gross-cell">0</td>
-                        <td class="pl-gross-cell">0</td>
-                        <td class="pl-gross-cell">0</td>
-                        <td class="pl-gross-cell">0</td>
-                        <td class="pl-gross-cell">0</td>
-                        <td class="pl-gross-cell">0</td>
-                        <td class="pl-gross-cell">0</td>
-                        <td class="pl-gross-cell">0</td>
-                        <td class="pl-gross-cell">0</td>
-                        <td class="pl-gross-cell">0</td>
+                        <td class="pl-line-item pl-calculated-line">Gross Profit</td>`;
+                
+                // Generate dynamic gross profit cells
+                for (let month = 1; month <= 12; month++) {
+                    htmlContent += `<td class="pl-gross-cell">0</td>`;
+                }
+                
+                htmlContent += `
                         <td class="pl-gross-cell pl-gross-prominent" id="grossProfit-total">0</td>
                         <td class="pl-percentage-cell" id="grossProfit-pct">0.0%</td>
                     </tr>
@@ -27844,19 +27833,14 @@
                 // NEW: Gross Profit Margin % Row
                 htmlContent += `
                     <tr class="pl-margin-row pl-gross-margin">
-                        <td class="pl-line-item pl-margin-line">Gross Profit Margin %</td>
-                        <td class="pl-margin-cell">0.0%</td>
-                        <td class="pl-margin-cell">0.0%</td>
-                        <td class="pl-margin-cell">0.0%</td>
-                        <td class="pl-margin-cell">0.0%</td>
-                        <td class="pl-margin-cell">0.0%</td>
-                        <td class="pl-margin-cell">0.0%</td>
-                        <td class="pl-margin-cell">0.0%</td>
-                        <td class="pl-margin-cell">0.0%</td>
-                        <td class="pl-margin-cell">0.0%</td>
-                        <td class="pl-margin-cell">0.0%</td>
-                        <td class="pl-margin-cell">0.0%</td>
-                        <td class="pl-margin-cell">0.0%</td>
+                        <td class="pl-line-item pl-margin-line">Gross Profit Margin %</td>`;
+                
+                // Generate dynamic margin cells
+                for (let month = 1; month <= 12; month++) {
+                    htmlContent += `<td class="pl-margin-cell">0.0%</td>`;
+                }
+                
+                htmlContent += `
                         <td class="pl-margin-cell pl-margin-prominent" id="grossMargin-total">0.0%</td>
                         <td class="pl-percentage-cell">-</td>
                     </tr>
@@ -27875,19 +27859,19 @@
             accountCategories.opex.forEach(account => {
                 htmlContent += `
                     <tr class="pl-data-row pl-opex-row" data-account-code="${account.account_code}">
-                        <td class="pl-line-item">${account.account_name}</td>
-                        <td class="pl-actual-cell" data-month="jan">0</td>
-                        <td class="pl-actual-cell" data-month="feb">0</td>
-                        <td class="pl-actual-cell" data-month="mar">0</td>
-                        <td class="pl-actual-cell" data-month="apr">0</td>
-                        <td class="pl-actual-cell" data-month="may">0</td>
-                        <td class="pl-actual-cell" data-month="jun">0</td>
-                        <td class="pl-forecast-cell" contenteditable="true" data-month="jul">0</td>
-                        <td class="pl-forecast-cell" contenteditable="true" data-month="aug">0</td>
-                        <td class="pl-forecast-cell" contenteditable="true" data-month="sep">0</td>
-                        <td class="pl-forecast-cell" contenteditable="true" data-month="oct">0</td>
-                        <td class="pl-forecast-cell" contenteditable="true" data-month="nov">0</td>
-                        <td class="pl-forecast-cell" contenteditable="true" data-month="dec">0</td>
+                        <td class="pl-line-item">${account.account_name}</td>`;
+                
+                // Generate dynamic month cells
+                for (let month = 1; month <= 12; month++) {
+                    const monthKey = monthNames[month - 1].toLowerCase();
+                    const isActual = month <= actualEndMonth;
+                    const cellClass = isActual ? 'pl-actual-cell' : 'pl-forecast-cell';
+                    const editableAttr = isActual ? '' : 'contenteditable="true"';
+                    
+                    htmlContent += `<td class="${cellClass}" ${editableAttr} data-month="${monthKey}">0</td>`;
+                }
+                
+                htmlContent += `
                         <td class="pl-total-cell" id="${account.account_code}-total">0</td>
                         <td class="pl-percentage-cell" id="${account.account_code}-pct">0.0%</td>
                     </tr>
@@ -27897,19 +27881,14 @@
             // OPEX Total Row
             htmlContent += `
                 <tr class="pl-total-row pl-opex-total">
-                    <td class="pl-line-item pl-total-line">Total Operating Expenses</td>
-                    <td class="pl-calculated-cell">0</td>
-                    <td class="pl-calculated-cell">0</td>
-                    <td class="pl-calculated-cell">0</td>
-                    <td class="pl-calculated-cell">0</td>
-                    <td class="pl-calculated-cell">0</td>
-                    <td class="pl-calculated-cell">0</td>
-                    <td class="pl-calculated-cell">0</td>
-                    <td class="pl-calculated-cell">0</td>
-                    <td class="pl-calculated-cell">0</td>
-                    <td class="pl-calculated-cell">0</td>
-                    <td class="pl-calculated-cell">0</td>
-                    <td class="pl-calculated-cell">0</td>
+                    <td class="pl-line-item pl-total-line">Total Operating Expenses</td>`;
+            
+            // Generate dynamic total cells
+            for (let month = 1; month <= 12; month++) {
+                htmlContent += `<td class="pl-calculated-cell">0</td>`;
+            }
+            
+            htmlContent += `
                     <td class="pl-total-cell pl-total-prominent" id="totalOPEX-total">0</td>
                     <td class="pl-percentage-cell" id="totalOPEX-pct">0.0%</td>
                 </tr>
@@ -27918,19 +27897,14 @@
             // NEW: OPEX to Sales % Row
             htmlContent += `
                 <tr class="pl-margin-row pl-opex-margin">
-                    <td class="pl-line-item pl-margin-line">OPEX to Sales %</td>
-                    <td class="pl-margin-cell">0.0%</td>
-                    <td class="pl-margin-cell">0.0%</td>
-                    <td class="pl-margin-cell">0.0%</td>
-                    <td class="pl-margin-cell">0.0%</td>
-                    <td class="pl-margin-cell">0.0%</td>
-                    <td class="pl-margin-cell">0.0%</td>
-                    <td class="pl-margin-cell">0.0%</td>
-                    <td class="pl-margin-cell">0.0%</td>
-                    <td class="pl-margin-cell">0.0%</td>
-                    <td class="pl-margin-cell">0.0%</td>
-                    <td class="pl-margin-cell">0.0%</td>
-                    <td class="pl-margin-cell">0.0%</td>
+                    <td class="pl-line-item pl-margin-line">OPEX to Sales %</td>`;
+            
+            // Generate dynamic margin cells
+            for (let month = 1; month <= 12; month++) {
+                htmlContent += `<td class="pl-margin-cell">0.0%</td>`;
+            }
+            
+            htmlContent += `
                     <td class="pl-margin-cell pl-margin-prominent" id="opexMargin-total">0.0%</td>
                     <td class="pl-percentage-cell">-</td>
                 </tr>
@@ -27939,19 +27913,14 @@
             // NEW: EBITDA Row
             htmlContent += `
                 <tr class="pl-calculated-row pl-ebitda">
-                    <td class="pl-line-item pl-ebitda-line">EBITDA</td>
-                    <td class="pl-ebitda-cell">0</td>
-                    <td class="pl-ebitda-cell">0</td>
-                    <td class="pl-ebitda-cell">0</td>
-                    <td class="pl-ebitda-cell">0</td>
-                    <td class="pl-ebitda-cell">0</td>
-                    <td class="pl-ebitda-cell">0</td>
-                    <td class="pl-ebitda-cell">0</td>
-                    <td class="pl-ebitda-cell">0</td>
-                    <td class="pl-ebitda-cell">0</td>
-                    <td class="pl-ebitda-cell">0</td>
-                    <td class="pl-ebitda-cell">0</td>
-                    <td class="pl-ebitda-cell">0</td>
+                    <td class="pl-line-item pl-ebitda-line">EBITDA</td>`;
+            
+            // Generate dynamic EBITDA cells
+            for (let month = 1; month <= 12; month++) {
+                htmlContent += `<td class="pl-ebitda-cell">0</td>`;
+            }
+            
+            htmlContent += `
                     <td class="pl-ebitda-cell pl-ebitda-prominent" id="ebitda-total">0</td>
                     <td class="pl-percentage-cell" id="ebitda-pct">0.0%</td>
                 </tr>
@@ -27960,19 +27929,14 @@
             // NEW: EBITDA Margin % Row
             htmlContent += `
                 <tr class="pl-margin-row pl-ebitda-margin">
-                    <td class="pl-line-item pl-margin-line">EBITDA Margin %</td>
-                    <td class="pl-margin-cell">0.0%</td>
-                    <td class="pl-margin-cell">0.0%</td>
-                    <td class="pl-margin-cell">0.0%</td>
-                    <td class="pl-margin-cell">0.0%</td>
-                    <td class="pl-margin-cell">0.0%</td>
-                    <td class="pl-margin-cell">0.0%</td>
-                    <td class="pl-margin-cell">0.0%</td>
-                    <td class="pl-margin-cell">0.0%</td>
-                    <td class="pl-margin-cell">0.0%</td>
-                    <td class="pl-margin-cell">0.0%</td>
-                    <td class="pl-margin-cell">0.0%</td>
-                    <td class="pl-margin-cell">0.0%</td>
+                    <td class="pl-line-item pl-margin-line">EBITDA Margin %</td>`;
+            
+            // Generate dynamic margin cells
+            for (let month = 1; month <= 12; month++) {
+                htmlContent += `<td class="pl-margin-cell">0.0%</td>`;
+            }
+            
+            htmlContent += `
                     <td class="pl-margin-cell pl-margin-prominent" id="ebitdaMargin-total">0.0%</td>
                     <td class="pl-percentage-cell">-</td>
                 </tr>
@@ -27981,19 +27945,14 @@
             // NEW: EBIT Row
             htmlContent += `
                 <tr class="pl-calculated-row pl-ebit">
-                    <td class="pl-line-item pl-ebit-line">EBIT</td>
-                    <td class="pl-ebit-cell">0</td>
-                    <td class="pl-ebit-cell">0</td>
-                    <td class="pl-ebit-cell">0</td>
-                    <td class="pl-ebit-cell">0</td>
-                    <td class="pl-ebit-cell">0</td>
-                    <td class="pl-ebit-cell">0</td>
-                    <td class="pl-ebit-cell">0</td>
-                    <td class="pl-ebit-cell">0</td>
-                    <td class="pl-ebit-cell">0</td>
-                    <td class="pl-ebit-cell">0</td>
-                    <td class="pl-ebit-cell">0</td>
-                    <td class="pl-ebit-cell">0</td>
+                    <td class="pl-line-item pl-ebit-line">EBIT</td>`;
+            
+            // Generate dynamic EBIT cells
+            for (let month = 1; month <= 12; month++) {
+                htmlContent += `<td class="pl-ebit-cell">0</td>`;
+            }
+            
+            htmlContent += `
                     <td class="pl-ebit-cell pl-ebit-prominent" id="ebit-total">0</td>
                     <td class="pl-percentage-cell" id="ebit-pct">0.0%</td>
                 </tr>
@@ -28002,19 +27961,14 @@
             // NET INCOME Row
             htmlContent += `
                 <tr class="pl-calculated-row pl-net-income">
-                    <td class="pl-line-item pl-net-income-line">Net Income</td>
-                    <td class="pl-net-cell">0</td>
-                    <td class="pl-net-cell">0</td>
-                    <td class="pl-net-cell">0</td>
-                    <td class="pl-net-cell">0</td>
-                    <td class="pl-net-cell">0</td>
-                    <td class="pl-net-cell">0</td>
-                    <td class="pl-net-cell">0</td>
-                    <td class="pl-net-cell">0</td>
-                    <td class="pl-net-cell">0</td>
-                    <td class="pl-net-cell">0</td>
-                    <td class="pl-net-cell">0</td>
-                    <td class="pl-net-cell">0</td>
+                    <td class="pl-line-item pl-net-income-line">Net Income</td>`;
+            
+            // Generate dynamic net income cells
+            for (let month = 1; month <= 12; month++) {
+                htmlContent += `<td class="pl-net-cell">0</td>`;
+            }
+            
+            htmlContent += `
                     <td class="pl-net-cell pl-net-prominent" id="netIncome-total">0</td>
                     <td class="pl-percentage-cell" id="netIncome-pct">0.0%</td>
                 </tr>
@@ -28023,19 +27977,14 @@
             // NEW: Net Income Margin % Row
             htmlContent += `
                 <tr class="pl-margin-row pl-net-margin">
-                    <td class="pl-line-item pl-margin-line">Net Income Margin %</td>
-                    <td class="pl-margin-cell">0.0%</td>
-                    <td class="pl-margin-cell">0.0%</td>
-                    <td class="pl-margin-cell">0.0%</td>
-                    <td class="pl-margin-cell">0.0%</td>
-                    <td class="pl-margin-cell">0.0%</td>
-                    <td class="pl-margin-cell">0.0%</td>
-                    <td class="pl-margin-cell">0.0%</td>
-                    <td class="pl-margin-cell">0.0%</td>
-                    <td class="pl-margin-cell">0.0%</td>
-                    <td class="pl-margin-cell">0.0%</td>
-                    <td class="pl-margin-cell">0.0%</td>
-                    <td class="pl-margin-cell">0.0%</td>
+                    <td class="pl-line-item pl-margin-line">Net Income Margin %</td>`;
+            
+            // Generate dynamic margin cells
+            for (let month = 1; month <= 12; month++) {
+                htmlContent += `<td class="pl-margin-cell">0.0%</td>`;
+            }
+            
+            htmlContent += `
                     <td class="pl-margin-cell pl-margin-prominent" id="netMargin-total">0.0%</td>
                     <td class="pl-percentage-cell">-</td>
                 </tr>
