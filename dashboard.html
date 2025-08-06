@@ -27604,8 +27604,16 @@
                 const { data: transactions, error: txError } = await supabase
                     .from('financial_transactions_meridash')
                     .select('*')
-                    .gte('transaction_date', '2025-01-01')
-                    .lt('transaction_date', '2025-07-01');
+                    // Get dynamic date context
+                    const dateContext = getDateContext();
+                    const { actualEndMonth, currentYear } = dateContext;
+                    const actualEndDate = `${currentYear}-${String(actualEndMonth + 1).padStart(2, '0')}-01`;
+                    
+                    const { data: transactions, error: txError } = await supabase
+                        .from('financial_transactions_meridash')
+                        .select('*')
+                        .gte('transaction_date', `${currentYear}-01-01`)
+                        .lt('transaction_date', actualEndDate);
                     
                 if (txError) {
                     console.error('Error loading transactions:', txError);
@@ -28337,8 +28345,8 @@
         }
         
         function refreshActualData() {
-            loadPLActualDataFromSupabase();
-            alert('Refreshing actual data from Supabase...');
+            console.log('Refreshing actual data from Supabase...');
+            loadActualTransactionData(); // Changed from loadPLActualDataFromSupabase()
         }
         
         // Auto-save functionality
