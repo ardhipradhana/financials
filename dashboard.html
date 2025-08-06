@@ -12449,18 +12449,7 @@
                                 <thead>
                                     <tr>
                                         <th class="pl-line-item-header">Line Item</th>
-                                        <th class="pl-month-header pl-actual-header">Jan 2025</th>
-                                        <th class="pl-month-header pl-actual-header">Feb 2025</th>
-                                        <th class="pl-month-header pl-actual-header">Mar 2025</th>
-                                        <th class="pl-month-header pl-actual-header">Apr 2025</th>
-                                        <th class="pl-month-header pl-actual-header">May 2025</th>
-                                        <th class="pl-month-header pl-actual-header">Jun 2025</th>
-                                        <th class="pl-month-header pl-forecast-header">Jul 2025</th>
-                                        <th class="pl-month-header pl-forecast-header">Aug 2025</th>
-                                        <th class="pl-month-header pl-forecast-header">Sep 2025</th>
-                                        <th class="pl-month-header pl-forecast-header">Oct 2025</th>
-                                        <th class="pl-month-header pl-forecast-header">Nov 2025</th>
-                                        <th class="pl-month-header pl-forecast-header">Dec 2025</th>
+                                        <th class="pl-total-header" id="dynamic-month-headers">Loading...</th>
                                         <th class="pl-total-header">2025 Total</th>
                                         <th class="pl-percentage-header">% of Revenue</th>
                                     </tr>
@@ -14422,6 +14411,36 @@
                 monthNames: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
             };
         }
+
+        // Generate dynamic table headers
+        function generateDynamicHeaders() {
+            const dateContext = getDateContext();
+            const { currentYear, actualEndMonth, monthNames } = dateContext;
+            
+            let headersHTML = '';
+            
+            // Generate 12 months with proper actual/forecast classification
+            for (let month = 1; month <= 12; month++) {
+                const monthName = monthNames[month - 1];
+                const isActual = month <= actualEndMonth;
+                const headerClass = isActual ? 'pl-actual-header' : 'pl-forecast-header';
+                
+                headersHTML += `<th class="pl-month-header ${headerClass}">${monthName} ${currentYear}</th>`;
+            }
+            
+            // Add total column
+            headersHTML += `<th class="pl-total-header">${currentYear} Total</th>`;
+            
+            return headersHTML;
+        }
+        
+        // Update headers when page loads
+        function updateTableHeaders() {
+            const headerElement = document.getElementById('dynamic-month-headers');
+            if (headerElement) {
+                headerElement.outerHTML = generateDynamicHeaders();
+            }
+        }
         
         function initializeCashFlowScenario() {
             console.log("🚀 Initializing Cash Flow Scenario module...");
@@ -14671,6 +14690,8 @@
             
             // Initialize date display
             initializeDateDisplay();
+
+            updateTableHeaders();
             
             // Initialize connection status
             updateConnectionStatus();
