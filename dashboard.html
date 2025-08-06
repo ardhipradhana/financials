@@ -7510,6 +7510,12 @@
             grid-template-columns: 1fr 1fr;
             gap: 1.5rem;
         }
+
+        @media (min-width: 1200px) {
+            .insights-content {
+                grid-template-columns: 1fr 1fr 1fr 1fr;
+            }
+        }
         
         @media (max-width: 768px) {
             .insights-content {
@@ -29670,6 +29676,16 @@
                         </div>
                         <div class="insight-text">
                             ${formatInsightText(insights.opportunities)}
+                        </div>
+                    </div>
+                    
+                    <div class="insight-card methodology-card">
+                        <div class="insight-header">
+                            <i class="fas fa-cogs insight-icon"></i>
+                            <h5>Forecast Methodology</h5>
+                        </div>
+                        <div class="insight-text">
+                            ${formatInsightText(insights.methodology || 'AI-based forecast methodology using historical trends and industry analysis.')}
                         </div>
                     </div>
                 </div>
