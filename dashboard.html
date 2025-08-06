@@ -29262,11 +29262,11 @@
 
         // Update the generateAI2026Forecast function to calculate dynamic periods
         async function generateAI2026Forecast() {
-            console.log('🚀 Starting 2026 AI Forecast Generation...');
+            console.log('🚀 Starting AI Forecast Generation for Next Year...');
             
             const industry = document.getElementById('forecast2026IndustrySelect').value;
             const additionalContext = document.getElementById('forecast2026Context').value;
-            const forecastStyle = document.getElementById('forecast2026StyleSelect').value; // Define this early
+            const forecastStyle = document.getElementById('forecast2026StyleSelect').value;
             
             if (!industry) {
                 alert('Please select an industry for AI context');
@@ -29276,10 +29276,14 @@
             // Show loading state
             const button = document.getElementById('generateAI2026Forecast');
             const originalText = button.innerHTML;
-            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating 2026 Forecast...';
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating Next Year Forecast...';
             button.disabled = true;
             
             try {
+                // Get dynamic date context
+                const dateContext = getDateContext();
+                const { currentYear, actualEndMonth, years } = dateContext;
+                
                 // Extract current year data (both actuals and forecast)
                 const currentYearData = extractFullYearData();
                 
@@ -29290,14 +29294,8 @@
                     return;
                 }
                 
-                // Calculate dynamic periods based on current date
-                const dateContext = getDateContext();
-                const { currentYear, actualEndMonth, forecastStartMonth } = dateContext;
-                const forecastStartMonth = includeCurrentMonth ? currentMonth : currentMonth + 1;
-                
-                // Create dynamic period descriptions
-                const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                
+                // Calculate dynamic periods
+                const monthNames = dateContext.monthNames;
                 let actualsPeriod, forecastPeriod;
                 
                 if (actualEndMonth >= 1) {
@@ -29308,49 +29306,50 @@
                     actualsPeriod = `No actuals yet for ${currentYear}`;
                 }
                 
-                if (forecastStartMonth <= 12) {
-                    forecastPeriod = forecastStartMonth === 12 ? 
+                const nextForecastStart = actualEndMonth + 1;
+                if (nextForecastStart <= 12) {
+                    forecastPeriod = nextForecastStart === 12 ? 
                         `${monthNames[11]} ${currentYear}` : 
-                        `${monthNames[forecastStartMonth - 1]}-${monthNames[11]} ${currentYear}`;
+                        `${monthNames[nextForecastStart - 1]}-${monthNames[11]} ${currentYear}`;
                 } else {
                     forecastPeriod = `All months forecasted for ${currentYear}`;
                 }
                 
                 console.log('📅 Dynamic periods calculated:', {
-                    currentDate: `${currentYear}-${currentMonth}-${currentDay}`,
+                    currentDate: `${currentYear}-${dateContext.currentMonth}-${dateContext.currentDay}`,
                     actualEndMonth,
-                    forecastStartMonth,
+                    nextForecastStart,
                     actualsPeriod,
                     forecastPeriod
                 });
                 
-                // Prepare payload for 2026 forecast
+                // Prepare payload for next year forecast
                 const payload = {
-                    year: dateContext.years.next,
+                    year: years.next,
                     industry: industry,
                     additionalContext: additionalContext,
-                    forecastStyle: forecastStyle, // Now this is defined
+                    forecastStyle: forecastStyle,
                     baselineData: {
-                        year_2025_complete: currentYearData.monthlyData,
-                        year_2025_totals: currentYearData.yearTotals,
+                        [`year_${currentYear}_complete`]: currentYearData.monthlyData,
+                        [`year_${currentYear}_totals`]: currentYearData.yearTotals,
                         actuals_period: actualsPeriod,
                         forecast_period: forecastPeriod,
                         actual_months_count: actualEndMonth,
                         forecast_months_count: 12 - actualEndMonth,
                         current_date: {
                             year: currentYear,
-                            month: currentMonth,
-                            day: currentDay,
-                            include_current_month: includeCurrentMonth
+                            month: dateContext.currentMonth,
+                            day: dateContext.currentDay,
+                            include_current_month: dateContext.currentDay <= 25
                         }
                     },
-                    requestType: 'full_year_forecast_2026'
+                    requestType: `full_year_forecast_${years.next}`
                 };
                 
-                console.log('📤 Sending 2026 forecast request:', payload);
+                console.log(`📤 Sending ${years.next} forecast request:`, payload);
                 
-                // Call n8n webhook
-                const response = await fetch('https://n8n.srv909550.hstgr.cloud/webhook-test/ai-forecast-Y1', {
+                // Call n8n webhook with updated endpoint
+                const response = await fetch('https://n8n.srv909550.hstgr.cloud/webhook/ai-forecast-Y1', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -29362,34 +29361,41 @@
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 
-                const responseData = await response.json();
-                console.log('📥 2026 AI Forecast received:', responseData);
+                const result = await response.json();
+                console.log(`📥 ${years.next} AI forecast response:`, result);
                 
-                // Handle array response - extract first element if response is an array
-                let result;
-                if (Array.isArray(responseData)) {
-                    console.log('📋 Response is array, extracting first element...');
-                    result = responseData[0];
+                // Process the AI result
+                if (result.success && result.data) {
+                    const aiResult = result.data;
+                    
+                    if (aiResult.forecast_data && aiResult.forecast_data.monthly_data) {
+                        console.log(`✅ ${years.next} forecast generated successfully`);
+                        
+                        // Populate the next year table
+                        populateNextYearForecastTable(aiResult.forecast_data.monthly_data, years.next);
+                        
+                        // Update summary cards
+                        updateNextYearSummaryCards(aiResult);
+                        
+                        // Show success message
+                        alert(`${years.next} AI forecast generated successfully!`);
+                        
+                        // Save to Supabase
+                        await saveNextYearForecastToSupabase(aiResult, industry, additionalContext, forecastStyle, years.next);
+                        
+                    } else {
+                        throw new Error(aiResult?.message || `Failed to generate ${years.next} forecast - invalid response format`);
+                    }
+                    
                 } else {
-                    result = responseData;
+                    throw new Error(aiResult?.message || `Failed to generate ${years.next} forecast - invalid response format`);
                 }
                 
-                console.log('📊 Processed result:', result);
-                
-                // Populate the 2026 table with AI results
-                populate2026TableWithAI(result);
-                
-                // Save to Supabase
-                await save2026ForecastToSupabase(result);
-                
-                // Show success notification
-                showForecastLoadedNotification(new Date(), true);
-                
             } catch (error) {
-                console.error('❌ 2026 Forecast generation failed:', error);
-                alert('Failed to generate 2026 forecast. Please try again.');
+                console.error(`❌ Error generating ${dateContext.years.next} forecast:`, error);
+                alert(`Failed to generate next year forecast: ${error.message}`);
             } finally {
-                // Reset button
+                // Reset button state
                 button.innerHTML = originalText;
                 button.disabled = false;
             }
