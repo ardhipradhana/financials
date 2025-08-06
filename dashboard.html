@@ -27661,18 +27661,27 @@
 
         async function loadActualTransactionData() {
             try {
+                // Get dynamic date context to determine actual period
+                const dateContext = getDateContext();
+                const { actualEndMonth, currentYear } = dateContext;
+                
+                // Calculate end date for actuals (include completed months)
+                const actualEndDate = `${currentYear}-${String(actualEndMonth + 1).padStart(2, '0')}-01`;
+                
+                console.log(`Loading actual transaction data from ${currentYear}-01-01 to ${actualEndDate}`);
+                
                 const { data: transactions, error } = await supabase
                     .from('financial_transactions_meridash')
                     .select('*')
-                    .gte('transaction_date', '2025-01-01')
-                    .lt('transaction_date', '2025-07-01'); // Jan-Jun 2025
+                    .gte('transaction_date', `${currentYear}-01-01`)
+                    .lt('transaction_date', actualEndDate); // Now includes July
                     
                 if (error) {
                     console.error('Error loading actual data:', error);
                     return;
                 }
                 
-                console.log('Loaded transactions:', transactions);
+                console.log(`Loaded ${transactions.length} transactions for actual period:`, transactions);
                 
                 // Process transactions and populate P&L
                 populatePLWithActualData(transactions);
@@ -28002,6 +28011,10 @@
         function populatePLWithActualData(transactions) {
             console.log('Populating P&L with actual transaction data...');
             
+            // Get dynamic date context
+            const dateContext = getDateContext();
+            const { actualEndMonth, monthNames } = dateContext;
+            
             // Group transactions by account code and month
             const monthlyData = {};
             
@@ -28031,18 +28044,27 @@
                 }
             });
             
-            // Populate the actual cells (Jan-Jun only)
+            // Populate the actual cells dynamically based on actualEndMonth
             Object.keys(monthlyData).forEach(accountCode => {
                 const accountRow = document.querySelector(`tr[data-account-code="${accountCode}"]`);
                 if (!accountRow) return;
                 
-                const monthNames = ['jan', 'feb', 'mar', 'apr', 'may', 'jun'];
+                // Generate dynamic month names for actual period only
+                const actualMonthNames = [];
+                for (let i = 0; i < actualEndMonth; i++) {
+                    actualMonthNames.push(monthNames[i].toLowerCase());
+                }
                 
-                monthNames.forEach((monthName, index) => {
+                console.log(`Populating actuals for account ${accountCode}: ${actualMonthNames.join(', ')}`);
+                
+                actualMonthNames.forEach((monthName, index) => {
                     const cell = accountRow.querySelector(`.pl-actual-cell[data-month="${monthName}"]`);
                     if (cell) {
                         const amount = monthlyData[accountCode][index] || 0;
                         cell.textContent = Math.round(amount).toLocaleString();
+                        console.log(`${accountCode} ${monthName}: ${Math.round(amount).toLocaleString()}`);
+                    } else {
+                        console.warn(`Cell not found for ${accountCode} ${monthName}`);
                     }
                 });
             });
@@ -28052,7 +28074,7 @@
                 recalculateEntirePL();
             }, 100);
             
-            console.log('P&L populated with actual data!');
+            console.log(`P&L populated with actual data for ${actualEndMonth} months!`);
         }
         
         function populatePLActualCells(data) {
