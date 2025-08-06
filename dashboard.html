@@ -29360,14 +29360,15 @@
                 const result = await response.json();
                 console.log(`📥 ${years.next} AI forecast response:`, result);
                 
+                // Handle array response format from backend
+                const aiResult = Array.isArray(result) ? result[0] : result;
+                
                 // Process the AI result
-                if (result.success && result.data) {
-                    const aiResult = result.data;
-                    
-                    if (aiResult.forecast_data && aiResult.forecast_data.monthly_data) {
+                if (aiResult.success && aiResult.forecast_data) {
+                    if (aiResult.forecast_data && aiResult.forecast_data.monthly_forecasts) {
                         console.log(`✅ ${years.next} forecast generated successfully`);
                         
-                        // Populate the next year table
+                        // Populate the next year table with correct data structure
                         populate2026TableWithAI(aiResult);
                         
                         // Update summary cards
