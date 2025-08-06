@@ -29380,11 +29380,19 @@
                         // Update summary cards
                         updateNextYearSummaryCards(aiResult);
                         
-                        // Show success message
-                        alert(`${years.next} AI forecast generated successfully!`);
-                        
-                        // Save to Supabase
-                        await save2026ForecastToSupabase(aiResult);
+                        // Save to Supabase first, then show success
+                        try {
+                            await save2026ForecastToSupabase(aiResult);
+                            console.log('✅ 2026 forecast saved to Supabase successfully');
+                            
+                            // Show success message only after successful save
+                            alert(`${years.next} AI forecast generated and saved successfully!`);
+                        } catch (saveError) {
+                            console.error('❌ Error saving 2026 forecast to Supabase:', saveError);
+                            
+                            // Still show success for the forecast generation, but warn about save issue
+                            alert(`${years.next} AI forecast generated successfully, but there was an issue saving to database. The forecast is displayed but may not be persistent.`);
+                        }
                         
                     } else {
                         throw new Error(aiResult?.message || `Failed to generate ${years.next} forecast - invalid response format`);
@@ -29614,13 +29622,13 @@
             
             // Show insights if available
             if (aiResult.insights) {
-                show2026Insights(aiResult.insights);
+                show2026Insights(aiResult.insights, aiResult);
             }
         }
         
-        // Add function to show 2026 insights
-        function show2026Insights(insights) {
-            console.log('📊 Displaying 2026 AI Insights...');
+        // Fixed function to show 2026 insights with dynamic confidence and methodology
+        function show2026Insights(insights, aiResult) {
+            console.log('📊 Displaying 2026 AI Insights...', { insights, confidence: aiResult.confidence });
             
             // Create or find the insights container for 2026
             let insightsContainer = document.getElementById('ai2026InsightsContainer');
@@ -29638,13 +29646,17 @@
                 table2026Container.parentNode.insertBefore(insightsContainer, table2026Container.nextSibling);
             }
             
-            // Populate ONLY the insights (no chart here)
+            // Get dynamic confidence and date
+            const confidence = aiResult.confidence || 75;
+            const generatedDate = new Date(aiResult.generated_at || new Date()).toLocaleDateString();
+            
+            // Populate with dynamic data
             insightsContainer.innerHTML = `
                 <div class="insights-header-AIinsight">
                     <h4><i class="fas fa-brain"></i> 2026 AI Analysis & Insights</h4>
                     <div class="insights-meta">
-                        <span class="confidence-badge">Confidence: 85%</span>
-                        <span class="forecast-date">Generated: ${new Date().toLocaleDateString()}</span>
+                        <span class="confidence-badge">Confidence: ${confidence}%</span>
+                        <span class="forecast-date">Generated: ${generatedDate}</span>
                     </div>
                 </div>
                 
@@ -29655,7 +29667,7 @@
                             <h5>Key Trends & Growth Drivers</h5>
                         </div>
                         <div class="insight-text">
-                            ${formatInsightText(insights.key_trends)}
+                            ${formatInsightText(insights.key_trends || 'No key trends identified.')}
                         </div>
                     </div>
                     
@@ -29665,7 +29677,7 @@
                             <h5>Risk Factors & Considerations</h5>
                         </div>
                         <div class="insight-text">
-                            ${formatInsightText(insights.risk_factors)}
+                            ${formatInsightText(insights.risk_factors || 'No risk factors identified.')}
                         </div>
                     </div>
                     
@@ -29675,7 +29687,7 @@
                             <h5>Growth Opportunities</h5>
                         </div>
                         <div class="insight-text">
-                            ${formatInsightText(insights.opportunities)}
+                            ${formatInsightText(insights.opportunities || 'No opportunities identified.')}
                         </div>
                     </div>
                     
@@ -29685,14 +29697,32 @@
                             <h5>Forecast Methodology</h5>
                         </div>
                         <div class="insight-text">
-                            ${formatInsightText(insights.methodology || 'AI-based forecast methodology using historical trends and industry analysis.')}
+                            ${formatInsightText(aiResult.methodology || insights.methodology || 'AI-based forecast methodology using historical trends and industry analysis.')}
                         </div>
                     </div>
                 </div>
+                
+                <style>
+                .insights-content {
+                    padding: 2rem;
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 1.5rem;
+                    background: #fafbfc;
+                }
+        
+                @media (min-width: 1200px) {
+                    .insights-content {
+                        grid-template-columns: 1fr 1fr;
+                    }
+                }
+                </style>
             `;
             
             // Show the insights container
             insightsContainer.style.display = 'block';
+            
+            console.log('✅ 2026 insights displayed with dynamic data');
             
             // Create separate trending chart container
             create2026TrendingContainer();
