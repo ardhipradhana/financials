@@ -27600,26 +27600,22 @@
                 // Build the proper P&L structure
                 buildPLStructureFromGLAccounts(glAccounts);
                 
-                // THEN load actual transaction data
-                const { data: transactions, error: txError } = await supabase
+                // THEN load actual transaction data with dynamic dates
+                const dateContext = getDateContext();
+                const { actualEndMonth, currentYear } = dateContext;
+                const actualEndDate = `${currentYear}-${String(actualEndMonth + 1).padStart(2, '0')}-01`;
+                
+                const { data: actualTransactions, error: txError } = await supabase
                     .from('financial_transactions_meridash')
                     .select('*')
-                    // Get dynamic date context
-                    const dateContext = getDateContext();
-                    const { actualEndMonth, currentYear } = dateContext;
-                    const actualEndDate = `${currentYear}-${String(actualEndMonth + 1).padStart(2, '0')}-01`;
-                    
-                    const { data: transactions, error: txError } = await supabase
-                        .from('financial_transactions_meridash')
-                        .select('*')
-                        .gte('transaction_date', `${currentYear}-01-01`)
-                        .lt('transaction_date', actualEndDate);
+                    .gte('transaction_date', `${currentYear}-01-01`)
+                    .lt('transaction_date', actualEndDate);
                     
                 if (txError) {
                     console.error('Error loading transactions:', txError);
                 } else {
-                    console.log('Transactions loaded:', transactions);
-                    populatePLWithActualData(transactions);
+                    console.log('Actual transactions loaded:', actualTransactions);
+                    populatePLWithActualData(actualTransactions);
                 }
                 
             } catch (error) {
