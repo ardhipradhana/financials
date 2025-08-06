@@ -29964,59 +29964,75 @@
                 const monthlyForecasts = aiResult.forecast_data.monthly_forecasts;
                 
                 // Calculate totals
-                let totalRevenue = 0, totalCogs = 0, totalOpex = 0;
+                let totalRevenue = 0, totalCogs = 0, totalOpex = 0, totalGrossProfit = 0, totalEbitda = 0;
                 
                 const monthlyData = monthlyForecasts.map(month => {
-                    const revenue = (month.revenue_accounts?.['4010'] || 0) + (month.revenue_accounts?.['4020'] || 0);
-                    const cogs = (month.cogs_accounts?.['5010'] || 0) + (month.cogs_accounts?.['5020'] || 0);
-                    const opex = (month.opex_accounts?.['5100'] || 0) + (month.opex_accounts?.['5110'] || 0);
+                    const salesRevenue = month.revenue_accounts?.['4010'] || 0;
+                    const serviceRevenue = month.revenue_accounts?.['4020'] || 0;
+                    const directCosts = month.cogs_accounts?.['5010'] || 0;
+                    const operatingExpenses = month.opex_accounts?.['5100'] || 0;
                     
-                    totalRevenue += revenue;
-                    totalCogs += cogs;
-                    totalOpex += opex;
+                    const totalRev = salesRevenue + serviceRevenue;
+                    const totalCogs = directCosts + (month.cogs_accounts?.['5020'] || 0);
+                    const totalOpex = operatingExpenses + (month.opex_accounts?.['5110'] || 0);
+                    const grossProfit = totalRev - totalCogs;
+                    const ebitda = grossProfit - totalOpex;
+                    
+                    // Add to running totals
+                    totalRevenue += totalRev;
+                    totalCogs += totalCogs;
+                    totalOpex += totalOpex;
+                    totalGrossProfit += grossProfit;
+                    totalEbitda += ebitda;
                     
                     return {
                         month_number: month.month,
                         month_name: month.month_name,
-                        sales_revenue: month.revenue_accounts?.['4010'] || 0,
-                        service_revenue: month.revenue_accounts?.['4020'] || 0,
-                        direct_costs: month.cogs_accounts?.['5010'] || 0,
-                        operating_expenses: month.opex_accounts?.['5100'] || 0,
-                        total_revenue: revenue,
-                        total_cogs: cogs,
-                        total_opex: opex,
-                        gross_profit: revenue - cogs,
-                        ebitda: revenue - cogs - opex
+                        sales_revenue: salesRevenue,
+                        service_revenue: serviceRevenue,
+                        direct_costs: directCosts,
+                        operating_expenses: operatingExpenses,
+                        total_revenue: totalRev,
+                        total_cogs: totalCogs,
+                        total_opex: totalOpex,
+                        gross_profit: grossProfit,
+                        ebitda: ebitda
                     };
                 });
                 
-                // Prepare forecast data for Supabase
+                // Prepare forecast data matching the exact table structure
                 const forecastData = {
                     user_id: user.id,
                     forecast_year: 2026,
+                    forecast_type: 'full_year_ai_forecast',
                     industry_context: industry,
                     additional_context: additionalContext,
                     forecast_style: forecastStyle,
-                    confidence_level: aiResult.confidence || 85,
+                    confidence_level: aiResult.confidence || 75,
+                    generated_at: aiResult.generated_at || new Date().toISOString(),
                     monthly_data: monthlyData,
                     year_totals: {
                         total_revenue: totalRevenue,
                         total_cogs: totalCogs,
                         total_opex: totalOpex,
-                        total_gross_profit: totalRevenue - totalCogs,
-                        total_ebitda: totalRevenue - totalCogs - totalOpex,
-                        gross_margin: totalRevenue > 0 ? ((totalRevenue - totalCogs) / totalRevenue) * 100 : 0,
-                        ebitda_margin: totalRevenue > 0 ? ((totalRevenue - totalCogs - totalOpex) / totalRevenue) * 100 : 0
+                        gross_margin: totalRevenue > 0 ? ((totalGrossProfit / totalRevenue) * 100) : 0,
+                        gross_profit: totalGrossProfit,
+                        ebitda_margin: totalRevenue > 0 ? ((totalEbitda / totalRevenue) * 100) : 0,
+                        ebitda: totalEbitda
                     },
                     ai_insights: {
                         key_trends: aiResult.insights?.key_trends || '',
                         risk_factors: aiResult.insights?.risk_factors || '',
                         opportunities: aiResult.insights?.opportunities || '',
-                        methodology: aiResult.insights?.methodology || ''
+                        methodology: aiResult.methodology || aiResult.insights?.methodology || ''
                     },
-                    generated_at: new Date().toISOString(),
-                    model_version: aiResult.model_version || 'ai-agent-v1'
+                    baseline_year: 2025,
+                    model_version: aiResult.model_version || 'ai-agent-v1',
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
                 };
+                
+                console.log('📤 Saving forecast data:', forecastData);
                 
                 // Save to Supabase
                 const { data, error } = await supabase
@@ -30025,13 +30041,17 @@
                     .select();
                 
                 if (error) {
+                    console.error('❌ Supabase insert error:', error);
                     throw error;
                 }
         
-                trackLatestForecastId(data[0].id, 'ai_forecasts_2026_meridash');
-                
-                console.log('✅ 2026 forecast saved to Supabase:', data);
-                return data;
+                if (data && data.length > 0) {
+                    trackLatestForecastId(data[0].id, 'ai_forecasts_2026_meridash');
+                    console.log('✅ 2026 forecast saved to Supabase:', data[0]);
+                    return data[0];
+                } else {
+                    throw new Error('No data returned from Supabase insert');
+                }
                 
             } catch (error) {
                 console.error('❌ Error saving 2026 forecast to Supabase:', error);
