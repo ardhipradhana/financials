@@ -29381,6 +29381,7 @@
                         updateNextYearSummaryCards(aiResult);
                         
                         // Save to Supabase first, then show success
+                        console.log('💾 About to save 2026 forecast to Supabase...', aiResult);
                         try {
                             await save2026ForecastToSupabase(aiResult);
                             console.log('✅ 2026 forecast saved to Supabase successfully');
@@ -29389,9 +29390,10 @@
                             alert(`${years.next} AI forecast generated and saved successfully!`);
                         } catch (saveError) {
                             console.error('❌ Error saving 2026 forecast to Supabase:', saveError);
+                            console.error('❌ Save error details:', saveError.message, saveError.stack);
                             
                             // Still show success for the forecast generation, but warn about save issue
-                            alert(`${years.next} AI forecast generated successfully, but there was an issue saving to database. The forecast is displayed but may not be persistent.`);
+                            alert(`${years.next} AI forecast generated successfully, but there was an issue saving to database: ${saveError.message}`);
                         }
                         
                     } else {
