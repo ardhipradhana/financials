@@ -29377,8 +29377,16 @@
                         // Populate the next year table with correct data structure
                         populate2026TableWithAI(aiResult);
                         
-                        // Update summary cards
-                        updateNextYearSummaryCards(aiResult);
+                        // Update summary cards (optional - skip if function doesn't exist)
+                        try {
+                            if (typeof updateNextYearSummaryCards === 'function') {
+                                updateNextYearSummaryCards(aiResult);
+                            } else {
+                                console.log('ℹ️ updateNextYearSummaryCards function not found - skipping summary card update');
+                            }
+                        } catch (summaryError) {
+                            console.warn('⚠️ Error updating summary cards:', summaryError);
+                        }
                         
                         // Save to Supabase first, then show success
                         console.log('💾 About to save 2026 forecast to Supabase...', aiResult);
