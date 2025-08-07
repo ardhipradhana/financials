@@ -31474,14 +31474,19 @@
                     const growthCell = row.querySelector(`[data-growth="${year}"]`);
                     
                     if (growthCell && previousValue !== 0) {
-                        const growthPercent = ((value - previousValue) / Math.abs(previousValue)) * 100;
-                        const growthValue = value - previousValue;
+                        let growthPercent, displayValue;
                         
                         if (accountType.includes('margin')) {
-                            growthCell.textContent = `${growthPercent >= 0 ? '+' : ''}${growthPercent.toFixed(1)}pp`;
+                            // For margins, use percentage points (simple subtraction)
+                            growthPercent = value - previousValue;
+                            displayValue = `${growthPercent >= 0 ? '+' : ''}${growthPercent.toFixed(1)}pp`;
                         } else {
-                            growthCell.textContent = `${growthPercent >= 0 ? '+' : ''}${growthPercent.toFixed(1)}%`;
+                            // For absolute values, use percentage change
+                            growthPercent = ((value - previousValue) / Math.abs(previousValue)) * 100;
+                            displayValue = `${growthPercent >= 0 ? '+' : ''}${growthPercent.toFixed(1)}%`;
                         }
+                        
+                        growthCell.textContent = displayValue;
                         
                         // Add color coding
                         growthCell.className = growthCell.className.replace(/positive|negative/g, '');
