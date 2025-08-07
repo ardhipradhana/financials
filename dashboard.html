@@ -29405,6 +29405,7 @@
                 }
                 
             } catch (error) {
+                const dateContext = getDateContext(); // Define it here if needed
                 console.error(`❌ Error generating ${dateContext.years.next} forecast:`, error);
                 alert(`Failed to generate next year forecast: ${error.message}`);
             } finally {
