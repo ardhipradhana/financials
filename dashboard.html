@@ -29983,18 +29983,18 @@
                     const directCosts = month.cogs_accounts?.['5010'] || 0;
                     const operatingExpenses = month.opex_accounts?.['5100'] || 0;
                     
-                    const totalRev = salesRevenue + serviceRevenue;
-                    const totalCogs = directCosts + (month.cogs_accounts?.['5020'] || 0);
-                    const totalOpex = operatingExpenses + (month.opex_accounts?.['5110'] || 0);
-                    const grossProfit = totalRev - totalCogs;
-                    const ebitda = grossProfit - totalOpex;
+                    const monthTotalRevenue = salesRevenue + serviceRevenue;
+                    const monthTotalCogs = directCosts + (month.cogs_accounts?.['5020'] || 0);
+                    const monthTotalOpex = operatingExpenses + (month.opex_accounts?.['5110'] || 0);
+                    const monthGrossProfit = monthTotalRevenue - monthTotalCogs;
+                    const monthEbitda = monthGrossProfit - monthTotalOpex;
                     
                     // Add to running totals
-                    totalRevenue += totalRev;
-                    totalCogs += totalCogs;
-                    totalOpex += totalOpex;
-                    totalGrossProfit += grossProfit;
-                    totalEbitda += ebitda;
+                    totalRevenue += monthTotalRevenue;
+                    totalCogs += monthTotalCogs;
+                    totalOpex += monthTotalOpex;
+                    totalGrossProfit += monthGrossProfit;
+                    totalEbitda += monthEbitda;
                     
                     return {
                         month_number: month.month,
@@ -30003,11 +30003,11 @@
                         service_revenue: serviceRevenue,
                         direct_costs: directCosts,
                         operating_expenses: operatingExpenses,
-                        total_revenue: totalRev,
-                        total_cogs: totalCogs,
-                        total_opex: totalOpex,
-                        gross_profit: grossProfit,
-                        ebitda: ebitda
+                        total_revenue: monthTotalRevenue,
+                        total_cogs: monthTotalCogs,
+                        total_opex: monthTotalOpex,
+                        gross_profit: monthGrossProfit,
+                        ebitda: monthEbitda
                     };
                 });
                 
