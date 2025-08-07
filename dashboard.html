@@ -30933,7 +30933,7 @@
             }
         }
         
-        function showMultiYearInsights(insights) {
+        function showMultiYearInsights(insights, aiResult) {
             console.log('📊 Displaying multi-year AI insights...');
             
             // Create or find the insights container for multi-year
@@ -30957,7 +30957,7 @@
                 <div class="insights-header-AIinsight">
                     <h4><i class="fas fa-brain"></i> Multi-Year AI Analysis & Strategic Insights (2027-2030)</h4>
                     <div class="insights-meta">
-                        <span class="confidence-badge">Confidence: ${insights.confidence || '85'}%</span>
+                        <span class="confidence-badge">Confidence: ${aiResult.confidence || '85'}%</span>
                         <span class="forecast-date">Generated: ${new Date().toLocaleDateString()}</span>
                     </div>
                 </div>
@@ -31120,7 +31120,7 @@
                 
                 // Show insights
                 if (aiResult.insights) {
-                    showMultiYearInsights(aiResult.insights);
+                    showMultiYearInsights(aiResult.insights, aiResult);
                 }
                 
                 // Restore the form values
