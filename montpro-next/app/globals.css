@@ -1,0 +1,32 @@
+@import 'tailwindcss';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-bg: 15 23 42; /* slate-900 */
+  --color-fg: 226 232 240; /* slate-200 */
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+html,
+body {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+}
+
+.container {
+  @apply mx-auto max-w-[1400px] px-5;
+}
