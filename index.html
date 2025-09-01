@@ -764,16 +764,22 @@
             color: #3B82F6;
         }
         
-        .problem-icon.locked {
+        .problem-icon.strategy {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.1));
+            border-color: rgba(59, 130, 246, 0.3);
+            color: #3B82F6;
+        }
+        
+        .problem-icon.growth {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.1));
+            border-color: rgba(16, 185, 129, 0.3);
+            color: #10B981;
+        }
+
+        .problem-icon.time {
             background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(234, 179, 8, 0.1));
             border-color: rgba(245, 158, 11, 0.3);
             color: #F59E0B;
-        }
-        
-        .problem-icon.burnout {
-            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(124, 58, 237, 0.1));
-            border-color: rgba(139, 92, 246, 0.3);
-            color: #8B5CF6;
         }
         
         .problem-stat {
@@ -823,6 +829,71 @@
             color: #F8FAFC;
             font-weight: 500;
             font-size: 0.9rem;
+        }
+
+        /* CFO Cross-sell Styling */
+        .cfo-crosssell {
+            margin-top: 16px;
+            padding: 12px;
+            background: rgba(59, 130, 246, 0.05);
+            border: 1px solid rgba(59, 130, 246, 0.1);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .cfo-crosssell:hover {
+            background: rgba(59, 130, 246, 0.08);
+            border-color: rgba(59, 130, 246, 0.2);
+        }
+
+        .cfo-crosssell p {
+            color: #3B82F6;
+            font-size: 0.85rem;
+            margin: 0;
+        }
+
+        .cfo-crosssell a {
+            color: #1E40AF;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .cfo-crosssell a:hover {
+            color: #3B82F6;
+        }
+
+        /* Icon Animations */
+        @keyframes gentle-glow {
+            0%, 100% { 
+                box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+            }
+            50% { 
+                box-shadow: 0 0 30px rgba(59, 130, 246, 0.5);
+            }
+        }
+
+        @keyframes clock-tick {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes growth-trend {
+            0% { transform: translateY(2px); opacity: 0.7; }
+            50% { transform: translateY(-2px); opacity: 1; }
+            100% { transform: translateY(2px); opacity: 0.7; }
+        }
+
+        .problem-icon.strategy:hover {
+            animation: gentle-glow 3s ease-in-out infinite;
+        }
+
+        .problem-icon.time svg {
+            animation: clock-tick 10s linear infinite;
+        }
+
+        .problem-icon.growth:hover svg {
+            animation: growth-trend 2s ease-in-out infinite;
         }
         
         /* Solution Transition */
@@ -1020,10 +1091,10 @@
                 </div>
                 <h1 class="hero-title">
                     Empowering Financials.<br>
-                    <span class="gradient-text">Automate Your Analytics.</span>
+                    <span class="gradient-text">Unlock Your Growth Potential.</span>
                 </h1>
                 <p class="hero-subtitle">
-                    Institutional-grade financial analysis powered by AI. Transform raw data into executive-ready insights in minutes.
+                    Every growing business deserves financial clarity. Transform your data into the strategic insights that secure funding, optimize operations, and fuel confident decision-making.
                 </p>
                 <div class="hero-cta">
                     <a href="#platform" class="btn-hero-primary">Let's Go!</a>
@@ -1038,62 +1109,60 @@
             <!-- Problem Statement -->
             <div class="crisis-header">
                 <div class="crisis-badge">
-                    <span class="crisis-badge-text">The Hidden Crisis</span>
+                    <span class="crisis-badge-text">You're Not Alone</span>
                 </div>
                 <h2 class="crisis-title">
-                    <span class="crisis-highlight">70 Million SMEs</span> in Southeast Asia Are 
-                    <span class="crisis-gradient">Flying Blind Financially</span>
+                    If you're scaling a successful SME, you're likely facing 
+                    <span class="crisis-gradient">the same challenge as thousands of other ambitious founders</span>
                 </h2>
                 <p class="crisis-subtitle">
-                    While you're building your business, critical financial blindspots are quietly sabotaging your growth potential
+                    You've built something great. Now let's make sure your financials reflect that success and unlock the growth capital you deserve.
                 </p>
             </div>
     
             <!-- Problem Grid -->
             <div class="problem-grid">
                 <div class="problem-card" data-aos="fade-up" data-aos-delay="100">
-                    <div class="problem-icon">
+                    <div class="problem-icon strategy">
                         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                            <circle cx="9" cy="7" r="4"/>
-                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                            <line x1="12" y1="12" x2="12" y2="16"/>
-                            <line x1="10" y1="14" x2="14" y2="14"/>
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                         </svg>
                     </div>
                     <div class="problem-content">
-                        <div class="problem-stat">70M SMEs</div>
-                        <h3 class="problem-title">in SEA lacking CFO guidance</h3>
-                        <p class="problem-description">Can't afford strategic CFO guidance, leaving founders with critical financial blind spots that kill growth opportunities</p>
+                        <div class="problem-stat">95% of SMEs</div>
+                        <h3 class="problem-title">Scale without strategic financial guidance</h3>
+                        <p class="problem-description">You've proven your business model works. But without CFO-level financial strategy, you're missing opportunities to optimize cash flow, secure better funding terms, and accelerate growth.</p>
                     </div>
                     <div class="problem-impact">
                         <span class="impact-label">Result:</span>
-                        <span class="impact-text">leaving Founders with critical financial blind spots and no high-level guidance.</span>
+                        <span class="impact-text">Slower scaling and missed growth opportunities that your competitors are capturing.</span>
+                    </div>
+                    <div class="cfo-crosssell" style="margin-top: 16px; padding: 12px; background: rgba(59, 130, 246, 0.05); border: 1px solid rgba(59, 130, 246, 0.1); border-radius: 8px;">
+                        <p style="color: #3B82F6; font-size: 0.85rem; margin: 0;">Need 1-on-1 strategic guidance? <a href="https://ardhipradhana.com" style="color: #1E40AF; text-decoration: none; font-weight: 600;">Explore CFO Advisory Services →</a></p>
                     </div>
                 </div>
     
                 <div class="problem-card" data-aos="fade-up" data-aos-delay="200">
-                    <div class="problem-icon locked">
+                    <div class="problem-icon growth">
                         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
-                            <circle cx="12" cy="16" r="1"/>
-                            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                            <path d="M3 3v18h18"/>
+                            <path d="M7 12l4-4 4 4 6-6"/>
+                            <circle cx="15" cy="8" r="2"/>
                         </svg>
                     </div>
                     <div class="problem-content">
-                        <div class="problem-stat">$100B+</div>
-                        <h3 class="problem-title">Locked Out of Capital</h3>
-                        <p class="problem-description">Banks won't lend without solid financials – yet most SMEs lack "bank-ready" reports keeping growth-ready businesses undercapitalized.</p>
+                        <div class="problem-stat">$2.3T</div>
+                        <h3 class="problem-title">Growth potential locked in poor financial visibility</h3>
+                        <p class="problem-description">Your business generates solid revenue, but without clear financial insights, you can't identify the best growth investments, optimize pricing strategies, or demonstrate your true value to stakeholders.</p>
                     </div>
                     <div class="problem-impact">
                         <span class="impact-label">Result:</span>
-                        <span class="impact-text">There's a massive funding gap (hundreds of billions of dollars)</span>
+                        <span class="impact-text">Suboptimal resource allocation and missed opportunities to maximize profitability.</span>
                     </div>
                 </div>
     
                 <div class="problem-card" data-aos="fade-up" data-aos-delay="300">
-                    <div class="problem-icon burnout">
+                    <div class="problem-icon time">
                         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <circle cx="12" cy="12" r="10"/>
                             <polyline points="12,6 12,12 16,14"/>
@@ -1101,12 +1170,12 @@
                     </div>
                     <div class="problem-content">
                         <div class="problem-stat">16hrs/week</div>
-                        <h3 class="problem-title">Wasted on manual tasks</h3>
-                        <p class="problem-description">Founders waste 16+ hours a week on manual finance tasks – time they should spend on strategy and growing the business.</p>
+                        <h3 class="problem-title">Spent on repetitive financial tasks</h3>
+                        <p class="problem-description">Your expertise should drive strategy, not spreadsheet formulas. Our pre-designed reports and AI sidekick eliminate manual work, giving you instant insights designed by an ex-CFO.</p>
                     </div>
                     <div class="problem-impact">
                         <span class="impact-label">Result:</span>
-                        <span class="impact-text">Exhausted founders, slower scaling, missed opportunities</span>
+                        <span class="impact-text">More time for strategic decisions that actually move the needle on growth.</span>
                     </div>
                 </div>
             </div>
